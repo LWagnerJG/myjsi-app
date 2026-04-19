@@ -7,6 +7,7 @@ import React, {
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { TabContent } from '../../components/common/TabContent.jsx';
 import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
 import {
     List,
@@ -415,7 +416,8 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                 onChange={handleViewChange}
                                 options={productViewOptions}
                                 theme={theme}
-                                size="md"
+                                size="sm"
+                                fullWidth
                             />
                         </div>
                         <div
@@ -436,6 +438,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
                 <div className="px-4 sm:px-5 lg:px-8 pt-0 pb-8">
                     <div className="max-w-5xl mx-auto w-full">
+                        <TabContent activeKey={activeProductView === 'families' ? 'families' : 'other'}>
                         {activeProductView === 'families' ? (
                             <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
                                 <FamiliesView
@@ -470,6 +473,7 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
                                 ))}
                             </div>
                         )}
+                        </TabContent>
                     </div>
                 </div>
             </div>

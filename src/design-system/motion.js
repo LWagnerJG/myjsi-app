@@ -83,3 +83,16 @@ export const getToastMotion = (prefersReducedMotion = false) => ({
     ? { duration: 0 }
     : { type: 'spring', stiffness: 480, damping: 32, mass: 0.75 },
 });
+
+// Crossfade with a small upward drift — used for tab panel swaps.
+export const getTabContentMotion = (prefersReducedMotion = false) => ({
+  initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 },
+  transition: prefersReducedMotion
+    ? { duration: 0 }
+    : {
+        duration: toFramerSeconds(DURATIONS_MS.fast),
+        ease: EASINGS.standard,
+      },
+});

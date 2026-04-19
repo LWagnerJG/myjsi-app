@@ -7,6 +7,7 @@ import { CITY_OPTIONS } from '../../constants/locations.js';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { TabContent } from '../../components/common/TabContent.jsx';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
@@ -721,54 +722,55 @@ export const ProjectsScreen = forwardRef(({
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
+        <TabContent activeKey={projectsTab}>
+          {projectsTab === 'pipeline' && (
+            filteredOpportunities.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {filteredOpportunities.map(opp => (
+                  <ProjectCard key={opp.id} opp={opp} theme={theme}
+                    onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />
+                ))}
+              </div>
+            ) : (
+              <SharedEmptyState icon={Briefcase} theme={theme}
+                title={`No projects in ${selectedPipelineStage}`}
+                description='Tap "+ Project" to add one.' />
+            )
+          )}
 
-        {projectsTab === 'pipeline' && (
-          filteredOpportunities.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {filteredOpportunities.map(opp => (
-                <ProjectCard key={opp.id} opp={opp} theme={theme}
-                  onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />
-              ))}
-            </div>
-          ) : (
-            <SharedEmptyState icon={Briefcase} theme={theme}
-              title={`No projects in ${selectedPipelineStage}`}
-              description='Tap "+ Project" to add one.' />
-          )
-        )}
+          {projectsTab === 'customers' && (
+            filteredCustomers.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {filteredCustomers.map(cust => (
+                  <CustomerCard key={cust.id} customer={cust} isDark={isDark}
+                    onClick={() => setSelectedCustomer(cust)} />
+                ))}
+              </div>
+            ) : (
+              <SharedEmptyState icon={Building2} theme={theme}
+                title={`No ${ctaSingular.toLowerCase()}s yet`}
+                description={`Tap "+ ${ctaSingular}" to add one.`} />
+            )
+          )}
 
-        {projectsTab === 'customers' && (
-          filteredCustomers.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {filteredCustomers.map(cust => (
-                <CustomerCard key={cust.id} customer={cust} isDark={isDark}
-                  onClick={() => setSelectedCustomer(cust)} />
-              ))}
-            </div>
-          ) : (
-            <SharedEmptyState icon={Building2} theme={theme}
-              title={`No ${ctaSingular.toLowerCase()}s yet`}
-              description={`Tap "+ ${ctaSingular}" to add one.`} />
-          )
-        )}
-
-        {projectsTab === 'my-projects' && (
-          allProjects.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {allProjects.map(p => {
-                const ownerCustomer = customers.find(c => c.id === p.customerId);
-                return (
-                  <InstallCard key={p.id} project={p} isDark={isDark}
-                    onClick={() => ownerCustomer && setSelectedCustomer(ownerCustomer)} />
-                );
-              })}
-            </div>
-          ) : (
-            <SharedEmptyState icon={Briefcase} theme={theme}
-              title="No installations recorded yet"
-              description='Tap "+ Install" to add one.' />
-          )
-        )}
+          {projectsTab === 'my-projects' && (
+            allProjects.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {allProjects.map(p => {
+                  const ownerCustomer = customers.find(c => c.id === p.customerId);
+                  return (
+                    <InstallCard key={p.id} project={p} isDark={isDark}
+                      onClick={() => ownerCustomer && setSelectedCustomer(ownerCustomer)} />
+                  );
+                })}
+              </div>
+            ) : (
+              <SharedEmptyState icon={Briefcase} theme={theme}
+                title="No installations recorded yet"
+                description='Tap "+ Install" to add one.' />
+            )
+          )}
+        </TabContent>
       </div>
 
       <FloatingActionCTA
