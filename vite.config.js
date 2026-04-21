@@ -6,8 +6,13 @@ export default defineConfig({
     server: {
         port: 5173,
         strictPort: true,
-        // Enable SPA history fallback so React Router handles all paths
-        historyApiFallback: true
+        historyApiFallback: true,
+        headers: {
+            'X-Frame-Options': 'DENY',
+            'X-Content-Type-Options': 'nosniff',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+            'X-XSS-Protection': '1; mode=block',
+        },
     },
     build: {
         chunkSizeWarningLimit: 1000,

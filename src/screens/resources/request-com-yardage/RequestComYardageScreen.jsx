@@ -7,6 +7,7 @@ import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.
 import { X, Plus, Minus, Trash2, Scissors } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 import { hapticSuccess } from '../../../utils/haptics.js';
+import { validateWebhookUrl } from '../../../utils/secureWebhook.js';
 import { cardSurface, subtleBorder, isDarkTheme } from '../../../design-system/tokens.js';
 
 /* Inline editable qty — tap the number to type directly (opens numpad on mobile) */
@@ -77,7 +78,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
 
     const handleFinalSubmit = async () => {
         setIsSubmitting(true);
-        const url = import.meta.env.VITE_POWER_AUTOMATE_URL;
+        const url = validateWebhookUrl(import.meta.env.VITE_POWER_AUTOMATE_URL, 'VITE_POWER_AUTOMATE_URL');
         if (!url) { showAlert('Not configured.'); setIsSubmitting(false); return; }
         const payload = {
             requester: userSettings?.email || 'unknown@example.com',

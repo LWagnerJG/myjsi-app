@@ -191,6 +191,12 @@ input::placeholder {
     opacity: 0.45;
 }
 
+/* FormInput placeholder color driven by CSS custom property (set via JS, never innerHTML) */
+.placeholder-theme-secondary::placeholder {
+    color: var(--placeholder-theme-secondary) !important;
+    opacity: 1;
+}
+
 /* New Lead form: inline label/control rows for compact layout */
 .lead-form-inline .settings-row {
     display: grid;

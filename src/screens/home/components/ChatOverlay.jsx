@@ -66,6 +66,16 @@ if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
     document.head.appendChild(style);
 }
 
+// Safe markdown renderer — converts **bold** spans to <strong> without innerHTML.
+// Splits on the bold delimiter and alternates plain / bold segments.
+const renderMessageText = (text) => {
+    if (!text || typeof text !== 'string') return null;
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    return parts.map((part, i) =>
+        i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+    );
+};
+
 export const ChatOverlay = ({
     isChatOpen,
     setIsChatOpen,
@@ -225,12 +235,9 @@ export const ChatOverlay = ({
                                             border: msg.role === 'user' ? 'none' : `1px solid ${colors.border}`,
                                         }}
                                     >
-                                        <div
-                                            className="whitespace-pre-wrap leading-relaxed [&_strong]:font-semibold"
-                                            dangerouslySetInnerHTML={{
-                                                __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                            }}
-                                        />
+                                        <div className="whitespace-pre-wrap leading-relaxed [&_strong]:font-semibold">
+                                            {renderMessageText(msg.text)}
+                                        </div>
                                         {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
                                             <div className="flex flex-wrap gap-1 pt-1">
                                                 {msg.attachments.map((file) => (
