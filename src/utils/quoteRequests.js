@@ -1,5 +1,12 @@
 const QUOTE_REQUESTS_STORAGE_KEY = 'myjsi.quote-requests';
 
+/** Cryptographically random ID — not guessable unlike Date.now(). */
+const randomId = () => {
+    const bytes = new Uint8Array(12);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+};
+
 /**
  * @param {string | null} value - Raw JSON string from localStorage
  * @returns {Array<Object>}
@@ -19,7 +26,7 @@ const safeParse = (value) => {
  * @returns {{ id: string, name: string, size: number, type: string }[]}
  */
 const normalizeFiles = (files = []) => files.map((file, index) => ({
-  id: `${Date.now()}-${index}`,
+  id: `${randomId()}-${index}`,
   name: file?.name || `attachment-${index + 1}`,
   size: file?.size || 0,
   type: file?.type || 'application/octet-stream',
@@ -41,7 +48,7 @@ export const getStoredQuoteRequests = () => {
  * @returns {Object}
  */
 export const createQuoteRequestRecord = (data = {}, extras = {}) => ({
-  id: `quote-request-${Date.now()}`,
+  id: `quote-request-${randomId()}`,
   submittedAt: new Date().toISOString(),
   status: 'requested',
   source: extras.source || 'app',

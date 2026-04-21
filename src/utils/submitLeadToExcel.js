@@ -17,7 +17,12 @@
  *   Products | Notes
  */
 
-const LEADS_URL = import.meta.env.VITE_LEADS_POWER_AUTOMATE_URL;
+import { validateWebhookUrl } from './secureWebhook.js';
+
+const LEADS_URL = validateWebhookUrl(
+    import.meta.env.VITE_LEADS_POWER_AUTOMATE_URL,
+    'VITE_LEADS_POWER_AUTOMATE_URL'
+);
 
 /**
  * Flatten the lead object into a simple key→string map
