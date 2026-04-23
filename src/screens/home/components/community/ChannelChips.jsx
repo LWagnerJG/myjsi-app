@@ -18,6 +18,8 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
   const fullMeasureRef = useRef(null);
   const compactMeasureRef = useRef(null);
   const [chipMode, setChipMode] = useState('default');
+  const [scrolled, setScrolled] = useState(false);
+
   const fullChips = useMemo(
     () => [
       { id: 'all', label: 'All' },

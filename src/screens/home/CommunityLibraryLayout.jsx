@@ -262,8 +262,9 @@ export const CommunityLibraryLayout = ({
                       <button
                         type="button"
                         onClick={openCreateContentModal}
-                        className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
+                        className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] px-3 text-sm leading-none"
                         style={{
+                          height: 'var(--jsi-ctrl-h)',
                           backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                           color: theme.colors.accentText || '#FFFFFF',
                         }}
@@ -308,8 +309,9 @@ export const CommunityLibraryLayout = ({
                     <button
                       type="button"
                       onClick={activeAction}
-                      className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
+                      className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] px-3 text-sm leading-none"
                       style={{
+                        height: 'var(--jsi-ctrl-h)',
                         backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                         color: theme.colors.accentText || '#FFFFFF',
                       }}

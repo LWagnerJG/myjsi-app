@@ -37,6 +37,7 @@ html {
 :root {
     --app-height: 100vh;
     --app-header-offset: 72px;
+    --jsi-ctrl-h: 36px; /* shared fixed height for toggle + CTA pill buttons — immune to iOS Dynamic Type */
     --safe-area-inset-top: env(safe-area-inset-top);
     --safe-area-inset-right: env(safe-area-inset-right);
     --safe-area-inset-bottom: env(safe-area-inset-bottom);

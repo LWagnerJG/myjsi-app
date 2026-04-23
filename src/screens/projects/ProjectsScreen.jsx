@@ -770,8 +770,8 @@ export const ProjectsScreen = forwardRef(({
               type="button"
               aria-label={cta.ariaLabel}
               onClick={cta.action}
-              className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] gap-1.5 text-sm leading-none px-3"
-              style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+              className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] gap-1.5 text-sm leading-none px-3"
+              style={{ height: 'var(--jsi-ctrl-h)', backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
             >
               <Plus size={14} strokeWidth={2.5} />
               {cta.label}

@@ -25,7 +25,6 @@ export const SegmentedToggle = ({
     smDense: {
       text: 'text-[0.8125rem]',
       px: 'px-2.5',
-      py: 'py-1.5',
       gap: 'gap-1',
       iconSize: 'w-3.5 h-3.5',
       badgeSize: 'w-4 h-4 text-[0.6875rem]'
@@ -33,7 +32,6 @@ export const SegmentedToggle = ({
     sm: { 
       text: 'text-[0.8125rem]', 
       px: 'px-3', 
-      py: 'py-1.5', 
       gap: 'gap-1.5',
       iconSize: 'w-3.5 h-3.5',
       badgeSize: 'w-4 h-4 text-[0.6875rem]'
@@ -41,7 +39,6 @@ export const SegmentedToggle = ({
     md: { 
       text: 'text-[0.9375rem]', 
       px: 'px-5', 
-      py: 'py-2', 
       gap: 'gap-2',
       iconSize: 'w-4 h-4',
       badgeSize: 'w-5 h-5 text-xs'
@@ -49,7 +46,6 @@ export const SegmentedToggle = ({
     lg: { 
       text: 'text-base', 
       px: 'px-6', 
-      py: 'py-2.5', 
       gap: 'gap-2',
       iconSize: 'w-5 h-5',
       badgeSize: 'w-5 h-5 text-xs'
@@ -97,7 +93,7 @@ export const SegmentedToggle = ({
     <div 
       ref={containerRef}
       className={`${fullWidth ? 'flex w-full' : 'inline-flex'} rounded-full p-[3px] relative ${className}`} 
-      style={{ backgroundColor: containerBg }}
+      style={{ backgroundColor: containerBg, height: 'var(--jsi-ctrl-h)' }}
     >
       {/* Single animated pill — extends 3px beyond button to cover container padding */}
       {pillLayout && (
@@ -123,7 +119,7 @@ export const SegmentedToggle = ({
             type="button"
             data-toggle-btn
             onClick={() => onChange(opt.value)}
-            className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition-colors whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
+            className={`relative rounded-full ${s.px} ${s.text} flex items-center transition-colors whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
             aria-pressed={isSelected}
             style={{ color: isSelected ? selectedText : unselectedText }}
           >
