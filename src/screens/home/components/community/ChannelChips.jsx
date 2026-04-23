@@ -18,6 +18,7 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
   const fullMeasureRef = useRef(null);
   const compactMeasureRef = useRef(null);
   const [chipMode, setChipMode] = useState('default');
+  const bgRgb = dark ? '26,26,26' : '240,237,232';
 
   const fullChips = useMemo(
     () => [
@@ -121,23 +122,42 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
   );
 
   return (
-    <div
-      ref={viewportRef}
-      className="relative overflow-x-auto scrollbar-hide scroll-smooth pb-0.5"
-      style={{
-        scrollPaddingLeft: 10,
-        scrollPaddingRight: 12,
-        maskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
-        WebkitMaskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
-      }}
-    >
-      <div className="inline-flex gap-1.5 whitespace-nowrap pr-4">
-        {renderedChips.map((chipOption) => {
-          const sub = SUBREDDITS.find((subreddit) => subreddit.id === chipOption.id) || null;
-          const handleClick = chipOption.id === 'all' ? () => onSelect(null) : () => onSelect(sub);
-          return chip(chipOption.id, chipOption.label, handleClick, selectedChipId === chipOption.id);
-        })}
+    <div className="relative">
+      <div
+        ref={viewportRef}
+        className="overflow-x-auto scrollbar-hide scroll-smooth pb-0.5"
+        style={{
+          scrollPaddingLeft: 14,
+          scrollPaddingRight: 16,
+        }}
+      >
+        <div className="inline-flex gap-1.5 whitespace-nowrap pl-1 pr-4">
+          {renderedChips.map((chipOption) => {
+            const sub = SUBREDDITS.find((subreddit) => subreddit.id === chipOption.id) || null;
+            const handleClick = chipOption.id === 'all' ? () => onSelect(null) : () => onSelect(sub);
+            return chip(chipOption.id, chipOption.label, handleClick, selectedChipId === chipOption.id);
+          })}
+        </div>
       </div>
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-7"
+        style={{
+          background: `linear-gradient(to right, rgba(${bgRgb},0.96) 0%, rgba(${bgRgb},0.7) 58%, rgba(${bgRgb},0) 100%)`,
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-7"
+        style={{
+          background: `linear-gradient(to left, rgba(${bgRgb},0.96) 0%, rgba(${bgRgb},0.7) 58%, rgba(${bgRgb},0) 100%)`,
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+        }}
+      />
 
       <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
         <div ref={fullMeasureRef} className="inline-flex gap-1.5 pr-4">

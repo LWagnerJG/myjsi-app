@@ -144,6 +144,8 @@ export const CommunityLibraryLayout = ({
       ? openLibraryUploadModal
       : null;
   const actionLabel = activeTab === 'library' ? '+ Upload' : '+ Post';
+  const ActiveSubredditIcon = activeSubreddit?.icon || null;
+  const activeSubredditDescription = activeSubreddit?.description?.trim() || '';
   const searchPlaceholder = inSubCommunity
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';
@@ -225,115 +227,143 @@ export const CommunityLibraryLayout = ({
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
-      <ScreenTopChrome theme={theme} contentClassName="pb-2.5" fade={false}>
-        <div className="space-y-3">
+        <ScreenTopChrome theme={theme} contentClassName="pb-2.5" fade={false}>
+          <div className="space-y-3">
 
-          {inSubCommunity ? (
-            /* ── Immersive sub-community header ── */
-            <div key={`subreddit-header-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
-              <div className="flex flex-wrap items-start gap-x-3 gap-y-2.5">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-3 min-w-0">
-                    <h2 className="text-[1.125rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>
-                      {activeSubreddit?.name}
-                    </h2>
-                    {activeSubreddit?.members ? (
-                      <span className="text-[0.75rem] font-medium tabular-nums flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
-                        {activeSubreddit.members}
-                      </span>
+            {inSubCommunity ? (
+              <div key={`subreddit-header-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
+                <div className="flex items-start gap-3">
+                  {ActiveSubredditIcon ? (
+                    <div
+                      className="mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
+                        border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
+                        boxShadow: dark ? '0 10px 24px rgba(0,0,0,0.18)' : '0 10px 24px rgba(53,53,53,0.06)',
+                      }}
+                    >
+                      <ActiveSubredditIcon className="h-5 w-5" style={{ color: activeSubreddit?.color || theme.colors.textSecondary }} />
+                    </div>
+                  ) : null}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start gap-x-3 gap-y-2.5">
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em]"
+                          style={{ color: theme.colors.textSecondary, opacity: 0.72 }}
+                        >
+                          Community
+                        </p>
+                        <h1 className="mt-1 text-[1.5rem] font-bold tracking-tight leading-tight" style={{ color: theme.colors.textPrimary }}>
+                          {activeSubreddit?.name}
+                        </h1>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openCreateContentModal}
+                        className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
+                        style={{
+                          backgroundColor: theme.colors.accent || theme.colors.textPrimary,
+                          color: theme.colors.accentText || '#FFFFFF',
+                        }}
+                      >
+                        + Post
+                      </button>
+                    </div>
+
+                    {activeSubredditDescription ? (
+                      <p
+                        className="mt-2 text-[0.8125rem] leading-relaxed"
+                        style={{
+                          color: theme.colors.textSecondary,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {activeSubredditDescription}
+                      </p>
                     ) : null}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={openCreateContentModal}
-                  className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
-                  style={{
-                    backgroundColor: theme.colors.accent || theme.colors.textPrimary,
-                    color: theme.colors.accentText || '#FFFFFF',
-                  }}
-                >
-                  + Post
-                </button>
               </div>
-            </div>
-          ) : (
-            /* ── Normal top-level chrome ── */
-            <>
-              <div ref={topHeaderControlsRef} className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-                <div ref={topTabsViewportRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
-                  <div className="inline-block pr-4">
-                    <SegmentedToggle
-                      value={activeTab}
-                      onChange={switchTab}
-                      options={tabs}
-                      size={topTabToggleSize}
-                      theme={theme}
-                    />
+            ) : (
+              <>
+                <div ref={topHeaderControlsRef} className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
+                  <div ref={topTabsViewportRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
+                    <div className="inline-block pr-4">
+                      <SegmentedToggle
+                        value={activeTab}
+                        onChange={switchTab}
+                        options={tabs}
+                        size={topTabToggleSize}
+                        theme={theme}
+                      />
+                    </div>
+                  </div>
+
+                  {activeAction ? (
+                    <button
+                      type="button"
+                      onClick={activeAction}
+                      className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
+                      style={{
+                        backgroundColor: theme.colors.accent || theme.colors.textPrimary,
+                        color: theme.colors.accentText || '#FFFFFF',
+                      }}
+                    >
+                      {actionLabel}
+                    </button>
+                  ) : null}
+
+                  <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
+                    <div ref={topTabsStandardMeasureRef} className="inline-block">
+                      <SegmentedToggle
+                        value={activeTab}
+                        onChange={noopTabChange}
+                        options={standardTabs}
+                        size="sm"
+                        theme={theme}
+                      />
+                    </div>
+                    <div ref={topTabsCompactMeasureRef} className="inline-block ml-4">
+                      <SegmentedToggle
+                        value={activeTab}
+                        onChange={noopTabChange}
+                        options={compactTabs}
+                        size="smDense"
+                        theme={theme}
+                      />
+                    </div>
                   </div>
                 </div>
+              </>
+            )}
 
-                {activeAction ? (
-                  <button
-                    type="button"
-                    onClick={activeAction}
-                    className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
-                    style={{
-                      backgroundColor: theme.colors.accent || theme.colors.textPrimary,
-                      color: theme.colors.accentText || '#FFFFFF',
-                    }}
-                  >
-                    {actionLabel}
-                  </button>
-                ) : null}
+            {activeTab === 'community' ? (
+              <ChannelChips
+                theme={theme}
+                dark={dark}
+                onSelect={handleSubredditSelect}
+                activeId={activeSubreddit?.id || null}
+              />
+            ) : null}
 
-                <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
-                  <div ref={topTabsStandardMeasureRef} className="inline-block">
-                    <SegmentedToggle
-                      value={activeTab}
-                      onChange={noopTabChange}
-                      options={standardTabs}
-                      size="sm"
-                      theme={theme}
-                    />
-                  </div>
-                  <div ref={topTabsCompactMeasureRef} className="inline-block ml-4">
-                    <SegmentedToggle
-                      value={activeTab}
-                      onChange={noopTabChange}
-                      options={compactTabs}
-                      size="smDense"
-                      theme={theme}
-                    />
-                  </div>
-                </div>
-              </div>
+            {showSearch ? (
+              <StandardSearchBar
+                id="community-main-search"
+                value={query}
+                onChange={setQuery}
+                placeholder={searchPlaceholder}
+                theme={theme}
+                style={communitySearchStyle}
+              />
+            ) : null}
 
-            </>
-          )}
-
-          {activeTab === 'community' ? (
-            <ChannelChips
-              theme={theme}
-              dark={dark}
-              onSelect={handleSubredditSelect}
-              activeId={activeSubreddit?.id || null}
-            />
-          ) : null}
-
-          {showSearch ? (
-            <StandardSearchBar
-              id="community-main-search"
-              value={query}
-              onChange={setQuery}
-              placeholder={searchPlaceholder}
-              theme={theme}
-              style={communitySearchStyle}
-            />
-          ) : null}
-
-        </div>
-      </ScreenTopChrome>
+          </div>
+        </ScreenTopChrome>
       </div>
 
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
