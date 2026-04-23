@@ -37,6 +37,18 @@ const formatNetRate = (discountOption) => {
     return `${rounded.toFixed(Number.isInteger(rounded) ? 0 : 2)}% net`;
 };
 
+const PriceMetaLine = ({ discount, listPrice, theme, accent = false }) => (
+    <div className="mt-2 inline-flex flex-wrap items-center gap-1.5 text-[0.75rem] leading-none"
+        style={{ color: theme.colors.textSecondary, opacity: accent ? 0.88 : 0.8 }}>
+        <span className="inline-flex items-center gap-1 font-semibold" style={{ color: theme.colors.textPrimary }}>
+            {shortDiscount(discount)}
+            <ChevronDown className="h-3 w-3" style={{ color: theme.colors.textSecondary }} />
+        </span>
+        <span className="opacity-35">•</span>
+        <span className="tabular-nums">{formatCurrency(listPrice)} list</span>
+    </div>
+);
+
 const AdvantageChip = ({ compPremium, theme }) => {
     const isParity = compPremium === 0;
     const jsiWins = compPremium > 0;
@@ -61,48 +73,6 @@ const AdvantageChip = ({ compPremium, theme }) => {
         </span>
     );
 };
-
-const MetaPill = ({ label, value, theme, accent = false }) => (
-    <div
-        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
-        style={{
-            background: accent ? `${theme.colors.accent}10` : (theme.colors.surface || '#FFFFFF'),
-            border: `1px solid ${accent ? `${theme.colors.accent}24` : theme.colors.border}`,
-        }}
-    >
-        <span
-            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
-            style={{ color: theme.colors.textSecondary, opacity: 0.74 }}
-        >
-            {label}
-        </span>
-        <span className="text-[0.8125rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
-            {value}
-        </span>
-    </div>
-);
-
-const DiscountTrigger = ({ value, onClick, theme }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all active:scale-[0.98]"
-        style={{
-            background: theme.colors.surface || '#FFFFFF',
-            border: `1px solid ${theme.colors.border}`,
-            color: theme.colors.textPrimary,
-        }}
-    >
-        <span
-            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
-            style={{ color: theme.colors.textSecondary, opacity: 0.74 }}
-        >
-            Disc
-        </span>
-        <span className="text-[0.8125rem] font-semibold leading-none">{shortDiscount(value)}</span>
-        <ChevronDown className="h-3.5 w-3.5" style={{ color: theme.colors.textSecondary }} />
-    </button>
-);
 
 const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
     const [jsiDiscount, setJsiDiscount] = useState(DEFAULT_DISCOUNT);
@@ -139,19 +109,14 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
     return (
         <>
             <GlassCard theme={theme} className="overflow-hidden p-0">
-                <div className="px-5 pt-5 pb-3.5">
+                <div className="px-5 pt-5 pb-3">
                     <div className="flex items-start justify-between gap-3">
-                        <div>
-                            <h2
-                                className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
-                                style={{ color: theme.colors.textSecondary, opacity: 0.88 }}
-                            >
-                                {title}
-                            </h2>
-                            <p className="mt-1 text-[0.75rem] leading-tight" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
-                                Net comparison updates as you change discounts.
-                            </p>
-                        </div>
+                        <h2
+                            className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
+                            style={{ color: theme.colors.textSecondary, opacity: 0.88 }}
+                        >
+                            {title}
+                        </h2>
                         <span
                             className="pt-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
                             style={{ color: theme.colors.textSecondary, opacity: 0.58 }}
@@ -161,14 +126,15 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                     </div>
                 </div>
 
-                <div className="px-4 pb-5 space-y-3">
-                    <div
-                        className="rounded-[24px] px-4 py-4"
+                <div className="px-4 pb-5 space-y-2.5">
+                    <button
+                        type="button"
+                        onClick={() => setDiscountTarget('jsi')}
+                        className="w-full rounded-[24px] px-4 py-4 text-left transition-all active:scale-[0.99]"
                         style={{
-                            background: `linear-gradient(180deg, ${theme.colors.accent}18 0%, ${theme.colors.accent}10 100%)`,
-                            border: `1px solid ${theme.colors.accent}28`,
-                            boxShadow: '0 10px 24px rgba(53,53,53,0.06)',
+                            background: `linear-gradient(180deg, ${theme.colors.accent}14 0%, ${theme.colors.accent}0D 100%)`,
                         }}
+                        aria-label={`Edit discount for ${jsiProduct.name}`}
                     >
                         <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
@@ -184,28 +150,19 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                                 <p className="mt-2 text-[1rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
                                     {jsiProduct.name}
                                 </p>
-                                <div className="mt-3 flex flex-wrap items-center gap-2">
-                                    <DiscountTrigger value={jsiDiscount} onClick={() => setDiscountTarget('jsi')} theme={theme} />
-                                    <MetaPill label="List" value={formatCurrency(jsiList)} theme={theme} accent />
-                                </div>
+                                <PriceMetaLine discount={jsiDiscount} listPrice={jsiList} theme={theme} accent />
                             </div>
 
                             <div className="flex-shrink-0 text-right">
-                                <p
-                                    className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
-                                    style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
-                                >
-                                    Net
-                                </p>
-                                <p className="mt-1 text-[1.625rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                <p className="text-[1.625rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
                                     {formatCurrency(jsiNet)}
                                 </p>
-                                <p className="mt-1 text-[0.75rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
-                                    Comparison baseline
+                                <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.74 }}>
+                                    baseline
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </button>
 
                     {competitors.length > 0 ? competitors.map((c) => {
                         const cList = parseListPrice(c.laminate);
@@ -214,38 +171,26 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                         const compPremium = jsiNet > 0 ? Math.round(((cNet - jsiNet) / jsiNet) * 100) : 0;
 
                         return (
-                            <div
+                            <button
                                 key={c.id}
-                                className="rounded-[22px] px-4 py-4"
+                                type="button"
+                                onClick={() => setDiscountTarget(c.id)}
+                                className="w-full rounded-[22px] px-4 py-4 text-left transition-all active:scale-[0.99]"
                                 style={{
-                                    background: theme.colors.surface || '#FFFFFF',
-                                    border: `1px solid ${theme.colors.border}`,
-                                    boxShadow: '0 8px 20px rgba(53,53,53,0.04)',
+                                    background: theme.colors.subtle,
                                 }}
+                                aria-label={`Edit discount for ${c.name}`}
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
                                         <p className="text-[0.9375rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
                                             {c.name}
                                         </p>
-                                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                                            <DiscountTrigger
-                                                value={cDiscount}
-                                                onClick={() => setDiscountTarget(c.id)}
-                                                theme={theme}
-                                            />
-                                            <MetaPill label="List" value={formatCurrency(cList)} theme={theme} />
-                                        </div>
+                                        <PriceMetaLine discount={cDiscount} listPrice={cList} theme={theme} />
                                     </div>
 
                                     <div className="flex-shrink-0 text-right">
-                                        <p
-                                            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
-                                            style={{ color: theme.colors.textSecondary, opacity: 0.58 }}
-                                        >
-                                            Net
-                                        </p>
-                                        <p className="mt-1 text-[1.25rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                        <p className="text-[1.25rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
                                             {formatCurrency(cNet)}
                                         </p>
                                         <div className="mt-2 flex justify-end">
@@ -253,7 +198,7 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </button>
                         );
                     }) : (
                         <p className="px-1 pb-1 text-xs" style={{ color: theme.colors.textSecondary }}>
@@ -270,20 +215,9 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                 theme={theme}
             >
                 <div className="space-y-3">
-                    <div
-                        className="rounded-[20px] px-4 py-3"
-                        style={{
-                            background: theme.colors.subtle,
-                            border: `1px solid ${theme.colors.border}`,
-                        }}
-                    >
-                        <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                            {activeDiscountName || 'Series'}
-                        </p>
-                        <p className="mt-1 text-[0.75rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>
-                            This discount updates the net price and the competitor delta on this screen.
-                        </p>
-                    </div>
+                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                        {activeDiscountName || 'Series'}
+                    </p>
 
                     <div className="max-h-[52vh] space-y-2 overflow-y-auto pr-1 scrollbar-hide">
                         {STANDARD_DISCOUNT_OPTIONS.map((option) => {
