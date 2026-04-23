@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SUBREDDITS } from './data.js';
 
 const COMPACT_CHANNEL_LABELS = {
@@ -95,6 +95,15 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
     return () => window.cancelAnimationFrame(frame);
   }, [chipMode, renderedChips, selectedChipId]);
 
+  // Reveal the left-edge fade only once the user has scrolled away from "All"
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return undefined;
+    const onScroll = () => setScrolled(viewport.scrollLeft > 1);
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', onScroll);
+  }, []);
+
   const chip = (id, label, onClick, active) => (
     <button
       key={id}
@@ -124,12 +133,7 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
       <div
         ref={viewportRef}
         className="overflow-x-auto scrollbar-hide scroll-smooth pb-0.5"
-        style={{
-          scrollPaddingLeft: 14,
-          scrollPaddingRight: 16,
-          maskImage: 'linear-gradient(to right, transparent 0%, black 11%, black 89%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 11%, black 89%, transparent 100%)',
-        }}
+        style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}
       >
         <div className="inline-flex gap-1.5 whitespace-nowrap pl-1 pr-4">
           {renderedChips.map((chipOption) => {
@@ -139,6 +143,23 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
           })}
         </div>
       </div>
+
+      {/* Left fade — only visible once scrolled away from All */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-10"
+        style={{
+          background: `linear-gradient(to right, ${theme.colors.background} 0%, transparent 100%)`,
+          opacity: scrolled ? 1 : 0,
+          transition: 'opacity 220ms ease',
+        }}
+      />
+      {/* Right fade — always present */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-10"
+        style={{ background: `linear-gradient(to left, ${theme.colors.background} 0%, transparent 100%)` }}
+      />
 
       <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
         <div ref={fullMeasureRef} className="inline-flex gap-1.5 pr-4">

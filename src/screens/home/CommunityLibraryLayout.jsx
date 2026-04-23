@@ -342,14 +342,23 @@ export const CommunityLibraryLayout = ({
               </>
             )}
 
-            {activeTab === 'community' ? (
+            {/* Always mounted so the height can animate in/out without a hard jump */}
+            <div
+              aria-hidden={activeTab !== 'community' ? true : undefined}
+              style={{
+                overflow: 'hidden',
+                maxHeight: activeTab === 'community' ? '56px' : '0px',
+                marginTop: activeTab === 'community' ? undefined : '0px',
+                transition: 'max-height 260ms cubic-bezier(0.4,0,0.2,1), margin-top 260ms cubic-bezier(0.4,0,0.2,1)',
+              }}
+            >
               <ChannelChips
                 theme={theme}
                 dark={dark}
                 onSelect={handleSubredditSelect}
                 activeId={activeSubreddit?.id || null}
               />
-            ) : null}
+            </div>
 
             {showSearch ? (
               <StandardSearchBar
