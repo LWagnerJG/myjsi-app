@@ -377,20 +377,25 @@ export function useHomeChat() {
     const botReplyTimeoutRef = useRef(null);
 
     const appendChatTurn = useCallback((text, attachments = []) => {
-        const trimmed = text?.trim();
-        if (!trimmed) return;
+        const trimmed = text?.trim() || '';
+        const normalizedAttachments = Array.isArray(attachments) ? attachments : [];
+        if (!trimmed && !normalizedAttachments.length) return;
+
+        const userText = trimmed || `Shared ${normalizedAttachments.length} attachment${normalizedAttachments.length === 1 ? '' : 's'}.`;
         const now = Date.now();
         setChatMessages((prev) => ([
             ...prev,
-            { id: `u-${now}`, role: 'user', text: trimmed, attachments, timestamp: now }
+            { id: `u-${now}`, role: 'user', text: userText, attachments: normalizedAttachments, timestamp: now }
         ]));
         if (botReplyTimeoutRef.current) {
             clearTimeout(botReplyTimeoutRef.current);
         }
         setIsBotThinking(true);
 
-        const replyText = generateReply(trimmed);
-        const replyActions = generateActions(trimmed);
+        const replyText = trimmed
+            ? generateReply(trimmed)
+            : `I saved ${normalizedAttachments.length === 1 ? 'that attachment' : 'those attachments'}. Add a quick note if you want help with the files or want me to point you to the right part of myJSI.`;
+        const replyActions = trimmed ? generateActions(trimmed) : [];
 
         botReplyTimeoutRef.current = setTimeout(() => {
             setChatMessages((prev) => ([
@@ -429,7 +434,7 @@ export function useHomeChat() {
 
     const handleChatSubmit = useCallback((e) => {
         e.preventDefault();
-        if (!chatInput.trim()) return;
+        if (!chatInput.trim() && chatAttachments.length === 0) return;
         appendChatTurn(chatInput, chatAttachments);
         setChatInput('');
         setChatAttachments([]);
@@ -450,7 +455,17 @@ export function useHomeChat() {
             name: file.name,
             size: file.size
         }));
-        setChatAttachments((prev) => ([...prev, ...mapped]));
+        setChatAttachments((prev) => {
+            const seen = new Set(prev.map((file) => file.id));
+            const next = [...prev];
+            mapped.forEach((file) => {
+                if (seen.has(file.id)) return;
+                seen.add(file.id);
+                next.push(file);
+            });
+            return next;
+        });
+        event.target.value = '';
     }, []);
 
     const handleRemoveAttachment = useCallback((id) => {
@@ -462,6 +477,9 @@ export function useHomeChat() {
         setChatMessages([]);
         setChatInput('');
         setChatAttachments([]);
+        if (chatFileInputRef.current) {
+            chatFileInputRef.current.value = '';
+        }
     }, []);
 
     return {

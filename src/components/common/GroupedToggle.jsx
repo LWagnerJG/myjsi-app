@@ -22,6 +22,14 @@ export const SegmentedToggle = ({
   const isFirstRender = useRef(true);
   
   const sizes = {
+    smDense: {
+      text: 'text-[0.8125rem]',
+      px: 'px-2.5',
+      py: 'py-1.5',
+      gap: 'gap-1',
+      iconSize: 'w-3.5 h-3.5',
+      badgeSize: 'w-4 h-4 text-[0.6875rem]'
+    },
     sm: { 
       text: 'text-[0.8125rem]', 
       px: 'px-3', 
@@ -112,9 +120,11 @@ export const SegmentedToggle = ({
         return (
           <button
             key={opt.value}
+            type="button"
             data-toggle-btn
             onClick={() => onChange(opt.value)}
             className={`relative rounded-full ${s.px} ${s.py} ${s.text} transition-colors whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
+            aria-pressed={isSelected}
             style={{ color: isSelected ? selectedText : unselectedText }}
           >
             <span className={`relative z-10 flex items-center justify-center ${s.gap}`}

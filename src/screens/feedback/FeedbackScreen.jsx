@@ -20,6 +20,8 @@ const formatFileSize = (bytes = 0) => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+const getFileKey = (file) => `${file?.name || 'file'}_${file?.size || 0}_${file?.lastModified || 0}`;
+
 export const FeedbackScreen = ({ theme }) => {
     const [feedbackType, setFeedbackType] = useState('general');
     const [message, setMessage] = useState('');
@@ -59,7 +61,17 @@ export const FeedbackScreen = ({ theme }) => {
     function onAttach(e) {
         const list = Array.from(e.target.files || []);
         if (!list.length) return;
-        setFiles(prev => [...prev, ...list]);
+        setFiles((prev) => {
+            const seen = new Set(prev.map(getFileKey));
+            const next = [...prev];
+            list.forEach((file) => {
+                const key = getFileKey(file);
+                if (seen.has(key)) return;
+                seen.add(key);
+                next.push(file);
+            });
+            return next;
+        });
         e.target.value = '';
     }
     function removeFile(idx) { setFiles(prev => prev.filter((_, i) => i !== idx)); }
@@ -269,7 +281,9 @@ export const FeedbackScreen = ({ theme }) => {
                                     Attachments
                                 </h3>
                                 <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary }}>
-                                    Screenshots, PDFs, and marked-up images help when something looks wrong.
+                                    {files.length
+                                        ? `${files.length} file${files.length === 1 ? '' : 's'} attached. Re-adding the same file will not duplicate it.`
+                                        : 'Screenshots, PDFs, and marked-up images help when something looks wrong.'}
                                 </p>
                             </div>
 

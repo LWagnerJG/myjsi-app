@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search, ChevronDown, Check, Store, Pencil } from 'lucide-react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
@@ -20,6 +20,12 @@ const CUSTOMER_TYPES = [
   { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
   { id: 'dealers',      label: 'Dealers',      singular: 'Dealer',      icon: Store     },
   { id: 'design-firms', label: 'Design Firms', singular: 'Design Firm', icon: Pencil    },
+];
+
+const COMPACT_PROJECTS_TAB_OPTIONS = [
+  { value: 'pipeline', label: 'Projects' },
+  { value: 'customers', label: 'Customers' },
+  { value: 'my-projects', label: 'Installs' },
 ];
 
 const TypeDropdown = React.memo(({ value, onChange, theme }) => {
@@ -532,6 +538,11 @@ export const ProjectsScreen = forwardRef(({
   const stagesScrollRef = useRef(null);
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
+  const headerControlsRef = useRef(null);
+  const projectsToggleRef = useRef(null);
+  const projectsStandardMeasureRef = useRef(null);
+  const projectsCompactMeasureRef = useRef(null);
+  const [projectsToggleMode, setProjectsToggleMode] = useState('default');
   const selectedOpportunityRef = useRef(selectedOpportunity);
   const selectedCustomerRef = useRef(selectedCustomer);
 
@@ -644,11 +655,79 @@ export const ProjectsScreen = forwardRef(({
     () => CUSTOMER_TYPES.find(t => t.id === customerType)?.singular || 'Customer',
     [customerType],
   );
+  const noopToggleChange = useCallback(() => {}, []);
+  const projectsTabOptions = useMemo(
+    () => projectsToggleMode === 'compact' ? COMPACT_PROJECTS_TAB_OPTIONS : PROJECTS_TAB_OPTIONS,
+    [projectsToggleMode],
+  );
+  const projectsToggleSize = projectsToggleMode === 'compact' ? 'smDense' : 'sm';
+
   const cta = useMemo(() => ({
-    pipeline:      { label: 'Project',    action: () => onNavigate('new-lead') },
-    customers:     { label: ctaSingular,  action: () => setShowAddCustomer(true) },
-    'my-projects': { label: 'Install',    action: () => onNavigate('add-new-install') },
+    pipeline:      { label: 'New', ariaLabel: 'Create project', action: () => onNavigate('new-lead') },
+    customers:     { label: 'New', ariaLabel: `Add ${ctaSingular.toLowerCase()}`, action: () => setShowAddCustomer(true) },
+    'my-projects': { label: 'New', ariaLabel: 'Add installation', action: () => onNavigate('add-new-install') },
   })[projectsTab], [projectsTab, ctaSingular, onNavigate]);
+
+  const updateProjectsToggleMode = useCallback(() => {
+    const row = headerControlsRef.current;
+    if (!row) return;
+
+    const rowWidth = row.clientWidth;
+    const standardWidth = projectsStandardMeasureRef.current?.scrollWidth || 0;
+    const compactWidth = projectsCompactMeasureRef.current?.scrollWidth || 0;
+    if (!rowWidth || !standardWidth) return;
+
+    const nextMode = standardWidth > rowWidth - 4 && compactWidth > 0 ? 'compact' : 'default';
+    setProjectsToggleMode((prev) => prev === nextMode ? prev : nextMode);
+  }, []);
+
+  useLayoutEffect(() => {
+    updateProjectsToggleMode();
+    const row = headerControlsRef.current;
+    if (!row) return undefined;
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => updateProjectsToggleMode())
+      : null;
+
+    resizeObserver?.observe(row);
+    if (projectsStandardMeasureRef.current) resizeObserver?.observe(projectsStandardMeasureRef.current);
+    if (projectsCompactMeasureRef.current) resizeObserver?.observe(projectsCompactMeasureRef.current);
+
+    window.addEventListener('resize', updateProjectsToggleMode);
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateProjectsToggleMode);
+    };
+  }, [updateProjectsToggleMode, projectsTabOptions, projectsToggleSize]);
+
+  useLayoutEffect(() => {
+    const toggleViewport = projectsToggleRef.current;
+    if (!toggleViewport) return undefined;
+
+    const selectedIndex = projectsTabOptions.findIndex((option) => option.value === projectsTab);
+    const selectedButton = toggleViewport.querySelectorAll('[data-toggle-btn]')[selectedIndex];
+    if (!selectedButton) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const gutter = projectsToggleMode === 'compact' ? 16 : 14;
+      const nextLeft = Math.max(0, selectedButton.offsetLeft - gutter);
+      const nextRight = selectedButton.offsetLeft + selectedButton.offsetWidth + gutter;
+      const viewportLeft = toggleViewport.scrollLeft;
+      const viewportRight = viewportLeft + toggleViewport.clientWidth;
+
+      if (nextLeft < viewportLeft) {
+        toggleViewport.scrollLeft = nextLeft;
+        return;
+      }
+
+      if (nextRight > viewportRight) {
+        toggleViewport.scrollLeft = Math.max(0, nextRight - toggleViewport.clientWidth);
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [projectsTab, projectsTabOptions, projectsToggleMode]);
 
   if (selectedCustomer) return (
     <CustomerMicrositeScreen
@@ -673,26 +752,51 @@ export const ProjectsScreen = forwardRef(({
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex items-center justify-between gap-2.5">
-          <div className="min-w-0 overflow-x-auto scrollbar-hide">
-            <SegmentedToggle
-              value={projectsTab}
-              onChange={setProjectsTab}
-              options={PROJECTS_TAB_OPTIONS}
-              size="sm"
-              theme={theme}
-            />
+        <div ref={headerControlsRef} className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div ref={projectsToggleRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
+            <div className="inline-block pr-4">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={setProjectsTab}
+                options={projectsTabOptions}
+                size={projectsToggleSize}
+                theme={theme}
+              />
+            </div>
           </div>
           {cta && (
             <button
+              type="button"
+              aria-label={cta.ariaLabel}
               onClick={cta.action}
-              className="flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-9 min-w-[36px] gap-1 text-sm py-2 px-3.5"
+              className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] gap-1.5 text-sm leading-none px-3"
               style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
             >
               <Plus size={14} strokeWidth={2.5} />
               {cta.label}
             </button>
           )}
+
+          <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
+            <div ref={projectsStandardMeasureRef} className="inline-block">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={noopToggleChange}
+                options={PROJECTS_TAB_OPTIONS}
+                size="sm"
+                theme={theme}
+              />
+            </div>
+            <div ref={projectsCompactMeasureRef} className="inline-block ml-4">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={noopToggleChange}
+                options={COMPACT_PROJECTS_TAB_OPTIONS}
+                size="smDense"
+                theme={theme}
+              />
+            </div>
+          </div>
         </div>
 
         {projectsTab === 'customers' && (

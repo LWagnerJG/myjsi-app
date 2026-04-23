@@ -89,6 +89,30 @@ describe('useHomeChat', () => {
         expect(result.current.chatMessages).toHaveLength(0);
     });
 
+    it('submits attachment-only messages', () => {
+        const { result } = renderHook(() => useHomeChat());
+
+        act(() => {
+            result.current.handleChatFilesSelected({
+                target: {
+                    files: [
+                        { name: 'photo.png', size: 5120, lastModified: 3000 },
+                    ],
+                    value: 'C:/fakepath/photo.png',
+                }
+            });
+        });
+
+        act(() => {
+            result.current.handleChatSubmit({ preventDefault: () => {} });
+        });
+
+        expect(result.current.chatMessages).toHaveLength(1);
+        expect(result.current.chatMessages[0].text).toBe('Shared 1 attachment.');
+        expect(result.current.chatMessages[0].attachments).toHaveLength(1);
+        expect(result.current.chatAttachments).toEqual([]);
+    });
+
     it('resets chat state via resetChat', () => {
         const { result } = renderHook(() => useHomeChat());
 
@@ -136,5 +160,31 @@ describe('useHomeChat', () => {
 
         expect(result.current.chatAttachments).toHaveLength(1);
         expect(result.current.chatAttachments[0].name).toBe('doc.pdf');
+    });
+
+    it('deduplicates attachments when the same file is selected twice', () => {
+        const { result } = renderHook(() => useHomeChat());
+
+        act(() => {
+            result.current.handleChatFilesSelected({
+                target: {
+                    files: [
+                        { name: 'dup.pdf', size: 1024, lastModified: 1000 },
+                    ],
+                    value: 'C:/fakepath/dup.pdf',
+                }
+            });
+            result.current.handleChatFilesSelected({
+                target: {
+                    files: [
+                        { name: 'dup.pdf', size: 1024, lastModified: 1000 },
+                    ],
+                    value: 'C:/fakepath/dup.pdf',
+                }
+            });
+        });
+
+        expect(result.current.chatAttachments).toHaveLength(1);
+        expect(result.current.chatAttachments[0].name).toBe('dup.pdf');
     });
 });

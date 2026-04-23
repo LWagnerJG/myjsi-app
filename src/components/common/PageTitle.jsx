@@ -19,6 +19,7 @@ export const PageTitle = React.memo(({
             <div className="flex-1 flex items-start space-x-2 min-w-0">
                 {onBack && showBack && (
                     <button
+                        type="button"
                         onClick={onBack}
                         className="p-2 -ml-2 rounded-full transition-colors"
                         style={{ backgroundColor: 'transparent' }}
