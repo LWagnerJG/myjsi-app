@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
@@ -8,6 +8,20 @@ import { MakersStudioTab } from './components/community/MakersStudioTab.jsx';
 import { ChannelChips } from './components/community/ChannelChips.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+
+const buildCommunityTabOptions = (hasBoardContent, compact = false) => {
+  const base = [
+    { value: 'community', label: compact ? 'Feed' : 'Community' },
+    { value: 'library', label: 'Library' },
+    { value: 'makers studio', label: 'Studio' },
+  ];
+
+  if (hasBoardContent) {
+    base.push({ value: 'my board', label: 'Board' });
+  }
+
+  return base;
+};
 
 export const CommunityLibraryLayout = ({
   theme,
@@ -25,21 +39,25 @@ export const CommunityLibraryLayout = ({
     return savedImageIds.length > 0 || Object.keys(likedPosts || {}).length > 0 || hasComments;
   }, [savedImageIds, likedPosts, posts]);
 
-  const tabs = useMemo(() => {
-    const base = [
-      { value: 'community', label: 'Community' },
-      { value: 'library', label: 'Library' },
-      { value: 'makers studio', label: 'Studio' },
-    ];
-    if (hasBoardContent) base.push({ value: 'my board', label: 'Board' });
-    return base;
-  }, [hasBoardContent]);
-
   const [activeTab, setActiveTab] = useState('community');
   const [activeSubreddit, setActiveSubreddit] = useState(null);
   const [query, setQuery] = useState('');
+  const [communityTabMode, setCommunityTabMode] = useState('default');
   const scrollPositions = useRef({});
   const containerRef = useRef(null);
+  const topHeaderControlsRef = useRef(null);
+  const topTabsViewportRef = useRef(null);
+  const topTabsStandardMeasureRef = useRef(null);
+  const topTabsCompactMeasureRef = useRef(null);
+
+  const standardTabs = useMemo(() => buildCommunityTabOptions(hasBoardContent, false), [hasBoardContent]);
+  const compactTabs = useMemo(() => buildCommunityTabOptions(hasBoardContent, true), [hasBoardContent]);
+  const noopTabChange = useCallback(() => {}, []);
+  const tabs = useMemo(
+    () => communityTabMode === 'compact' ? compactTabs : standardTabs,
+    [communityTabMode, compactTabs, standardTabs],
+  );
+  const topTabToggleSize = communityTabMode === 'compact' ? 'smDense' : 'sm';
 
   useEffect(() => {
     if (!hasBoardContent && activeTab === 'my board') setActiveTab('community');
@@ -102,26 +120,97 @@ export const CommunityLibraryLayout = ({
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';
 
+  const updateCommunityTabMode = useCallback(() => {
+    const viewport = topTabsViewportRef.current;
+    if (!viewport) return;
+
+    const availableWidth = viewport.clientWidth;
+    const standardWidth = topTabsStandardMeasureRef.current?.scrollWidth || 0;
+    const compactWidth = topTabsCompactMeasureRef.current?.scrollWidth || 0;
+    if (!availableWidth || !standardWidth) return;
+
+    const nextMode = standardWidth > availableWidth - 4 && compactWidth > 0 ? 'compact' : 'default';
+    setCommunityTabMode((prev) => prev === nextMode ? prev : nextMode);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (inSubCommunity) return undefined;
+
+    updateCommunityTabMode();
+    const controls = topHeaderControlsRef.current;
+    if (!controls) return undefined;
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => updateCommunityTabMode())
+      : null;
+
+    resizeObserver?.observe(controls);
+    if (topTabsViewportRef.current) resizeObserver?.observe(topTabsViewportRef.current);
+    if (topTabsStandardMeasureRef.current) resizeObserver?.observe(topTabsStandardMeasureRef.current);
+    if (topTabsCompactMeasureRef.current) resizeObserver?.observe(topTabsCompactMeasureRef.current);
+
+    window.addEventListener('resize', updateCommunityTabMode);
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateCommunityTabMode);
+    };
+  }, [inSubCommunity, tabs, topTabToggleSize, updateCommunityTabMode]);
+
+  useLayoutEffect(() => {
+    if (inSubCommunity) return undefined;
+
+    const viewport = topTabsViewportRef.current;
+    if (!viewport) return undefined;
+
+    const selectedIndex = tabs.findIndex((option) => option.value === activeTab);
+    const selectedButton = viewport.querySelectorAll('[data-toggle-btn]')[selectedIndex];
+    if (!selectedButton) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const gutter = communityTabMode === 'compact' ? 16 : 14;
+      const nextLeft = Math.max(0, selectedButton.offsetLeft - gutter);
+      const nextRight = selectedButton.offsetLeft + selectedButton.offsetWidth + gutter;
+      const viewportLeft = viewport.scrollLeft;
+      const viewportRight = viewportLeft + viewport.clientWidth;
+
+      if (nextLeft < viewportLeft) {
+        viewport.scrollLeft = nextLeft;
+        return;
+      }
+
+      if (nextRight > viewportRight) {
+        viewport.scrollLeft = Math.max(0, nextRight - viewport.clientWidth);
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTab, communityTabMode, inSubCommunity, tabs]);
+
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <ScreenTopChrome theme={theme} contentClassName="pt-1 pb-2">
-        <div className="space-y-3">
+        <div className="space-y-2.5">
 
           {inSubCommunity ? (
             /* ── Immersive sub-community header ── */
             <>
-              <div className="flex items-baseline gap-3">
-                <h2 className="text-[1.125rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>
-                  {activeSubreddit?.name}
-                </h2>
-                {activeSubreddit?.members ? (
-                  <span className="text-[0.75rem] font-medium tabular-nums flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
-                    {activeSubreddit.members}
-                  </span>
-                ) : null}
+              <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-3 min-w-0">
+                    <h2 className="text-[1.125rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>
+                      {activeSubreddit?.name}
+                    </h2>
+                    {activeSubreddit?.members ? (
+                      <span className="text-[0.75rem] font-medium tabular-nums flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
+                        {activeSubreddit.members}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
                 <button
+                  type="button"
                   onClick={openCreateContentModal}
-                  className="h-8 px-3.5 rounded-full text-sm font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
+                  className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[92px] px-3.5 text-sm leading-none"
                   style={{
                     backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                     color: theme.colors.accentText || '#FFFFFF',
@@ -141,19 +230,24 @@ export const CommunityLibraryLayout = ({
           ) : (
             /* ── Normal top-level chrome ── */
             <>
-              <div className="flex items-center gap-3">
-                <SegmentedToggle
-                  value={activeTab}
-                  onChange={switchTab}
-                  options={tabs}
-                  size="sm"
-                  theme={theme}
-                />
+              <div ref={topHeaderControlsRef} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <div ref={topTabsViewportRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
+                  <div className="inline-block pr-4">
+                    <SegmentedToggle
+                      value={activeTab}
+                      onChange={switchTab}
+                      options={tabs}
+                      size={topTabToggleSize}
+                      theme={theme}
+                    />
+                  </div>
+                </div>
 
                 {activeAction ? (
                   <button
+                    type="button"
                     onClick={activeAction}
-                    className="h-8 px-3.5 rounded-full text-sm font-semibold transition-all duration-150 active:scale-95 flex-shrink-0 ml-auto"
+                    className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[92px] px-3.5 text-sm leading-none"
                     style={{
                       backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                       color: theme.colors.accentText || '#FFFFFF',
@@ -162,6 +256,27 @@ export const CommunityLibraryLayout = ({
                     {actionLabel}
                   </button>
                 ) : null}
+
+                <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
+                  <div ref={topTabsStandardMeasureRef} className="inline-block">
+                    <SegmentedToggle
+                      value={activeTab}
+                      onChange={noopTabChange}
+                      options={standardTabs}
+                      size="sm"
+                      theme={theme}
+                    />
+                  </div>
+                  <div ref={topTabsCompactMeasureRef} className="inline-block ml-4">
+                    <SegmentedToggle
+                      value={activeTab}
+                      onChange={noopTabChange}
+                      options={compactTabs}
+                      size="smDense"
+                      theme={theme}
+                    />
+                  </div>
+                </div>
               </div>
 
               {activeTab === 'community' ? (
