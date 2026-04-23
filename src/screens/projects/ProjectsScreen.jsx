@@ -669,15 +669,15 @@ export const ProjectsScreen = forwardRef(({
   })[projectsTab], [projectsTab, ctaSingular, onNavigate]);
 
   const updateProjectsToggleMode = useCallback(() => {
-    const row = headerControlsRef.current;
-    if (!row) return;
+    const toggleViewport = projectsToggleRef.current;
+    if (!toggleViewport) return;
 
-    const rowWidth = row.clientWidth;
+    const availableToggleWidth = toggleViewport.clientWidth;
     const standardWidth = projectsStandardMeasureRef.current?.scrollWidth || 0;
     const compactWidth = projectsCompactMeasureRef.current?.scrollWidth || 0;
-    if (!rowWidth || !standardWidth) return;
+    if (!availableToggleWidth || !standardWidth) return;
 
-    const nextMode = standardWidth > rowWidth - 4 && compactWidth > 0 ? 'compact' : 'default';
+    const nextMode = standardWidth > availableToggleWidth - 4 && compactWidth > 0 ? 'compact' : 'default';
     setProjectsToggleMode((prev) => prev === nextMode ? prev : nextMode);
   }, []);
 
@@ -691,6 +691,7 @@ export const ProjectsScreen = forwardRef(({
       : null;
 
     resizeObserver?.observe(row);
+    if (projectsToggleRef.current) resizeObserver?.observe(projectsToggleRef.current);
     if (projectsStandardMeasureRef.current) resizeObserver?.observe(projectsStandardMeasureRef.current);
     if (projectsCompactMeasureRef.current) resizeObserver?.observe(projectsCompactMeasureRef.current);
 
