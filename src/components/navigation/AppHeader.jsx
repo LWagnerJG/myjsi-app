@@ -176,28 +176,21 @@ export const AppHeader = React.memo(({
                     }}
                 >
                     <div className="flex items-center">
-                        {/* Expanded back-button hit area — covers top-left corner for fat-finger taps */}
-                        {showBack && (
-                            <button
-                                aria-hidden="true"
-                                tabIndex={-1}
-                                onClick={handleBack}
-                                className="fixed top-0 left-0 z-40"
-                                style={{ width: 56, height: 56, background: 'transparent', border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
-                            />
-                        )}
                         <button
+                            type="button"
                             aria-label="Go back"
                             aria-hidden={!showBack}
                             onClick={handleBack}
-                            className={`transition-all duration-300 overflow-hidden flex items-center justify-center rounded-full ${dark ? 'hover:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'} active:scale-90 ${showBack ? 'w-10 h-10 -ml-2 mr-2 opacity-100' : 'w-0 h-10 ml-0 mr-0 opacity-0 pointer-events-none'}`}
+                            className={`transition-all duration-300 overflow-hidden flex items-center justify-center rounded-full ${dark ? 'hover:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'} active:scale-90 ${showBack ? 'w-12 h-12 -ml-3 mr-1 opacity-100' : 'w-0 h-12 ml-0 mr-0 opacity-0 pointer-events-none'}`}
                             disabled={!showBack}
                             tabIndex={showBack ? 0 : -1}
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                         >
                             <ArrowLeft className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
                         </button>
 
                         <button
+                            type="button"
                             aria-label="Go to homepage"
                             onClick={onHomeClick}
                             className="hover:opacity-60 transition-all active:scale-95"
@@ -218,6 +211,7 @@ export const AppHeader = React.memo(({
 
                         <button
                         ref={profileBtnRef}
+                        type="button"
                         aria-label="Open profile menu"
                         onClick={onProfileClick}
                         className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all hover:opacity-90 active:scale-90"

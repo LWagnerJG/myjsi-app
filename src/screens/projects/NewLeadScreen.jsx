@@ -16,7 +16,7 @@ import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
-import { ProductCard, ProductSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
+import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
 
 const WIN_PRESETS = [10, 25, 50, 75, 90];
 const getWinBand = (pct) => {
@@ -376,13 +376,12 @@ export const NewLeadScreen = ({
     if (step === 0) {
       // On first step, clear any custom handler — default back exits the screen
       setBackHandler(null);
-      return () => setBackHandler(null);
+      return undefined;
     }
-    setBackHandler(() => {
+    return setBackHandler(() => {
       animateToStep(Math.max(step - 1, 0));
       return true; // consumed — prevent screen-level navigation
     });
-    return () => setBackHandler(null);
   }, [step, setBackHandler, animateToStep]);
 
   // Inject step-transition keyframes once
@@ -424,6 +423,44 @@ export const NewLeadScreen = ({
     setTouched((prev) => ({ ...prev, [field]: true }));
   }, []);
 
+  const handleProjectInputChange = useCallback((nextValue) => {
+    const currentSelectedProject = (opportunities || []).find((opp) => String(opp?.id) === String(newLeadData.pastProjectRef || ''));
+    const selectedName = currentSelectedProject ? String(currentSelectedProject.name || currentSelectedProject.project || '').trim() : '';
+    const updates = { project: nextValue };
+
+    if (newLeadData.pastProjectRef && normalizeText(selectedName) !== normalizeText(nextValue)) {
+      updates.pastProjectRef = '';
+    }
+
+    onNewLeadChange(updates);
+  }, [newLeadData.pastProjectRef, onNewLeadChange, opportunities]);
+
+  const commitProjectValue = useCallback((nextValue) => {
+    onNewLeadChange({ project: String(nextValue || '').trim(), pastProjectRef: '' });
+    markTouched('project');
+  }, [markTouched, onNewLeadChange]);
+
+  const handleSelectExistingProject = useCallback((opp) => {
+    const projectName = String(opp?.name || opp?.project || '').trim();
+    if (!projectName) return;
+
+    const companyName = String(opp?.company || opp?.customerName || '').trim();
+    const updates = {
+      project: projectName,
+      pastProjectRef: String(opp?.id ?? ''),
+    };
+
+    if (companyName && !String(newLeadData.endUser || '').trim()) {
+      updates.endUser = companyName;
+    }
+
+    onNewLeadChange(updates);
+    markTouched('project');
+    if (companyName && !String(newLeadData.endUser || '').trim()) {
+      markTouched('endUser');
+    }
+  }, [markTouched, newLeadData.endUser, onNewLeadChange]);
+
   const addEndUserOption = useCallback((value) => {
     const normalized = String(value || '').trim();
     if (!normalized) return;
@@ -452,9 +489,11 @@ export const NewLeadScreen = ({
     const endUser = normalizeText(newLeadData.endUser);
     const projectQuery = project.length >= 3 ? project : '';
     const endUserQuery = endUser.length >= 3 ? endUser : '';
+    const selectedProjectRef = String(newLeadData.pastProjectRef || '');
     // Require BOTH project and end user to have enough characters and BOTH to match
     if (!projectQuery || !endUserQuery) return [];
     return (opportunities || [])
+      .filter((opp) => String(opp?.id) !== selectedProjectRef)
       .filter((opp) => {
         const name = normalizeText(opp.name || opp.project);
         const company = normalizeText(opp.company);
@@ -463,7 +502,7 @@ export const NewLeadScreen = ({
         return projectHit && companyHit;
       })
       .slice(0, 3);
-  }, [newLeadData.project, newLeadData.endUser, opportunities]);
+  }, [newLeadData.project, newLeadData.endUser, newLeadData.pastProjectRef, opportunities]);
 
   const errors = useMemo(() => {
     const next = {};
@@ -844,14 +883,16 @@ export const NewLeadScreen = ({
             <Section title="Project Basics" theme={theme}>
               <Row label="Project Name" theme={theme} inline>
                 <div>
-                  <FormInput
+                  <ProjectSpotlight
                     value={newLeadData.project || ''}
-                    onChange={(e) => { upd('project', e.target.value); markTouched('project'); }}
+                    onChange={handleProjectInputChange}
+                    onCommitValue={commitProjectValue}
+                    onSelectOpportunity={handleSelectExistingProject}
+                    opportunities={opportunities}
+                    selectedOpportunityId={newLeadData.pastProjectRef}
                     onBlur={() => markTouched('project')}
                     placeholder="Enter project name"
                     theme={theme}
-                    size="sm"
-                    surfaceBg
                   />
                   <FieldError show={!!visibleError('project')} message={visibleError('project')} />
                 </div>

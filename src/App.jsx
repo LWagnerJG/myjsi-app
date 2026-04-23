@@ -239,6 +239,9 @@ function App() {
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [homeResetKey, setHomeResetKey] = useState(0);
     const backHandlerRef = useRef(null);
+    const backHandlerRegistrationRef = useRef(0);
+    const backInteractionLockRef = useRef(false);
+    const backInteractionTimerRef = useRef(null);
 
     const [navDepth, setNavDepth] = useState(0);
     const navDepthRef = useRef(navDepth);
@@ -250,10 +253,32 @@ function App() {
     const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
     const isHomeScreen = !currentScreen || currentScreen === 'home';
 
+    const releaseBackInteractionLock = useCallback(() => {
+        if (backInteractionTimerRef.current) {
+            clearTimeout(backInteractionTimerRef.current);
+            backInteractionTimerRef.current = null;
+        }
+        backInteractionLockRef.current = false;
+    }, []);
+
+    const lockBackInteraction = useCallback((ms = 260) => {
+        releaseBackInteractionLock();
+        backInteractionLockRef.current = true;
+        backInteractionTimerRef.current = setTimeout(() => {
+            backInteractionLockRef.current = false;
+            backInteractionTimerRef.current = null;
+        }, ms);
+    }, [releaseBackInteractionLock]);
+
+    useEffect(() => () => {
+        releaseBackInteractionLock();
+    }, [releaseBackInteractionLock]);
+
     // Sync navDepth when browser native back/forward triggers a location change
     // without going through handleNavigate/handleBack (e.g. native swipe-back,
     // hardware back button, browser forward/back buttons).
     useEffect(() => {
+        releaseBackInteractionLock();
         if (internalNavRef.current) {
             // This location change was triggered by our code — already handled
             internalNavRef.current = false;
@@ -270,7 +295,7 @@ function App() {
             setLastNavigationDirection('none');
             setNavDepth(1);
         }
-    }, [currentScreen, isHomeScreen]);
+    }, [currentScreen, isHomeScreen, releaseBackInteractionLock]);
 
     const screenLabel = useMemo(() => {
         if (!currentScreen || currentScreen === 'home') return 'Home';
@@ -352,24 +377,46 @@ function App() {
     }, [navigateHome, routerNavigate]);
 
     const handleBack = useCallback(() => {
+        if (backInteractionLockRef.current) {
+            return;
+        }
+
         if (typeof backHandlerRef.current === 'function') {
+            lockBackInteraction(220);
             const handled = backHandlerRef.current();
             if (handled) {
                 return;
             }
+            releaseBackInteractionLock();
         }
 
         if (navDepth > 0) {
+            lockBackInteraction(navDepth <= 1 ? 420 : 320);
             internalNavRef.current = true;
             setLastNavigationDirection(navDepth <= 1 ? 'home' : 'backward');
             setScreenParams({});
             setNavDepth(d => Math.max(0, d - 1));
             routerNavigate(-1);
         }
-    }, [routerNavigate, navDepth]);
+    }, [routerNavigate, navDepth, lockBackInteraction, releaseBackInteractionLock]);
 
     const setBackHandler = useCallback((handler) => {
-        backHandlerRef.current = typeof handler === 'function' ? handler : null;
+        if (typeof handler !== 'function') {
+            backHandlerRegistrationRef.current += 1;
+            backHandlerRef.current = null;
+            return () => {};
+        }
+
+        const registrationId = ++backHandlerRegistrationRef.current;
+        backHandlerRef.current = handler;
+
+        return () => {
+            if (backHandlerRegistrationRef.current !== registrationId) {
+                return;
+            }
+            backHandlerRegistrationRef.current += 1;
+            backHandlerRef.current = null;
+        };
     }, []);
 
     const handleHome = useCallback(() => {

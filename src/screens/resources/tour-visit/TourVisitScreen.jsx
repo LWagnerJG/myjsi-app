@@ -1393,20 +1393,14 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
         if (typeof setBackHandler !== 'function') return undefined;
 
         if (entryMode !== 'home') {
-            setBackHandler(() => {
+            return setBackHandler(() => {
                 resetTourVisitFlow();
                 return true;
             });
-
-            return () => {
-                setBackHandler(null);
-            };
         }
 
         setBackHandler(null);
-        return () => {
-            setBackHandler(null);
-        };
+        return undefined;
     }, [entryMode, setBackHandler, resetTourVisitFlow]);
 
     useEffect(() => () => {

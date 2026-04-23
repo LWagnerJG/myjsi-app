@@ -532,6 +532,16 @@ export const ProjectsScreen = forwardRef(({
   const stagesScrollRef = useRef(null);
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
+  const selectedOpportunityRef = useRef(selectedOpportunity);
+  const selectedCustomerRef = useRef(selectedCustomer);
+
+  useEffect(() => {
+    selectedOpportunityRef.current = selectedOpportunity;
+  }, [selectedOpportunity]);
+
+  useEffect(() => {
+    selectedCustomerRef.current = selectedCustomer;
+  }, [selectedCustomer]);
 
   useEffect(() => {
     if (projectsInitialTab) {
@@ -563,16 +573,23 @@ export const ProjectsScreen = forwardRef(({
   }));
 
   useEffect(() => {
-    if (selectedCustomer || selectedOpportunity) {
-      setBackHandler?.(() => {
-        if (selectedCustomer)    { setSelectedCustomer(null);    return true; }
-        if (selectedOpportunity) { setSelectedOpportunity(null); return true; }
-        return false;
-      });
-    } else {
-      setBackHandler?.(null);
+    if (typeof setBackHandler !== 'function') return undefined;
+    if (!selectedCustomer && !selectedOpportunity) {
+      setBackHandler(null);
+      return undefined;
     }
-    return () => setBackHandler?.(null);
+
+    return setBackHandler(() => {
+      if (selectedCustomerRef.current) {
+        setSelectedCustomer(null);
+        return true;
+      }
+      if (selectedOpportunityRef.current) {
+        setSelectedOpportunity(null);
+        return true;
+      }
+      return false;
+    });
   }, [selectedCustomer, selectedOpportunity, setBackHandler]);
 
   const updateStageFade = useCallback(() => {
