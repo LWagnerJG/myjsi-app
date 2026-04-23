@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, ExternalLink } from 'lucide-react';
+import { ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, ExternalLink, Package, Truck } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
@@ -11,6 +11,7 @@ import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quot
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { ContactSearchSelector } from './ContactSearchSelector.jsx';
+import { getSampleOrdersForOpportunity } from '../../../../utils/projectLinks.js';
 
 /* helpers */
 const parseCurrency = (raw) => {
@@ -88,6 +89,12 @@ const STATUS_META = {
   'in-progress':{ label: 'In Progress', icon: Loader2,      color: JSI_COLORS.info,    bg: `${JSI_COLORS.info}1A` },
   review:       { label: 'In Review',   icon: Eye,          color: JSI_COLORS.info,    bg: `${JSI_COLORS.info}1A` },
   complete:     { label: 'Complete',    icon: CheckCircle,  color: JSI_COLORS.success, bg: `${JSI_COLORS.success}1A` },
+};
+
+const SAMPLE_STATUS_META = {
+  processing: { label: 'Processing', color: JSI_COLORS.warning, bg: `${JSI_COLORS.warning}1A`, icon: Clock },
+  'in-transit': { label: 'In Transit', color: JSI_COLORS.info, bg: `${JSI_COLORS.info}1A`, icon: Truck },
+  delivered: { label: 'Delivered', color: JSI_COLORS.success, bg: `${JSI_COLORS.success}1A`, icon: CheckCircle },
 };
 
 const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
@@ -178,7 +185,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
 /* 
    MAIN COMPONENT
     */
-export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId }) => {
+export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId, sampleOrders = [], opportunities = [], onNavigate }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
 
@@ -263,6 +270,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
+  const relatedSampleOrders = useMemo(
+    () => getSampleOrdersForOpportunity(draft, sampleOrders, opportunities)
+      .slice()
+      .sort((a, b) => new Date(b.date) - new Date(a.date)),
+    [draft, sampleOrders, opportunities],
+  );
   const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
 
   return (
@@ -428,12 +441,71 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
           </Section>
 
-          {/* 7. QUOTES */}
+          {/* 7. SAMPLE ACTIVITY */}
+          <Section
+            title="Sample Activity"
+            theme={theme}
+            right={relatedSampleOrders.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => onNavigate?.('samples/orders')}
+                className="text-[0.625rem] font-semibold px-2.5 py-1 rounded-full transition-all"
+                style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: c.textPrimary }}
+              >
+                View Orders
+              </button>
+            ) : null}
+          >
+            {relatedSampleOrders.length > 0 ? (
+              <div className="space-y-2">
+                {relatedSampleOrders.map((order) => {
+                  const meta = SAMPLE_STATUS_META[order.status] || SAMPLE_STATUS_META.processing;
+                  const StatusIcon = meta.icon;
+                  const totalItems = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
+
+                  return (
+                    <button
+                      key={order.id}
+                      type="button"
+                      onClick={() => onNavigate?.('samples/orders', { orderId: order.id, tab: order.status === 'delivered' ? 'past' : 'current' })}
+                      className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all active:scale-[0.98]"
+                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)', border: `1px solid ${divider}` }}
+                    >
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
+                        <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[0.75rem] font-bold truncate" style={{ color: c.textPrimary }}>{order.id}</span>
+                          <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: meta.bg, color: meta.color }}>
+                            {meta.label}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-[0.6875rem] leading-tight" style={{ color: c.textSecondary }}>
+                          {(order.items || [])[0]?.name || 'Sample order'}{totalItems > 1 ? ` + ${totalItems - 1} more` : ''}
+                        </div>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 px-3 py-3 rounded-xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}>
+                <Package className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                <span className="text-[0.6875rem]" style={{ color: c.textSecondary }}>
+                  No sample orders linked to this project yet.
+                </span>
+              </div>
+            )}
+          </Section>
+
+          {/* 8. QUOTES */}
           <Section title="Quotes" theme={theme}>
             <QuoteTracker quotes={enrichedQuotes} theme={theme} onRequestQuote={() => setQuoteModalOpen(true)} />
           </Section>
 
-          {/* 8. DOCUMENTS */}
+          {/* 9. DOCUMENTS */}
           <Section title="Documents" theme={theme} right={
             <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-semibold transition-all"
               style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', color: c.textPrimary }}><Upload className="w-3 h-3" /> Upload</button>
@@ -476,7 +548,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             )}
           </Section>
 
-          {/* 9. NOTES */}
+          {/* 10. NOTES */}
           <Section title="Notes" theme={theme}>
             <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={2}
               className="w-full resize-none rounded-lg p-2.5 text-[0.6875rem] leading-relaxed outline-none"

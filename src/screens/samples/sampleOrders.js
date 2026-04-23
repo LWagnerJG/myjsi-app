@@ -7,6 +7,7 @@ const DEFAULT_ORDERED_BY = {
 export const INITIAL_SAMPLE_ORDERS = [
     {
         id: 'SO-2026-0041',
+        linkedProjectId: 8,
         date: '2026-04-17T14:30:00',
         status: 'in-transit',
         shipTo: 'Benchmark Design Group',
@@ -24,6 +25,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     },
     {
         id: 'SO-2026-0038',
+        linkedProjectId: 9,
         date: '2026-04-14T09:15:00',
         status: 'delivered',
         shipTo: 'Haworth Chicago Showroom',
@@ -40,6 +42,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     },
     {
         id: 'SO-2026-0035',
+        linkedProjectId: 10,
         date: '2026-04-10T16:45:00',
         status: 'delivered',
         shipTo: 'Sarah Mitchell — Mitchell Interiors',
@@ -84,6 +87,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     },
     {
         id: 'SO-2026-0018',
+        linkedProjectId: 11,
         date: '2026-03-18T13:10:00',
         status: 'delivered',
         shipTo: 'Amanda Chen — Perkins&Will',
@@ -133,6 +137,8 @@ export const buildSubmittedSampleOrder = ({
     address1,
     address2,
     shipToType,
+    linkedProjectId = null,
+    linkedProjectName = '',
     userSettings,
 }) => {
     const now = new Date();
@@ -148,6 +154,8 @@ export const buildSubmittedSampleOrder = ({
         status: 'processing',
         shipTo: String(shipToName || '').trim() || 'Home',
         shipToType: inferShipToType(shipToType, shipToName),
+        linkedProjectId,
+        linkedProjectName: String(linkedProjectName || '').trim(),
         address,
         eta: eta.toISOString().slice(0, 10),
         carrier: 'UPS',

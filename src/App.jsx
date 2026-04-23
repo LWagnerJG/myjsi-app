@@ -304,12 +304,22 @@ function App() {
     }, [currentScreen]);
 
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', shirtSize: 'L' });
-    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+    const [opportunities, setOpportunities] = usePersistentState('projects.opportunities', INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [projectsTabOverride, setProjectsTabOverride] = useState(null);
     const [projectsStageOverride, setProjectsStageOverride] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
+
+    useEffect(() => {
+        setOpportunities((prev) => {
+            if (!Array.isArray(prev)) return INITIAL_OPPORTUNITIES;
+            const existingIds = new Set(prev.map((opportunity) => String(opportunity?.id)));
+            const missingSeeded = INITIAL_OPPORTUNITIES.filter((opportunity) => !existingIds.has(String(opportunity.id)));
+            if (missingSeeded.length === 0) return prev;
+            return [...prev, ...missingSeeded];
+        });
+    }, [setOpportunities]);
 
     const [posts, setPosts] = useState([...INITIAL_POSTS, ...INITIAL_WINS, ...SUBREDDIT_POSTS]);
     const [polls, setPolls] = useState(INITIAL_POLLS);
@@ -448,6 +458,8 @@ function App() {
                 address1: draft?.address1,
                 address2: draft?.address2,
                 shipToType: draft?.shipToType,
+                linkedProjectId: draft?.linkedProjectId || null,
+                linkedProjectName: draft?.linkedProjectName || '',
                 userSettings,
             });
             return [createdOrder, ...existing];

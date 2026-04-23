@@ -524,7 +524,7 @@ export const ProjectsScreen = forwardRef(({
   projectsInitialTab, clearProjectsInitialTab,
   projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
-  setBackHandler, onAddInstall,
+  setBackHandler, onAddInstall, sampleOrders,
 }, ref) => {
   const isDark = isDarkTheme(theme);
   const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
@@ -743,6 +743,9 @@ export const ProjectsScreen = forwardRef(({
       theme={theme}
       members={members}
       currentUserId={currentUserId}
+      sampleOrders={sampleOrders}
+      opportunities={opportunities}
+      onNavigate={onNavigate}
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
     />
   );

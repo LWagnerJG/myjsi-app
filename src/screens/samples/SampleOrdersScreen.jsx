@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
-import { Package, Truck, CheckCircle2, Clock, Mail, ChevronRight, User, MapPin, X, Send, Copy, Check, ExternalLink, PackageCheck, CircleDot, Circle } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Clock, Mail, ChevronRight, User, MapPin, X, Send, Copy, Check, ExternalLink, PackageCheck, CircleDot, Circle, Briefcase, FileText } from 'lucide-react';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
 import { INITIAL_SAMPLE_ORDERS } from './sampleOrders.js';
+import { resolveOrderProjectLink, summarizeProjectQuotes } from '../../utils/projectLinks.js';
 
 const STATUS_CONFIG = {
     'processing': { label: 'Processing', color: '#D4A843', icon: Clock, bg: (dk) => dk ? 'rgba(212,168,67,0.12)' : 'rgba(212,168,67,0.08)' },
@@ -17,6 +18,15 @@ const TYPE_BADGE = {
     'design': { label: 'Design', color: '#5B7B8C' },
     'end-user': { label: 'End User', color: '#8B7355' },
     'personal': { label: 'Personal', color: '#8B8680' },
+};
+
+const PROJECT_STAGE_BADGE = {
+    'Discovery': { color: '#5B7B8C', bg: 'rgba(91,123,140,0.10)' },
+    'Specifying': { color: '#C4956A', bg: 'rgba(196,149,106,0.12)' },
+    'Decision/Bidding': { color: '#8B7355', bg: 'rgba(139,115,85,0.12)' },
+    'PO Expected': { color: '#4A6258', bg: 'rgba(74,98,88,0.12)' },
+    'Won': { color: '#4A7C59', bg: 'rgba(74,124,89,0.12)' },
+    'Lost': { color: '#B85C5C', bg: 'rgba(184,92,92,0.12)' },
 };
 
 function formatDate(iso) {
@@ -440,12 +450,15 @@ const TrackingModal = ({ order, theme, onClose }) => {
 };
 
 // ─── Order card ─────────────────────────────────────────────────────────────
-const OrderCard = ({ order, theme, expanded, onToggle, onFollowUp, onTrack }) => {
+const OrderCard = ({ order, theme, expanded, onToggle, onFollowUp, onTrack, projectLink, onOpenProject }) => {
     const dk = isDarkTheme(theme);
     const status = STATUS_CONFIG[order.status] || STATUS_CONFIG['processing'];
     const badge = TYPE_BADGE[order.shipToType] || TYPE_BADGE['personal'];
     const StatusIcon = status.icon;
     const totalItems = order.items.reduce((s, i) => s + i.qty, 0);
+    const linkedOpportunity = projectLink?.opportunity || null;
+    const quoteSummary = projectLink?.quoteSummary || null;
+    const stageMeta = PROJECT_STAGE_BADGE[linkedOpportunity?.stage] || PROJECT_STAGE_BADGE.Discovery;
 
     return (
         <div
@@ -480,6 +493,14 @@ const OrderCard = ({ order, theme, expanded, onToggle, onFollowUp, onTrack }) =>
                             <span className="text-xs" style={{ color: theme.colors.textSecondary }}>{relativeDate(order.date)}</span>
                             <span className="text-xs opacity-40" style={{ color: theme.colors.textSecondary }}>·</span>
                             <span className="text-xs" style={{ color: theme.colors.textSecondary }}>{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
+                            {linkedOpportunity && (
+                                <>
+                                    <span className="text-xs opacity-40" style={{ color: theme.colors.textSecondary }}>·</span>
+                                    <span className="text-xs flex items-center gap-1" style={{ color: theme.colors.textSecondary }}>
+                                        <Briefcase className="w-2.5 h-2.5" /> {linkedOpportunity.stage}
+                                    </span>
+                                </>
+                            )}
                             {!order.orderedBy.isCurrentUser && (
                                 <>
                                     <span className="text-xs opacity-40" style={{ color: theme.colors.textSecondary }}>·</span>
@@ -557,6 +578,48 @@ const OrderCard = ({ order, theme, expanded, onToggle, onFollowUp, onTrack }) =>
                                 )}
                             </div>
 
+                            {linkedOpportunity && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onOpenProject(linkedOpportunity); }}
+                                    className="w-full flex items-start gap-3 px-3.5 py-3 rounded-xl text-left active:scale-[0.99] transition-all"
+                                    style={{
+                                        backgroundColor: dk ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)',
+                                        border: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`,
+                                    }}
+                                >
+                                    <div
+                                        className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                                        style={{ backgroundColor: stageMeta.bg }}
+                                    >
+                                        <Briefcase className="w-4 h-4" style={{ color: stageMeta.color }} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <p className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>
+                                                {linkedOpportunity.name}
+                                            </p>
+                                            <span
+                                                className="text-[0.625rem] font-bold uppercase tracking-[0.08em] px-2 py-1 rounded-full"
+                                                style={{ backgroundColor: stageMeta.bg, color: stageMeta.color }}
+                                            >
+                                                {linkedOpportunity.stage}
+                                            </span>
+                                        </div>
+                                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                            <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
+                                                {projectLink.source === 'explicit' ? 'Linked project' : 'Likely related project'}
+                                            </span>
+                                            {quoteSummary && (
+                                                <span className="text-[0.6875rem] flex items-center gap-1" style={{ color: theme.colors.textSecondary }}>
+                                                    <FileText className="w-3 h-3" /> {quoteSummary.label}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <ExternalLink className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.45 }} />
+                                </button>
+                            )}
+
                             {/* Action buttons */}
                             <div className="flex gap-2 pt-1">
                                 {order.tracking && (
@@ -607,11 +670,20 @@ const OrderCard = ({ order, theme, expanded, onToggle, onFollowUp, onTrack }) =>
 };
 
 // ─── Main screen ────────────────────────────────────────────────────────────
-export const SampleOrdersScreen = ({ theme, sampleOrders = INITIAL_SAMPLE_ORDERS }) => {
+export const SampleOrdersScreen = ({ theme, sampleOrders = INITIAL_SAMPLE_ORDERS, opportunities = [], onNavigate, screenParams }) => {
     const [expandedId, setExpandedId] = useState(null);
     const [tab, setTab] = useState('current');
     const [followUpOrder, setFollowUpOrder] = useState(null);
     const [trackingOrder, setTrackingOrder] = useState(null);
+
+    useEffect(() => {
+        if (screenParams?.tab === 'current' || screenParams?.tab === 'past') {
+            setTab(screenParams.tab);
+        }
+        if (screenParams?.orderId) {
+            setExpandedId(screenParams.orderId);
+        }
+    }, [screenParams]);
 
     const currentOrders = useMemo(() =>
         [...(Array.isArray(sampleOrders) ? sampleOrders : [])]
@@ -633,6 +705,20 @@ export const SampleOrdersScreen = ({ theme, sampleOrders = INITIAL_SAMPLE_ORDERS
 
     const handleFollowUp = useCallback((order) => setFollowUpOrder(order), []);
     const handleTrack = useCallback((order) => setTrackingOrder(order), []);
+    const linkedProjects = useMemo(() => Object.fromEntries(
+        (Array.isArray(sampleOrders) ? sampleOrders : []).map((order) => {
+            const link = resolveOrderProjectLink(order, opportunities || []);
+            if (!link.opportunity) return [order.id, null];
+            return [order.id, {
+                ...link,
+                quoteSummary: summarizeProjectQuotes(link.opportunity.quotes || []),
+            }];
+        }),
+    ), [sampleOrders, opportunities]);
+    const handleOpenProject = useCallback((opportunity) => {
+        if (!opportunity?.id) return;
+        onNavigate?.(`projects/${opportunity.id}`);
+    }, [onNavigate]);
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
@@ -678,6 +764,8 @@ export const SampleOrdersScreen = ({ theme, sampleOrders = INITIAL_SAMPLE_ORDERS
                                     onToggle={() => setExpandedId(prev => prev === order.id ? null : order.id)}
                                     onFollowUp={handleFollowUp}
                                     onTrack={handleTrack}
+                                    projectLink={linkedProjects[order.id]}
+                                    onOpenProject={handleOpenProject}
                                 />
                             ))}
                             {orders.length === 0 && (
