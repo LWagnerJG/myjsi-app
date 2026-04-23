@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Package, Plus } from 'lucide-react';
+import { Check, ChevronDown, Package, Plus } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 import { Modal } from '../../components/common/Modal.jsx';
 import { PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
@@ -29,41 +29,79 @@ const applyDiscount = (list, discountOption) =>
 
 const shortDiscount = (opt) => opt.replace(/\s*\(.*\)/, '');
 
-const AdvantageChip = ({ compPremium }) => {
-    if (compPremium === 0) return (
-        <span className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full tabular-nums"
-            style={{ background: 'rgba(0,0,0,0.06)', color: '#888' }}>
-            parity
-        </span>
-    );
+const formatCurrency = (value) => `$${value.toLocaleString()}`;
+
+const formatNetRate = (discountOption) => {
+    const netPercent = parseNetMultiplier(discountOption) * 100;
+    const rounded = Math.round(netPercent * 100) / 100;
+    return `${rounded.toFixed(Number.isInteger(rounded) ? 0 : 2)}% net`;
+};
+
+const AdvantageChip = ({ compPremium, theme }) => {
+    const isParity = compPremium === 0;
     const jsiWins = compPremium > 0;
+
     return (
-        <span className="text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full tabular-nums"
+        <span
+            className="inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold tabular-nums"
             style={{
-                background: jsiWins ? 'rgba(74,124,89,0.13)' : 'rgba(184,92,92,0.12)',
-                color: jsiWins ? '#4A7C59' : '#B85C5C',
-            }}>
-            {compPremium > 0 ? `+${compPremium}%` : `${compPremium}%`}
+                background: isParity
+                    ? theme.colors.subtle
+                    : jsiWins
+                        ? 'rgba(74,124,89,0.12)'
+                        : 'rgba(184,92,92,0.12)',
+                color: isParity
+                    ? theme.colors.textSecondary
+                    : jsiWins
+                        ? '#4A7C59'
+                        : '#B85C5C',
+            }}
+        >
+            {isParity ? 'Parity' : `${compPremium > 0 ? '+' : ''}${compPremium}%`}
         </span>
     );
 };
 
-const DiscountPicker = ({ value, onChange, theme }) => (
-    <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="text-[0.625rem] font-semibold rounded-full cursor-pointer focus:outline-none transition-colors appearance-none"
+const MetaPill = ({ label, value, theme, accent = false }) => (
+    <div
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
         style={{
-            background: theme.colors.surface,
-            color: theme.colors.textSecondary,
-            border: `1px solid ${theme.colors.border}`,
-            padding: '2px 8px 2px 6px',
+            background: accent ? `${theme.colors.accent}10` : (theme.colors.surface || '#FFFFFF'),
+            border: `1px solid ${accent ? `${theme.colors.accent}24` : theme.colors.border}`,
         }}
     >
-        {STANDARD_DISCOUNT_OPTIONS.map(opt => (
-            <option key={opt} value={opt}>{shortDiscount(opt)}</option>
-        ))}
-    </select>
+        <span
+            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: theme.colors.textSecondary, opacity: 0.74 }}
+        >
+            {label}
+        </span>
+        <span className="text-[0.8125rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+            {value}
+        </span>
+    </div>
+);
+
+const DiscountTrigger = ({ value, onClick, theme }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all active:scale-[0.98]"
+        style={{
+            background: theme.colors.surface || '#FFFFFF',
+            border: `1px solid ${theme.colors.border}`,
+            color: theme.colors.textPrimary,
+        }}
+    >
+        <span
+            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: theme.colors.textSecondary, opacity: 0.74 }}
+        >
+            Disc
+        </span>
+        <span className="text-[0.8125rem] font-semibold leading-none">{shortDiscount(value)}</span>
+        <ChevronDown className="h-3.5 w-3.5" style={{ color: theme.colors.textSecondary }} />
+    </button>
 );
 
 const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
@@ -71,118 +109,215 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
     const [compDiscounts, setCompDiscounts] = useState(() =>
         Object.fromEntries(competitors.map(c => [c.id, DEFAULT_DISCOUNT]))
     );
+    const [discountTarget, setDiscountTarget] = useState(null);
 
     const compKey = competitors.map(c => c.id).join(',');
     useEffect(() => {
         setCompDiscounts(Object.fromEntries(competitors.map(c => [c.id, DEFAULT_DISCOUNT])));
         setJsiDiscount(DEFAULT_DISCOUNT);
+        setDiscountTarget(null);
     }, [compKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const jsiList = jsiProduct.price || 0;
     const jsiNet = applyDiscount(jsiList, jsiDiscount);
+    const activeDiscountValue = discountTarget === 'jsi'
+        ? jsiDiscount
+        : (discountTarget ? (compDiscounts[discountTarget] ?? DEFAULT_DISCOUNT) : DEFAULT_DISCOUNT);
+    const activeDiscountName = discountTarget === 'jsi'
+        ? jsiProduct.name
+        : competitors.find((competitor) => competitor.id === discountTarget)?.name;
+
+    const handleDiscountSelect = (nextValue) => {
+        if (discountTarget === 'jsi') {
+            setJsiDiscount(nextValue);
+        } else if (discountTarget) {
+            setCompDiscounts((prev) => ({ ...prev, [discountTarget]: nextValue }));
+        }
+        setDiscountTarget(null);
+    };
 
     return (
-        <GlassCard theme={theme} className="overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-5 pb-4">
-                <h2 className="text-[0.6875rem] font-semibold tracking-widest uppercase"
-                    style={{ color: theme.colors.textSecondary }}>
-                    {title}
-                </h2>
-                <span className="text-[0.625rem] font-medium"
-                    style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
-                    % Δ on net
-                </span>
-            </div>
-
-            {/* JSI hero row */}
-            <div className="mx-4 mb-3 rounded-2xl px-4 py-3.5"
-                style={{
-                    background: `${theme.colors.accent}14`,
-                    border: `1.5px solid ${theme.colors.accent}30`,
-                }}>
-                <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ background: theme.colors.accent }} />
-                        <div className="min-w-0">
-                            <p className="font-semibold text-[0.9375rem] leading-tight"
-                                style={{ color: theme.colors.textPrimary }}>
-                                {jsiProduct.name}
+        <>
+            <GlassCard theme={theme} className="overflow-hidden p-0">
+                <div className="px-5 pt-5 pb-3.5">
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <h2
+                                className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
+                                style={{ color: theme.colors.textSecondary, opacity: 0.88 }}
+                            >
+                                {title}
+                            </h2>
+                            <p className="mt-1 text-[0.75rem] leading-tight" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
+                                Net comparison updates as you change discounts.
                             </p>
-                            <div className="flex items-center gap-1.5 mt-1">
-                                <DiscountPicker value={jsiDiscount} onChange={setJsiDiscount} theme={theme} />
-                                <span className="text-[0.6875rem] tabular-nums"
-                                    style={{ color: theme.colors.textSecondary }}>
-                                    ${jsiList.toLocaleString()} list
-                                </span>
+                        </div>
+                        <span
+                            className="pt-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                            style={{ color: theme.colors.textSecondary, opacity: 0.58 }}
+                        >
+                            % Δ on net
+                        </span>
+                    </div>
+                </div>
+
+                <div className="px-4 pb-5 space-y-3">
+                    <div
+                        className="rounded-[24px] px-4 py-4"
+                        style={{
+                            background: `linear-gradient(180deg, ${theme.colors.accent}18 0%, ${theme.colors.accent}10 100%)`,
+                            border: `1px solid ${theme.colors.accent}28`,
+                            boxShadow: '0 10px 24px rgba(53,53,53,0.06)',
+                        }}
+                    >
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: theme.colors.accent }} />
+                                    <span
+                                        className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                        style={{ color: theme.colors.textSecondary, opacity: 0.78 }}
+                                    >
+                                        JSI benchmark
+                                    </span>
+                                </div>
+                                <p className="mt-2 text-[1rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                    {jsiProduct.name}
+                                </p>
+                                <div className="mt-3 flex flex-wrap items-center gap-2">
+                                    <DiscountTrigger value={jsiDiscount} onClick={() => setDiscountTarget('jsi')} theme={theme} />
+                                    <MetaPill label="List" value={formatCurrency(jsiList)} theme={theme} accent />
+                                </div>
+                            </div>
+
+                            <div className="flex-shrink-0 text-right">
+                                <p
+                                    className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                    style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
+                                >
+                                    Net
+                                </p>
+                                <p className="mt-1 text-[1.625rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                    {formatCurrency(jsiNet)}
+                                </p>
+                                <p className="mt-1 text-[0.75rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
+                                    Comparison baseline
+                                </p>
                             </div>
                         </div>
                     </div>
-                    <div className="flex-shrink-0 text-right">
-                        <p className="text-[1.25rem] font-bold tabular-nums leading-none"
-                            style={{ color: theme.colors.textPrimary }}>
-                            ${jsiNet.toLocaleString()}
-                        </p>
-                        <p className="text-[0.625rem] font-medium mt-0.5"
-                            style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-                            net
-                        </p>
-                    </div>
-                </div>
-            </div>
 
-            {/* Competitor rows */}
-            {competitors.length > 0 ? (
-                <div className="px-4 pb-5 space-y-2">
-                    {competitors.map(c => {
+                    {competitors.length > 0 ? competitors.map((c) => {
                         const cList = parseListPrice(c.laminate);
                         const cDiscount = compDiscounts[c.id] ?? DEFAULT_DISCOUNT;
                         const cNet = applyDiscount(cList, cDiscount);
-                        // positive = competitor costs MORE than JSI = JSI advantage (green)
-                        // negative = competitor costs LESS than JSI = competitor advantage (red)
-                        const compPremium = jsiNet > 0 ? Math.round((cNet - jsiNet) / jsiNet * 100) : 0;
+                        const compPremium = jsiNet > 0 ? Math.round(((cNet - jsiNet) / jsiNet) * 100) : 0;
 
                         return (
-                            <div key={c.id} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
+                            <div
+                                key={c.id}
+                                className="rounded-[22px] px-4 py-4"
                                 style={{
-                                    background: theme.colors.subtle,
+                                    background: theme.colors.surface || '#FFFFFF',
                                     border: `1px solid ${theme.colors.border}`,
-                                }}>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[0.875rem] font-medium leading-tight"
-                                        style={{ color: theme.colors.textPrimary }}>
-                                        {c.name}
-                                    </p>
-                                    <div className="flex items-center gap-1.5 mt-1.5">
-                                        <DiscountPicker
-                                            value={cDiscount}
-                                            onChange={v => setCompDiscounts(prev => ({ ...prev, [c.id]: v }))}
-                                            theme={theme}
-                                        />
-                                        <span className="text-[0.6875rem] tabular-nums"
-                                            style={{ color: theme.colors.textSecondary }}>
-                                            ${cList.toLocaleString()} list
-                                        </span>
+                                    boxShadow: '0 8px 20px rgba(53,53,53,0.04)',
+                                }}
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[0.9375rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                            {c.name}
+                                        </p>
+                                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                                            <DiscountTrigger
+                                                value={cDiscount}
+                                                onClick={() => setDiscountTarget(c.id)}
+                                                theme={theme}
+                                            />
+                                            <MetaPill label="List" value={formatCurrency(cList)} theme={theme} />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex-shrink-0 flex flex-col items-end gap-1.5">
-                                    <p className="text-[1.0625rem] font-bold tabular-nums leading-none"
-                                        style={{ color: theme.colors.textPrimary }}>
-                                        ${cNet.toLocaleString()}
-                                    </p>
-                                    <AdvantageChip compPremium={compPremium} />
+
+                                    <div className="flex-shrink-0 text-right">
+                                        <p
+                                            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                            style={{ color: theme.colors.textSecondary, opacity: 0.58 }}
+                                        >
+                                            Net
+                                        </p>
+                                        <p className="mt-1 text-[1.25rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                            {formatCurrency(cNet)}
+                                        </p>
+                                        <div className="mt-2 flex justify-end">
+                                            <AdvantageChip compPremium={compPremium} theme={theme} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         );
-                    })}
+                    }) : (
+                        <p className="px-1 pb-1 text-xs" style={{ color: theme.colors.textSecondary }}>
+                            No competitive data added yet.
+                        </p>
+                    )}
                 </div>
-            ) : (
-                <p className="px-5 pb-5 text-xs" style={{ color: theme.colors.textSecondary }}>
-                    No competitive data added yet.
-                </p>
-            )}
-        </GlassCard>
+            </GlassCard>
+
+            <Modal
+                show={!!discountTarget}
+                onClose={() => setDiscountTarget(null)}
+                title="Select Discount"
+                theme={theme}
+            >
+                <div className="space-y-3">
+                    <div
+                        className="rounded-[20px] px-4 py-3"
+                        style={{
+                            background: theme.colors.subtle,
+                            border: `1px solid ${theme.colors.border}`,
+                        }}
+                    >
+                        <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                            {activeDiscountName || 'Series'}
+                        </p>
+                        <p className="mt-1 text-[0.75rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>
+                            This discount updates the net price and the competitor delta on this screen.
+                        </p>
+                    </div>
+
+                    <div className="max-h-[52vh] space-y-2 overflow-y-auto pr-1 scrollbar-hide">
+                        {STANDARD_DISCOUNT_OPTIONS.map((option) => {
+                            const isSelected = option === activeDiscountValue;
+
+                            return (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => handleDiscountSelect(option)}
+                                    className="w-full rounded-[20px] px-4 py-3 text-left transition-all active:scale-[0.99]"
+                                    style={{
+                                        background: isSelected ? `${theme.colors.accent}10` : (theme.colors.surface || '#FFFFFF'),
+                                        border: `1px solid ${isSelected ? `${theme.colors.accent}2E` : theme.colors.border}`,
+                                    }}
+                                >
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                {shortDiscount(option)}
+                                            </p>
+                                            <p className="mt-1 text-[0.75rem]" style={{ color: theme.colors.textSecondary }}>
+                                                {formatNetRate(option)}
+                                            </p>
+                                        </div>
+                                        {isSelected ? <Check className="h-4 w-4 flex-shrink-0" style={{ color: theme.colors.accent }} /> : null}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </Modal>
+        </>
     );
 };
 
