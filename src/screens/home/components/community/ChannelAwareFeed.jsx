@@ -34,6 +34,7 @@ export const ChannelAwareFeed = ({
         allPosts={posts}
         theme={theme}
         dark={dark}
+        query={query}
         likedPosts={likedPosts}
         postUpvotes={postUpvotes}
         onToggleLike={onToggleLike}

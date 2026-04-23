@@ -30,6 +30,7 @@ export const CommunityLibraryLayout = ({
   openLibraryUploadModal,
   libraryAssets,
   savedImageIds = [], onToggleSaveImage,
+  setBackHandler,
 }) => {
   const dark = isDarkTheme(theme);
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -45,6 +46,7 @@ export const CommunityLibraryLayout = ({
   const [communityTabMode, setCommunityTabMode] = useState('default');
   const scrollPositions = useRef({});
   const containerRef = useRef(null);
+  const activeSubredditRef = useRef(activeSubreddit);
   const topHeaderControlsRef = useRef(null);
   const topTabsViewportRef = useRef(null);
   const topTabsStandardMeasureRef = useRef(null);
@@ -63,6 +65,10 @@ export const CommunityLibraryLayout = ({
     if (!hasBoardContent && activeTab === 'my board') setActiveTab('community');
   }, [hasBoardContent, activeTab]);
 
+  useEffect(() => {
+    activeSubredditRef.current = activeSubreddit;
+  }, [activeSubreddit]);
+
   const switchTab = useCallback((tab) => {
     if (tab === activeTab) return;
     if (containerRef.current) scrollPositions.current[activeTab] = containerRef.current.scrollTop;
@@ -77,8 +83,16 @@ export const CommunityLibraryLayout = ({
 
   const enterSubreddit = useCallback((subreddit) => {
     if (containerRef.current) containerRef.current.scrollTop = 0;
-    setActiveSubreddit(subreddit);
+    setActiveSubreddit((prev) => {
+      const prevId = prev?.id || null;
+      const nextId = subreddit?.id || null;
+      return prevId === nextId ? prev : subreddit;
+    });
   }, []);
+
+  const handleSubredditSelect = useCallback((subreddit) => {
+    enterSubreddit(subreddit || null);
+  }, [enterSubreddit]);
 
   useEffect(() => {
     const handler = (event) => {
@@ -95,13 +109,27 @@ export const CommunityLibraryLayout = ({
     if (!activeSubreddit) return;
     const onPopState = (event) => {
       event.preventDefault();
-      setActiveSubreddit(null);
+      handleSubredditSelect(null);
       window.history.pushState(null, '', window.location.href);
     };
     window.history.pushState(null, '', window.location.href);
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [activeSubreddit]);
+  }, [activeSubreddit, handleSubredditSelect]);
+
+  useEffect(() => {
+    if (typeof setBackHandler !== 'function') return undefined;
+    if (!activeSubreddit) {
+      setBackHandler(null);
+      return undefined;
+    }
+
+    return setBackHandler(() => {
+      if (!activeSubredditRef.current) return false;
+      handleSubredditSelect(null);
+      return true;
+    });
+  }, [activeSubreddit, handleSubredditSelect, setBackHandler]);
 
   const tr = prefersReducedMotion ? 'none' : 'opacity 200ms ease';
   const paneStyle = (name) => activeTab === name
@@ -119,6 +147,7 @@ export const CommunityLibraryLayout = ({
   const searchPlaceholder = inSubCommunity
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';
+  const communityTransitionClassName = prefersReducedMotion ? '' : 'animate-fade-in motion-fade-up';
   const communitySearchStyle = useMemo(() => ({
     backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
     border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
@@ -194,13 +223,14 @@ export const CommunityLibraryLayout = ({
   }, [activeTab, communityTabMode, inSubCommunity, tabs]);
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <ScreenTopChrome theme={theme} contentClassName="pt-2.5 pb-2.5" fade={false}>
+    <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
+      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
+      <ScreenTopChrome theme={theme} contentClassName="pb-2.5" fade={false}>
         <div className="space-y-3">
 
           {inSubCommunity ? (
             /* ── Immersive sub-community header ── */
-            <>
+            <div key={`subreddit-header-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
               <div className="flex flex-wrap items-start gap-x-3 gap-y-2.5">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-3 min-w-0">
@@ -226,15 +256,7 @@ export const CommunityLibraryLayout = ({
                   + Post
                 </button>
               </div>
-              <StandardSearchBar
-                id="community-main-search"
-                value={query}
-                onChange={setQuery}
-                placeholder={searchPlaceholder}
-                theme={theme}
-                style={communitySearchStyle}
-              />
-            </>
+            </div>
           ) : (
             /* ── Normal top-level chrome ── */
             <>
@@ -287,51 +309,55 @@ export const CommunityLibraryLayout = ({
                 </div>
               </div>
 
-              {activeTab === 'community' ? (
-                <ChannelChips
-                  theme={theme}
-                  dark={dark}
-                  onSelect={enterSubreddit}
-                  activeId={null}
-                />
-              ) : null}
-
-              {showSearch ? (
-                <StandardSearchBar
-                  id="community-main-search"
-                  value={query}
-                  onChange={setQuery}
-                  placeholder={searchPlaceholder}
-                  theme={theme}
-                  style={communitySearchStyle}
-                />
-              ) : null}
             </>
           )}
 
+          {activeTab === 'community' ? (
+            <ChannelChips
+              theme={theme}
+              dark={dark}
+              onSelect={handleSubredditSelect}
+              activeId={activeSubreddit?.id || null}
+            />
+          ) : null}
+
+          {showSearch ? (
+            <StandardSearchBar
+              id="community-main-search"
+              value={query}
+              onChange={setQuery}
+              placeholder={searchPlaceholder}
+              theme={theme}
+              style={communitySearchStyle}
+            />
+          ) : null}
+
         </div>
       </ScreenTopChrome>
+      </div>
 
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
-        <div className="mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8 pt-2" style={{ position: 'relative' }}>
+        <div className="mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8 pt-1" style={{ position: 'relative' }}>
           <div style={{ position: 'relative' }}>
             <div style={paneStyle('community')}>
-              <ChannelAwareFeed
-                theme={theme}
-                dark={dark}
-                posts={posts}
-                polls={polls}
-                likedPosts={likedPosts}
-                pollChoices={pollChoices}
-                postUpvotes={postUpvotes}
-                onToggleLike={onToggleLike}
-                onUpvote={onUpvote}
-                onPollVote={onPollVote}
-                onAddComment={onAddComment}
-                openCreateContentModal={openCreateContentModal}
-                query={query}
-                activeSubreddit={activeSubreddit}
-              />
+              <div key={`community-feed-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
+                <ChannelAwareFeed
+                  theme={theme}
+                  dark={dark}
+                  posts={posts}
+                  polls={polls}
+                  likedPosts={likedPosts}
+                  pollChoices={pollChoices}
+                  postUpvotes={postUpvotes}
+                  onToggleLike={onToggleLike}
+                  onUpvote={onUpvote}
+                  onPollVote={onPollVote}
+                  onAddComment={onAddComment}
+                  openCreateContentModal={openCreateContentModal}
+                  query={query}
+                  activeSubreddit={activeSubreddit}
+                />
+              </div>
             </div>
 
             <div style={paneStyle('library')}>

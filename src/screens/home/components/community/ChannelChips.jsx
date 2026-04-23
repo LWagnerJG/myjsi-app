@@ -108,12 +108,12 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
         color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
         backgroundColor: active
           ? (dark ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.92)')
-          : 'transparent',
-        border: active ? `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}` : '1px solid transparent',
-        opacity: active ? 1 : 0.72,
+          : (dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.68)'),
+        border: `1px solid ${active ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)')}`,
+        opacity: active ? 1 : 0.9,
         boxShadow: active
           ? (dark ? '0 8px 18px rgba(0,0,0,0.16)' : '0 6px 14px rgba(53,53,53,0.05)')
-          : 'none',
+          : (dark ? 'none' : '0 1px 2px rgba(53,53,53,0.03)'),
       }}
     >
       {label}
