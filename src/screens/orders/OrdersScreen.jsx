@@ -5,7 +5,7 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { isDarkTheme, DESIGN_TOKENS, cardSurface } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
@@ -138,6 +138,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
 /* ---- Main Screen ---- */
 export const OrdersScreen = ({ theme, onNavigate }) => {
     const dark = isDarkTheme(theme);
+    const bgRgb = dark ? '26,26,26' : '240,237,232';
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
     const [viewMode, setViewMode] = useState('list');
@@ -145,6 +146,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     const [selectedDealer, setSelectedDealer] = useState('All Dealers');
     const scrollRef = useRef(null);
     const dealerRef = useRef(null);
+    const controlTile = fieldTileSurface(theme);
 
     const dealers = useMemo(() => ['All Dealers', ...Array.from(new Set(ORDER_DATA.map((o) => o.company))).sort((a, b) => a.localeCompare(b))], []);
 
@@ -184,41 +186,56 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             {/* Controls */}
             <div className="flex-shrink-0 max-w-content mx-auto w-full">
                 <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-col gap-2.5">
-                    <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                            <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                            <div ref={dealerRef} className="relative flex-shrink-0">
-                                <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, borderColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}30` : dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={selectedDealer}>
-                                    <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
+                    <div className="space-y-2.5">
+                        <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                                <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />
+                            </div>
+                            <div className="flex items-center gap-2.5">
+                                <div ref={dealerRef} className="relative flex-shrink-0">
+                                    <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-2 min-w-[7rem] sm:min-w-[7.75rem] md:w-auto md:px-4" style={{ ...controlTile, borderRadius: '999px', height: 40, backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : controlTile.backgroundColor, border: selectedDealer !== 'All Dealers' ? `1px solid ${theme.colors.accent}24` : 'none' }} title={selectedDealer}>
+                                        <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
+                                        <span className="text-[0.75rem] sm:text-[0.8125rem] font-medium whitespace-nowrap truncate" style={{ color: theme.colors.textPrimary, maxWidth: '5.1rem' }}>
+                                            {selectedDealer === 'All Dealers' ? 'All Dealers' : formatCompanyName(selectedDealer)}
+                                        </span>
+                                    </button>
+                                    {dealerMenuOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                                            className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20"
+                                            style={{ ...modalCardSurface(theme), transformOrigin: 'top right' }}>
+                                            {dealers.map(d => {
+                                                const active = d === selectedDealer;
+                                                return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? controlTile.backgroundColor : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
+                                            })}
+                                        </motion.div>
+                                    )}
+                                </div>
+                                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition w-10 md:w-auto md:px-4 md:gap-2" style={{ ...controlTile, borderRadius: '999px', height: 40 }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
+                                    {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
                                     <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                                        {selectedDealer === 'All Dealers' ? 'Dealers' : formatCompanyName(selectedDealer)}
+                                        {viewMode === 'list' ? 'Calendar' : 'List'}
                                     </span>
                                 </button>
-                                {dealerMenuOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                                        className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20 rounded-[24px]"
-                                        style={{ transformOrigin: 'top right', backgroundColor: theme.colors.surface, border: dark ? '1px solid rgba(255,255,255,0.12)' : `1px solid ${theme.colors.border}`, boxShadow: DESIGN_TOKENS.shadows.modal }}>
-                                        {dealers.map(d => {
-                                            const active = d === selectedDealer;
-                                            return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? theme.colors.subtle : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
-                                        })}
-                                    </motion.div>
-                                )}
                             </div>
-                            <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition border w-10 md:w-auto md:px-4 md:gap-2" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface, borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
-                                {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
-                                <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                                    {viewMode === 'list' ? 'Calendar' : 'List'}
-                                </span>
-                            </button>
                         </div>
                     </div>
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none h-2"
+                        style={{
+                            backdropFilter: 'blur(4px) saturate(1.05)',
+                            WebkitBackdropFilter: 'blur(4px) saturate(1.05)',
+                            background: `linear-gradient(to bottom,
+                                rgba(${bgRgb},0.42) 0%,
+                                rgba(${bgRgb},0.18) 58%,
+                                rgba(${bgRgb},0.04) 84%,
+                                rgba(${bgRgb},0) 100%)`,
+                        }}
+                    />
                 </div>
             </div>
 

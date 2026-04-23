@@ -260,6 +260,10 @@ export const isDarkTheme = (theme) => {
 
 // SURFACE HELPERS — eliminate repeated dark/light card + input styling
 
+export const SECTION_CARD_RADIUS = '28px';
+export const FIELD_LABEL_CLASSNAME = 'text-[0.6875rem] font-semibold tracking-[0.01em]';
+export const SECTION_TITLE_CLASSNAME = 'text-[0.95rem] sm:text-[1rem] font-semibold tracking-[-0.015em] leading-none';
+
 /**
  * Standard card/surface background for dark/light mode.
  * Returns { backgroundColor, border, boxShadow } ready to spread into style.
@@ -289,6 +293,44 @@ export const subtleBg = (theme, strength = 1) => {
 export const subtleBorder = (theme) => {
   const dark = isDarkTheme(theme);
   return dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.03)';
+};
+
+/**
+ * Standard rounded section card used across project/detail and form screens.
+ */
+export const sectionCardSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.90)',
+    border: dark ? subtleBorder(theme) : 'none',
+    boxShadow: dark ? '0 12px 28px rgba(0,0,0,0.16)' : '0 10px 24px rgba(53,53,53,0.05)',
+    borderRadius: SECTION_CARD_RADIUS,
+  };
+};
+
+/**
+ * Standard warm inset tile for grouped controls and lightweight data blocks.
+ */
+export const fieldTileSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.065)' : 'rgba(240,237,232,0.88)',
+    border: 'none',
+    borderRadius: DESIGN_TOKENS.borderRadius.xl,
+  };
+};
+
+/**
+ * Standard modal / popover card shell.
+ */
+export const modalCardSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: theme?.colors?.surface || (dark ? '#282828' : '#FFFFFF'),
+    border: subtleBorder(theme),
+    borderRadius: DESIGN_TOKENS.borderRadius.xl,
+    boxShadow: dark ? DESIGN_TOKENS.shadowsDark.modal : DESIGN_TOKENS.shadows.modal,
+  };
 };
 
 /**

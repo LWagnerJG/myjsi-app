@@ -245,7 +245,7 @@ function generateReply(text) {
     }
 
     case 'project':
-        return `Your project pipeline lives in **${NAV.projects}**. You can:\n\n• Add new leads & opportunities\n• Track stages (Discovery → Won/Lost)\n• Manage installs and follow-ups\n• View pipeline value & win rate\n\nAsk me about **commissions** to see how projects translate to earnings.`;
+        return `Your project workspace lives in **${NAV.projects}**. You can:\n\n• Add new leads & opportunities\n• Track stages (Discovery → Won/Lost)\n• Manage installs and follow-ups\n• View project value & win rate\n\nAsk me about **commissions** to see how projects translate to earnings.`;
 
     case 'sample':
         return `Head to **${NAV.samples}** to browse and request product samples. Add items to your cart and submit a request.\n\nFor **sample discounts** by series, ask me or visit **${NAV.sampleDisc}**.`;

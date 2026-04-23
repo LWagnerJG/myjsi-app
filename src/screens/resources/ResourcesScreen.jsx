@@ -4,8 +4,9 @@ import {
     Palette, Package, Users, MapPin, MonitorPlay, Wrench, Clock, ChevronRight, Gift, Scale, Plane
 } from 'lucide-react';
 import { RESOURCES_DATA } from './data.js';
-import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
 import { allApps, DEFAULT_HOME_APPS } from '../../constants/apps.js';
+import { fieldTileSurface, sectionCardSurface, SECTION_TITLE_CLASSNAME, isDarkTheme } from '../../design-system/tokens.js';
 
 const sublabelMap = {
     'Lead Times': 'Production estimates',
@@ -56,7 +57,7 @@ const CORE_APP_SUBLABELS = {
     orders: 'Order tracking and status',
     sales: 'Revenue and performance view',
     products: 'Main product application',
-    projects: 'Pipeline and project management',
+    projects: 'Project stages and management',
     'new-lead': 'Start a new project or lead',
     community: 'Team and dealer conversations',
     samples: 'Sample ordering workflow',
@@ -134,7 +135,8 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
     const Row = ({ item, isFirst }) => {
         const Icon = getResourceIcon(item);
         const sub = item.sublabel || sublabelMap[item.label] || 'Tool';
-        const borderTop = isFirst ? 'transparent' : theme.colors.border;
+        const borderTop = isFirst ? 'transparent' : (isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)');
+        const iconTile = fieldTileSurface(theme);
         return (
             <li>
                 <button
@@ -148,7 +150,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
                 >
                     <div
                         className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                        style={{ backgroundColor: theme.colors.subtle }}
+                        style={{ ...iconTile, borderRadius: '999px' }}
                     >
                         <Icon className="w-5 h-5" style={{ color: theme.colors.accent }} strokeWidth={1.5} />
                     </div>
@@ -170,8 +172,8 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
     };
 
     const CategoryCard = ({ category }) => (
-        <GlassCard theme={theme} className="px-6 py-4">
-            <h3 className="text-[0.9375rem] font-semibold text-center mb-3" style={{ color: theme.colors.textPrimary }}>
+        <div className="px-6 py-4" style={sectionCardSurface(theme)}>
+            <h3 className={`${SECTION_TITLE_CLASSNAME} text-center mb-3`} style={{ color: theme.colors.textPrimary }}>
                 {category.category}
             </h3>
             <ul className="pb-1">
@@ -179,7 +181,7 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
                     <Row key={item.nav+item.label} item={item} isFirst={idx === 0} />
                 ))}
             </ul>
-        </GlassCard>
+        </div>
     );
 
     /* ---------- responsive 2-col when wide enough ---------- */
@@ -199,24 +201,27 @@ export const ResourcesScreen = ({ theme, onNavigate, homeApps }) => {
     }, [measure]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-6">
-                <div ref={containerRef} className="max-w-content mx-auto w-full">
-                    <div
-                        className="mt-6"
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: wide ? '1fr 1fr' : '1fr',
-                            gap: wide ? '20px' : '24px',
-                            alignItems: 'start'
-                        }}
-                    >
-                        {resourceCategories.map((cat) => (
-                            <CategoryCard key={cat.category} category={cat} />
-                        ))}
-                    </div>
-                </div>
+        <AppScreenLayout
+            theme={theme}
+            showTitle={false}
+            maxWidthClass="max-w-content"
+            horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
+            contentPaddingBottomClass="pb-6"
+            contentClassName="pt-6"
+        >
+            <div
+                ref={containerRef}
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: wide ? '1fr 1fr' : '1fr',
+                    gap: wide ? '20px' : '24px',
+                    alignItems: 'start'
+                }}
+            >
+                {resourceCategories.map((cat) => (
+                    <CategoryCard key={cat.category} category={cat} />
+                ))}
             </div>
-        </div>
+        </AppScreenLayout>
     );
 };

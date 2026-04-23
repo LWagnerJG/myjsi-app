@@ -4,7 +4,7 @@ import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { FloatingSubmitCTA } from '../../components/common/FloatingSubmitCTA.jsx';
 import { PrimaryButton } from '../../components/common/JSIButtons.jsx';
-import { isDarkTheme, subtleBg, subtleBorder } from '../../design-system/tokens.js';
+import { isDarkTheme, subtleBg, subtleBorder, fieldTileSurface, floatingBarStyle } from '../../design-system/tokens.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 
 const FEEDBACK_TYPES = [
@@ -93,19 +93,13 @@ export const FeedbackScreen = ({ theme }) => {
     }
 
     const surfaceBorder = subtleBorder(theme);
-    const composerSurface = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
     const helperSurface = subtleBg(theme, 1.1);
+    const fieldTile = fieldTileSurface(theme);
     const activeTypeSurface = colors.accent || colors.textPrimary;
     const showFloatingSubmit = canSubmit && !isSubmitAreaVisible && !isMessageFocused;
     const feedbackChromeRgb = isDark ? '26,26,26' : '240,237,232';
     const feedbackFloatingCtaStyle = {
-        backdropFilter: 'blur(20px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
-        backgroundColor: isDark ? 'rgba(42,42,42,0.72)' : 'rgba(255,255,255,0.82)',
-        border: isDark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(255,255,255,0.88)',
-        boxShadow: isDark
-            ? '0 14px 36px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08)'
-            : '0 12px 32px rgba(53,53,53,0.10), 0 2px 10px rgba(53,53,53,0.04)',
+        ...floatingBarStyle(theme),
         color: colors.textPrimary,
     };
 
@@ -163,136 +157,96 @@ export const FeedbackScreen = ({ theme }) => {
             maxWidthClass="max-w-content"
             horizontalPaddingClass="px-4 sm:px-6"
             contentPaddingBottomClass="pb-36"
-            contentClassName="pt-2 space-y-5"
+            contentClassName="pt-3 space-y-4"
         >
             <GlassCard theme={theme} className="p-4 sm:p-5">
-                <div className="space-y-5">
-                    <div className="space-y-3">
-                        <div className="space-y-1">
-                            <h2 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                What is this about?
-                            </h2>
-                            <p className="text-sm leading-relaxed" style={{ color: colors.textSecondary }}>
-                                Pick the closest type, then tell us what happened or what should change.
-                            </p>
-                        </div>
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                        {FEEDBACK_TYPES.map((item) => {
+                            const active = feedbackType === item.value;
+                            const Icon = item.icon;
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            {FEEDBACK_TYPES.map((item) => {
-                                const active = feedbackType === item.value;
-                                const Icon = item.icon;
-
-                                return (
-                                    <button
-                                        key={item.value}
-                                        type="button"
-                                        onClick={() => setFeedbackType(item.value)}
-                                        className="rounded-[20px] px-3.5 py-3 text-left transition-all active:scale-[0.98]"
-                                        style={{
-                                            backgroundColor: active ? activeTypeSurface : helperSurface,
-                                            color: active ? (colors.accentText || '#FFFFFF') : colors.textSecondary,
-                                            border: active ? 'none' : surfaceBorder,
-                                            boxShadow: active
-                                                ? (isDark ? '0 12px 28px rgba(0,0,0,0.24)' : '0 12px 28px rgba(53,53,53,0.10)')
-                                                : 'none',
-                                        }}
-                                    >
-                                        <div className="flex items-center gap-2.5">
-                                            <div
-                                                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                                                style={{
-                                                    backgroundColor: active
-                                                        ? 'rgba(255,255,255,0.16)'
-                                                        : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)'),
-                                                }}
-                                            >
-                                                <Icon className="w-4 h-4" />
-                                            </div>
-                                            <span className="text-sm font-semibold leading-none">{item.label}</span>
+                            return (
+                                <button
+                                    key={item.value}
+                                    type="button"
+                                    onClick={() => setFeedbackType(item.value)}
+                                    className="rounded-[20px] px-3.5 py-3 text-left transition-all active:scale-[0.98]"
+                                    style={{
+                                        backgroundColor: active ? activeTypeSurface : fieldTile.backgroundColor,
+                                        color: active ? (colors.accentText || '#FFFFFF') : colors.textSecondary,
+                                        border: 'none',
+                                        boxShadow: active
+                                            ? (isDark ? '0 12px 28px rgba(0,0,0,0.24)' : '0 12px 28px rgba(53,53,53,0.10)')
+                                            : 'none',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2.5">
+                                        <div
+                                            className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                                            style={{
+                                                backgroundColor: active
+                                                    ? 'rgba(255,255,255,0.16)'
+                                                    : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)'),
+                                            }}
+                                        >
+                                            <Icon className="w-3.5 h-3.5" />
                                         </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                                        <span className="text-[0.9375rem] font-semibold leading-none">{item.label}</span>
+                                    </div>
+                                </button>
+                            );
+                        })}
                     </div>
 
-                    <div className="space-y-2.5">
-                        <div className="flex items-center justify-between gap-3">
-                            <label htmlFor="feedback-message" className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                Message
-                            </label>
-                            <span className="text-xs tabular-nums" style={{ color: colors.textSecondary, opacity: message.length > 0 ? 0.75 : 0.55 }}>
-                                {message.length > 0 ? `${message.length} chars` : 'A short note is enough'}
-                            </span>
-                        </div>
-
+                    <div>
                         <div
                             className="rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 transition-all duration-200"
                             style={{
-                                backgroundColor: composerSurface,
-                                border: isMessageFocused ? `1px solid ${colors.accent}33` : surfaceBorder,
+                                ...fieldTile,
+                                border: isMessageFocused ? `1px solid ${colors.accent}33` : '1px solid transparent',
                                 boxShadow: isMessageFocused ? `0 0 0 3px ${colors.accent}14` : 'none',
                             }}
                         >
                             <textarea
                                 id="feedback-message"
+                                aria-label="Feedback message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 onFocus={() => setIsMessageFocused(true)}
                                 onBlur={() => setIsMessageFocused(false)}
-                                placeholder="Tell us what you ran into, what you expected, or what would make this better."
+                                placeholder="What happened, or what should change?"
                                 rows={7}
                                 required
-                                className="w-full min-h-[180px] resize-none bg-transparent text-[0.9375rem] leading-6 outline-none placeholder:opacity-45"
+                                className="w-full min-h-[172px] resize-none bg-transparent text-[0.9375rem] leading-6 outline-none placeholder:opacity-45"
                                 style={{
                                     color: colors.textPrimary,
                                     caretColor: colors.textPrimary,
                                 }}
                             />
-
-                            <div className="mt-3 flex items-center justify-between gap-3">
-                                <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary }}>
-                                    Include what happened, what you expected, and anything that would help us reproduce it.
-                                </p>
-                                <div
-                                    className="shrink-0 rounded-full px-3 py-1.5 text-[0.6875rem] font-semibold"
-                                    style={{
-                                        backgroundColor: helperSurface,
-                                        border: surfaceBorder,
-                                        color: colors.textSecondary,
-                                    }}
-                                >
-                                    {activeFeedbackType.label}
-                                </div>
-                            </div>
                         </div>
                     </div>
 
-                    <div
-                        className="rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 space-y-3"
-                        style={{
-                            backgroundColor: helperSurface,
-                            border: surfaceBorder,
-                        }}
-                    >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="space-y-1">
-                                <h3 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                    <div className="space-y-2.5">
+                        <div
+                            className="rounded-[24px] px-4 py-3.5 sm:px-5 flex items-center justify-between gap-3"
+                            style={fieldTile}
+                        >
+                            <div className="min-w-0">
+                                <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
                                     Attachments
-                                </h3>
-                                <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary }}>
-                                    {files.length
-                                        ? `${files.length} file${files.length === 1 ? '' : 's'} attached. Re-adding the same file will not duplicate it.`
-                                        : 'Screenshots, PDFs, and marked-up images help when something looks wrong.'}
-                                </p>
+                                </div>
+                                <div className="text-xs mt-0.5" style={{ color: colors.textSecondary }}>
+                                    Optional
+                                </div>
                             </div>
 
                             <label
-                                className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold cursor-pointer transition-all active:scale-[0.98]"
+                                className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold cursor-pointer transition-all active:scale-[0.98] shrink-0"
                                 style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.9)',
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.surface,
                                     color: colors.textPrimary,
-                                    border: surfaceBorder,
+                                    border: 'none',
                                 }}
                             >
                                 <Paperclip className="w-4 h-4" />
@@ -308,8 +262,8 @@ export const FeedbackScreen = ({ theme }) => {
                                         key={`${file.name}-${index}`}
                                         className="flex items-center justify-between gap-3 rounded-[20px] px-3.5 py-3"
                                         style={{
+                                            ...fieldTile,
                                             backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.78)',
-                                            border: surfaceBorder,
                                         }}
                                     >
                                         <div className="min-w-0 flex-1">
@@ -335,30 +289,12 @@ export const FeedbackScreen = ({ theme }) => {
                         ) : null}
                     </div>
 
-                    <div
-                        ref={submitAreaRef}
-                        className="rounded-[24px] px-4 py-4 sm:px-5 sm:py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                        style={{
-                            backgroundColor: helperSurface,
-                            border: surfaceBorder,
-                        }}
-                    >
-                        <div className="space-y-1">
-                            <h3 className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                Send feedback
-                            </h3>
-                            <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary }}>
-                                {canSubmit
-                                    ? 'We read every note and use it to improve myJSI.'
-                                    : 'Write a message first, then send it when you are ready.'}
-                            </p>
-                        </div>
-
+                    <div ref={submitAreaRef}>
                         <PrimaryButton
                             theme={theme}
                             type="submit"
                             disabled={!canSubmit}
-                            className="w-full sm:w-auto sm:min-w-[13rem]"
+                            className="w-full"
                             icon={<Send className="w-[18px] h-[18px]" />}
                         >
                             Send feedback

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { X, Send, CheckCircle2, Upload, FileText, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { hapticMedium, hapticSuccess } from '../../utils/haptics.js';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
 import { getModalMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 import { PrimaryButton, SecondaryButton } from './JSIButtons.jsx';
@@ -45,17 +45,18 @@ const AD_FIRMS_LIST = [
 /* ─── inline primitives ─── */
 
 const SectionLabel = ({ children, accent }) => (
-    <span className="text-[0.625rem] font-bold uppercase tracking-[0.08em] block mb-1.5"
-        style={{ color: accent, opacity: 0.7 }}>{children}</span>
+    <span className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`}
+        style={{ color: accent, opacity: 0.78 }}>{children}</span>
 );
 
 const SelectPill = ({ on, onClick, children, accent, accentText, textSecondary, isDark }) => (
     <button type="button" onClick={onClick}
         className="px-3.5 py-[7px] rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97]"
         style={{
-            backgroundColor: on ? accent : 'transparent',
+            backgroundColor: on ? accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(240,237,232,0.88)'),
             color: on ? (accentText || '#fff') : textSecondary,
-            border: `1.5px solid ${on ? accent : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)')}`,
+            border: 'none',
+            boxShadow: on ? (isDark ? '0 10px 20px rgba(0,0,0,0.18)' : '0 10px 18px rgba(53,53,53,0.08)') : 'none',
         }}>
         {children}
     </button>
@@ -111,8 +112,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const modalMotion = getModalMotion(prefersReducedMotion);
     const toggleId = useId();
 
-    const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.025)';
-    const fieldBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
     const divider = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     const teamMembers = useMemo(() => {
@@ -180,9 +179,14 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     if (!show) return null;
 
     const inputStyle = {
-        height: 40, borderRadius: DESIGN_TOKENS.borderRadius.md,
-        background: fieldBg, border: `1px solid ${fieldBorder}`,
-        color: c.textPrimary, padding: '0 12px', fontSize: "0.75rem", fontWeight: 500,
+        ...fieldTileSurface(theme),
+        height: 44,
+        border: '1px solid transparent',
+        borderRadius: DESIGN_TOKENS.borderRadius.lg,
+        color: c.textPrimary,
+        padding: '0 14px',
+        fontSize: '0.75rem',
+        fontWeight: 500,
         outline: 'none', width: '100%',
     };
 
@@ -201,10 +205,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     onClick={e => e.stopPropagation()}
                     className="w-full max-w-[520px] flex flex-col relative my-auto outline-none"
                     style={{
-                        backgroundColor: c.surface || (isDark ? '#282828' : '#FFFFFF'),
-                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
-                        borderRadius: DESIGN_TOKENS.borderRadius.xl,
-                        boxShadow: isDark ? DESIGN_TOKENS.shadowsDark.modal : DESIGN_TOKENS.shadows.modal,
+                        ...modalCardSurface(theme),
                         maxHeight: '85vh',
                     }}
                 >
@@ -243,7 +244,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 <input type="text" value={formData.projectName}
                                     onChange={e => updateField('projectName', e.target.value)}
                                     placeholder="Enter project name"
-                                    style={{ ...inputStyle, borderColor: errors.projectName ? (c.error || '#B85C5C') : fieldBorder }} />
+                                    style={{ ...inputStyle, borderColor: errors.projectName ? (c.error || '#B85C5C') : 'transparent' }} />
                                 {errors.projectName && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.projectName}</p>}
                             </div>
 
@@ -274,7 +275,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                             <input type="text" value={formData.previousQuoteRef}
                                                 onChange={e => updateField('previousQuoteRef', e.target.value)}
                                                 placeholder="Enter quote number or attach below"
-                                                style={{ ...inputStyle, borderColor: errors.previousQuoteRef ? (c.error || '#B85C5C') : fieldBorder }} />
+                                                style={{ ...inputStyle, borderColor: errors.previousQuoteRef ? (c.error || '#B85C5C') : 'transparent' }} />
                                             {errors.previousQuoteRef && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.previousQuoteRef}</p>}
                                         </div>
                                     </motion.div>
@@ -373,7 +374,7 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     placeholder="Additional details..."
                                     rows={2}
                                     className="w-full resize-none outline-none text-xs leading-relaxed"
-                                    style={{ background: fieldBg, border: `1px solid ${fieldBorder}`, color: c.textPrimary,
+                                    style={{ ...fieldTileSurface(theme), border: '1px solid transparent', color: c.textPrimary,
                                         borderRadius: DESIGN_TOKENS.borderRadius.lg, padding: '10px 12px' }} />
                             </div>
 

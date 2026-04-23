@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
+import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { PillButton } from '../../components/common/JSIButtons.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { ChevronDown, ChevronUp, Mail, Phone, Info, Search, BookOpen, ShoppingCart, Layout, FolderKanban, Palette, HelpCircle, Keyboard } from 'lucide-react';
-import { isDarkTheme } from '../../design-system/tokens.js';
+import { isDarkTheme, sectionCardSurface, fieldTileSurface, SECTION_TITLE_CLASSNAME } from '../../design-system/tokens.js';
 
 const Pill = ({ children, theme }) => (
     <span
@@ -20,17 +21,21 @@ const Pill = ({ children, theme }) => (
 
 const QAItem = ({ q, a, theme, defaultOpen = false }) => {
     const [open, setOpen] = useState(defaultOpen);
+    const qaSurface = sectionCardSurface(theme);
+    const iconTile = fieldTileSurface(theme);
     return (
         <div
-            className="rounded-2xl border"
-            style={{ borderColor: theme.colors.border, backgroundColor: theme.colors.surface }}
+            className="overflow-hidden"
+            style={qaSurface}
         >
             <button
                 onClick={() => setOpen((v) => !v)}
                 className="w-full flex items-center justify-between gap-3 p-4 rounded-2xl"
             >
                 <div className="flex items-center gap-2 text-left">
-                    <Info className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ ...iconTile, borderRadius: '999px' }}>
+                        <Info className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                    </div>
                     <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>
                         {q}
                     </span>
@@ -67,7 +72,7 @@ const FAQS = [
     { cat: 'navigation', q: 'How do I switch between tabs?', a: 'Each screen with tabs shows them at the top. Tap to switch. On Community, you can also tap channel chips to filter by sub-community.' },
     { cat: 'navigation', q: 'Where is the sidebar / main menu?', a: 'The main navigation is at the bottom of the screen on mobile, or in the left sidebar on desktop. Tap any icon to navigate.' },
     { cat: 'projects', q: 'How do I create a new lead or project?', a: 'From the Projects screen, tap New Lead. Fill in the basic details and tap Save. You can edit value, stage, and competitors any time from the project details page.' },
-    { cat: 'projects', q: 'How do I track project stages?', a: 'Projects move through pipeline stages shown as tabs. Tap a stage to filter. Each project card shows its current stage, value, and health indicator.' },
+    { cat: 'projects', q: 'How do I track project stages?', a: 'Projects move through clear stages shown as tabs. Tap a stage to filter. Each project card shows its current stage, value, and health indicator.' },
     { cat: 'projects', q: 'Can I add notes or files to a project?', a: 'Yes. Open a project and scroll to the notes section. You can attach files, PDFs, and images from the project detail view.' },
     { cat: 'samples', q: 'Where can I see sample finishes and add to cart?', a: 'Go to Samples. Tap a tile to add it to the cart. Use the +/- controls on each tile to adjust quantities. The cart drawer appears at the bottom and updates right away.' },
     { cat: 'samples', q: 'How do I order a full set of samples?', a: 'On the Samples screen, tap "Full JSI Set" at the top, or use the set button within a specific category to add all finishes from that group.' },
@@ -82,6 +87,8 @@ export const HelpScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const [query, setQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState(null);
+    const chipSurface = fieldTileSurface(theme);
+    const inactiveChipBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)';
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -92,9 +99,14 @@ export const HelpScreen = ({ theme }) => {
     }, [query, activeCategory]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-6 space-y-4 scrollbar-hide">
-                <div className="max-w-content mx-auto w-full space-y-4">
+        <AppScreenLayout
+            theme={theme}
+            showTitle={false}
+            maxWidthClass="max-w-content"
+            horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
+            contentPaddingBottomClass="pb-6"
+            contentClassName="pt-4 space-y-4"
+        >
                 {/* Search */}
                 <div className="pt-4">
                     <StandardSearchBar
@@ -109,11 +121,13 @@ export const HelpScreen = ({ theme }) => {
                 <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                     <button
                         onClick={() => setActiveCategory(null)}
-                        className="text-[0.6875rem] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border"
+                        className="text-[0.6875rem] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95"
                         style={{
                             color: !activeCategory ? theme.colors.accentText : theme.colors.textSecondary,
-                            borderColor: !activeCategory ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),
-                            backgroundColor: !activeCategory ? theme.colors.accent : 'transparent',
+                            border: !activeCategory ? 'none' : `1px solid ${inactiveChipBorder}`,
+                            backgroundColor: !activeCategory ? theme.colors.accent : chipSurface.backgroundColor,
+                            borderRadius: '999px',
+                            boxShadow: !activeCategory ? (dark ? '0 12px 28px rgba(0,0,0,0.24)' : '0 12px 28px rgba(53,53,53,0.10)') : 'none',
                         }}
                     >
                         All
@@ -122,11 +136,13 @@ export const HelpScreen = ({ theme }) => {
                         <button
                             key={cat.id}
                             onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                            className="text-[0.6875rem] font-medium px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 border flex items-center gap-1.5"
+                            className="text-[0.6875rem] font-medium px-3 py-1.5 rounded-full flex-shrink-0 whitespace-nowrap transition-all active:scale-95 flex items-center gap-1.5"
                             style={{
                                 color: activeCategory === cat.id ? theme.colors.accentText : theme.colors.textSecondary,
-                                borderColor: activeCategory === cat.id ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),
-                                backgroundColor: activeCategory === cat.id ? theme.colors.accent : 'transparent',
+                                border: activeCategory === cat.id ? 'none' : `1px solid ${inactiveChipBorder}`,
+                                backgroundColor: activeCategory === cat.id ? theme.colors.accent : chipSurface.backgroundColor,
+                                borderRadius: '999px',
+                                boxShadow: activeCategory === cat.id ? (dark ? '0 12px 28px rgba(0,0,0,0.24)' : '0 12px 28px rgba(53,53,53,0.10)') : 'none',
                             }}
                         >
                             <cat.icon className="w-3 h-3" />
@@ -157,7 +173,7 @@ export const HelpScreen = ({ theme }) => {
                             <Mail className="w-5 h-5" style={{ color: theme.colors.accent }} />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-bold text-base" style={{ color: theme.colors.textPrimary }}>
+                            <h3 className={SECTION_TITLE_CLASSNAME} style={{ color: theme.colors.textPrimary }}>
                                 Contact Support
                             </h3>
                             <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
@@ -187,8 +203,6 @@ export const HelpScreen = ({ theme }) => {
                         </div>
                     </div>
                 </GlassCard>
-                </div>
-            </div>
-        </div>
+        </AppScreenLayout>
     );
 };

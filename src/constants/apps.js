@@ -14,7 +14,7 @@ export const allApps = [
     { name: 'Lead Times', route: 'resources/lead-times', icon: Hourglass, desc: 'Current production lead times' },
     { name: 'Products', route: 'products', icon: Armchair, desc: 'Browse the full JSI catalog' },
     { name: 'Orders', route: 'orders', icon: MousePointer, desc: 'Track and manage your orders' },
-    { name: 'Sales', route: 'sales', icon: PieChart, desc: 'View sales data and pipeline' },
+    { name: 'Sales', route: 'sales', icon: PieChart, desc: 'View sales data and project momentum' },
     { name: 'Projects', route: 'projects', icon: Briefcase, desc: 'Manage active project specs' },
     { name: 'Add New Project', route: 'new-lead', icon: FilePlus, desc: 'Start a new project or lead' },
     { name: 'Resources', route: 'resources', icon: Database, desc: 'Tools, docs, and references' },

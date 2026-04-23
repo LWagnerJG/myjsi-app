@@ -8,7 +8,7 @@ import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobo
 import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { TabContent } from '../../components/common/TabContent.jsx';
-import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
+import { isDarkTheme, JSI_COLORS, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
@@ -103,7 +103,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
-  const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
+  const fieldTile = fieldTileSurface(theme);
 
   const [name, setName]       = useState('');
   const [location, setLocation] = useState('');
@@ -150,10 +150,10 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
       <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
-        style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
+        style={{ ...modalCardSurface(theme), overflow: 'visible', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderBottom: `1px solid ${border}`, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <Building2 className="w-4 h-4" style={{ color: c.accent }} />
@@ -168,18 +168,18 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Account Name</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Account Name</label>
             <input
               ref={nameRef}
               value={name} onChange={e => { setName(e.target.value); setError(''); }}
               placeholder="e.g. Midwest Health Partners"
               className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
+              style={{ ...fieldTile, color: c.textPrimary }}
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Location</label>
             <AutoCompleteCombobox
               value={location}
               onChange={(val) => { setLocation(val); setError(''); }}
@@ -194,7 +194,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Vertical</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Vertical</label>
             <div className="flex flex-wrap gap-2">
               {VERTICAL_OPTIONS.map(v => {
                 const active = vertical === v;
@@ -270,7 +270,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
-  const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
+  const fieldTile = fieldTileSurface(theme);
   const MAX_PHOTOS = INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos;
 
   const [selectedProject, setSelectedProject] = useState(null);
@@ -371,10 +371,10 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
       <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
-        style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
+        style={{ ...modalCardSurface(theme), overflow: 'visible', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderBottom: `1px solid ${border}`, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <ImageIcon className="w-4 h-4" style={{ color: c.accent }} />
@@ -389,7 +389,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Project</label>
             <div className="relative" ref={projectDropdownRef}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: c.textSecondary }} />
               <input
@@ -399,15 +399,13 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
                 onChange={e => { setProjectSearch(e.target.value); setSelectedProject(null); setProjectOpen(true); setError(''); }}
                 placeholder="Search customer or project..."
                 className="w-full rounded-full pl-[34px] pr-4 text-sm outline-none"
-                style={{ height: 40, backgroundColor: isDark ? c.background : c.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)'}`, color: c.textPrimary }}
+                style={{ ...fieldTile, height: 44, color: c.textPrimary }}
               />
               {projectOpen && filteredProjects.length > 0 && (
-                <div className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+                <div className="absolute left-0 right-0 z-50 overflow-hidden"
                   style={{
+                    ...modalCardSurface(theme),
                     top: 'calc(100% + 6px)',
-                    backgroundColor: c.surface,
-                    borderColor: isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
-                    boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
                   }}>
                   <div className="overflow-y-auto py-1" style={{ maxHeight: 216 }}>
                     {filteredProjects.map(proj => (
@@ -424,12 +422,10 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
                 </div>
               )}
               {projectOpen && filteredProjects.length === 0 && projectSearch.trim() && (
-                <div className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+                <div className="absolute left-0 right-0 z-50 overflow-hidden"
                   style={{
+                    ...modalCardSurface(theme),
                     top: 'calc(100% + 6px)',
-                    backgroundColor: c.surface,
-                    borderColor: isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
-                    boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
                   }}>
                   <div className="px-4 py-3 text-[0.8125rem]" style={{ color: c.textSecondary }}>
                     No matching projects
@@ -440,7 +436,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Location</label>
             <AutoCompleteCombobox
               value={location}
               onChange={(val) => { setLocation(val); setError(''); }}
@@ -456,13 +452,13 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: c.textSecondary, opacity: 0.7 }}>Photos</label>
+              <label className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.84 }}>Photos</label>
               <span className="text-xs font-semibold tabular-nums" style={{ color: c.textSecondary, opacity: 0.6 }}>{photos.length}/{MAX_PHOTOS}</span>
             </div>
             {photos.length === 0 ? (
               <button type="button" onClick={() => fileInputRef.current?.click()}
                 className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors"
-                style={{ borderColor: border, backgroundColor: fieldBg, color: c.textSecondary }}>
+                style={{ borderColor: border, ...fieldTile, color: c.textSecondary }}>
                 <Upload className="w-5 h-5" style={{ opacity: 0.5 }} />
                 <span className="text-xs font-semibold" style={{ color: c.textPrimary }}>Add Photos</span>
               </button>
@@ -481,7 +477,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
                 {photos.length < MAX_PHOTOS && (
                   <button type="button" onClick={() => fileInputRef.current?.click()}
                     className="aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors"
-                    style={{ borderColor: border, color: c.textSecondary, backgroundColor: fieldBg }}>
+                    style={{ borderColor: border, color: c.textSecondary, ...fieldTile }}>
                     <Plus className="w-4 h-4" />
                     <span className="text-[0.625rem] font-semibold">Add</span>
                   </button>
@@ -543,6 +539,7 @@ export const ProjectsScreen = forwardRef(({
   const projectsStandardMeasureRef = useRef(null);
   const projectsCompactMeasureRef = useRef(null);
   const [projectsToggleMode, setProjectsToggleMode] = useState('default');
+  const hasRouteOpportunityDetail = Boolean(deepLinkOppId);
   const selectedOpportunityRef = useRef(selectedOpportunity);
   const selectedCustomerRef = useRef(selectedCustomer);
 
@@ -569,23 +566,36 @@ export const ProjectsScreen = forwardRef(({
   }, [projectsInitialStage, clearProjectsInitialStage, setSelectedPipelineStage]);
 
   useEffect(() => {
-    if (deepLinkOppId && opportunities) {
-      const match = opportunities.find(o => String(o.id) === String(deepLinkOppId));
-      if (match) setSelectedOpportunity(match);
+    if (!deepLinkOppId) {
+      setSelectedOpportunity(null);
+      return;
     }
+
+    if (!Array.isArray(opportunities)) {
+      setSelectedOpportunity(null);
+      return;
+    }
+
+    const match = opportunities.find(o => String(o.id) === String(deepLinkOppId));
+    setSelectedOpportunity(match || null);
   }, [deepLinkOppId, opportunities]);
 
   useImperativeHandle(ref, () => ({
     clearSelection: () => {
       if (selectedCustomer)    { setSelectedCustomer(null);    return true; }
-      if (selectedOpportunity) { setSelectedOpportunity(null); return true; }
+      if (selectedOpportunity && !hasRouteOpportunityDetail) {
+        setSelectedOpportunity(null);
+        return true;
+      }
       return false;
     },
-  }));
+  }), [selectedCustomer, selectedOpportunity, hasRouteOpportunityDetail]);
 
   useEffect(() => {
     if (typeof setBackHandler !== 'function') return undefined;
-    if (!selectedCustomer && !selectedOpportunity) {
+    const hasLocalOpportunityDetail = Boolean(selectedOpportunity) && !hasRouteOpportunityDetail;
+
+    if (!selectedCustomer && !hasLocalOpportunityDetail) {
       setBackHandler(null);
       return undefined;
     }
@@ -595,13 +605,13 @@ export const ProjectsScreen = forwardRef(({
         setSelectedCustomer(null);
         return true;
       }
-      if (selectedOpportunityRef.current) {
+      if (!hasRouteOpportunityDetail && selectedOpportunityRef.current) {
         setSelectedOpportunity(null);
         return true;
       }
       return false;
     });
-  }, [selectedCustomer, selectedOpportunity, setBackHandler]);
+  }, [selectedCustomer, selectedOpportunity, hasRouteOpportunityDetail, setBackHandler]);
 
   const updateStageFade = useCallback(() => {
     const el = stagesScrollRef.current;
@@ -853,7 +863,7 @@ export const ProjectsScreen = forwardRef(({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
                   {filteredOpportunities.map(opp => (
                     <ProjectCard key={opp.id} opp={opp} theme={theme}
-                      onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />
+                      onClick={() => onNavigate(`projects/${opp.id}`)} />
                   ))}
                 </div>
                 <div className="mt-6 flex justify-center">

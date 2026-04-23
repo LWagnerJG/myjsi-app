@@ -43,7 +43,7 @@ export const getStoredQuoteRequests = () => {
 
 /**
  * Build a new quote-request record from form data.
- * @param {{ projectName?: string, dealerName?: string, adName?: string, quoteType?: string, projectType?: string, neededByDate?: string, contractName?: string, itemsNeeded?: string[], formats?: string[], projectInfo?: string, selectedTeamMembers?: string[], previousQuoteRef?: string, files?: File[] }} [data]
+ * @param {{ projectName?: string, dealerName?: string, adName?: string, quoteType?: string, projectType?: string, neededByDate?: string, contractName?: string, itemsNeeded?: string[], formats?: string[], projectInfo?: string, selectedTeamMembers?: string[], selectedTeamMemberNames?: string[], previousQuoteRef?: string, files?: File[] }} [data]
  * @param {{ source?: string, metadata?: Object | null }} [extras]
  * @returns {Object}
  */
@@ -63,6 +63,7 @@ export const createQuoteRequestRecord = (data = {}, extras = {}) => ({
   formats: Array.isArray(data.formats) ? data.formats : [],
   projectInfo: data.projectInfo || '',
   selectedTeamMembers: Array.isArray(data.selectedTeamMembers) ? data.selectedTeamMembers : [],
+  selectedTeamMemberNames: Array.isArray(data.selectedTeamMemberNames) ? data.selectedTeamMemberNames : [],
   previousQuoteRef: data.previousQuoteRef || '',
   files: normalizeFiles(data.files),
   metadata: extras.metadata || null,
@@ -70,7 +71,7 @@ export const createQuoteRequestRecord = (data = {}, extras = {}) => ({
 
 /**
  * Create a quote-request record and persist it to localStorage.
- * @param {{ projectName?: string, dealerName?: string, adName?: string, quoteType?: string, projectType?: string, neededByDate?: string, contractName?: string, itemsNeeded?: string[], formats?: string[], projectInfo?: string, selectedTeamMembers?: string[], previousQuoteRef?: string, files?: File[] }} [data]
+ * @param {{ projectName?: string, dealerName?: string, adName?: string, quoteType?: string, projectType?: string, neededByDate?: string, contractName?: string, itemsNeeded?: string[], formats?: string[], projectInfo?: string, selectedTeamMembers?: string[], selectedTeamMemberNames?: string[], previousQuoteRef?: string, files?: File[] }} [data]
  * @param {{ source?: string, metadata?: Object | null }} [extras]
  * @returns {Object} The newly created record
  */
@@ -91,9 +92,9 @@ export const persistQuoteRequest = (data = {}, extras = {}) => {
 /**
  * Convert a persisted quote-request record into a lightweight quote list item
  * suitable for display in the OpportunityDetail quotes list.
- * @param {{ id: string, projectName?: string, submittedAt: string }} record
+ * @param {{ id: string, projectName?: string, submittedAt: string, selectedTeamMemberNames?: string[] }} record
  * @param {string} [fallbackProjectName] - Used if record.projectName is empty
- * @returns {{ id: string, fileName: string, status: string, url: null, requestedAt: string }}
+ * @returns {{ id: string, fileName: string, status: string, url: null, requestedAt: string, assigneeNames: string[] }}
  */
 export const createQuoteListItem = (record, fallbackProjectName = 'Untitled') => ({
   id: `q-${record.id}`,
@@ -101,4 +102,5 @@ export const createQuoteListItem = (record, fallbackProjectName = 'Untitled') =>
   status: 'requested',
   url: null,
   requestedAt: record.submittedAt,
+  assigneeNames: Array.isArray(record.selectedTeamMemberNames) ? record.selectedTeamMemberNames : [],
 });
