@@ -119,6 +119,13 @@ export const CommunityLibraryLayout = ({
   const searchPlaceholder = inSubCommunity
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';
+  const communitySearchStyle = useMemo(() => ({
+    backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
+    border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
+    boxShadow: dark ? '0 1px 6px rgba(0,0,0,0.18)' : '0 1px 4px rgba(53,53,53,0.05)',
+    backdropFilter: 'none',
+    WebkitBackdropFilter: 'none',
+  }), [dark]);
 
   const updateCommunityTabMode = useCallback(() => {
     const viewport = topTabsViewportRef.current;
@@ -188,13 +195,13 @@ export const CommunityLibraryLayout = ({
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <ScreenTopChrome theme={theme} contentClassName="pt-1 pb-2">
-        <div className="space-y-2.5">
+      <ScreenTopChrome theme={theme} contentClassName="pt-2.5 pb-2.5" fade={false}>
+        <div className="space-y-3">
 
           {inSubCommunity ? (
             /* ── Immersive sub-community header ── */
             <>
-              <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+              <div className="flex flex-wrap items-start gap-x-3 gap-y-2.5">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-3 min-w-0">
                     <h2 className="text-[1.125rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>
@@ -210,7 +217,7 @@ export const CommunityLibraryLayout = ({
                 <button
                   type="button"
                   onClick={openCreateContentModal}
-                  className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[92px] px-3.5 text-sm leading-none"
+                  className="ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
                   style={{
                     backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                     color: theme.colors.accentText || '#FFFFFF',
@@ -225,12 +232,13 @@ export const CommunityLibraryLayout = ({
                 onChange={setQuery}
                 placeholder={searchPlaceholder}
                 theme={theme}
+                style={communitySearchStyle}
               />
             </>
           ) : (
             /* ── Normal top-level chrome ── */
             <>
-              <div ref={topHeaderControlsRef} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <div ref={topHeaderControlsRef} className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
                 <div ref={topTabsViewportRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
                   <div className="inline-block pr-4">
                     <SegmentedToggle
@@ -247,7 +255,7 @@ export const CommunityLibraryLayout = ({
                   <button
                     type="button"
                     onClick={activeAction}
-                    className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[92px] px-3.5 text-sm leading-none"
+                    className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] h-10 min-w-[82px] px-3 text-sm leading-none"
                     style={{
                       backgroundColor: theme.colors.accent || theme.colors.textPrimary,
                       color: theme.colors.accentText || '#FFFFFF',
@@ -295,6 +303,7 @@ export const CommunityLibraryLayout = ({
                   onChange={setQuery}
                   placeholder={searchPlaceholder}
                   theme={theme}
+                  style={communitySearchStyle}
                 />
               ) : null}
             </>
@@ -304,7 +313,7 @@ export const CommunityLibraryLayout = ({
       </ScreenTopChrome>
 
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
-        <div className="mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8 pt-3" style={{ position: 'relative' }}>
+        <div className="mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8 pt-2" style={{ position: 'relative' }}>
           <div style={{ position: 'relative' }}>
             <div style={paneStyle('community')}>
               <ChannelAwareFeed

@@ -108,8 +108,9 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
         color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
         backgroundColor: active
           ? (dark ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.92)')
-          : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.58)'),
-        border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+          : 'transparent',
+        border: active ? `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}` : '1px solid transparent',
+        opacity: active ? 1 : 0.72,
         boxShadow: active
           ? (dark ? '0 8px 18px rgba(0,0,0,0.16)' : '0 6px 14px rgba(53,53,53,0.05)')
           : 'none',
@@ -120,8 +121,17 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
   );
 
   return (
-    <div ref={viewportRef} className="relative overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 10, scrollPaddingRight: 12 }}>
-      <div className="inline-flex gap-2 whitespace-nowrap pr-3">
+    <div
+      ref={viewportRef}
+      className="relative overflow-x-auto scrollbar-hide scroll-smooth pb-0.5"
+      style={{
+        scrollPaddingLeft: 10,
+        scrollPaddingRight: 12,
+        maskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to right, black 0%, black 92%, transparent 100%)',
+      }}
+    >
+      <div className="inline-flex gap-1.5 whitespace-nowrap pr-4">
         {renderedChips.map((chipOption) => {
           const sub = SUBREDDITS.find((subreddit) => subreddit.id === chipOption.id) || null;
           const handleClick = chipOption.id === 'all' ? () => onSelect(null) : () => onSelect(sub);
@@ -130,10 +140,10 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
       </div>
 
       <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
-        <div ref={fullMeasureRef} className="inline-flex gap-2 pr-3">
+        <div ref={fullMeasureRef} className="inline-flex gap-1.5 pr-4">
           {fullChips.map((chipOption) => chip(chipOption.id, chipOption.label, undefined, false))}
         </div>
-        <div ref={compactMeasureRef} className="inline-flex gap-2 pr-3 ml-4">
+        <div ref={compactMeasureRef} className="inline-flex gap-1.5 pr-4 ml-4">
           {compactChips.map((chipOption) => chip(chipOption.id, chipOption.label, undefined, false))}
         </div>
       </div>
