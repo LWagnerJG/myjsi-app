@@ -119,7 +119,7 @@ export const SegmentedToggle = ({
             type="button"
             data-toggle-btn
             onClick={() => onChange(opt.value)}
-            className={`relative rounded-full ${s.px} ${s.text} flex items-center transition-colors whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
+            className={`relative rounded-full ${s.px} ${s.text} flex items-center justify-center transition-colors whitespace-nowrap ${fullWidth ? 'flex-1' : ''}`}
             aria-pressed={isSelected}
             style={{ color: isSelected ? selectedText : unselectedText }}
           >
