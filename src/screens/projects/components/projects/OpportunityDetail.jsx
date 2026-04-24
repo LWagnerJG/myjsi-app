@@ -692,41 +692,57 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
             <div className="space-y-3.5 min-w-0">
               <Section title="Commercial" subtitle="Pricing basis, discounting, and reward settings" theme={theme}>
-            <div className="space-y-2.5">
-              <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Value</span>
-                <div className="mt-1 flex items-baseline gap-1.5">
-                  <span className="text-lg font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.25 }}>$</span>
-                  <input inputMode="numeric"
-                    value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
-                    onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                    className="bg-transparent outline-none text-[1.5rem] font-bold tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" className="px-3.5 py-3.5 text-left transition-all active:scale-[0.99]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
-                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Discount</span>
-                  <div className="mt-1 flex items-center gap-1">
-                    <span className="text-[0.8125rem] font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
-                    <ChevronDown className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
+            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="px-3.5 py-3.5 sm:col-span-2 lg:col-span-2" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Value</span>
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-lg font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.25 }}>$</span>
+                      <input inputMode="numeric"
+                        value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
+                        onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                        className="bg-transparent outline-none text-[1.5rem] font-bold tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
+                    </div>
                   </div>
-                </button>
-                <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Net Value</span>
-                  <span className="mt-1 block text-[1rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? formatCurrency(netValue) : '\u2014'}</span>
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold whitespace-nowrap"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textSecondary }}>
+                    {draft.discount || 'No discount'}
+                  </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="px-3.5 py-3 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                  <span className="text-[0.6875rem] font-semibold" style={{ color: c.textPrimary }}>Sales Reward</span>
-                  <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
+              <button type="button" className="h-full px-3.5 py-3.5 text-left transition-all active:scale-[0.99]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
+                <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Discount</span>
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <span className="text-[0.9375rem] font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
+                  <ChevronDown className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
                 </div>
-                <div className="px-3.5 py-3 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                  <span className="text-[0.6875rem] font-semibold" style={{ color: c.textPrimary }}>Designer Reward</span>
-                  <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
+                <p className="mt-1 text-[0.625rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.72 }}>Pricing basis</p>
+              </button>
+
+              <div className="px-3.5 py-3.5 h-full" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Net Value</span>
+                <span className="mt-1 block text-[1.125rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? formatCurrency(netValue) : '\u2014'}</span>
+                <p className="mt-1 text-[0.625rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                  {discountPct > 0 ? `${Math.round(discountPct * 100)}% off list` : 'Awaiting discount'}
+                </p>
+              </div>
+
+              <div className="px-3.5 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                <div>
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Sales Reward</span>
+                  <span className="mt-1 block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{draft.salesReward !== false ? 'Enabled' : 'Off'}</span>
                 </div>
+                <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
+              </div>
+
+              <div className="px-3.5 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                <div>
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Designer Reward</span>
+                  <span className="mt-1 block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{draft.designerReward !== false ? 'Enabled' : 'Off'}</span>
+                </div>
+                <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
               </div>
 
             </div>
@@ -754,7 +770,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                     <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
                       className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
                   </Row>
-                  <Row label="Bid Path" theme={theme} className="xl:col-span-2">
+                  <Row label="Bid Path" theme={theme}>
                     <div className="w-full px-4 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
                       <span className="text-[0.875rem] font-medium" style={{ color: c.textPrimary }}>Include in bid process</span>
                       <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
