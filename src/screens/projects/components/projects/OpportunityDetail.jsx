@@ -655,6 +655,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const heroInsetStyle = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
     borderRadius: '28px',
+    border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}`,
   };
   const heroDealers = (draft.dealers || []).filter(Boolean);
   const heroDealerPreview = heroDealers.slice(0, 3);
@@ -672,6 +673,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const rewardsDetailLabel = rewardDefaultOff
     ? `Net below ${formatCurrency(REWARD_AUTO_OFF_NET_LIMIT)} with ${formatPercentLabel(REWARD_AUTO_OFF_DISCOUNT_MIN * 100)}+ discount starts rewards off.`
     : `Both rewards stay on by default until net drops below ${formatCurrency(REWARD_AUTO_OFF_NET_LIMIT)} at ${formatPercentLabel(REWARD_AUTO_OFF_DISCOUNT_MIN * 100)}+ discount.`;
+  const currentProbability = draft.winProbability || 0;
+  const statusProgressLabel = isOutcomeStage
+    ? 'Final outcome selected'
+    : `${Math.max(currentPipelineIndex + 1, 1)} of ${pipelineStages.length} active stages`;
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
     : customerLinkSource === 'inferred'
@@ -685,16 +690,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           {/* HERO */}
           <div className="rounded-[32px] p-4 sm:p-6 space-y-3.5" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
-                  {draft.stage || 'Stage pending'}
-                </span>
-                {heroMetaLabel ? (
+              {heroMetaLabel ? (
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
                   <span className="text-[0.75rem] font-medium" style={{ color: c.textSecondary }}>
                     {heroMetaLabel}
                   </span>
-                ) : null}
-              </div>
+                </div>
+              ) : null}
 
               <div className="space-y-1.5">
                 <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project</span>
@@ -756,13 +758,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setHubModal('status')}
-              className="w-full px-4 py-3.5 text-left transition-all active:scale-[0.99]"
-              style={heroInsetStyle}
-            >
-              <div className="flex items-center justify-between gap-3">
+            <div className="w-full px-4 py-4 space-y-3.5" style={heroInsetStyle}>
+              <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project Status</span>
@@ -773,16 +770,102 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       {currentStageItem?.stage || draft.stage || 'Stage pending'}
                     </span>
                     <span className="text-[0.8125rem] font-medium" style={{ color: c.textSecondary }}>
-                      {draft.winProbability || 0}% win probability
+                      {statusProgressLabel}
                     </span>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
-                  Adjust
+                <button
+                  type="button"
+                  onClick={() => setHubModal('status')}
+                  className="inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold flex-shrink-0 transition-all active:scale-[0.98]"
+                  style={{ color: c.textSecondary }}
+                >
+                  View flow
                   <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.58 }} />
-                </span>
+                </button>
               </div>
-            </button>
+
+              <div className="space-y-2">
+                <div className="grid gap-1.5 grid-cols-2 lg:grid-cols-4">
+                  {pipelineStageItems.map((item) => (
+                    <button
+                      key={item.stage}
+                      type="button"
+                      onClick={() => update('stage', item.stage)}
+                      className="min-w-0 px-3 py-2.5 text-left transition-all active:scale-[0.98]"
+                      style={{
+                        backgroundColor: item.active
+                          ? c.accent
+                          : item.complete
+                            ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.08)')
+                            : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)'),
+                        borderRadius: '20px',
+                        boxShadow: item.active ? (isDark ? '0 10px 20px rgba(0,0,0,0.18)' : '0 12px 24px rgba(53,53,53,0.12)') : 'none',
+                        border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)')}`,
+                      }}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[0.625rem] font-bold flex-shrink-0"
+                          style={{
+                            backgroundColor: item.active ? 'rgba(255,255,255,0.18)' : item.circleBg,
+                            border: `1px solid ${item.active ? 'rgba(255,255,255,0.24)' : item.circleBorder}`,
+                            color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
+                          }}
+                        >
+                          {item.stepToken}
+                        </span>
+                        <span className="text-[0.75rem] font-semibold leading-tight min-w-0" style={{ color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary) }}>
+                          {item.stage}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.62 }}>Outcome</span>
+                  <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.78 }}>Optional closeout</span>
+                </div>
+
+                <div className="grid gap-1.5 grid-cols-2 sm:max-w-[240px]">
+                  {outcomeStageItems.map((item) => (
+                    <button
+                      key={item.stage}
+                      type="button"
+                      onClick={() => update('stage', item.stage)}
+                      className="px-3 py-2.5 text-left transition-all active:scale-[0.98]"
+                      style={{
+                        backgroundColor: item.active
+                          ? c.accent
+                          : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)'),
+                        borderRadius: '20px',
+                        border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)')}`,
+                      }}
+                    >
+                      <span className="text-[0.75rem] font-semibold" style={{ color: item.active ? c.accentText : c.textSecondary }}>
+                        {item.stage}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.76)', borderRadius: '22px', boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)' }}>
+                <div className="flex items-center justify-between gap-3 mb-2.5">
+                  <div>
+                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Win Probability</span>
+                    <p className="mt-1 text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.74 }}>
+                      Keep confidence visible while you adjust stage.
+                    </p>
+                  </div>
+                  <span className="text-[0.875rem] font-bold tabular-nums rounded-full px-2.5 py-1" style={{ backgroundColor: `${c.accent}10`, color: c.textPrimary }}>
+                    {currentProbability}%
+                  </span>
+                </div>
+                <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
@@ -1316,11 +1399,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           </div>
 
           <div className="pt-1">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Win Probability</span>
-              <span className="text-[0.6875rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
-            </div>
-            <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
+            <p className="text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.76 }}>
+              Win probability now lives on the main screen so you can update it alongside stage.
+            </p>
           </div>
         </div>
       </Modal>
