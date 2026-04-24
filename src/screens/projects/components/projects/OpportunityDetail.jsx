@@ -874,7 +874,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </button>
               </Section>
 
-              <Section title="Project Hub" subtitle="Tap any card to view full details" theme={theme}>
+              <Section title="Project Hub" theme={theme}>
                 <div className="space-y-2">
                   <DetailHubCard
                     icon={Users}
