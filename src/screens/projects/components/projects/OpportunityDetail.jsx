@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Package, Truck } from 'lucide-react';
+import { ArrowUpRight, Building2, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Mail, MapPin, Package, Phone, Truck } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME, SECTION_TITLE_CLASSNAME } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
@@ -12,7 +12,7 @@ import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quot
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { ContactSearchSelector } from './ContactSearchSelector.jsx';
-import { getSampleOrdersForOpportunity } from '../../../../utils/projectLinks.js';
+import { buildOpportunityProjectContacts, getOpportunityCustomerDisplayName, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
 
 /* helpers */
 const parseCurrency = (raw) => {
@@ -30,6 +30,7 @@ const CONTROL_RADIUS = '24px';
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 
 const formatDiscountLabel = (value) => value || 'No discount selected';
+const getInitials = (name) => String(name || '').split(' ').filter(Boolean).map((segment) => segment[0]).join('').slice(0, 2).toUpperCase() || '?';
 
 /* ---- section primitives ---- */
 const Section = ({ title, children, theme, right }) => {
@@ -87,6 +88,58 @@ const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
           </button>
         );
       })}
+    </div>
+  );
+};
+
+const ContactSummaryCard = ({ contact, theme }) => {
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
+  const avatarBg = contact.kind === 'rep'
+    ? `${JSI_COLORS.info}18`
+    : contact.kind === 'primary'
+      ? `${c.accent}18`
+      : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.08)');
+  const avatarColor = contact.kind === 'customer' ? c.textPrimary : c.accent;
+  const badgeBg = contact.kind === 'rep'
+    ? `${JSI_COLORS.info}16`
+    : contact.kind === 'primary'
+      ? `${c.accent}14`
+      : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.07)');
+  const badgeColor = contact.kind === 'rep'
+    ? JSI_COLORS.info
+    : contact.kind === 'primary'
+      ? c.accent
+      : c.textSecondary;
+
+  return (
+    <div className="flex items-start gap-3 px-3.5 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+      <div className="w-9 h-9 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: avatarBg, color: avatarColor }}>
+        {getInitials(contact.name)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{contact.name}</span>
+          <span className="text-[0.5625rem] font-bold uppercase tracking-[0.08em] px-2 py-1 rounded-full whitespace-nowrap" style={{ backgroundColor: badgeBg, color: badgeColor }}>
+            {contact.label}
+          </span>
+        </div>
+        {contact.role ? <p className="mt-1 text-[0.6875rem]" style={{ color: c.textSecondary }}>{contact.role}</p> : null}
+      </div>
+      {(contact.email || contact.phone) ? (
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {contact.email ? (
+            <a href={`mailto:${contact.email}`} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}12`, color: c.accent }}>
+              <Mail className="w-3.5 h-3.5" />
+            </a>
+          ) : null}
+          {contact.phone ? (
+            <a href={`tel:${contact.phone}`} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}12`, color: c.accent }}>
+              <Phone className="w-3.5 h-3.5" />
+            </a>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -220,7 +273,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
 /* 
    MAIN COMPONENT
     */
-export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId, sampleOrders = [], opportunities = [], onNavigate }) => {
+export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId, sampleOrders = [], opportunities = [], onNavigate, customers = [], onOpenCustomer }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
 
@@ -309,25 +362,59 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     [draft, sampleOrders, opportunities],
   );
   const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
+  const { customer: linkedCustomer, source: customerLinkSource } = useMemo(
+    () => resolveOpportunityCustomerLink(draft, customers),
+    [customers, draft],
+  );
+  const displayCustomerName = useMemo(
+    () => getOpportunityCustomerDisplayName(draft, linkedCustomer),
+    [draft, linkedCustomer],
+  );
+  const projectContacts = useMemo(
+    () => buildOpportunityProjectContacts(draft, linkedCustomer),
+    [draft, linkedCustomer],
+  );
+  const customerLocationLabel = linkedCustomer?.location
+    ? [linkedCustomer.location.city, linkedCustomer.location.state].filter(Boolean).join(', ')
+    : '';
+  const customerLinkStatus = draft.customerId
+    ? 'Linked customer profile'
+    : customerLinkSource === 'inferred'
+      ? 'Matched from project account'
+      : 'No customer profile linked yet';
+  const openLinkedCustomer = useCallback(() => {
+    if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
+  }, [linkedCustomer, onOpenCustomer]);
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-2.5">
+        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-3.5">
 
           {/* HERO */}
           <div className="pb-1 space-y-1.5">
             <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
               className="w-full bg-transparent outline-none text-[1.85rem] sm:text-[2rem] font-semibold tracking-[-0.02em] leading-[1.02]" style={{ color: c.textPrimary }} placeholder="Project name" />
-            <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
               <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                className="bg-transparent outline-none text-[0.75rem] font-medium flex-1" style={{ color: c.textSecondary }} placeholder="Company / End User" />
+                className="bg-transparent outline-none text-[0.75rem] font-medium flex-1 min-w-[180px]" style={{ color: c.textSecondary }} placeholder="Customer account / End User" />
+              {linkedCustomer ? (
+                <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
+                  style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}>
+                  <Building2 className="w-3 h-3" style={{ color: c.accent }} />
+                  {customerLinkSource === 'explicit' ? 'Customer profile' : 'Matched customer'}
+                  <ArrowUpRight className="w-3 h-3" style={{ color: c.textSecondary, opacity: 0.6 }} />
+                </button>
+              ) : null}
             </div>
           </div>
 
-          {/* 1. FINANCIALS */}
-          <Section title="Financials" theme={theme}>
+          <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
+            <div className="space-y-3.5 min-w-0">
+              <div className="grid gap-3.5 lg:grid-cols-2">
+                <div className="h-full">
+                  <Section title="Financials" theme={theme}>
             <div className="space-y-2.5">
               <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
                 <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Value</span>
@@ -372,10 +459,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
               </div>
             )}
-          </Section>
+                  </Section>
+                </div>
 
-          {/* 2. PROJECT PROGRESS */}
-          <Section title="Project Progress" theme={theme}>
+                <div className="h-full">
+                  <Section title="Project Progress" theme={theme}>
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
                 <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Current Stage</span>
@@ -451,83 +539,180 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               </div>
               <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
             </div>
-          </Section>
-
-          {/* 3. PROJECT DETAILS */}
-          <Section title="Project Details" theme={theme}>
-            <Row label="Vertical" theme={theme} noSep>
-              <PillSelect options={VERTICALS.filter(v => v !== 'Other (Please specify)')} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
-            </Row>
-            <Row label="PO Timeframe" theme={theme}>
-              <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
-            </Row>
-            <Row label="Install Date" theme={theme}>
-              <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} />
-            </Row>
-            <Row label="Location" theme={theme}>
-              <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
-                className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
-            </Row>
-            <Row label="Bid?" theme={theme}>
-              <div className="w-full px-3.5 py-3 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <span className="text-[0.6875rem] font-medium" style={{ color: c.textPrimary }}>Include in bid process</span>
-                <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
+                  </Section>
+                </div>
               </div>
-            </Row>
-          </Section>
 
-          {/* 4. STAKEHOLDERS */}
-          <Section title="Stakeholders" theme={theme}>
-            <Row label="Contact" theme={theme} noSep>
-              <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
-            </Row>
-            <Row label="Dealer(s)" theme={theme}>
-              <div className="flex flex-wrap gap-1.5">
-                {(draft.dealers || []).map(f => (
-                  <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
-                    style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
-                ))}
-                <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
+              <Section title="Project Details" theme={theme}>
+                <Row label="Vertical" theme={theme} noSep>
+                  <PillSelect options={VERTICALS.filter(v => v !== 'Other (Please specify)')} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
+                </Row>
+                <Row label="PO Timeframe" theme={theme}>
+                  <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
+                </Row>
+                <Row label="Install Date" theme={theme}>
+                  <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
+                    className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} />
+                </Row>
+                <Row label="Location" theme={theme}>
+                  <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
+                    className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
+                </Row>
+                <Row label="Bid?" theme={theme}>
+                  <div className="w-full px-3.5 py-3 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                    <span className="text-[0.6875rem] font-medium" style={{ color: c.textPrimary }}>Include in bid process</span>
+                    <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
+                  </div>
+                </Row>
+              </Section>
+
+              <Section title="Stakeholders" theme={theme}>
+                <Row label="Contact" theme={theme} noSep>
+                  <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
+                </Row>
+                <Row label="Dealer(s)" theme={theme}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(draft.dealers || []).map(f => (
+                      <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
+                        style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
+                    ))}
+                    <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
+                  </div>
+                </Row>
+                <Row label="A&D Firm(s)" theme={theme}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(draft.designFirms || []).map(f => (
+                      <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
+                        style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
+                    ))}
+                    <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
+                  </div>
+                </Row>
+                <Row label="Customer Account" theme={theme}>
+                  <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
+                    className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="Customer account name" />
+                </Row>
+              </Section>
+
+              <div className="grid gap-3.5 lg:grid-cols-2">
+                <div className="h-full">
+                  <Section title="Competition" theme={theme} right={<ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />}>
+                    {draft.competitionPresent !== false ? (
+                      <MultiPillSelect options={COMPETITORS.filter(x => x !== 'None')} value={draft.competitors || []} onToggle={toggleCompetitor} theme={theme} />
+                    ) : (
+                      <p className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.6 }}>No competition noted</p>
+                    )}
+                  </Section>
+                </div>
+
+                <div className="h-full">
+                  <Section title="Products" theme={theme}>
+                    <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      {(draft.products || []).map(p => (
+                        <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
+                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
+                      ))}
+                    </div>
+                    <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
+                  </Section>
+                </div>
               </div>
-            </Row>
-            <Row label="A&D Firm(s)" theme={theme}>
-              <div className="flex flex-wrap gap-1.5">
-                {(draft.designFirms || []).map(f => (
-                  <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
-                    style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
-                ))}
-                <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
-              </div>
-            </Row>
-            <Row label="End User" theme={theme}>
-              <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
-                className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="Company name" />
-            </Row>
-          </Section>
 
-          {/* 5. COMPETITION */}
-          <Section title="Competition" theme={theme} right={<ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />}>
-            {draft.competitionPresent !== false ? (
-              <MultiPillSelect options={COMPETITORS.filter(x => x !== 'None')} value={draft.competitors || []} onToggle={toggleCompetitor} theme={theme} />
-            ) : (
-              <p className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.6 }}>No competition noted</p>
-            )}
-          </Section>
-
-          {/* 6. PRODUCTS */}
-          <Section title="Products" theme={theme}>
-            <div className="flex flex-wrap gap-1.5 mb-2.5">
-              {(draft.products || []).map(p => (
-                <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
-                  style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
-              ))}
+              <Section title="Notes" theme={theme}>
+                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
+                  className="w-full resize-none p-3.5 text-[0.75rem] leading-relaxed outline-none"
+                  style={{ background: isDark ? 'rgba(255,255,255,0.06)' : FIELD_BG_LIGHT, color: c.textPrimary, borderRadius: CONTROL_RADIUS }}
+                  placeholder="Add project notes, context, or special instructions..." />
+              </Section>
             </div>
-            <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
-          </Section>
 
-          {/* 7. SAMPLE ACTIVITY */}
-          <Section title="Sample Activity" theme={theme}>
+            <div className="space-y-3.5 min-w-0">
+              <Section title="Customer Connection" theme={theme}>
+                <div className="space-y-2.5">
+                  <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}15`, color: c.accent }}>
+                          <Building2 className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Project account</span>
+                          <p className="mt-1 text-[0.9375rem] font-semibold leading-tight" style={{ color: c.textPrimary }}>{displayCustomerName}</p>
+                          <p className="mt-1 text-[0.6875rem] leading-tight" style={{ color: c.textSecondary }}>{customerLocationLabel || customerLinkStatus}</p>
+                        </div>
+                      </div>
+                      {linkedCustomer ? (
+                        <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
+                          style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
+                          Open
+                          <ArrowUpRight className="w-3 h-3" />
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                    <div className="flex items-center justify-between gap-3 mb-2.5">
+                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Linked customer profile</span>
+                      {draft.customerId ? (
+                        <button type="button" onClick={() => update('customerId', null)} className="text-[0.625rem] font-semibold" style={{ color: c.accent }}>
+                          Clear link
+                        </button>
+                      ) : null}
+                    </div>
+                    <select value={draft.customerId ? String(draft.customerId) : ''} onChange={(event) => update('customerId', event.target.value || null)}
+                      className="w-full bg-transparent outline-none text-[0.75rem] font-medium" style={{ color: c.textPrimary }}>
+                      <option value="">Select customer profile...</option>
+                      {(customers || []).map((customer) => (
+                        <option key={customer.id} value={customer.id}>{customer.name}</option>
+                      ))}
+                    </select>
+                    <p className="mt-2 text-[0.625rem] leading-tight" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                      {draft.customerId
+                        ? 'This project is explicitly pinned to a customer profile.'
+                        : customerLinkSource === 'inferred'
+                          ? 'A customer profile is already matched from the project account. Select it here to lock the relationship.'
+                          : 'Link a customer profile to bring in customer contacts, rep context, and quick navigation.'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="px-3.5 py-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Customer contacts</span>
+                      <p className="mt-1 text-[0.9375rem] font-semibold" style={{ color: c.textPrimary }}>{projectContacts.filter((contact) => contact.kind !== 'rep').length}</p>
+                    </div>
+                    <div className="px-3.5 py-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Dealer teams</span>
+                      <p className="mt-1 text-[0.9375rem] font-semibold" style={{ color: c.textPrimary }}>{(draft.dealers || []).length}</p>
+                    </div>
+                  </div>
+                </div>
+              </Section>
+
+              <Section title="Project Contacts" theme={theme} right={<span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{projectContacts.length} total</span>}>
+                {projectContacts.length > 0 ? (
+                  <div className="space-y-2">
+                    {projectContacts.map((contact) => (
+                      <ContactSummaryCard key={`${contact.kind}-${contact.id}`} contact={contact} theme={theme} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 px-3.5 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                    <Users className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                    <span className="text-[0.6875rem]" style={{ color: c.textSecondary }}>
+                      Add a primary contact or link a customer profile to surface project contacts here.
+                    </span>
+                  </div>
+                )}
+                {linkedCustomer ? (
+                  <div className="mt-2 flex items-center gap-2 text-[0.625rem]" style={{ color: c.textSecondary }}>
+                    <MapPin className="w-3 h-3" style={{ opacity: 0.55 }} />
+                    <span>{customerLocationLabel || linkedCustomer.name}</span>
+                  </div>
+                ) : null}
+              </Section>
+
+              <Section title="Sample Activity" theme={theme}>
             {relatedSampleOrders.length > 0 ? (
               <div className="space-y-2">
                 {relatedSampleOrders.map((order) => {
@@ -572,15 +757,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </span>
               </div>
             )}
-          </Section>
+              </Section>
 
-          {/* 8. QUOTES */}
-          <Section title="Quotes" theme={theme}>
+              <Section title="Quotes" theme={theme}>
             <QuoteTracker quotes={enrichedQuotes} theme={theme} onRequestQuote={() => setQuoteModalOpen(true)} />
-          </Section>
+              </Section>
 
-          {/* 9. DOCUMENTS */}
-          <Section title="Documents" theme={theme} right={
+              <Section title="Documents" theme={theme} right={
             <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all"
               style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}><Upload className="w-3 h-3" /> Upload</button>
           }>
@@ -620,15 +803,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
               </button>
             )}
-          </Section>
-
-          {/* 10. NOTES */}
-          <Section title="Notes" theme={theme}>
-            <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={2}
-              className="w-full resize-none p-3.5 text-[0.75rem] leading-relaxed outline-none"
-              style={{ background: isDark ? 'rgba(255,255,255,0.06)' : FIELD_BG_LIGHT, color: c.textPrimary, borderRadius: CONTROL_RADIUS }}
-              placeholder="Add project notes, context, or special instructions..." />
-          </Section>
+              </Section>
+            </div>
+          </div>
 
           {/* AUTOSAVE */}
           <div className="flex justify-center pt-0.5 pb-3">

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   MapPin, ChevronRight, FileText, Download, CheckCircle2,
-  Mail, Phone, X, Package, Award, Image,
+  Lock, LockOpen, Mail, Phone, X, Package, Award, Image,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS } from '../../../design-system/tokens.js';
@@ -202,7 +202,7 @@ const StandardsProgramDetailModal = ({ program, customer, theme, onClose }) => {
 /* ═══════════════════════════════════════════════════════════════
    MAIN: CustomerMicrositeScreen
    ═══════════════════════════════════════════════════════════════ */
-export const CustomerMicrositeScreen = ({ customer, theme }) => {
+export const CustomerMicrositeScreen = ({ customer, theme, onUpdateCustomer }) => {
   const dark = isDarkTheme(theme);
   const c = theme.colors;
   const border = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
@@ -213,6 +213,20 @@ export const CustomerMicrositeScreen = ({ customer, theme }) => {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedProjectFilter, setSelectedProjectFilter] = useState('All');
   const [lightboxImg, setLightboxImg] = useState(null);
+
+  const visibleContacts = useMemo(
+    () => (customer.contacts || []).filter((contact) => contact.visibility === 'dealer'),
+    [customer.contacts],
+  );
+  const contactVisibilityLocked = Boolean(customer.contactVisibilityLocked);
+
+  const handleToggleContactVisibilityLock = useCallback(() => {
+    if (typeof onUpdateCustomer !== 'function') return;
+    onUpdateCustomer({
+      ...customer,
+      contactVisibilityLocked: !contactVisibilityLocked,
+    });
+  }, [contactVisibilityLocked, customer, onUpdateCustomer]);
 
   /* ── Logo with fallback chain ── */
   const logoUrl = customer.uploadedLogoUrl
@@ -515,10 +529,46 @@ export const CustomerMicrositeScreen = ({ customer, theme }) => {
             )}
 
             {/* ── CONTACTS ── */}
-            {(customer.contacts || []).filter(ct => ct.visibility === 'dealer').length > 0 && (
-              <Sect title="Contacts" theme={theme} noPad>
+            {visibleContacts.length > 0 && (
+              <Sect
+                title="Contacts"
+                theme={theme}
+                noPad
+                right={
+                  <button
+                    type="button"
+                    onClick={handleToggleContactVisibilityLock}
+                    aria-pressed={contactVisibilityLocked}
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.625rem] font-semibold transition-colors"
+                    style={{
+                      backgroundColor: contactVisibilityLocked
+                        ? (dark ? 'rgba(255,255,255,0.09)' : 'rgba(53,53,53,0.07)')
+                        : 'transparent',
+                      color: contactVisibilityLocked ? c.textPrimary : c.textSecondary,
+                      border: `1px solid ${contactVisibilityLocked ? `${c.accent}20` : border}`,
+                    }}
+                    title={contactVisibilityLocked ? 'Unlock contacts-only visibility' : 'Lock visibility to listed contacts and your JSI rep'}
+                  >
+                    {contactVisibilityLocked ? <Lock className="w-3 h-3" /> : <LockOpen className="w-3 h-3" />}
+                    <span>{contactVisibilityLocked ? 'Locked' : 'Lock access'}</span>
+                  </button>
+                }
+              >
+                {contactVisibilityLocked && (
+                  <div className="px-5 pt-3">
+                    <div
+                      className="rounded-xl px-3.5 py-2 text-[0.6875rem] font-medium"
+                      style={{
+                        backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)',
+                        color: c.textSecondary,
+                      }}
+                    >
+                      Visible only to listed contacts and your JSI rep.
+                    </div>
+                  </div>
+                )}
                 <div className="px-5 pt-1">
-                  {customer.contacts.filter(ct => ct.visibility === 'dealer').map((ct, idx) => (
+                  {visibleContacts.map((ct, idx) => (
                     <React.Fragment key={ct.id}>
                       {idx > 0 && <Divider dark={dark} />}
                       <div className="flex items-center gap-3.5 py-3.5">

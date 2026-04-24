@@ -15,6 +15,7 @@ import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
+import { buildOpportunityProjectContacts, resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
 
 const CUSTOMER_TYPES = [
   { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
@@ -139,6 +140,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
       approvedMaterials: {},
       projects: [],
       contacts: [],
+      contactVisibilityLocked: false,
       documents: [],
     };
     onAdd(newCustomer);
@@ -639,6 +641,19 @@ export const ProjectsScreen = forwardRef(({
     [selectedPipelineStage, opportunities],
   );
 
+  const presentedOpportunities = useMemo(
+    () => filteredOpportunities.map((opportunity) => {
+      const { customer, source } = resolveOpportunityCustomerLink(opportunity, customers);
+      return {
+        opportunity,
+        linkedCustomer: customer,
+        customerLinkSource: source,
+        projectContacts: buildOpportunityProjectContacts(opportunity, customer),
+      };
+    }),
+    [customers, filteredOpportunities],
+  );
+
   const stageTotalValue = useMemo(() =>
     filteredOpportunities.reduce((sum, o) => {
       const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : o.value;
@@ -653,6 +668,11 @@ export const ProjectsScreen = forwardRef(({
 
   const handleAddCustomer = useCallback(newCustomer => {
     setCustomers(prev => [...prev, newCustomer]);
+  }, []);
+
+  const updateCustomer = useCallback(updatedCustomer => {
+    setCustomers(prev => prev.map(customer => customer.id === updatedCustomer.id ? updatedCustomer : customer));
+    setSelectedCustomer(prev => prev?.id === updatedCustomer.id ? updatedCustomer : prev);
   }, []);
 
   const filteredCustomers = useMemo(() => {
@@ -744,6 +764,7 @@ export const ProjectsScreen = forwardRef(({
     <CustomerMicrositeScreen
       customer={selectedCustomer}
       theme={theme}
+      onUpdateCustomer={updateCustomer}
     />
   );
 
@@ -751,11 +772,13 @@ export const ProjectsScreen = forwardRef(({
     <OpportunityDetail
       opp={selectedOpportunity}
       theme={theme}
+      customers={customers}
       members={members}
       currentUserId={currentUserId}
       sampleOrders={sampleOrders}
       opportunities={opportunities}
       onNavigate={onNavigate}
+      onOpenCustomer={setSelectedCustomer}
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
     />
   );
@@ -858,12 +881,15 @@ export const ProjectsScreen = forwardRef(({
       <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-10 max-w-content mx-auto w-full">
         <TabContent activeKey={projectsTab} tabIndex={PROJECTS_TAB_OPTIONS.findIndex(o => o.value === projectsTab)}>
           {projectsTab === 'pipeline' && (
-            filteredOpportunities.length > 0 ? (
+            presentedOpportunities.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-                  {filteredOpportunities.map(opp => (
-                    <ProjectCard key={opp.id} opp={opp} theme={theme}
-                      onClick={() => onNavigate(`projects/${opp.id}`)} />
+                  {presentedOpportunities.map(({ opportunity, linkedCustomer, customerLinkSource, projectContacts }) => (
+                    <ProjectCard key={opportunity.id} opp={opportunity} theme={theme}
+                      linkedCustomer={linkedCustomer}
+                      customerLinkSource={customerLinkSource}
+                      projectContacts={projectContacts}
+                      onClick={() => onNavigate(`projects/${opportunity.id}`)} />
                   ))}
                 </div>
                 <div className="mt-6 flex justify-center">
@@ -875,7 +901,7 @@ export const ProjectsScreen = forwardRef(({
                     }}
                   >
                     <Briefcase size={15} style={{ opacity: 0.5 }} />
-                    {selectedPipelineStage} · {filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'} · {fmtCurrency(stageTotalValue)}
+                    {selectedPipelineStage} · {presentedOpportunities.length} {presentedOpportunities.length === 1 ? 'project' : 'projects'} · {fmtCurrency(stageTotalValue)}
                   </div>
                 </div>
               </>

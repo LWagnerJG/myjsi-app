@@ -20,6 +20,118 @@ const getOpportunityTokens = (opportunity) => uniqueTokens([
   ...(opportunity?.designFirms || []),
 ]);
 
+const getOpportunityCustomerTokens = (opportunity) => uniqueTokens([
+  opportunity?.endUser,
+  opportunity?.company,
+]);
+
+const getCustomerTokens = (customer) => uniqueTokens([
+  customer?.name,
+  customer?.domain,
+  customer?.domain ? customer.domain.split('.')[0] : null,
+]);
+
+export const getOpportunityCustomerDisplayName = (opportunity, customer) => (
+  customer?.name || opportunity?.endUser || opportunity?.company || 'Customer TBD'
+);
+
+export const resolveOpportunityCustomerLink = (opportunity, customers = []) => {
+  if (!opportunity) return { customer: null, source: null };
+
+  const explicitId = opportunity?.customerId ?? opportunity?.linkedCustomerId;
+  if (explicitId != null) {
+    const explicitCustomer = (customers || []).find((customer) => String(customer?.id) === String(explicitId));
+    if (explicitCustomer) return { customer: explicitCustomer, source: 'explicit' };
+  }
+
+  const opportunityTokens = getOpportunityCustomerTokens(opportunity);
+  let bestCustomer = null;
+  let bestScore = 0;
+
+  (customers || []).forEach((customer) => {
+    const customerTokens = getCustomerTokens(customer);
+    let score = 0;
+
+    opportunityTokens.forEach((opportunityToken) => {
+      customerTokens.forEach((customerToken) => {
+        if (!opportunityToken || !customerToken) return;
+
+        if (opportunityToken === customerToken) {
+          score = Math.max(score, 100);
+          return;
+        }
+
+        if (
+          Math.min(opportunityToken.length, customerToken.length) >= 6
+          && (opportunityToken.includes(customerToken) || customerToken.includes(opportunityToken))
+        ) {
+          score = Math.max(score, 74);
+        }
+      });
+    });
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestCustomer = customer;
+    }
+  });
+
+  if (bestCustomer && bestScore >= 74) {
+    return { customer: bestCustomer, source: 'inferred' };
+  }
+
+  return { customer: null, source: null };
+};
+
+export const buildOpportunityProjectContacts = (opportunity, customer) => {
+  const visibleCustomerContacts = (customer?.contacts || []).filter(
+    (contact) => !contact?.visibility || contact.visibility === 'dealer',
+  );
+  const primaryContactToken = normalizeText(opportunity?.contact);
+  const matchedCustomerContact = visibleCustomerContacts.find(
+    (contact) => normalizeText(contact?.name) === primaryContactToken,
+  );
+
+  const contacts = [];
+  const seen = new Set();
+
+  const pushContact = (contact, kind, label) => {
+    const name = String(contact?.name || '').trim();
+    if (!name) return;
+
+    const key = normalizeText(name);
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    contacts.push({
+      id: contact?.id || `${kind}-${key}`,
+      kind,
+      label,
+      name,
+      role: contact?.role || contact?.title || '',
+      email: contact?.email || '',
+      phone: contact?.phone || '',
+    });
+  };
+
+  if (matchedCustomerContact) {
+    pushContact(matchedCustomerContact, 'primary', 'Primary project contact');
+  } else if (opportunity?.contact) {
+    pushContact({ name: opportunity.contact, role: 'Primary project contact' }, 'primary', 'Primary project contact');
+  }
+
+  visibleCustomerContacts.forEach((contact) => {
+    if (matchedCustomerContact && String(contact?.id) === String(matchedCustomerContact?.id)) return;
+    pushContact(contact, 'customer', 'Customer contact');
+  });
+
+  if (customer?.jsiRep) {
+    pushContact(customer.jsiRep, 'rep', 'JSI rep');
+  }
+
+  return contacts;
+};
+
 export const normalizeQuoteStatus = (quote, index = 0) => {
   const raw = String(quote?.status || '').toLowerCase();
   if (['requested', 'in-progress', 'review', 'complete'].includes(raw)) return raw;
