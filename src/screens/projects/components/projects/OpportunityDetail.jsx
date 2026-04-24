@@ -31,6 +31,7 @@ const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 const DETAIL_SECTION_TITLE_CLASS = 'text-[1.05rem] sm:text-[1.125rem] font-semibold tracking-[-0.02em] leading-none';
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1.5 text-[0.75rem] leading-snug';
 const HERO_TITLE_INPUT_CLASS = 'project-display-title w-full bg-transparent outline-none font-semibold tracking-[-0.04em]';
+const HERO_IDENTITY_LABEL_CLASS = 'text-[0.625rem] font-semibold uppercase tracking-[0.08em]';
 
 const formatDiscountLabel = (value) => value || 'No discount selected';
 const getInitials = (name) => String(name || '').split(' ').filter(Boolean).map((segment) => segment[0]).join('').slice(0, 2).toUpperCase() || '?';
@@ -566,6 +567,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
     borderRadius: '28px',
   };
+  const heroDealers = (draft.dealers || []).filter(Boolean);
+  const heroDealerPreview = heroDealers.slice(0, 3);
+  const heroDealerOverflowCount = Math.max(heroDealers.length - heroDealerPreview.length, 0);
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
     : customerLinkSource === 'inferred'
@@ -604,13 +608,51 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   ) : null}
                 </div>
 
-                <div className="space-y-1.5">
-                  <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
-                    className={HERO_TITLE_INPUT_CLASS} style={{ color: c.textPrimary }} placeholder="Project name" />
-                  <div className="flex items-center gap-2.5 mt-0.5 flex-wrap">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
-                    <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                      className="bg-transparent outline-none text-[0.8125rem] font-medium flex-1 min-w-[220px]" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project Name</span>
+                    <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
+                      className={HERO_TITLE_INPUT_CLASS} style={{ color: c.textPrimary }} placeholder="Project name" />
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.9fr)]">
+                    <div className="space-y-1.5 min-w-0">
+                      <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Customer</span>
+                      <div className="flex items-center gap-2.5 mt-0.5 min-w-0">
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
+                        <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
+                          className="bg-transparent outline-none text-[0.9375rem] font-medium flex-1 min-w-0" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 min-w-0">
+                      <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Associated Dealerships</span>
+                      {heroDealerPreview.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {heroDealerPreview.map((dealer) => (
+                            <span
+                              key={dealer}
+                              className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
+                              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.96)', color: c.textPrimary }}
+                            >
+                              {dealer}
+                            </span>
+                          ))}
+                          {heroDealerOverflowCount > 0 ? (
+                            <span
+                              className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
+                              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.06)', color: c.textSecondary }}
+                            >
+                              +{heroDealerOverflowCount} more
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="text-[0.8125rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                          No dealerships linked yet
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
