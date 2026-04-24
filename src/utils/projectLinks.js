@@ -222,5 +222,8 @@ export const resolveOrderProjectLink = (order, opportunities = []) => {
 };
 
 export const getSampleOrdersForOpportunity = (opportunity, sampleOrders = [], opportunities = []) => (
-  (sampleOrders || []).filter((order) => resolveOrderProjectLink(order, opportunities).opportunity?.id === opportunity?.id)
+  (sampleOrders || []).filter((order) => {
+    const link = resolveOrderProjectLink(order, opportunities);
+    return link.source === 'explicit' && link.opportunity?.id === opportunity?.id;
+  })
 );

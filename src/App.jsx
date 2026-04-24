@@ -21,7 +21,7 @@ import { ToastHost } from './components/common/ToastHost.jsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 import { ScreenSkeleton } from './components/common/ScreenSkeleton.jsx';
 import { submitLeadToExcel } from './utils/submitLeadToExcel.js';
-import { INITIAL_SAMPLE_ORDERS, buildSubmittedSampleOrder } from './screens/samples/sampleOrders.js';
+import { INITIAL_SAMPLE_ORDERS, buildSubmittedSampleOrder, syncSampleOrdersWithSeeds } from './screens/samples/sampleOrders.js';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -229,6 +229,10 @@ function App() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        setSampleOrders((prev) => syncSampleOrdersWithSeeds(prev));
+    }, [setSampleOrders]);
 
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [screenParams, setScreenParams] = useState({});

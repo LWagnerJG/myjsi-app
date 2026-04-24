@@ -6,8 +6,121 @@ const DEFAULT_ORDERED_BY = {
 
 export const INITIAL_SAMPLE_ORDERS = [
     {
+        id: 'SO-2026-0048',
+        linkedProjectId: 7,
+        linkedProjectName: 'Startup Collaboration Space',
+        date: '2026-04-23T10:20:00',
+        status: 'processing',
+        shipTo: 'Innovate Labs',
+        shipToType: 'end-user',
+        address: '1201 Tech Avenue, Indianapolis, IN 46202',
+        orderedBy: DEFAULT_ORDERED_BY,
+        carrier: 'UPS',
+        eta: '2026-04-29',
+        items: [
+            { name: 'Vision White Oak', code: 'VWO', qty: 2 },
+            { name: 'Pebble Felt', code: 'PBF', qty: 2 },
+        ],
+    },
+    {
+        id: 'SO-2026-0047',
+        linkedProjectId: 6,
+        linkedProjectName: 'Hotel Lobby Seating',
+        date: '2026-04-22T09:10:00',
+        status: 'delivered',
+        shipTo: 'Metro Hospitality Studio',
+        shipToType: 'design',
+        address: '18 W Illinois St, Chicago, IL 60654',
+        orderedBy: { name: 'Chris Dow', email: 'chris.dow@metrohospitality.com', isCurrentUser: false },
+        tracking: '1Z999AA10123456841',
+        carrier: 'UPS',
+        eta: '2026-04-24',
+        deliveredDate: '2026-04-24',
+        items: [
+            { name: 'Hoopz Saddle', code: 'HPZ-SDL', qty: 2 },
+            { name: 'Bronzed Pull', code: 'BRP', qty: 1 },
+        ],
+    },
+    {
+        id: 'SO-2026-0046',
+        linkedProjectId: 5,
+        linkedProjectName: 'University Commons Refresh',
+        date: '2026-04-20T13:40:00',
+        status: 'in-transit',
+        shipTo: 'State University Planning',
+        shipToType: 'end-user',
+        address: '500 College Ave, Bloomington, IN 47405',
+        orderedBy: { name: 'Emily Raine', email: 'emily.raine@stateuniversity.edu', isCurrentUser: false },
+        tracking: '1Z999AA10123456838',
+        carrier: 'UPS',
+        eta: '2026-04-25',
+        items: [
+            { name: 'Cao Clay', code: 'CAO-CLY', qty: 2 },
+            { name: 'Wink Moss', code: 'WNK-MOS', qty: 2 },
+            { name: 'Inset Pull Finish Ring', code: 'IPR', qty: 1 },
+        ],
+    },
+    {
+        id: 'SO-2026-0045',
+        linkedProjectId: 4,
+        linkedProjectName: 'Medical Wing Remodel',
+        date: '2026-04-18T08:15:00',
+        status: 'delivered',
+        shipTo: 'Midwest Health Facilities',
+        shipToType: 'end-user',
+        address: '8900 W 82nd St, Indianapolis, IN 46278',
+        orderedBy: { name: 'Alan Cooper', email: 'acooper@midwesthealth.org', isCurrentUser: false },
+        tracking: '773456781234',
+        carrier: 'FedEx',
+        eta: '2026-04-22',
+        deliveredDate: '2026-04-21',
+        items: [
+            { name: 'Coact Mist', code: 'COA-MST', qty: 3 },
+            { name: 'Healthcare Pull Pack', code: 'HCP', qty: 1 },
+        ],
+    },
+    {
+        id: 'SO-2026-0044',
+        linkedProjectId: 2,
+        linkedProjectName: 'Lobby Refresh',
+        date: '2026-04-16T15:05:00',
+        status: 'in-transit',
+        shipTo: 'XYZ Industries',
+        shipToType: 'end-user',
+        address: '4100 Meridian Plaza, Carmel, IN 46032',
+        orderedBy: DEFAULT_ORDERED_BY,
+        tracking: '1Z999AA10123456830',
+        carrier: 'UPS',
+        eta: '2026-04-20',
+        items: [
+            { name: 'Vision Drift', code: 'VIS-DRF', qty: 2 },
+            { name: 'Wink Sand', code: 'WNK-SND', qty: 2 },
+        ],
+    },
+    {
+        id: 'SO-2026-0043',
+        linkedProjectId: 1,
+        linkedProjectName: 'New Office Furnishings',
+        date: '2026-04-12T10:45:00',
+        status: 'delivered',
+        shipTo: 'ABC Corporation HQ',
+        shipToType: 'end-user',
+        address: '888 Meridian Tower, Indianapolis, IN 46204',
+        orderedBy: DEFAULT_ORDERED_BY,
+        tracking: '1Z999AA10123456827',
+        carrier: 'UPS',
+        eta: '2026-04-15',
+        deliveredDate: '2026-04-15',
+        items: [
+            { name: 'Finn Studio Black', code: 'FIN-SBK', qty: 2 },
+            { name: 'Vision Natural Walnut', code: 'VIS-NWL', qty: 2 },
+            { name: 'Laminate Pull Sample', code: 'LPS', qty: 1 },
+        ],
+    },
+    {
         id: 'SO-2026-0041',
         linkedProjectId: 8,
+        linkedProjectName: 'Benchmark Finish Library Refresh',
         date: '2026-04-17T14:30:00',
         status: 'in-transit',
         shipTo: 'Benchmark Design Group',
@@ -26,6 +139,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     {
         id: 'SO-2026-0038',
         linkedProjectId: 9,
+        linkedProjectName: 'Chicago Showroom Standards Reset',
         date: '2026-04-14T09:15:00',
         status: 'delivered',
         shipTo: 'Haworth Chicago Showroom',
@@ -43,6 +157,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     {
         id: 'SO-2026-0035',
         linkedProjectId: 10,
+        linkedProjectName: 'Mitchell Interiors Material Palette',
         date: '2026-04-10T16:45:00',
         status: 'delivered',
         shipTo: 'Sarah Mitchell — Mitchell Interiors',
@@ -88,6 +203,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     {
         id: 'SO-2026-0018',
         linkedProjectId: 11,
+        linkedProjectName: 'Perkins&Will Sample Library Update',
         date: '2026-03-18T13:10:00',
         status: 'delivered',
         shipTo: 'Amanda Chen — Perkins&Will',
@@ -128,6 +244,50 @@ const getNextSampleOrderId = (existingOrders = [], now = new Date()) => {
         return Math.max(max, parsed || 0);
     }, 0);
     return `SO-${year}-${String(maxSuffix + 1).padStart(4, '0')}`;
+};
+
+const mergeSeedOrder = (seedOrder, existingOrder) => {
+    if (!existingOrder) return seedOrder;
+
+    return {
+        ...seedOrder,
+        ...existingOrder,
+        linkedProjectId: existingOrder.linkedProjectId ?? seedOrder.linkedProjectId ?? null,
+        linkedProjectName: existingOrder.linkedProjectName ?? seedOrder.linkedProjectName ?? '',
+        shipTo: existingOrder.shipTo ?? seedOrder.shipTo,
+        shipToType: existingOrder.shipToType ?? seedOrder.shipToType,
+        address: existingOrder.address ?? seedOrder.address,
+        orderedBy: existingOrder.orderedBy ?? seedOrder.orderedBy,
+        tracking: existingOrder.tracking ?? seedOrder.tracking,
+        carrier: existingOrder.carrier ?? seedOrder.carrier,
+        eta: existingOrder.eta ?? seedOrder.eta,
+        deliveredDate: existingOrder.deliveredDate ?? seedOrder.deliveredDate,
+        items: Array.isArray(existingOrder.items) && existingOrder.items.length > 0 ? existingOrder.items : seedOrder.items,
+    };
+};
+
+export const syncSampleOrdersWithSeeds = (existingOrders = []) => {
+    if (!Array.isArray(existingOrders)) return [...INITIAL_SAMPLE_ORDERS];
+
+    const nextOrders = [...existingOrders];
+    let changed = false;
+
+    INITIAL_SAMPLE_ORDERS.forEach((seedOrder) => {
+        const matchIndex = nextOrders.findIndex((order) => String(order?.id) === String(seedOrder.id));
+        if (matchIndex === -1) {
+            nextOrders.push(seedOrder);
+            changed = true;
+            return;
+        }
+
+        const mergedOrder = mergeSeedOrder(seedOrder, nextOrders[matchIndex]);
+        if (JSON.stringify(mergedOrder) !== JSON.stringify(nextOrders[matchIndex])) {
+            nextOrders[matchIndex] = mergedOrder;
+            changed = true;
+        }
+    });
+
+    return changed ? nextOrders : existingOrders;
 };
 
 export const buildSubmittedSampleOrder = ({

@@ -31,14 +31,45 @@ const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 
 const formatDiscountLabel = (value) => value || 'No discount selected';
 const getInitials = (name) => String(name || '').split(' ').filter(Boolean).map((segment) => segment[0]).join('').slice(0, 2).toUpperCase() || '?';
+const parseProjectDateValue = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  const rawValue = String(value);
+  const dateOnlyMatch = rawValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+  const parsed = new Date(rawValue);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+const formatSampleOrderTimestamp = (value) => {
+  if (!value) return 'Date unavailable';
+  const date = parseProjectDateValue(value);
+  if (!date) return value;
+  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+};
+const formatSampleOrderDate = (value) => {
+  if (!value) return 'Date unavailable';
+  const date = parseProjectDateValue(value);
+  if (!date) return value;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
 
 /* ---- section primitives ---- */
-const Section = ({ title, children, theme, right }) => {
+const Section = ({ title, subtitle, children, theme, right }) => {
   return (
-    <div className="overflow-hidden" style={{ ...sectionCardSurface(theme), padding: '16px', borderRadius: SECTION_RADIUS }}>
+    <div className="overflow-hidden" style={{ ...sectionCardSurface(theme), padding: '18px', borderRadius: SECTION_RADIUS }}>
       {title && (
-        <div className="flex items-start justify-between gap-3 mb-3.5">
-          <span className={SECTION_TITLE_CLASSNAME} style={{ color: theme.colors.textPrimary }}>{title}</span>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="min-w-0">
+            <span className={SECTION_TITLE_CLASSNAME} style={{ color: theme.colors.textPrimary }}>{title}</span>
+            {subtitle ? (
+              <p className="mt-1 text-[0.6875rem] leading-snug" style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
           {right ? <div className="flex-shrink-0 pt-0.5">{right}</div> : null}
         </div>
       )}
@@ -47,10 +78,10 @@ const Section = ({ title, children, theme, right }) => {
   );
 };
 
-const Row = ({ label, children, theme, noSep }) => {
+const Row = ({ label, children, theme, className = '' }) => {
   return (
-    <div className={`flex flex-col gap-2.5 py-1.5 sm:flex-row sm:items-start sm:gap-4 ${noSep ? '' : 'mt-1.5'}`}>
-      {label && <label className="text-[0.6875rem] font-semibold tracking-[0.01em] sm:w-[104px] sm:flex-shrink-0 sm:pt-2" style={{ color: theme.colors.textSecondary, opacity: 0.88 }}>{label}</label>}
+    <div className={`space-y-2 ${className}`}>
+      {label && <label className="block text-[0.75rem] font-semibold tracking-[-0.01em]" style={{ color: theme.colors.textSecondary, opacity: 0.9 }}>{label}</label>}
       <div className="flex-1 min-w-0 w-full">{children}</div>
     </div>
   );
@@ -60,11 +91,11 @@ const PillSelect = ({ options, value, onChange, theme }) => {
   const isDark = isDarkTheme(theme);
   const chipBg = isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT;
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-2">
       {options.map(opt => {
         const active = opt === value;
         return (
-          <button key={opt} onClick={() => onChange(opt)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97]"
+          <button key={opt} onClick={() => onChange(opt)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97]"
             style={{ backgroundColor: active ? theme.colors.accent : chipBg, color: active ? theme.colors.accentText : theme.colors.textSecondary, boxShadow: active ? (isDark ? '0 10px 20px rgba(0,0,0,0.16)' : '0 10px 18px rgba(53,53,53,0.08)') : 'none' }}>
             {opt}
           </button>
@@ -78,11 +109,11 @@ const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
   const isDark = isDarkTheme(theme);
   const chipBg = isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT;
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-2">
       {options.map(opt => {
         const active = value.includes(opt);
         return (
-          <button key={opt} onClick={() => onToggle(opt)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97]"
+          <button key={opt} onClick={() => onToggle(opt)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97]"
             style={{ backgroundColor: active ? theme.colors.accent : chipBg, color: active ? theme.colors.accentText : theme.colors.textSecondary, boxShadow: active ? (isDark ? '0 10px 20px rgba(0,0,0,0.16)' : '0 10px 18px rgba(53,53,53,0.08)') : 'none' }}>
             {opt}
           </button>
@@ -270,10 +301,141 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
   );
 };
 
+const SampleOrderDetailModal = ({ order, theme, onClose }) => {
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
+
+  if (!order) return null;
+
+  const meta = SAMPLE_STATUS_META[order.status] || SAMPLE_STATUS_META.processing;
+  const StatusIcon = meta.icon;
+  const totalItems = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
+  const primaryItemLabel = (order.items || [])[0]?.name || 'Sample order';
+  const deliveryLabel = order.deliveredDate
+    ? `Delivered ${formatSampleOrderDate(order.deliveredDate)}`
+    : order.eta
+      ? `ETA ${formatSampleOrderDate(order.eta)}`
+      : 'Queued for fulfillment';
+
+  return (
+    <Modal
+      show={!!order}
+      onClose={onClose}
+      title="Sample Order"
+      theme={theme}
+      maxWidth="max-w-lg"
+    >
+      <div className="space-y-4">
+        <div className="px-4 py-3.5 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT }}>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
+              <StatusIcon className="w-4 h-4" style={{ color: meta.color }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[0.875rem] font-semibold truncate" style={{ color: c.textPrimary }}>
+                  {primaryItemLabel}{totalItems > 1 ? ` + ${totalItems - 1} more` : ''}
+                </span>
+                <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: meta.bg, color: meta.color }}>
+                  {meta.label}
+                </span>
+              </div>
+              <p className="mt-1 text-[0.6875rem]" style={{ color: c.textSecondary }}>
+                {order.id} · {totalItems} sample{totalItems === 1 ? '' : 's'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+            <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ordered</span>
+            <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{formatSampleOrderTimestamp(order.date)}</p>
+          </div>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+            <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Fulfillment</span>
+            <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{deliveryLabel}</p>
+          </div>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+            <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ship to</span>
+            <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.shipTo || 'TBD'}</p>
+          </div>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+            <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Requested by</span>
+            <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.orderedBy?.name || 'Unknown'}</p>
+          </div>
+        </div>
+
+        <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+          <div className="flex items-start gap-2.5">
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }} />
+            <div>
+              <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Delivery address</span>
+              <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.address || 'Address pending'}</p>
+            </div>
+          </div>
+        </div>
+
+        {order.tracking ? (
+          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+            <div className="flex items-start gap-2.5">
+              <Truck className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }} />
+              <div>
+                <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Tracking</span>
+                <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.carrier || 'Carrier'} · {order.tracking}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="space-y-2">
+          <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Sample contents</span>
+          <div className="space-y-1.5">
+            {(order.items || []).map((item, index) => (
+              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+                <div className="min-w-0">
+                  <p className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{item.name}</p>
+                  <p className="mt-0.5 text-[0.625rem]" style={{ color: c.textSecondary }}>{item.code || 'Sample'}</p>
+                </div>
+                <span className="text-[0.75rem] font-semibold flex-shrink-0" style={{ color: c.textPrimary }}>x{item.qty || 1}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+const OverviewMetric = ({ label, value, supportingText, theme, emphasis = false }) => {
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
+
+  return (
+    <div
+      className="px-3.5 py-3.5 rounded-[24px]"
+      style={{
+        backgroundColor: emphasis
+          ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)')
+          : (isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT),
+        border: `1px solid ${emphasis ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)') : 'transparent'}`,
+      }}
+    >
+      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.82 }}>{label}</span>
+      <p className="mt-1 text-[1rem] font-semibold tracking-[-0.02em] leading-tight" style={{ color: c.textPrimary }}>{value}</p>
+      {supportingText ? (
+        <p className="mt-1 text-[0.625rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+          {supportingText}
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
 /* 
    MAIN COMPONENT
     */
-export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId, sampleOrders = [], opportunities = [], onNavigate, customers = [], onOpenCustomer }) => {
+export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId, sampleOrders = [], opportunities = [], customers = [], onOpenCustomer }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
 
@@ -354,6 +516,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const currentStageIndex = Math.max(STAGES.indexOf(draft.stage), 0);
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
   const relatedSampleOrders = useMemo(
     () => getSampleOrdersForOpportunity(draft, sampleOrders, opportunities)
@@ -385,6 +548,28 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const openLinkedCustomer = useCallback(() => {
     if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
   }, [linkedCustomer, onOpenCustomer]);
+  const listValueLabel = rawNumeric > 0 ? formatCurrency(rawNumeric) : '—';
+  const netValueLabel = netValue > 0 && discountPct > 0 ? formatCurrency(netValue) : '—';
+  const installDateLabel = draft.expectedInstallDate ? formatSampleOrderDate(draft.expectedInstallDate) : 'Not scheduled';
+  const locationSummary = draft.installationLocation || customerLocationLabel || 'Location pending';
+  const teamCount = (draft.dealers || []).length + (draft.designFirms || []).length;
+  const productCount = (draft.products || []).length;
+  const competitorCount = (draft.competitors || []).length;
+  const stagePositionLabel = `${Math.min(currentStageIndex + 1, STAGES.length)} / ${STAGES.length}`;
+  const heroInsetStyle = {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
+    borderRadius: '28px',
+  };
+  const customerConnectionLabel = draft.customerId
+    ? 'Linked'
+    : customerLinkSource === 'inferred'
+      ? 'Matched'
+      : 'Open';
+  const overviewMeta = [
+    `Account · ${displayCustomerName}`,
+    draft.contact ? `Primary contact · ${draft.contact}` : 'Primary contact · Not set',
+    `Location · ${locationSummary}`,
+  ];
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
@@ -392,29 +577,179 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
         <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-3.5">
 
           {/* HERO */}
-          <div className="pb-1 space-y-1.5">
-            <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
-              className="w-full bg-transparent outline-none text-[1.85rem] sm:text-[2rem] font-semibold tracking-[-0.02em] leading-[1.02]" style={{ color: c.textPrimary }} placeholder="Project name" />
-            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
-              <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                className="bg-transparent outline-none text-[0.75rem] font-medium flex-1 min-w-[180px]" style={{ color: c.textSecondary }} placeholder="Customer account / End User" />
-              {linkedCustomer ? (
-                <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
-                  style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}>
-                  <Building2 className="w-3 h-3" style={{ color: c.accent }} />
-                  {customerLinkSource === 'explicit' ? 'Customer profile' : 'Matched customer'}
-                  <ArrowUpRight className="w-3 h-3" style={{ color: c.textSecondary, opacity: 0.6 }} />
-                </button>
-              ) : null}
+          <div className="rounded-[32px] p-5 sm:p-6 space-y-4" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0 flex-1 space-y-3.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
+                    {draft.stage}
+                  </span>
+                  {draft.vertical ? (
+                    <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.9)', color: c.textSecondary }}>
+                      {draft.vertical}
+                    </span>
+                  ) : null}
+                  {draft.poTimeframe ? (
+                    <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.9)', color: c.textSecondary }}>
+                      {draft.poTimeframe}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="space-y-1.5">
+                  <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
+                    className="w-full bg-transparent outline-none text-[2rem] sm:text-[2.35rem] font-semibold tracking-[-0.03em] leading-[0.98]" style={{ color: c.textPrimary }} placeholder="Project name" />
+                  <div className="flex items-center gap-2.5 mt-0.5 flex-wrap">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
+                    <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
+                      className="bg-transparent outline-none text-[0.8125rem] font-medium flex-1 min-w-[220px]" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
+                    {linkedCustomer ? (
+                      <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
+                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}>
+                        <Building2 className="w-3 h-3" style={{ color: c.accent }} />
+                        {customerLinkSource === 'explicit' ? 'Customer profile' : 'Matched customer'}
+                        <ArrowUpRight className="w-3 h-3" style={{ color: c.textSecondary, opacity: 0.6 }} />
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {overviewMeta.map((item) => (
+                    <span key={item} className="inline-flex items-center rounded-full px-3 py-1.5 text-[0.625rem] font-medium" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(240,237,232,0.88)', color: c.textSecondary }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 xl:w-[360px]">
+                <OverviewMetric
+                  label="List Value"
+                  value={listValueLabel}
+                  supportingText={draft.discount || 'No discount selected'}
+                  theme={theme}
+                  emphasis
+                />
+                <OverviewMetric
+                  label="Net Value"
+                  value={netValueLabel}
+                  supportingText={discountPct > 0 ? `${Math.round(discountPct * 100)}% discount applied` : 'Set a discount to calculate'}
+                  theme={theme}
+                />
+                <OverviewMetric
+                  label="Install Target"
+                  value={installDateLabel}
+                  supportingText={locationSummary}
+                  theme={theme}
+                />
+                <OverviewMetric
+                  label="Project Team"
+                  value={`${teamCount} group${teamCount === 1 ? '' : 's'}`}
+                  supportingText={`${projectContacts.length} contacts surfaced`}
+                  theme={theme}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
+              <div className="px-4 py-4" style={heroInsetStyle}>
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Stage Progress</span>
+                    <span className="block mt-1 text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>{draft.stage}</span>
+                  </div>
+                  <span className="text-[0.6875rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
+                </div>
+                <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+                  <div className="inline-flex items-start min-w-max">
+                    {STAGES.map((stage) => {
+                      const stageIndex = STAGES.indexOf(stage);
+                      const active = draft.stage === stage;
+                      const complete = stageIndex < currentStageIndex;
+                      const connectorComplete = stageIndex < currentStageIndex;
+                      const circleBg = active
+                        ? c.accent
+                        : complete
+                          ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
+                          : 'transparent';
+                      const circleBorder = active
+                        ? c.accent
+                        : complete
+                          ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
+                          : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.98)');
+                      const labelColor = active || complete ? c.textPrimary : c.textSecondary;
+                      const stepToken = stage === 'Won' ? 'W' : stage === 'Lost' ? 'L' : stageIndex + 1;
+                      return (
+                        <React.Fragment key={stage}>
+                          <button
+                            type="button"
+                            onClick={() => update('stage', stage)}
+                            className="flex flex-col items-center gap-1.5 w-[70px] rounded-[22px] px-2 py-2 text-center transition-all active:scale-[0.98]"
+                            style={{
+                              backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
+                            }}
+                          >
+                            <span
+                              className="w-5.5 h-5.5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
+                              style={{
+                                backgroundColor: circleBg,
+                                border: `1px solid ${circleBorder}`,
+                                color: active ? c.accentText : (complete ? c.textPrimary : c.textSecondary),
+                              }}
+                            >
+                              {stepToken}
+                            </span>
+                            <span
+                              className="text-[0.625rem] font-semibold leading-[1.05] whitespace-normal break-words"
+                              style={{ color: labelColor, opacity: active ? 1 : (complete ? 0.82 : 0.68) }}
+                            >
+                              {stage}
+                            </span>
+                          </button>
+                          {stageIndex < STAGES.length - 1 && (
+                            <div
+                              aria-hidden="true"
+                              className="w-4 h-px mx-0.5 mt-[11px] rounded-full flex-shrink-0"
+                              style={{
+                                backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
+                                opacity: connectorComplete ? 0.65 : 1,
+                              }}
+                            />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-4 py-4 space-y-3" style={heroInsetStyle}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Win Probability</span>
+                    <span className="block mt-1 text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>{draft.winProbability || 0}% confidence</span>
+                  </div>
+                  <span className="text-[0.625rem] font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: rewardsOn ? `${JSI_COLORS.success}12` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)'), color: rewardsOn ? JSI_COLORS.success : c.textSecondary }}>
+                    {rewardsOn ? 'Rewards active' : 'Rewards off'}
+                  </span>
+                </div>
+                <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-medium" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.58)', color: c.textSecondary }}>
+                    {productCount} series selected
+                  </span>
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-medium" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.58)', color: c.textSecondary }}>
+                    {draft.competitionPresent !== false ? `${competitorCount} competitor${competitorCount === 1 ? '' : 's'} tracked` : 'No competition tracked'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
             <div className="space-y-3.5 min-w-0">
-              <div className="grid gap-3.5 lg:grid-cols-2">
-                <div className="h-full">
-                  <Section title="Financials" theme={theme}>
+              <Section title="Commercial" subtitle="Pricing basis, discounting, and reward settings" theme={theme}>
             <div className="space-y-2.5">
               <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
                 <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Value</span>
@@ -459,144 +794,66 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
               </div>
             )}
-                  </Section>
-                </div>
-
-                <div className="h-full">
-                  <Section title="Project Progress" theme={theme}>
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div>
-                <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Current Stage</span>
-                <span className="text-[0.9375rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>{draft.stage}</span>
-              </div>
-              <span className="text-xs font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
-            </div>
-            <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-              <div className="inline-flex items-start min-w-max">
-                {STAGES.map((stage) => {
-                  const stageIndex = STAGES.indexOf(stage);
-                  const active = draft.stage === stage;
-                  const complete = stageIndex < currentStageIndex;
-                  const connectorComplete = stageIndex < currentStageIndex;
-                  const circleBg = active
-                    ? c.accent
-                    : complete
-                      ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
-                      : 'transparent';
-                  const circleBorder = active
-                    ? c.accent
-                    : complete
-                      ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
-                      : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.98)');
-                  const labelColor = active || complete ? c.textPrimary : c.textSecondary;
-                  const stepToken = stage === 'Won' ? 'W' : stage === 'Lost' ? 'L' : stageIndex + 1;
-                  return (
-                    <React.Fragment key={stage}>
-                      <button
-                        type="button"
-                        onClick={() => update('stage', stage)}
-                        className="flex flex-col items-center gap-1.5 w-[72px] rounded-[22px] px-2 py-2 text-center transition-all active:scale-[0.98]"
-                        style={{
-                          backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
-                        }}
-                      >
-                        <span
-                          className="w-5.5 h-5.5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
-                          style={{
-                            backgroundColor: circleBg,
-                            border: `1px solid ${circleBorder}`,
-                            color: active ? c.accentText : (complete ? c.textPrimary : c.textSecondary),
-                          }}
-                        >
-                          {stepToken}
-                        </span>
-                        <span
-                          className="text-[0.625rem] font-semibold leading-[1.05] whitespace-normal break-words"
-                          style={{ color: labelColor, opacity: active ? 1 : (complete ? 0.82 : 0.68) }}
-                        >
-                          {stage}
-                        </span>
-                      </button>
-                      {stageIndex < STAGES.length - 1 && (
-                        <div
-                          aria-hidden="true"
-                          className="w-4 h-px mx-0.5 mt-[11px] rounded-full flex-shrink-0"
-                          style={{
-                            backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
-                            opacity: connectorComplete ? 0.65 : 1,
-                          }}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="px-3.5 py-3.5 mt-2" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Win Probability</span>
-                <span className="text-xs font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
-              </div>
-              <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
-            </div>
-                  </Section>
-                </div>
-              </div>
-
-              <Section title="Project Details" theme={theme}>
-                <Row label="Vertical" theme={theme} noSep>
-                  <PillSelect options={VERTICALS.filter(v => v !== 'Other (Please specify)')} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
-                </Row>
-                <Row label="PO Timeframe" theme={theme}>
-                  <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
-                </Row>
-                <Row label="Install Date" theme={theme}>
-                  <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                    className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} />
-                </Row>
-                <Row label="Location" theme={theme}>
-                  <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
-                    className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
-                </Row>
-                <Row label="Bid?" theme={theme}>
-                  <div className="w-full px-3.5 py-3 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                    <span className="text-[0.6875rem] font-medium" style={{ color: c.textPrimary }}>Include in bid process</span>
-                    <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
-                  </div>
-                </Row>
               </Section>
 
-              <Section title="Stakeholders" theme={theme}>
-                <Row label="Contact" theme={theme} noSep>
-                  <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
-                </Row>
-                <Row label="Dealer(s)" theme={theme}>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(draft.dealers || []).map(f => (
-                      <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
-                        style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
-                    ))}
-                    <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
-                  </div>
-                </Row>
-                <Row label="A&D Firm(s)" theme={theme}>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(draft.designFirms || []).map(f => (
-                      <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
-                        style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
-                    ))}
-                    <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
-                  </div>
-                </Row>
-                <Row label="Customer Account" theme={theme}>
-                  <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
-                    className="w-full px-3.5 py-3 bg-transparent outline-none text-xs font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="Customer account name" />
-                </Row>
+              <Section title="Project Profile" subtitle="Scope, schedule, and install intent" theme={theme}>
+                <div className="grid gap-3.5 xl:grid-cols-2">
+                  <Row label="Vertical" theme={theme}>
+                    <PillSelect options={VERTICALS.filter(v => v !== 'Other (Please specify)')} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
+                  </Row>
+                  <Row label="PO Timeframe" theme={theme}>
+                    <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
+                  </Row>
+                  <Row label="Install Date" theme={theme}>
+                    <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
+                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} />
+                  </Row>
+                  <Row label="Location" theme={theme}>
+                    <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
+                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
+                  </Row>
+                  <Row label="Bid Path" theme={theme} className="xl:col-span-2">
+                    <div className="w-full px-4 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                      <span className="text-[0.875rem] font-medium" style={{ color: c.textPrimary }}>Include in bid process</span>
+                      <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
+                    </div>
+                  </Row>
+                </div>
+              </Section>
+
+              <Section title="Project Team" subtitle="Core contacts, dealer partners, and A&D firms" theme={theme}>
+                <div className="grid gap-3.5 xl:grid-cols-2">
+                  <Row label="Primary Contact" theme={theme}>
+                    <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
+                  </Row>
+                  <Row label="Customer Account" theme={theme}>
+                    <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
+                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="Customer account name" />
+                  </Row>
+                  <Row label="Dealer Partners" theme={theme}>
+                    <div className="flex flex-wrap gap-2">
+                      {(draft.dealers || []).map(f => (
+                        <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
+                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.6875rem]">{'×'}</span></button>
+                      ))}
+                      <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
+                    </div>
+                  </Row>
+                  <Row label="A&D Firms" theme={theme}>
+                    <div className="flex flex-wrap gap-2">
+                      {(draft.designFirms || []).map(f => (
+                        <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
+                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.6875rem]">{'×'}</span></button>
+                      ))}
+                      <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
+                    </div>
+                  </Row>
+                </div>
               </Section>
 
               <div className="grid gap-3.5 lg:grid-cols-2">
                 <div className="h-full">
-                  <Section title="Competition" theme={theme} right={<ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />}>
+                  <Section title="Competition" subtitle="Track competitive pressure on this opportunity" theme={theme} right={<ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />}>
                     {draft.competitionPresent !== false ? (
                       <MultiPillSelect options={COMPETITORS.filter(x => x !== 'None')} value={draft.competitors || []} onToggle={toggleCompetitor} theme={theme} />
                     ) : (
@@ -606,7 +863,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
 
                 <div className="h-full">
-                  <Section title="Products" theme={theme}>
+                  <Section title="Specified Series" subtitle="Lines and families already in consideration" theme={theme}>
                     <div className="flex flex-wrap gap-1.5 mb-2.5">
                       {(draft.products || []).map(p => (
                         <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
@@ -618,7 +875,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
               </div>
 
-              <Section title="Notes" theme={theme}>
+              <Section title="Notes" subtitle="Working context, constraints, and next steps" theme={theme}>
                 <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
                   className="w-full resize-none p-3.5 text-[0.75rem] leading-relaxed outline-none"
                   style={{ background: isDark ? 'rgba(255,255,255,0.06)' : FIELD_BG_LIGHT, color: c.textPrimary, borderRadius: CONTROL_RADIUS }}
@@ -627,7 +884,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </div>
 
             <div className="space-y-3.5 min-w-0">
-              <Section title="Customer Connection" theme={theme}>
+              <Section
+                title="Customer & Account"
+                subtitle="Link this project to the right account record and surface contact context"
+                theme={theme}
+                right={
+                  <span className="text-[0.625rem] font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)'), color: draft.customerId ? c.accent : c.textSecondary }}>
+                    {customerConnectionLabel}
+                  </span>
+                }
+              >
                 <div className="space-y-2.5">
                   <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
                     <div className="flex items-start justify-between gap-3">
@@ -682,14 +948,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       <p className="mt-1 text-[0.9375rem] font-semibold" style={{ color: c.textPrimary }}>{projectContacts.filter((contact) => contact.kind !== 'rep').length}</p>
                     </div>
                     <div className="px-3.5 py-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Dealer teams</span>
+                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Dealer groups</span>
                       <p className="mt-1 text-[0.9375rem] font-semibold" style={{ color: c.textPrimary }}>{(draft.dealers || []).length}</p>
                     </div>
                   </div>
                 </div>
               </Section>
 
-              <Section title="Project Contacts" theme={theme} right={<span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{projectContacts.length} total</span>}>
+              <Section title="Project Contacts" subtitle="Contacts surfaced from the linked customer, dealer team, and rep context" theme={theme} right={<span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{projectContacts.length} total</span>}>
                 {projectContacts.length > 0 ? (
                   <div className="space-y-2">
                     {projectContacts.map((contact) => (
@@ -712,58 +978,73 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 ) : null}
               </Section>
 
-              <Section title="Sample Activity" theme={theme}>
-            {relatedSampleOrders.length > 0 ? (
-              <div className="space-y-2">
-                {relatedSampleOrders.map((order) => {
-                  const meta = SAMPLE_STATUS_META[order.status] || SAMPLE_STATUS_META.processing;
-                  const StatusIcon = meta.icon;
-                  const totalItems = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
+              {relatedSampleOrders.length > 0 ? (
+                <Section
+                  title="Sample Activity"
+                  subtitle="Recent sample orders tied directly to this project"
+                  theme={theme}
+                  right={<span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{relatedSampleOrders.length} order{relatedSampleOrders.length === 1 ? '' : 's'}</span>}
+                >
+                  <div className="space-y-2">
+                    {relatedSampleOrders.map((order) => {
+                      const meta = SAMPLE_STATUS_META[order.status] || SAMPLE_STATUS_META.processing;
+                      const StatusIcon = meta.icon;
+                      const totalItems = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
+                      const primaryItemLabel = (order.items || [])[0]?.name || 'Sample order';
+                      const summaryBits = [
+                        order.id,
+                        `${totalItems} sample${totalItems === 1 ? '' : 's'}`,
+                        order.deliveredDate
+                          ? `Delivered ${formatSampleOrderDate(order.deliveredDate)}`
+                          : order.eta
+                            ? `ETA ${formatSampleOrderDate(order.eta)}`
+                            : `Ordered ${formatSampleOrderDate(order.date)}`,
+                      ];
 
-                  return (
-                    <button
-                      key={order.id}
-                      type="button"
-                      onClick={() => onNavigate?.('samples/orders', { orderId: order.id, tab: order.status === 'delivered' ? 'past' : 'current' })}
-                      className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98]"
-                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}
-                    >
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
-                        <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[0.75rem] font-bold truncate" style={{ color: c.textPrimary }}>{order.id}</span>
-                          <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: meta.bg, color: meta.color }}>
-                            {meta.label}
-                          </span>
-                        </div>
-                        <div className="mt-1 text-[0.6875rem] leading-tight" style={{ color: c.textSecondary }}>
-                          {(order.items || [])[0]?.name || 'Sample order'}{totalItems > 1 ? ` + ${totalItems - 1} more` : ''}
-                        </div>
-                        <div className="mt-1 text-[0.625rem]" style={{ color: c.textSecondary, opacity: 0.72 }}>
-                          {order.date || 'No ship date'}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2.5 px-3.5 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <Package className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
-                <span className="text-[0.6875rem]" style={{ color: c.textSecondary }}>
-                  No sample orders linked to this project yet.
-                </span>
-              </div>
-            )}
-              </Section>
+                      return (
+                        <button
+                          key={order.id}
+                          type="button"
+                          onClick={() => setSelectedSampleOrder(order)}
+                          className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98]"
+                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}
+                        >
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
+                            <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>
+                                    {primaryItemLabel}{totalItems > 1 ? ` + ${totalItems - 1} more` : ''}
+                                  </span>
+                                </div>
+                                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.625rem]" style={{ color: c.textSecondary, opacity: 0.82 }}>
+                                  {summaryBits.map((bit) => <span key={bit}>{bit}</span>)}
+                                  <span>{order.shipTo || 'Ship to TBD'}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: meta.bg, color: meta.color }}>
+                                  {meta.label}
+                                </span>
+                                <ArrowUpRight className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Section>
+              ) : null}
 
-              <Section title="Quotes" theme={theme}>
+              <Section title="Quotes" subtitle="Pricing requests and completed quote packages" theme={theme}>
             <QuoteTracker quotes={enrichedQuotes} theme={theme} onRequestQuote={() => setQuoteModalOpen(true)} />
               </Section>
 
-              <Section title="Documents" theme={theme} right={
+              <Section title="Documents" subtitle="Attachments, plans, and supporting project files" theme={theme} right={
             <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all"
               style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}><Upload className="w-3 h-3" /> Upload</button>
           }>
@@ -900,6 +1181,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           setQuoteModalOpen(false);
         }}
         initialData={{ projectName: draft.name || '', dealerName: (draft.dealers || [])[0] || '', adFirm: (draft.designFirms || [])[0] || '' }} />
+
+      <SampleOrderDetailModal
+        order={selectedSampleOrder}
+        theme={theme}
+        onClose={() => setSelectedSampleOrder(null)}
+      />
     </div>
   );
 };

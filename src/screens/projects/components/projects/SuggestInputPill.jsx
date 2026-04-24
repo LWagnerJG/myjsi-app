@@ -30,14 +30,14 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => 
   const fieldBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.95)';
 
   return (
-    <div className="relative" ref={ref} style={{ minWidth: 152 }}>
+    <div className="relative" ref={ref} style={{ minWidth: 184 }}>
       <input
         value={q}
         onChange={e => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onKeyDown={e => { if (e.key === 'Enter') { commit(q.trim()); } if (e.key === 'Escape') { setOpen(false); } }}
         placeholder={placeholder}
-        className="h-10 px-3.5 text-xs font-medium outline-none border w-full"
+        className="h-11 px-4 text-[0.875rem] font-medium outline-none border w-full"
         style={{ backgroundColor: fieldBg, borderColor: fieldBorder, color: theme.colors.textPrimary, borderRadius: '24px' }}
       />
       {open && filtered.length > 0 && (
@@ -47,7 +47,7 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => 
               <button
                 key={s}
                 onClick={() => commit(s)}
-                className="w-full text-left px-3.5 py-2.5 text-xs transition-colors rounded-[18px]"
+                className="w-full text-left px-4 py-3 text-[0.8125rem] transition-colors rounded-[18px]"
                 style={{ color: theme.colors.textPrimary }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}

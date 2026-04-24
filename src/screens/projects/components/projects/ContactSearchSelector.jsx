@@ -23,24 +23,24 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
   return (
     <div className="relative" ref={ref}>
       {value ? (
-        <div className="flex items-center gap-3 py-2.5 px-4" style={{ background: fieldBg, border: fieldBorder, borderRadius: '24px' }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+        <div className="flex items-center gap-3 py-3 px-4" style={{ background: fieldBg, border: fieldBorder, borderRadius: '24px' }}>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-[0.75rem] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
             {value.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
           </div>
-          <span className="flex-1 text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
+          <span className="flex-1 text-[0.9375rem] font-medium truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
           <button onClick={() => { onChange(''); setQuery(''); }} className="w-6 h-6 rounded-full flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity">
             <span className="text-sm leading-none" style={{ color: theme.colors.textSecondary }}>×</span>
           </button>
         </div>
       ) : (
-        <div className="flex items-center gap-3 py-2.5 px-4" style={{ background: fieldBg, border: fieldBorder, borderRadius: '24px' }}>
+        <div className="flex items-center gap-3 py-3 px-4" style={{ background: fieldBg, border: fieldBorder, borderRadius: '24px' }}>
           <Search size={14} style={{ color: theme.colors.textSecondary, opacity: 0.4, flexShrink: 0 }} />
           <input
             value={query}
             onChange={e => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
             onKeyDown={e => { if (e.key === 'Enter' && query.trim()) { onChange(query.trim()); setQuery(''); setOpen(false); } if (e.key === 'Escape') setOpen(false); }}
-            className="flex-1 bg-transparent outline-none text-sm font-medium"
+            className="flex-1 bg-transparent outline-none text-[0.9375rem] font-medium"
             style={{ color: theme.colors.textPrimary }}
             placeholder="Search contacts..."
           />
@@ -50,17 +50,17 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
         <div className="absolute z-50 mt-1.5 left-0 right-0 overflow-hidden shadow-xl" style={{ backgroundColor: theme.colors.surface, border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(227,224,216,0.95)', borderRadius: '24px' }}>
           <div className="max-h-[200px] overflow-y-auto scrollbar-hide p-1.5">
             {filtered.length > 0 ? filtered.map(c => (
-              <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-3.5 py-3 flex items-center gap-3 transition-colors rounded-[18px]" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
+              <button key={c.name} onClick={() => { onChange(c.name); setQuery(''); setOpen(false); }} className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors rounded-[18px]" onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-[0.75rem] font-bold flex-shrink-0" style={{ backgroundColor: theme.colors.accent + '18', color: theme.colors.accent }}>
                   {c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[0.8125rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</div>
-                  <div className="text-[0.6875rem] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{c.title} · {c.dealer}</div>
+                  <div className="text-[0.875rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{c.name}</div>
+                  <div className="text-[0.75rem] truncate" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>{c.title} · {c.dealer}</div>
                 </div>
               </button>
             )) : (
-              <div className="px-3 py-3 text-center text-xs" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              <div className="px-3 py-3 text-center text-[0.8125rem]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
                 {contacts.length === 0 ? 'Add a dealer to see contacts' : 'No matching contacts'}
               </div>
             )}
@@ -68,7 +68,7 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
           {query.trim() && !contacts.some(c => c.name.toLowerCase() === query.toLowerCase()) && (
             <button onClick={() => { onChange(query.trim()); setQuery(''); setOpen(false); }} className="w-full text-left px-4 py-3 flex items-center gap-2.5 border-t transition-colors" style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.95)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
               <UserPlus size={14} style={{ color: theme.colors.accent }} />
-              <span className="text-xs font-semibold" style={{ color: theme.colors.accent }}>Add "{query.trim()}"</span>
+              <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.accent }}>Add "{query.trim()}"</span>
             </button>
           )}
         </div>
