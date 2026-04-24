@@ -21,6 +21,8 @@ const parseCurrency = (raw) => {
   return Number.isFinite(n) ? n : 0;
 };
 const SPIFF_502010_MIN_LIST = 10000;
+const REWARD_AUTO_OFF_NET_LIMIT = 150000;
+const REWARD_AUTO_OFF_DISCOUNT_MIN = 0.64;
 const FIELD_BG_LIGHT = 'rgba(240,237,232,0.88)';
 const FIELD_BG_DARK = 'rgba(255,255,255,0.065)';
 const CHIP_BG_LIGHT = 'rgba(240,237,232,0.96)';
@@ -461,7 +463,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const [draft, setDraft] = useState(opp);
   const dirty = useRef(false);
   const saveRef = useRef(null);
-  useEffect(() => { setDraft(opp); }, [opp]);
+  const rewardAutoManagedRef = useRef({ salesReward: true, designerReward: true });
+  useEffect(() => {
+    setDraft(opp);
+    rewardAutoManagedRef.current = {
+      salesReward: opp.salesReward == null || opp.salesReward === true,
+      designerReward: opp.designerReward == null || opp.designerReward === true,
+    };
+  }, [opp]);
 
   const update = useCallback((k, v) => {
     setDraft(p => { const n = { ...p, [k]: v }; dirty.current = true; return n; });
@@ -530,12 +539,39 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const discountCode = String(draft.discount || '').split(' ')[0];
   const isDiscount502010 = discountCode === '50/20/10';
   const netValue = discountPct > 0 ? Math.round(rawNumeric * (1 - discountPct)) : rawNumeric;
-  const rewardsOn = (draft.salesReward !== false) || (draft.designerReward !== false);
+  const rewardDefaultOff = netValue > 0 && netValue < REWARD_AUTO_OFF_NET_LIMIT && discountPct >= REWARD_AUTO_OFF_DISCOUNT_MIN;
+  const rewardDefaultValue = !rewardDefaultOff;
+  const salesRewardEnabled = rewardAutoManagedRef.current.salesReward ? rewardDefaultValue : draft.salesReward !== false;
+  const designerRewardEnabled = rewardAutoManagedRef.current.designerReward ? rewardDefaultValue : draft.designerReward !== false;
+  const rewardsOn = salesRewardEnabled || designerRewardEnabled;
   const showSpiffWarning = isDiscount502010 && rewardsOn && rawNumeric > 0 && rawNumeric < SPIFF_502010_MIN_LIST;
   const outcomeStages = ['Won', 'Lost'];
   const pipelineStages = STAGES.filter((stage) => !outcomeStages.includes(stage));
   const isOutcomeStage = outcomeStages.includes(draft.stage);
   const currentPipelineIndex = pipelineStages.indexOf(draft.stage);
+
+  useEffect(() => {
+    setDraft((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      if (rewardAutoManagedRef.current.salesReward && prev.salesReward !== rewardDefaultValue) {
+        next.salesReward = rewardDefaultValue;
+        changed = true;
+      }
+      if (rewardAutoManagedRef.current.designerReward && prev.designerReward !== rewardDefaultValue) {
+        next.designerReward = rewardDefaultValue;
+        changed = true;
+      }
+      if (!changed) return prev;
+      dirty.current = true;
+      return next;
+    });
+  }, [rewardDefaultValue]);
+
+  const setRewardEnabled = useCallback((key, checked) => {
+    rewardAutoManagedRef.current[key] = false;
+    update(key, checked);
+  }, [update]);
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
@@ -632,6 +668,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       ? 'Auto-calculated from list and discount'
       : 'Matches list until a discount is selected'
     : 'Enter list price to start';
+  const rewardsStatusLabel = rewardDefaultOff ? 'Auto-default off' : 'Defaults on';
+  const rewardsDetailLabel = rewardDefaultOff
+    ? `Net below ${formatCurrency(REWARD_AUTO_OFF_NET_LIMIT)} with ${formatPercentLabel(REWARD_AUTO_OFF_DISCOUNT_MIN * 100)}+ discount starts rewards off.`
+    : `Both rewards stay on by default until net drops below ${formatCurrency(REWARD_AUTO_OFF_NET_LIMIT)} at ${formatPercentLabel(REWARD_AUTO_OFF_DISCOUNT_MIN * 100)}+ discount.`;
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
     : customerLinkSource === 'inferred'
@@ -812,20 +852,48 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
               </div>
 
-              <div className="px-3.5 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <div>
-                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Sales Reward</span>
-                  <span className="mt-1 block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{draft.salesReward !== false ? 'Enabled' : 'Off'}</span>
+              <div className="px-4 py-4 sm:col-span-2 lg:col-span-2 space-y-4" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Rewards</span>
+                    <p className="mt-1 text-[0.75rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.82 }}>
+                      Sales and designer rewards live together here, but each toggle still controls its own payout path.
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold whitespace-nowrap"
+                    style={{ backgroundColor: rewardDefaultOff ? `${theme.colors.warning}18` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'), color: rewardDefaultOff ? theme.colors.warning : c.textSecondary }}>
+                    {rewardsStatusLabel}
+                  </span>
                 </div>
-                <ToggleSwitch checked={draft.salesReward !== false} onChange={e => update('salesReward', e.target.checked)} theme={theme} />
-              </div>
 
-              <div className="px-3.5 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <div>
-                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Designer Reward</span>
-                  <span className="mt-1 block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{draft.designerReward !== false ? 'Enabled' : 'Off'}</span>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <div className="px-4 py-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)', borderRadius: '22px', boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)' }}>
+                    <div className="min-w-0">
+                      <span className="block text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Sales Reward</span>
+                      <span className="mt-1 block text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                        {salesRewardEnabled ? 'Enabled · 3% reward' : 'Off · Sales payout disabled'}
+                      </span>
+                    </div>
+                    <ToggleSwitch checked={salesRewardEnabled} onChange={e => setRewardEnabled('salesReward', e.target.checked)} theme={theme} />
+                  </div>
+
+                  <div className="px-4 py-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)', borderRadius: '22px', boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)' }}>
+                    <div className="min-w-0">
+                      <span className="block text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Designer Reward</span>
+                      <span className="mt-1 block text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                        {designerRewardEnabled ? 'Enabled · Designer payout active' : 'Off · Designer payout disabled'}
+                      </span>
+                    </div>
+                    <ToggleSwitch checked={designerRewardEnabled} onChange={e => setRewardEnabled('designerReward', e.target.checked)} theme={theme} />
+                  </div>
                 </div>
-                <ToggleSwitch checked={draft.designerReward !== false} onChange={e => update('designerReward', e.target.checked)} theme={theme} />
+
+                <div className="flex items-start gap-2.5 px-3.5 py-3" style={{ backgroundColor: rewardDefaultOff ? (isDark ? 'rgba(196,149,106,0.12)' : 'rgba(196,149,106,0.08)') : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)'), borderRadius: '20px' }}>
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: rewardDefaultOff ? theme.colors.warning : c.textSecondary, opacity: rewardDefaultOff ? 1 : 0.75 }} />
+                  <p className="text-[0.6875rem] font-medium leading-snug" style={{ color: rewardDefaultOff ? theme.colors.warning : c.textSecondary, opacity: rewardDefaultOff ? 1 : 0.82 }}>
+                    {rewardsDetailLabel} You can still override either reward independently.
+                  </p>
+                </div>
               </div>
 
             </div>
