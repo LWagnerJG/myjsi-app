@@ -529,7 +529,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
-  const [hubModal, setHubModal] = useState(null); // 'quotes' | 'samples' | 'documents' | 'contacts' | null
+  const [hubModal, setHubModal] = useState(null); // 'status' | 'quotes' | 'samples' | 'documents' | 'contacts' | null
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
   const relatedSampleOrders = useMemo(
     () => getSampleOrdersForOpportunity(draft, sampleOrders, opportunities)
@@ -600,6 +600,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const heroDealers = (draft.dealers || []).filter(Boolean);
   const heroDealerPreview = heroDealers.slice(0, 3);
   const heroDealerOverflowCount = Math.max(heroDealers.length - heroDealerPreview.length, 0);
+  const heroMetaLabel = [draft.vertical, draft.poTimeframe].filter(Boolean).join(' · ');
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
     : customerLinkSource === 'inferred'
@@ -611,204 +612,106 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
         <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-3.5">
 
           {/* HERO */}
-          <div className="rounded-[32px] p-5 sm:p-6 space-y-4" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
-            <div className="space-y-3">
-              <div className="min-w-0 flex-1 space-y-3">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
-                    {draft.stage}
+          <div className="rounded-[32px] p-4 sm:p-6 space-y-3.5" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
+                  {draft.stage || 'Stage pending'}
+                </span>
+                {heroMetaLabel ? (
+                  <span className="text-[0.75rem] font-medium" style={{ color: c.textSecondary }}>
+                    {heroMetaLabel}
                   </span>
-                  {draft.vertical ? (
-                    <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.9)', color: c.textSecondary }}>
-                      {draft.vertical}
-                    </span>
-                  ) : null}
-                  {draft.poTimeframe ? (
-                    <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.9)', color: c.textSecondary }}>
-                      {draft.poTimeframe}
-                    </span>
-                  ) : null}
-                  {linkedCustomer ? (
-                    <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
-                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}>
-                      <Building2 className="w-3 h-3" style={{ color: c.accent }} />
-                      {customerLinkSource === 'explicit' ? 'Customer profile' : 'Matched customer'}
-                      <ArrowUpRight className="w-3 h-3" style={{ color: c.textSecondary, opacity: 0.6 }} />
-                    </button>
-                  ) : null}
-                </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project Name</span>
-                    <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
-                      className={HERO_TITLE_INPUT_CLASS} style={{ color: c.textPrimary }} placeholder="Project name" />
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.9fr)]">
-                    <div className="space-y-1.5 min-w-0">
-                      <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Customer</span>
-                      <div className="flex items-center gap-2.5 mt-0.5 min-w-0">
-                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
-                        <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                          className="bg-transparent outline-none text-[0.9375rem] font-medium flex-1 min-w-0" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5 min-w-0">
-                      <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Associated Dealerships</span>
-                      {heroDealerPreview.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {heroDealerPreview.map((dealer) => (
-                            <span
-                              key={dealer}
-                              className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
-                              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.96)', color: c.textPrimary }}
-                            >
-                              {dealer}
-                            </span>
-                          ))}
-                          {heroDealerOverflowCount > 0 ? (
-                            <span
-                              className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
-                              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.06)', color: c.textSecondary }}
-                            >
-                              +{heroDealerOverflowCount} more
-                            </span>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <p className="text-[0.8125rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                          No dealerships linked yet
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-3.5 py-3 sm:px-4 sm:py-3.5" style={heroInsetStyle}>
-              <div className="flex items-center justify-between gap-3 mb-2.5">
-                <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Stage Progress</span>
-                <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
-              </div>
-              <div className="sm:hidden space-y-2">
-                <div
-                  className="rounded-[22px] px-3.5 py-3 flex items-center gap-3"
-                  style={{
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.7)',
-                    boxShadow: isDark ? 'none' : '0 10px 22px rgba(53,53,53,0.04)',
-                  }}
-                >
-                  <span
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[0.75rem] font-bold flex-shrink-0"
-                    style={{
-                      backgroundColor: currentStageItem?.circleBg || c.accent,
-                      border: `1px solid ${currentStageItem?.circleBorder || c.accent}`,
-                      color: currentStageItem?.active ? c.accentText : c.textPrimary,
-                    }}
-                  >
-                    {currentStageItem?.stepToken || '•'}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.7 }}>Current Stage</div>
-                    <div className="mt-1 text-[0.95rem] font-semibold leading-none" style={{ color: c.textPrimary }}>
-                      {currentStageItem?.stage || draft.stage || 'Stage pending'}
-                    </div>
-                  </div>
-                  <span className="text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
-                    {stagePositionLabel}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {stageItems.map((item) => (
-                    <button
-                      key={item.stage}
-                      type="button"
-                      onClick={() => update('stage', item.stage)}
-                      className="min-w-0 min-h-[74px] rounded-[18px] px-2.5 py-2.5 text-left transition-all active:scale-[0.98]"
-                      style={{
-                        backgroundColor: item.active
-                          ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.72)')
-                          : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.5)'),
-                        border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')}`,
-                      }}
-                    >
-                      <span
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold"
-                        style={{
-                          backgroundColor: item.circleBg,
-                          border: `1px solid ${item.circleBorder}`,
-                          color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
-                        }}
-                      >
-                        {item.stepToken}
-                      </span>
-                      <span
-                        className="mt-2 block text-[0.6875rem] font-semibold leading-[1.05] break-words"
-                        style={{ color: item.labelColor, opacity: item.active ? 1 : (item.complete ? 0.84 : 0.72) }}
-                      >
-                        {item.stage}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                ) : null}
               </div>
 
-              <div className="hidden sm:flex items-start gap-1.5 lg:gap-2 w-full">
-                {stageItems.map((item) => {
-                  return (
-                    <React.Fragment key={item.stage}>
+              <div className="space-y-1.5">
+                <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project</span>
+                <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
+                  className={HERO_TITLE_INPUT_CLASS} style={{ color: c.textPrimary }} placeholder="Project name" />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+                <div className="space-y-1.5 min-w-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Customer</span>
+                    {linkedCustomer ? (
                       <button
                         type="button"
-                        onClick={() => update('stage', item.stage)}
-                        className="flex-1 min-w-0 flex flex-col items-center gap-1.5 rounded-[20px] px-2 py-1.5 sm:px-2.5 text-center transition-all active:scale-[0.98]"
-                        style={{
-                          backgroundColor: item.active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
-                        }}
+                        onClick={openLinkedCustomer}
+                        className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold flex-shrink-0 transition-all active:scale-[0.98]"
+                        style={{ color: c.textSecondary }}
                       >
-                        <span
-                          className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
-                          style={{
-                            backgroundColor: item.circleBg,
-                            border: `1px solid ${item.circleBorder}`,
-                            color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
-                          }}
-                        >
-                          {item.stepToken}
-                        </span>
-                        <span
-                          className="text-[0.625rem] sm:text-[0.6875rem] font-semibold leading-[1.05] whitespace-normal break-words text-center"
-                          style={{ color: item.labelColor, opacity: item.active ? 1 : (item.complete ? 0.82 : 0.68) }}
-                        >
-                          {item.stage}
-                        </span>
+                        Open profile
+                        <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.58 }} />
                       </button>
-                      {item.stageIndex < STAGES.length - 1 && (
-                        <div aria-hidden="true" className="flex-[0.22_1_0%] min-w-[14px] pt-[10px]">
-                          <div
-                            className="h-px w-full rounded-full"
-                            style={{
-                              backgroundColor: item.connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
-                              opacity: item.connectorComplete ? 0.65 : 1,
-                            }}
-                          />
-                        </div>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}` }}>
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Win Probability</span>
-                  <span className="text-[0.6875rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
+                    <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
+                      className="bg-transparent outline-none text-[0.9375rem] font-medium flex-1 min-w-0" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
+                  </div>
                 </div>
-                <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
+
+                <div className="space-y-1.5 min-w-0">
+                  <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Dealerships</span>
+                  {heroDealerPreview.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {heroDealerPreview.map((dealer) => (
+                        <span
+                          key={dealer}
+                          className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
+                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.96)', color: c.textPrimary }}
+                        >
+                          {dealer}
+                        </span>
+                      ))}
+                      {heroDealerOverflowCount > 0 ? (
+                        <span
+                          className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
+                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.06)', color: c.textSecondary }}
+                        >
+                          +{heroDealerOverflowCount} more
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="text-[0.8125rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                      No dealerships linked yet
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setHubModal('status')}
+              className="w-full px-4 py-3.5 text-left transition-all active:scale-[0.99]"
+              style={heroInsetStyle}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project Status</span>
+                    <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
+                    <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.textPrimary }}>
+                      {currentStageItem?.stage || draft.stage || 'Stage pending'}
+                    </span>
+                    <span className="text-[0.8125rem] font-medium" style={{ color: c.textSecondary }}>
+                      {draft.winProbability || 0}% win probability
+                    </span>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
+                  Adjust
+                  <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.58 }} />
+                </span>
+              </div>
+            </button>
           </div>
 
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
@@ -1153,6 +1056,65 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           update('documents', [...(draft.documents || []), ...newDocs]);
           e.target.value = '';
         }} />
+
+      {/* STATUS HUB MODAL */}
+      <Modal show={hubModal === 'status'} onClose={() => setHubModal(null)} title="Project Status" theme={theme} maxWidth="max-w-lg">
+        <div className="space-y-4">
+          <div className="px-3.5 py-3 flex items-center justify-between gap-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+            <div className="min-w-0 flex-1">
+              <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Current stage</span>
+              <div className="mt-1 text-[0.95rem] font-semibold leading-none" style={{ color: c.textPrimary }}>
+                {currentStageItem?.stage || draft.stage || 'Stage pending'}
+              </div>
+            </div>
+            <span className="text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
+              {stagePositionLabel}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {stageItems.map((item) => (
+              <button
+                key={item.stage}
+                type="button"
+                onClick={() => update('stage', item.stage)}
+                className="min-w-0 min-h-[82px] rounded-[20px] px-3 py-3 text-left transition-all active:scale-[0.98]"
+                style={{
+                  backgroundColor: item.active
+                    ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.72)')
+                    : (isDark ? 'rgba(255,255,255,0.03)' : FIELD_BG_LIGHT),
+                  border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')}`,
+                }}
+              >
+                <span
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold"
+                  style={{
+                    backgroundColor: item.circleBg,
+                    border: `1px solid ${item.circleBorder}`,
+                    color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
+                  }}
+                >
+                  {item.stepToken}
+                </span>
+                <span
+                  className="mt-2 block text-[0.75rem] font-semibold leading-[1.08] break-words"
+                  style={{ color: item.labelColor, opacity: item.active ? 1 : (item.complete ? 0.84 : 0.72) }}
+                >
+                  {item.stage}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-1">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Win Probability</span>
+              <span className="text-[0.6875rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
+            </div>
+            <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
+          </div>
+        </div>
+      </Modal>
 
       {/* CONTACTS HUB MODAL */}
       <Modal show={hubModal === 'contacts'} onClose={() => setHubModal(null)} title="Project Contacts" theme={theme} maxWidth="max-w-lg">
