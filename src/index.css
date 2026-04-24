@@ -29,6 +29,11 @@ html {
     font-size: max(1rem, 16px) !important;
 }
 
+.panel-content input.project-display-title {
+    font-size: clamp(2.25rem, 4vw, 2.95rem) !important;
+    line-height: 0.94 !important;
+}
+
 :root {
     --font-scale: 1;        /* updated by initDynamicType() */
     --font-scale-pct: 100%; /* CSS percentage form */

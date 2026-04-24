@@ -1,6 +1,6 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ArrowUpRight, Building2, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Mail, MapPin, Package, Phone, Truck } from 'lucide-react';
-import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME, SECTION_TITLE_CLASSNAME } from '../../../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { JSI_SERIES } from '../../../products/data.js';
@@ -28,6 +28,9 @@ const CHIP_BG_DARK = 'rgba(255,255,255,0.08)';
 const SECTION_RADIUS = '28px';
 const CONTROL_RADIUS = '24px';
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
+const DETAIL_SECTION_TITLE_CLASS = 'text-[1.05rem] sm:text-[1.125rem] font-semibold tracking-[-0.02em] leading-none';
+const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1.5 text-[0.75rem] leading-snug';
+const HERO_TITLE_INPUT_CLASS = 'project-display-title w-full bg-transparent outline-none font-semibold tracking-[-0.04em]';
 
 const formatDiscountLabel = (value) => value || 'No discount selected';
 const getInitials = (name) => String(name || '').split(' ').filter(Boolean).map((segment) => segment[0]).join('').slice(0, 2).toUpperCase() || '?';
@@ -63,9 +66,9 @@ const Section = ({ title, subtitle, children, theme, right }) => {
       {title && (
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
-            <span className={SECTION_TITLE_CLASSNAME} style={{ color: theme.colors.textPrimary }}>{title}</span>
+            <h2 className={DETAIL_SECTION_TITLE_CLASS} style={{ color: theme.colors.textPrimary }}>{title}</h2>
             {subtitle ? (
-              <p className="mt-1 text-[0.6875rem] leading-snug" style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
+              <p className={DETAIL_SECTION_SUBTITLE_CLASS} style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
                 {subtitle}
               </p>
             ) : null}
@@ -603,7 +606,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
                 <div className="space-y-1.5">
                   <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
-                    className="w-full bg-transparent outline-none text-[2rem] sm:text-[2.35rem] font-semibold tracking-[-0.03em] leading-[0.98]" style={{ color: c.textPrimary }} placeholder="Project name" />
+                    className={HERO_TITLE_INPUT_CLASS} style={{ color: c.textPrimary }} placeholder="Project name" />
                   <div className="flex items-center gap-2.5 mt-0.5 flex-wrap">
                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
                     <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
