@@ -33,7 +33,14 @@ const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1.5 text-[0.75rem] leading-snug';
 const HERO_TITLE_INPUT_CLASS = 'project-display-title w-full bg-transparent outline-none font-semibold tracking-[-0.04em]';
 const HERO_IDENTITY_LABEL_CLASS = 'text-[0.625rem] font-semibold uppercase tracking-[0.08em]';
 
-const formatDiscountLabel = (value) => value || 'No discount selected';
+const formatPercentLabel = (value) => `${Number(value).toFixed(1).replace(/\.0$/, '')}%`;
+const formatDiscountLabel = (value) => {
+  if (!value) return 'No discount selected';
+  const code = String(value).split(' ')[0];
+  const percentMatch = String(value).match(/\(([^)]+)%\)/);
+  if (!percentMatch) return code;
+  return `${code} • ${formatPercentLabel(Number(percentMatch[1]))}`;
+};
 const getInitials = (name) => String(name || '').split(' ').filter(Boolean).map((segment) => segment[0]).join('').slice(0, 2).toUpperCase() || '?';
 const parseProjectDateValue = (value) => {
   if (!value) return null;
@@ -617,6 +624,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const heroDealerPreview = heroDealers.slice(0, 3);
   const heroDealerOverflowCount = Math.max(heroDealers.length - heroDealerPreview.length, 0);
   const heroMetaLabel = [draft.vertical, draft.poTimeframe].filter(Boolean).join(' · ');
+  const discountSummaryLabel = discountCode || 'Select discount';
+  const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
+  const netValueLabel = rawNumeric > 0 ? formatCurrency(netValue) : '—';
+  const netValueDetailLabel = rawNumeric > 0
+    ? discountPct > 0
+      ? 'Auto-calculated from list and discount'
+      : 'Matches list until a discount is selected'
+    : 'Enter list price to start';
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
     : customerLinkSource === 'inferred'
@@ -734,40 +749,67 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             <div className="space-y-3.5 min-w-0">
               <Section title="Commercial" subtitle="Pricing basis, discounting, and reward settings" theme={theme}>
             <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="px-3.5 py-3.5 sm:col-span-2 lg:col-span-2" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Value</span>
-                    <div className="mt-1 flex items-baseline gap-1.5">
-                      <span className="text-lg font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.25 }}>$</span>
-                      <input inputMode="numeric"
-                        value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
-                        onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                        className="bg-transparent outline-none text-[1.5rem] font-bold tracking-tight w-full leading-none" style={{ color: c.textPrimary }} placeholder="0" />
+              <div className="px-4 py-4 sm:col-span-2 lg:col-span-2 space-y-4" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                <div className="grid gap-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(200px,0.82fr)] sm:items-start">
+                  <div className="space-y-1.5 min-w-0">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Price</span>
+                    <div
+                      className="px-4 py-3.5"
+                      style={{
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)',
+                        borderRadius: '22px',
+                        boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)',
+                      }}
+                    >
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-[1.125rem] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.28 }}>$</span>
+                        <input inputMode="numeric"
+                          value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
+                          onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                          className="bg-transparent outline-none text-[1.9rem] sm:text-[2.05rem] font-semibold tracking-[-0.04em] w-full leading-none"
+                          style={{ color: c.textPrimary }}
+                          placeholder="0"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold whitespace-nowrap"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textSecondary }}>
-                    {draft.discount || 'No discount'}
+
+                  <div className="space-y-1.5 min-w-0">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Discount</span>
+                    <button
+                      type="button"
+                      className="w-full min-h-[84px] px-4 py-3.5 text-left transition-all active:scale-[0.99]"
+                      style={{
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)',
+                        borderRadius: '22px',
+                        boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)',
+                        border: `1px solid ${discountOpen ? c.accent : 'transparent'}`,
+                      }}
+                      onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
+                      ref={discBtn}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[1rem] font-semibold tracking-[-0.02em] truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary }}>
+                          {discountSummaryLabel}
+                        </span>
+                        <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                      </div>
+                      <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                        {discountDetailLabel}
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-3.5" style={{ borderTop: `1px solid ${divider}` }}>
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Net</span>
+                  <span className="mt-1.5 block text-[1.45rem] sm:text-[1.65rem] font-bold tracking-[-0.03em] leading-none" style={{ color: c.textPrimary }}>
+                    {netValueLabel}
                   </span>
+                  <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+                    {netValueDetailLabel}
+                  </p>
                 </div>
-              </div>
-
-              <button type="button" className="h-full px-3.5 py-3.5 text-left transition-all active:scale-[0.99]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()} ref={discBtn}>
-                <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Discount</span>
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <span className="text-[0.9375rem] font-bold tracking-tight truncate" style={{ color: c.textPrimary }}>{draft.discount || '\u2014'}</span>
-                  <ChevronDown className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.4 }} />
-                </div>
-                <p className="mt-1 text-[0.625rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.72 }}>Pricing basis</p>
-              </button>
-
-              <div className="px-3.5 py-3.5 h-full" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Net Value</span>
-                <span className="mt-1 block text-[1.125rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>{netValue > 0 && discountPct > 0 ? formatCurrency(netValue) : '\u2014'}</span>
-                <p className="mt-1 text-[0.625rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.72 }}>
-                  {discountPct > 0 ? `${Math.round(discountPct * 100)}% off list` : 'Awaiting discount'}
-                </p>
               </div>
 
               <div className="px-3.5 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
