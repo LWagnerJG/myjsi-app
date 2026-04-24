@@ -618,10 +618,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Stage Progress</span>
                 <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
               </div>
-              <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
-                <div className="inline-flex items-start min-w-max">
-                  {STAGES.map((stage) => {
-                    const stageIndex = STAGES.indexOf(stage);
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex items-start gap-1.5 sm:gap-2 w-full min-w-[560px]">
+                  {STAGES.map((stage, stageIndex) => {
                     const active = draft.stage === stage;
                     const complete = stageIndex < currentStageIndex;
                     const connectorComplete = stageIndex < currentStageIndex;
@@ -642,7 +641,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                         <button
                           type="button"
                           onClick={() => update('stage', stage)}
-                          className="flex flex-col items-center gap-1.5 w-[68px] rounded-[20px] px-2 py-1.5 text-center transition-all active:scale-[0.98]"
+                          className="flex-1 min-w-0 flex flex-col items-center gap-1.5 rounded-[20px] px-2 py-1.5 sm:px-2.5 text-center transition-all active:scale-[0.98]"
                           style={{
                             backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
                           }}
@@ -658,21 +657,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                             {stepToken}
                           </span>
                           <span
-                            className="text-[0.625rem] font-semibold leading-[1.05] whitespace-normal break-words"
+                            className="text-[0.625rem] sm:text-[0.6875rem] font-semibold leading-[1.05] whitespace-normal break-words text-center"
                             style={{ color: labelColor, opacity: active ? 1 : (complete ? 0.82 : 0.68) }}
                           >
                             {stage}
                           </span>
                         </button>
                         {stageIndex < STAGES.length - 1 && (
-                          <div
-                            aria-hidden="true"
-                            className="w-3.5 h-px mx-0.5 mt-[10px] rounded-full flex-shrink-0"
-                            style={{
-                              backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
-                              opacity: connectorComplete ? 0.65 : 1,
-                            }}
-                          />
+                          <div aria-hidden="true" className="flex-[0.22_1_0%] min-w-[14px] pt-[10px]">
+                            <div
+                              className="h-px w-full rounded-full"
+                              style={{
+                                backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
+                                opacity: connectorComplete ? 0.65 : 1,
+                              }}
+                            />
+                          </div>
                         )}
                       </React.Fragment>
                     );
