@@ -563,6 +563,36 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   }, [linkedCustomer, onOpenCustomer]);
   const locationSummary = draft.installationLocation || customerLocationLabel || 'Location pending';
   const stagePositionLabel = `${Math.min(currentStageIndex + 1, STAGES.length)} / ${STAGES.length}`;
+  const stageItems = STAGES.map((stage, stageIndex) => {
+    const active = draft.stage === stage;
+    const complete = currentStageIndex >= 0 && stageIndex < currentStageIndex;
+    const connectorComplete = currentStageIndex >= 0 && stageIndex < currentStageIndex;
+    const circleBg = active
+      ? c.accent
+      : complete
+        ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
+        : 'transparent';
+    const circleBorder = active
+      ? c.accent
+      : complete
+        ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
+        : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.98)');
+    const labelColor = active || complete ? c.textPrimary : c.textSecondary;
+    const stepToken = stage === 'Won' ? 'W' : stage === 'Lost' ? 'L' : stageIndex + 1;
+
+    return {
+      stage,
+      stageIndex,
+      active,
+      complete,
+      connectorComplete,
+      circleBg,
+      circleBorder,
+      labelColor,
+      stepToken,
+    };
+  });
+  const currentStageItem = stageItems.find((item) => item.active) || stageItems[Math.max(currentStageIndex, 0)] || null;
   const heroInsetStyle = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
     borderRadius: '28px',
@@ -658,71 +688,118 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               </div>
             </div>
 
-            <div className="px-4 py-3.5" style={heroInsetStyle}>
+            <div className="px-3.5 py-3 sm:px-4 sm:py-3.5" style={heroInsetStyle}>
               <div className="flex items-center justify-between gap-3 mb-2.5">
                 <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Stage Progress</span>
                 <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
               </div>
-              <div className="overflow-x-auto scrollbar-hide">
-                <div className="flex items-start gap-1.5 sm:gap-2 w-full min-w-[560px]">
-                  {STAGES.map((stage, stageIndex) => {
-                    const active = draft.stage === stage;
-                    const complete = stageIndex < currentStageIndex;
-                    const connectorComplete = stageIndex < currentStageIndex;
-                    const circleBg = active
-                      ? c.accent
-                      : complete
-                        ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
-                        : 'transparent';
-                    const circleBorder = active
-                      ? c.accent
-                      : complete
-                        ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
-                        : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.98)');
-                    const labelColor = active || complete ? c.textPrimary : c.textSecondary;
-                    const stepToken = stage === 'Won' ? 'W' : stage === 'Lost' ? 'L' : stageIndex + 1;
-                    return (
-                      <React.Fragment key={stage}>
-                        <button
-                          type="button"
-                          onClick={() => update('stage', stage)}
-                          className="flex-1 min-w-0 flex flex-col items-center gap-1.5 rounded-[20px] px-2 py-1.5 sm:px-2.5 text-center transition-all active:scale-[0.98]"
+              <div className="sm:hidden space-y-2">
+                <div
+                  className="rounded-[22px] px-3.5 py-3 flex items-center gap-3"
+                  style={{
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.7)',
+                    boxShadow: isDark ? 'none' : '0 10px 22px rgba(53,53,53,0.04)',
+                  }}
+                >
+                  <span
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[0.75rem] font-bold flex-shrink-0"
+                    style={{
+                      backgroundColor: currentStageItem?.circleBg || c.accent,
+                      border: `1px solid ${currentStageItem?.circleBorder || c.accent}`,
+                      color: currentStageItem?.active ? c.accentText : c.textPrimary,
+                    }}
+                  >
+                    {currentStageItem?.stepToken || '•'}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.7 }}>Current Stage</div>
+                    <div className="mt-1 text-[0.95rem] font-semibold leading-none" style={{ color: c.textPrimary }}>
+                      {currentStageItem?.stage || draft.stage || 'Stage pending'}
+                    </div>
+                  </div>
+                  <span className="text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
+                    {stagePositionLabel}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {stageItems.map((item) => (
+                    <button
+                      key={item.stage}
+                      type="button"
+                      onClick={() => update('stage', item.stage)}
+                      className="min-w-0 min-h-[74px] rounded-[18px] px-2.5 py-2.5 text-left transition-all active:scale-[0.98]"
+                      style={{
+                        backgroundColor: item.active
+                          ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.72)')
+                          : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.5)'),
+                        border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')}`,
+                      }}
+                    >
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold"
+                        style={{
+                          backgroundColor: item.circleBg,
+                          border: `1px solid ${item.circleBorder}`,
+                          color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
+                        }}
+                      >
+                        {item.stepToken}
+                      </span>
+                      <span
+                        className="mt-2 block text-[0.6875rem] font-semibold leading-[1.05] break-words"
+                        style={{ color: item.labelColor, opacity: item.active ? 1 : (item.complete ? 0.84 : 0.72) }}
+                      >
+                        {item.stage}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="hidden sm:flex items-start gap-1.5 lg:gap-2 w-full">
+                {stageItems.map((item) => {
+                  return (
+                    <React.Fragment key={item.stage}>
+                      <button
+                        type="button"
+                        onClick={() => update('stage', item.stage)}
+                        className="flex-1 min-w-0 flex flex-col items-center gap-1.5 rounded-[20px] px-2 py-1.5 sm:px-2.5 text-center transition-all active:scale-[0.98]"
+                        style={{
+                          backgroundColor: item.active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
+                        }}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
                           style={{
-                            backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
+                            backgroundColor: item.circleBg,
+                            border: `1px solid ${item.circleBorder}`,
+                            color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
                           }}
                         >
-                          <span
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
+                          {item.stepToken}
+                        </span>
+                        <span
+                          className="text-[0.625rem] sm:text-[0.6875rem] font-semibold leading-[1.05] whitespace-normal break-words text-center"
+                          style={{ color: item.labelColor, opacity: item.active ? 1 : (item.complete ? 0.82 : 0.68) }}
+                        >
+                          {item.stage}
+                        </span>
+                      </button>
+                      {item.stageIndex < STAGES.length - 1 && (
+                        <div aria-hidden="true" className="flex-[0.22_1_0%] min-w-[14px] pt-[10px]">
+                          <div
+                            className="h-px w-full rounded-full"
                             style={{
-                              backgroundColor: circleBg,
-                              border: `1px solid ${circleBorder}`,
-                              color: active ? c.accentText : (complete ? c.textPrimary : c.textSecondary),
+                              backgroundColor: item.connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
+                              opacity: item.connectorComplete ? 0.65 : 1,
                             }}
-                          >
-                            {stepToken}
-                          </span>
-                          <span
-                            className="text-[0.625rem] sm:text-[0.6875rem] font-semibold leading-[1.05] whitespace-normal break-words text-center"
-                            style={{ color: labelColor, opacity: active ? 1 : (complete ? 0.82 : 0.68) }}
-                          >
-                            {stage}
-                          </span>
-                        </button>
-                        {stageIndex < STAGES.length - 1 && (
-                          <div aria-hidden="true" className="flex-[0.22_1_0%] min-w-[14px] pt-[10px]">
-                            <div
-                              className="h-px w-full rounded-full"
-                              style={{
-                                backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
-                                opacity: connectorComplete ? 0.65 : 1,
-                              }}
-                            />
-                          </div>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
+                          />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </div>
               <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}` }}>
                 <div className="flex items-center justify-between gap-3 mb-2">
