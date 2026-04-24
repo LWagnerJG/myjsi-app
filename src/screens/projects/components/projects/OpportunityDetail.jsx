@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { ArrowUpRight, Building2, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Mail, MapPin, Package, Phone, Truck } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Mail, MapPin, Package, Phone, Truck } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
@@ -12,7 +12,7 @@ import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quot
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { ContactSearchSelector } from './ContactSearchSelector.jsx';
-import { buildOpportunityProjectContacts, getOpportunityCustomerDisplayName, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
+import { buildOpportunityProjectContacts, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
 
 /* helpers */
 const parseCurrency = (raw) => {
@@ -588,10 +588,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     () => resolveOpportunityCustomerLink(draft, customers),
     [customers, draft],
   );
-  const displayCustomerName = useMemo(
-    () => getOpportunityCustomerDisplayName(draft, linkedCustomer),
-    [draft, linkedCustomer],
-  );
   const projectContacts = useMemo(
     () => buildOpportunityProjectContacts(draft, linkedCustomer),
     [draft, linkedCustomer],
@@ -724,6 +720,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                     <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
                     <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
                       className="bg-transparent outline-none text-[0.9375rem] font-medium flex-1 min-w-0" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span
+                      className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold"
+                      style={{
+                        backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'),
+                        color: draft.customerId ? c.accent : c.textSecondary,
+                      }}
+                    >
+                      Account {customerConnectionLabel}
+                    </span>
+                    <span className="text-[0.6875rem] font-medium leading-tight" style={{ color: c.textSecondary, opacity: 0.76 }}>
+                      {customerLocationLabel || customerLinkStatus}
+                    </span>
                   </div>
                 </div>
 
@@ -1081,33 +1091,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </div>
 
             <div className="space-y-3.5 min-w-0">
-              <Section
-                title="Account"
-                subtitle="Customer record linked to this project"
-                theme={theme}
-                right={
-                  <span className="text-[0.625rem] font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)'), color: draft.customerId ? c.accent : c.textSecondary }}>
-                    {customerConnectionLabel}
-                  </span>
-                }
-              >
-                <button
-                  type="button"
-                  onClick={linkedCustomer ? openLinkedCustomer : () => setHubModal('contacts')}
-                  className="w-full flex items-start gap-3 px-3.5 py-3 text-left transition-all hover:-translate-y-px active:scale-[0.99]"
-                  style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[0.9375rem] font-semibold leading-tight truncate" style={{ color: c.textPrimary }}>{displayCustomerName}</p>
-                    <p className="mt-1 text-[0.6875rem] leading-tight truncate" style={{ color: c.textSecondary }}>{customerLocationLabel || customerLinkStatus}</p>
-                  </div>
-                  <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.5 }} />
-                </button>
-              </Section>
-
               <Section title="Project Hub" theme={theme}>
                 <div className="space-y-2">
                   <DetailHubCard
