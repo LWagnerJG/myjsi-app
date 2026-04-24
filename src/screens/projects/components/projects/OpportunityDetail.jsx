@@ -407,36 +407,6 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
   );
 };
 
-const OverviewMetric = ({ label, value, supportingText, theme, emphasis = false, onClick }) => {
-  const isDark = isDarkTheme(theme);
-  const c = theme.colors;
-
-  const Element = onClick ? 'button' : 'div';
-  const interactiveProps = onClick
-    ? { type: 'button', onClick, className: 'w-full text-left px-3.5 py-3.5 rounded-[24px] transition-all hover:-translate-y-px active:scale-[0.99]' }
-    : { className: 'px-3.5 py-3.5 rounded-[24px]' };
-
-  return (
-    <Element
-      {...interactiveProps}
-      style={{
-        backgroundColor: emphasis
-          ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)')
-          : (isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT),
-        border: `1px solid ${emphasis ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)') : 'transparent'}`,
-      }}
-    >
-      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.82 }}>{label}</span>
-      <p className="mt-1 text-[1rem] font-semibold tracking-[-0.02em] leading-tight" style={{ color: c.textPrimary }}>{value}</p>
-      {supportingText ? (
-        <p className="mt-1 text-[0.625rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-          {supportingText}
-        </p>
-      ) : null}
-    </Element>
-  );
-};
-
 const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, accentColor }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
@@ -587,13 +557,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const openLinkedCustomer = useCallback(() => {
     if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
   }, [linkedCustomer, onOpenCustomer]);
-  const listValueLabel = rawNumeric > 0 ? formatCurrency(rawNumeric) : '—';
-  const netValueLabel = netValue > 0 && discountPct > 0 ? formatCurrency(netValue) : '—';
-  const installDateLabel = draft.expectedInstallDate ? formatSampleOrderDate(draft.expectedInstallDate) : 'Not scheduled';
   const locationSummary = draft.installationLocation || customerLocationLabel || 'Location pending';
-  const teamCount = (draft.dealers || []).length + (draft.designFirms || []).length;
-  const productCount = (draft.products || []).length;
-  const competitorCount = (draft.competitors || []).length;
   const stagePositionLabel = `${Math.min(currentStageIndex + 1, STAGES.length)} / ${STAGES.length}`;
   const heroInsetStyle = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
@@ -604,12 +568,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     : customerLinkSource === 'inferred'
       ? 'Matched'
       : 'Open';
-  const overviewMeta = [
-    `Account · ${displayCustomerName}`,
-    draft.contact ? `Primary contact · ${draft.contact}` : 'Primary contact · Not set',
-    `Location · ${locationSummary}`,
-  ];
-
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -617,7 +575,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
           {/* HERO */}
           <div className="rounded-[32px] p-5 sm:p-6 space-y-4" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="space-y-3">
               <div className="min-w-0 flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
@@ -652,34 +610,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       className="bg-transparent outline-none text-[0.8125rem] font-medium flex-1 min-w-[220px]" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
                   </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 xl:w-[360px]">
-                <OverviewMetric
-                  label="List Value"
-                  value={listValueLabel}
-                  supportingText={draft.discount || 'No discount selected'}
-                  theme={theme}
-                  emphasis
-                />
-                <OverviewMetric
-                  label="Net Value"
-                  value={netValueLabel}
-                  supportingText={discountPct > 0 ? `${Math.round(discountPct * 100)}% discount applied` : 'Set a discount to calculate'}
-                  theme={theme}
-                />
-                <OverviewMetric
-                  label="Install Target"
-                  value={installDateLabel}
-                  supportingText={locationSummary}
-                  theme={theme}
-                />
-                <OverviewMetric
-                  label="Win Probability"
-                  value={`${draft.winProbability || 0}%`}
-                  supportingText={rewardsOn ? 'Rewards active' : 'Rewards off'}
-                  theme={theme}
-                />
               </div>
             </div>
 
