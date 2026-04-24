@@ -525,7 +525,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const netValue = discountPct > 0 ? Math.round(rawNumeric * (1 - discountPct)) : rawNumeric;
   const rewardsOn = (draft.salesReward !== false) || (draft.designerReward !== false);
   const showSpiffWarning = isDiscount502010 && rewardsOn && rawNumeric > 0 && rawNumeric < SPIFF_502010_MIN_LIST;
-  const currentStageIndex = Math.max(STAGES.indexOf(draft.stage), 0);
+  const outcomeStages = ['Won', 'Lost'];
+  const pipelineStages = STAGES.filter((stage) => !outcomeStages.includes(stage));
+  const isOutcomeStage = outcomeStages.includes(draft.stage);
+  const currentPipelineIndex = pipelineStages.indexOf(draft.stage);
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
@@ -562,11 +565,17 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
   }, [linkedCustomer, onOpenCustomer]);
   const locationSummary = draft.installationLocation || customerLocationLabel || 'Location pending';
-  const stagePositionLabel = `${Math.min(currentStageIndex + 1, STAGES.length)} / ${STAGES.length}`;
+  const stagePositionLabel = isOutcomeStage
+    ? 'Outcome'
+    : currentPipelineIndex >= 0
+      ? `${currentPipelineIndex + 1} / ${pipelineStages.length}`
+      : `1 / ${pipelineStages.length}`;
   const stageItems = STAGES.map((stage, stageIndex) => {
+    const isOutcome = outcomeStages.includes(stage);
+    const pipelineIndex = pipelineStages.indexOf(stage);
     const active = draft.stage === stage;
-    const complete = currentStageIndex >= 0 && stageIndex < currentStageIndex;
-    const connectorComplete = currentStageIndex >= 0 && stageIndex < currentStageIndex;
+    const complete = !isOutcome && (isOutcomeStage || (currentPipelineIndex >= 0 && pipelineIndex < currentPipelineIndex));
+    const connectorComplete = !isOutcome && (isOutcomeStage || (currentPipelineIndex >= 0 && pipelineIndex < currentPipelineIndex));
     const circleBg = active
       ? c.accent
       : complete
@@ -583,6 +592,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     return {
       stage,
       stageIndex,
+      pipelineIndex,
+      isOutcome,
       active,
       complete,
       connectorComplete,
@@ -592,7 +603,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       stepToken,
     };
   });
-  const currentStageItem = stageItems.find((item) => item.active) || stageItems[Math.max(currentStageIndex, 0)] || null;
+  const pipelineStageItems = stageItems.filter((item) => !item.isOutcome);
+  const outcomeStageItems = stageItems.filter((item) => item.isOutcome);
+  const currentStageItem = stageItems.find((item) => item.active)
+    || pipelineStageItems[Math.max(currentPipelineIndex, 0)]
+    || pipelineStageItems[0]
+    || null;
   const heroInsetStyle = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
     borderRadius: '28px',
@@ -1060,50 +1076,133 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       {/* STATUS HUB MODAL */}
       <Modal show={hubModal === 'status'} onClose={() => setHubModal(null)} title="Project Status" theme={theme} maxWidth="max-w-lg">
         <div className="space-y-4">
-          <div className="px-3.5 py-3 flex items-center justify-between gap-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-            <div className="min-w-0 flex-1">
+          <div className="px-3.5 py-3.5 space-y-2" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+            <div className="flex items-center justify-between gap-3">
               <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Current stage</span>
-              <div className="mt-1 text-[0.95rem] font-semibold leading-none" style={{ color: c.textPrimary }}>
-                {currentStageItem?.stage || draft.stage || 'Stage pending'}
-              </div>
+              <span className="text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
+                {stagePositionLabel}
+              </span>
             </div>
-            <span className="text-[0.6875rem] font-semibold flex-shrink-0" style={{ color: c.textSecondary }}>
-              {stagePositionLabel}
-            </span>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.textPrimary }}>
+                {currentStageItem?.stage || draft.stage || 'Stage pending'}
+              </span>
+              <span className="text-[0.75rem] font-medium" style={{ color: c.textSecondary }}>
+                {isOutcomeStage ? 'Pipeline complete, outcome selected' : `${Math.max(currentPipelineIndex + 1, 1)} of ${pipelineStages.length} active stages`}
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {stageItems.map((item) => (
-              <button
-                key={item.stage}
-                type="button"
-                onClick={() => update('stage', item.stage)}
-                className="min-w-0 min-h-[82px] rounded-[20px] px-3 py-3 text-left transition-all active:scale-[0.98]"
-                style={{
-                  backgroundColor: item.active
-                    ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.72)')
-                    : (isDark ? 'rgba(255,255,255,0.03)' : FIELD_BG_LIGHT),
-                  border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')}`,
-                }}
-              >
-                <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold"
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Pipeline</span>
+              <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>
+                {pipelineStages.length} stages
+              </span>
+            </div>
+
+            <div className="space-y-1.5">
+              {pipelineStageItems.map((item) => {
+                const statusLabel = item.active ? 'Current' : item.complete ? 'Done' : 'Up next';
+                return (
+                  <button
+                    key={item.stage}
+                    type="button"
+                    onClick={() => update('stage', item.stage)}
+                    className="w-full flex items-start gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98]"
+                    style={{
+                      backgroundColor: item.active
+                        ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.72)')
+                        : (isDark ? 'rgba(255,255,255,0.03)' : FIELD_BG_LIGHT),
+                      borderRadius: CONTROL_RADIUS,
+                      border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')}`,
+                    }}
+                  >
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      <span
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[0.625rem] font-bold"
+                        style={{
+                          backgroundColor: item.circleBg,
+                          border: `1px solid ${item.circleBorder}`,
+                          color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
+                        }}
+                      >
+                        {item.stepToken}
+                      </span>
+                      {item.pipelineIndex < pipelineStageItems.length - 1 ? (
+                        <span
+                          aria-hidden="true"
+                          className="mt-1 block w-px h-6 rounded-full"
+                          style={{
+                            backgroundColor: item.connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.10)'),
+                            opacity: item.connectorComplete ? 0.5 : 1,
+                          }}
+                        />
+                      ) : null}
+                    </div>
+
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="text-[0.8125rem] font-semibold leading-snug" style={{ color: item.labelColor }}>
+                          {item.stage}
+                        </span>
+                        <span className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] flex-shrink-0" style={{ color: item.active ? c.textPrimary : c.textSecondary, opacity: item.active ? 1 : 0.7 }}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Final Outcome</span>
+              <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>
+                {isOutcomeStage ? 'Selected' : 'Optional'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {outcomeStageItems.map((item) => (
+                <button
+                  key={item.stage}
+                  type="button"
+                  onClick={() => update('stage', item.stage)}
+                  className="min-w-0 rounded-[20px] px-3.5 py-3 text-left transition-all active:scale-[0.98]"
                   style={{
-                    backgroundColor: item.circleBg,
-                    border: `1px solid ${item.circleBorder}`,
-                    color: item.active ? c.accentText : (item.complete ? c.textPrimary : c.textSecondary),
+                    backgroundColor: item.active
+                      ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.72)')
+                      : (isDark ? 'rgba(255,255,255,0.03)' : FIELD_BG_LIGHT),
+                    border: `1px solid ${item.active ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')}`,
+                    borderRadius: CONTROL_RADIUS,
                   }}
                 >
-                  {item.stepToken}
-                </span>
-                <span
-                  className="mt-2 block text-[0.75rem] font-semibold leading-[1.08] break-words"
-                  style={{ color: item.labelColor, opacity: item.active ? 1 : (item.complete ? 0.84 : 0.72) }}
-                >
-                  {item.stage}
-                </span>
-              </button>
-            ))}
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[0.625rem] font-bold flex-shrink-0"
+                      style={{
+                        backgroundColor: item.circleBg,
+                        border: `1px solid ${item.circleBorder}`,
+                        color: item.active ? c.accentText : c.textSecondary,
+                      }}
+                    >
+                      {item.stepToken}
+                    </span>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <div className="text-[0.8125rem] font-semibold leading-none" style={{ color: item.active ? c.textPrimary : c.textSecondary }}>
+                        {item.stage}
+                      </div>
+                      <div className="mt-1 text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                        {item.stage === 'Won' ? 'Close this opportunity as secured' : 'Mark this opportunity as not awarded'}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="pt-1">
