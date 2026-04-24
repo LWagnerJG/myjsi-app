@@ -678,6 +678,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     : customerLinkSource === 'inferred'
       ? 'Matched'
       : 'Open';
+  const relationshipPillBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.62)';
+  const relationshipPillBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(227,224,216,0.95)';
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -1030,13 +1032,15 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   </Row>
                   <Row label="Customer Account" theme={theme}>
                     <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
-                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="Customer account name" />
+                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium border"
+                      style={{ color: c.textPrimary, backgroundColor: relationshipPillBg, border: relationshipPillBorder, borderRadius: CONTROL_RADIUS }}
+                      placeholder="Customer account name" />
                   </Row>
                   <Row label="Dealer Partners" theme={theme}>
                     <div className="flex flex-wrap gap-2">
                       {(draft.dealers || []).map(f => (
-                        <button key={f} onClick={() => removeFrom('dealers', f)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
-                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.6875rem]">{'×'}</span></button>
+                        <button key={f} onClick={() => removeFrom('dealers', f)} className="min-h-11 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold border flex items-center gap-1.5 transition-all active:scale-[0.97]"
+                          style={{ backgroundColor: relationshipPillBg, border: relationshipPillBorder, color: c.textPrimary }}>{f}<span className="opacity-35 text-[0.75rem]">{'×'}</span></button>
                       ))}
                       <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
                     </div>
@@ -1044,8 +1048,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   <Row label="A&D Firms" theme={theme}>
                     <div className="flex flex-wrap gap-2">
                       {(draft.designFirms || []).map(f => (
-                        <button key={f} onClick={() => removeFrom('designFirms', f)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
-                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{f}<span className="opacity-40 text-[0.6875rem]">{'×'}</span></button>
+                        <button key={f} onClick={() => removeFrom('designFirms', f)} className="min-h-11 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold border flex items-center gap-1.5 transition-all active:scale-[0.97]"
+                          style={{ backgroundColor: relationshipPillBg, border: relationshipPillBorder, color: c.textPrimary }}>{f}<span className="opacity-35 text-[0.75rem]">{'×'}</span></button>
                       ))}
                       <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
                     </div>

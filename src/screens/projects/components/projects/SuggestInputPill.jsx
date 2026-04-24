@@ -37,7 +37,7 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => 
         onFocus={() => setOpen(true)}
         onKeyDown={e => { if (e.key === 'Enter') { commit(q.trim()); } if (e.key === 'Escape') { setOpen(false); } }}
         placeholder={placeholder}
-        className="h-11 px-4 text-[0.875rem] font-medium outline-none border w-full"
+        className="h-11 px-4 text-[0.9375rem] font-medium outline-none border w-full"
         style={{ backgroundColor: fieldBg, borderColor: fieldBorder, color: theme.colors.textPrimary, borderRadius: '24px' }}
       />
       {open && filtered.length > 0 && (
