@@ -407,13 +407,18 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
   );
 };
 
-const OverviewMetric = ({ label, value, supportingText, theme, emphasis = false }) => {
+const OverviewMetric = ({ label, value, supportingText, theme, emphasis = false, onClick }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
 
+  const Element = onClick ? 'button' : 'div';
+  const interactiveProps = onClick
+    ? { type: 'button', onClick, className: 'w-full text-left px-3.5 py-3.5 rounded-[24px] transition-all hover:-translate-y-px active:scale-[0.99]' }
+    : { className: 'px-3.5 py-3.5 rounded-[24px]' };
+
   return (
-    <div
-      className="px-3.5 py-3.5 rounded-[24px]"
+    <Element
+      {...interactiveProps}
       style={{
         backgroundColor: emphasis
           ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)')
@@ -428,7 +433,40 @@ const OverviewMetric = ({ label, value, supportingText, theme, emphasis = false 
           {supportingText}
         </p>
       ) : null}
-    </div>
+    </Element>
+  );
+};
+
+const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, accentColor }) => {
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
+  const accent = accentColor || c.accent;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all hover:-translate-y-px active:scale-[0.99]"
+      style={{
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT,
+        borderRadius: CONTROL_RADIUS,
+      }}
+    >
+      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accent}16`, color: accent }}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[0.875rem] font-semibold tracking-[-0.01em] truncate" style={{ color: c.textPrimary }}>{title}</span>
+          {count != null ? (
+            <span className="text-[0.625rem] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: `${accent}16`, color: accent }}>{count}</span>
+          ) : null}
+        </div>
+        {summary ? (
+          <p className="mt-0.5 text-[0.6875rem] truncate" style={{ color: c.textSecondary }}>{summary}</p>
+        ) : null}
+      </div>
+      <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+    </button>
   );
 };
 
@@ -517,6 +555,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
+  const [hubModal, setHubModal] = useState(null); // 'quotes' | 'samples' | 'documents' | 'contacts' | null
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
   const relatedSampleOrders = useMemo(
     () => getSampleOrdersForOpportunity(draft, sampleOrders, opportunities)
@@ -579,7 +618,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           {/* HERO */}
           <div className="rounded-[32px] p-5 sm:p-6 space-y-4" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-              <div className="min-w-0 flex-1 space-y-3.5">
+              <div className="min-w-0 flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
                     {draft.stage}
@@ -594,6 +633,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       {draft.poTimeframe}
                     </span>
                   ) : null}
+                  {linkedCustomer ? (
+                    <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
+                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}>
+                      <Building2 className="w-3 h-3" style={{ color: c.accent }} />
+                      {customerLinkSource === 'explicit' ? 'Customer profile' : 'Matched customer'}
+                      <ArrowUpRight className="w-3 h-3" style={{ color: c.textSecondary, opacity: 0.6 }} />
+                    </button>
+                  ) : null}
                 </div>
 
                 <div className="space-y-1.5">
@@ -603,23 +650,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
                     <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
                       className="bg-transparent outline-none text-[0.8125rem] font-medium flex-1 min-w-[220px]" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
-                    {linkedCustomer ? (
-                      <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
-                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}>
-                        <Building2 className="w-3 h-3" style={{ color: c.accent }} />
-                        {customerLinkSource === 'explicit' ? 'Customer profile' : 'Matched customer'}
-                        <ArrowUpRight className="w-3 h-3" style={{ color: c.textSecondary, opacity: 0.6 }} />
-                      </button>
-                    ) : null}
                   </div>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5">
-                  {overviewMeta.map((item) => (
-                    <span key={item} className="inline-flex items-center rounded-full px-3 py-1.5 text-[0.625rem] font-medium" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(240,237,232,0.88)', color: c.textSecondary }}>
-                      {item}
-                    </span>
-                  ))}
                 </div>
               </div>
 
@@ -644,105 +675,86 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   theme={theme}
                 />
                 <OverviewMetric
-                  label="Project Team"
-                  value={`${teamCount} group${teamCount === 1 ? '' : 's'}`}
-                  supportingText={`${projectContacts.length} contacts surfaced`}
+                  label="Win Probability"
+                  value={`${draft.winProbability || 0}%`}
+                  supportingText={rewardsOn ? 'Rewards active' : 'Rewards off'}
                   theme={theme}
                 />
               </div>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
-              <div className="px-4 py-4" style={heroInsetStyle}>
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div>
-                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Stage Progress</span>
-                    <span className="block mt-1 text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>{draft.stage}</span>
-                  </div>
-                  <span className="text-[0.6875rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
-                </div>
-                <div className="overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-                  <div className="inline-flex items-start min-w-max">
-                    {STAGES.map((stage) => {
-                      const stageIndex = STAGES.indexOf(stage);
-                      const active = draft.stage === stage;
-                      const complete = stageIndex < currentStageIndex;
-                      const connectorComplete = stageIndex < currentStageIndex;
-                      const circleBg = active
-                        ? c.accent
-                        : complete
-                          ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
-                          : 'transparent';
-                      const circleBorder = active
-                        ? c.accent
-                        : complete
-                          ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
-                          : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.98)');
-                      const labelColor = active || complete ? c.textPrimary : c.textSecondary;
-                      const stepToken = stage === 'Won' ? 'W' : stage === 'Lost' ? 'L' : stageIndex + 1;
-                      return (
-                        <React.Fragment key={stage}>
-                          <button
-                            type="button"
-                            onClick={() => update('stage', stage)}
-                            className="flex flex-col items-center gap-1.5 w-[70px] rounded-[22px] px-2 py-2 text-center transition-all active:scale-[0.98]"
+            <div className="px-4 py-3.5" style={heroInsetStyle}>
+              <div className="flex items-center justify-between gap-3 mb-2.5">
+                <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Stage Progress</span>
+                <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{stagePositionLabel}</span>
+              </div>
+              <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+                <div className="inline-flex items-start min-w-max">
+                  {STAGES.map((stage) => {
+                    const stageIndex = STAGES.indexOf(stage);
+                    const active = draft.stage === stage;
+                    const complete = stageIndex < currentStageIndex;
+                    const connectorComplete = stageIndex < currentStageIndex;
+                    const circleBg = active
+                      ? c.accent
+                      : complete
+                        ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
+                        : 'transparent';
+                    const circleBorder = active
+                      ? c.accent
+                      : complete
+                        ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)')
+                        : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.98)');
+                    const labelColor = active || complete ? c.textPrimary : c.textSecondary;
+                    const stepToken = stage === 'Won' ? 'W' : stage === 'Lost' ? 'L' : stageIndex + 1;
+                    return (
+                      <React.Fragment key={stage}>
+                        <button
+                          type="button"
+                          onClick={() => update('stage', stage)}
+                          className="flex flex-col items-center gap-1.5 w-[68px] rounded-[20px] px-2 py-1.5 text-center transition-all active:scale-[0.98]"
+                          style={{
+                            backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
+                          }}
+                        >
+                          <span
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
                             style={{
-                              backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(227,224,216,0.66)') : 'transparent',
+                              backgroundColor: circleBg,
+                              border: `1px solid ${circleBorder}`,
+                              color: active ? c.accentText : (complete ? c.textPrimary : c.textSecondary),
                             }}
                           >
-                            <span
-                              className="w-5.5 h-5.5 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0"
-                              style={{
-                                backgroundColor: circleBg,
-                                border: `1px solid ${circleBorder}`,
-                                color: active ? c.accentText : (complete ? c.textPrimary : c.textSecondary),
-                              }}
-                            >
-                              {stepToken}
-                            </span>
-                            <span
-                              className="text-[0.625rem] font-semibold leading-[1.05] whitespace-normal break-words"
-                              style={{ color: labelColor, opacity: active ? 1 : (complete ? 0.82 : 0.68) }}
-                            >
-                              {stage}
-                            </span>
-                          </button>
-                          {stageIndex < STAGES.length - 1 && (
-                            <div
-                              aria-hidden="true"
-                              className="w-4 h-px mx-0.5 mt-[11px] rounded-full flex-shrink-0"
-                              style={{
-                                backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
-                                opacity: connectorComplete ? 0.65 : 1,
-                              }}
-                            />
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
+                            {stepToken}
+                          </span>
+                          <span
+                            className="text-[0.625rem] font-semibold leading-[1.05] whitespace-normal break-words"
+                            style={{ color: labelColor, opacity: active ? 1 : (complete ? 0.82 : 0.68) }}
+                          >
+                            {stage}
+                          </span>
+                        </button>
+                        {stageIndex < STAGES.length - 1 && (
+                          <div
+                            aria-hidden="true"
+                            className="w-3.5 h-px mx-0.5 mt-[10px] rounded-full flex-shrink-0"
+                            style={{
+                              backgroundColor: connectorComplete ? c.accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,1)'),
+                              opacity: connectorComplete ? 0.65 : 1,
+                            }}
+                          />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
               </div>
-
-              <div className="px-4 py-4 space-y-3" style={heroInsetStyle}>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Win Probability</span>
-                    <span className="block mt-1 text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>{draft.winProbability || 0}% confidence</span>
-                  </div>
-                  <span className="text-[0.625rem] font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: rewardsOn ? `${JSI_COLORS.success}12` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)'), color: rewardsOn ? JSI_COLORS.success : c.textSecondary }}>
-                    {rewardsOn ? 'Rewards active' : 'Rewards off'}
-                  </span>
+              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}` }}>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <span className="text-[0.6875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textSecondary, opacity: 0.85 }}>Win Probability</span>
+                  <span className="text-[0.6875rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{draft.winProbability || 0}%</span>
                 </div>
                 <ProbabilitySlider value={draft.winProbability || 0} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-medium" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.58)', color: c.textSecondary }}>
-                    {productCount} series selected
-                  </span>
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-medium" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.58)', color: c.textSecondary }}>
-                    {draft.competitionPresent !== false ? `${competitorCount} competitor${competitorCount === 1 ? '' : 's'} tracked` : 'No competition tracked'}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -851,29 +863,34 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
               </Section>
 
-              <div className="grid gap-3.5 lg:grid-cols-2">
-                <div className="h-full">
-                  <Section title="Competition" subtitle="Track competitive pressure on this opportunity" theme={theme} right={<ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />}>
+              <Section title="Specs & Competition" subtitle="Series in consideration and competitive pressure" theme={theme}>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[0.75rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Specified Series</span>
+                      <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{(draft.products || []).length}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(draft.products || []).map(p => (
+                        <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
+                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[0.6875rem]">{'×'}</span></button>
+                      ))}
+                      <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
+                    </div>
+                  </div>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[0.75rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Competition</span>
+                      <ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />
+                    </div>
                     {draft.competitionPresent !== false ? (
                       <MultiPillSelect options={COMPETITORS.filter(x => x !== 'None')} value={draft.competitors || []} onToggle={toggleCompetitor} theme={theme} />
                     ) : (
-                      <p className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.6 }}>No competition noted</p>
+                      <p className="text-[0.75rem]" style={{ color: c.textSecondary, opacity: 0.65 }}>No competition noted</p>
                     )}
-                  </Section>
+                  </div>
                 </div>
-
-                <div className="h-full">
-                  <Section title="Specified Series" subtitle="Lines and families already in consideration" theme={theme}>
-                    <div className="flex flex-wrap gap-1.5 mb-2.5">
-                      {(draft.products || []).map(p => (
-                        <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex items-center gap-1.5 transition-all"
-                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[0.625rem]">{'×'}</span></button>
-                      ))}
-                    </div>
-                    <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
-                  </Section>
-                </div>
-              </div>
+              </Section>
 
               <Section title="Notes" subtitle="Working context, constraints, and next steps" theme={theme}>
                 <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
@@ -885,8 +902,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
             <div className="space-y-3.5 min-w-0">
               <Section
-                title="Customer & Account"
-                subtitle="Link this project to the right account record and surface contact context"
+                title="Account"
+                subtitle="Customer record linked to this project"
                 theme={theme}
                 right={
                   <span className="text-[0.625rem] font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)'), color: draft.customerId ? c.accent : c.textSecondary }}>
@@ -894,196 +911,68 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   </span>
                 }
               >
-                <div className="space-y-2.5">
-                  <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-2.5 min-w-0">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}15`, color: c.accent }}>
-                          <Building2 className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Project account</span>
-                          <p className="mt-1 text-[0.9375rem] font-semibold leading-tight" style={{ color: c.textPrimary }}>{displayCustomerName}</p>
-                          <p className="mt-1 text-[0.6875rem] leading-tight" style={{ color: c.textSecondary }}>{customerLocationLabel || customerLinkStatus}</p>
-                        </div>
-                      </div>
-                      {linkedCustomer ? (
-                        <button type="button" onClick={openLinkedCustomer} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.625rem] font-semibold transition-all active:scale-[0.98]"
-                          style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
-                          Open
-                          <ArrowUpRight className="w-3 h-3" />
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="px-3.5 py-3.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                    <div className="flex items-center justify-between gap-3 mb-2.5">
-                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Linked customer profile</span>
-                      {draft.customerId ? (
-                        <button type="button" onClick={() => update('customerId', null)} className="text-[0.625rem] font-semibold" style={{ color: c.accent }}>
-                          Clear link
-                        </button>
-                      ) : null}
-                    </div>
-                    <select value={draft.customerId ? String(draft.customerId) : ''} onChange={(event) => update('customerId', event.target.value || null)}
-                      className="w-full bg-transparent outline-none text-[0.75rem] font-medium" style={{ color: c.textPrimary }}>
-                      <option value="">Select customer profile...</option>
-                      {(customers || []).map((customer) => (
-                        <option key={customer.id} value={customer.id}>{customer.name}</option>
-                      ))}
-                    </select>
-                    <p className="mt-2 text-[0.625rem] leading-tight" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                      {draft.customerId
-                        ? 'This project is explicitly pinned to a customer profile.'
-                        : customerLinkSource === 'inferred'
-                          ? 'A customer profile is already matched from the project account. Select it here to lock the relationship.'
-                          : 'Link a customer profile to bring in customer contacts, rep context, and quick navigation.'}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="px-3.5 py-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Customer contacts</span>
-                      <p className="mt-1 text-[0.9375rem] font-semibold" style={{ color: c.textPrimary }}>{projectContacts.filter((contact) => contact.kind !== 'rep').length}</p>
-                    </div>
-                    <div className="px-3.5 py-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Dealer groups</span>
-                      <p className="mt-1 text-[0.9375rem] font-semibold" style={{ color: c.textPrimary }}>{(draft.dealers || []).length}</p>
-                    </div>
-                  </div>
-                </div>
-              </Section>
-
-              <Section title="Project Contacts" subtitle="Contacts surfaced from the linked customer, dealer team, and rep context" theme={theme} right={<span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{projectContacts.length} total</span>}>
-                {projectContacts.length > 0 ? (
-                  <div className="space-y-2">
-                    {projectContacts.map((contact) => (
-                      <ContactSummaryCard key={`${contact.kind}-${contact.id}`} contact={contact} theme={theme} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2.5 px-3.5 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                    <Users className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
-                    <span className="text-[0.6875rem]" style={{ color: c.textSecondary }}>
-                      Add a primary contact or link a customer profile to surface project contacts here.
-                    </span>
-                  </div>
-                )}
-                {linkedCustomer ? (
-                  <div className="mt-2 flex items-center gap-2 text-[0.625rem]" style={{ color: c.textSecondary }}>
-                    <MapPin className="w-3 h-3" style={{ opacity: 0.55 }} />
-                    <span>{customerLocationLabel || linkedCustomer.name}</span>
-                  </div>
-                ) : null}
-              </Section>
-
-              {relatedSampleOrders.length > 0 ? (
-                <Section
-                  title="Sample Activity"
-                  subtitle="Recent sample orders tied directly to this project"
-                  theme={theme}
-                  right={<span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{relatedSampleOrders.length} order{relatedSampleOrders.length === 1 ? '' : 's'}</span>}
+                <button
+                  type="button"
+                  onClick={linkedCustomer ? openLinkedCustomer : () => setHubModal('contacts')}
+                  className="w-full flex items-start gap-3 px-3.5 py-3 text-left transition-all hover:-translate-y-px active:scale-[0.99]"
+                  style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}
                 >
-                  <div className="space-y-2">
-                    {relatedSampleOrders.map((order) => {
-                      const meta = SAMPLE_STATUS_META[order.status] || SAMPLE_STATUS_META.processing;
-                      const StatusIcon = meta.icon;
-                      const totalItems = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
-                      const primaryItemLabel = (order.items || [])[0]?.name || 'Sample order';
-                      const summaryBits = [
-                        order.id,
-                        `${totalItems} sample${totalItems === 1 ? '' : 's'}`,
-                        order.deliveredDate
-                          ? `Delivered ${formatSampleOrderDate(order.deliveredDate)}`
-                          : order.eta
-                            ? `ETA ${formatSampleOrderDate(order.eta)}`
-                            : `Ordered ${formatSampleOrderDate(order.date)}`,
-                      ];
-
-                      return (
-                        <button
-                          key={order.id}
-                          type="button"
-                          onClick={() => setSelectedSampleOrder(order)}
-                          className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98]"
-                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}
-                        >
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
-                            <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>
-                                    {primaryItemLabel}{totalItems > 1 ? ` + ${totalItems - 1} more` : ''}
-                                  </span>
-                                </div>
-                                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.625rem]" style={{ color: c.textSecondary, opacity: 0.82 }}>
-                                  {summaryBits.map((bit) => <span key={bit}>{bit}</span>)}
-                                  <span>{order.shipTo || 'Ship to TBD'}</span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: meta.bg, color: meta.color }}>
-                                  {meta.label}
-                                </span>
-                                <ArrowUpRight className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.45 }} />
-                              </div>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
+                    <Building2 className="w-4 h-4" />
                   </div>
-                </Section>
-              ) : null}
-
-              <Section title="Quotes" subtitle="Pricing requests and completed quote packages" theme={theme}>
-            <QuoteTracker quotes={enrichedQuotes} theme={theme} onRequestQuote={() => setQuoteModalOpen(true)} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[0.9375rem] font-semibold leading-tight truncate" style={{ color: c.textPrimary }}>{displayCustomerName}</p>
+                    <p className="mt-1 text-[0.6875rem] leading-tight truncate" style={{ color: c.textSecondary }}>{customerLocationLabel || customerLinkStatus}</p>
+                  </div>
+                  <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.5 }} />
+                </button>
               </Section>
 
-              <Section title="Documents" subtitle="Attachments, plans, and supporting project files" theme={theme} right={
-            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.625rem] font-semibold transition-all"
-              style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}><Upload className="w-3 h-3" /> Upload</button>
-          }>
-            <input ref={fileInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" className="hidden"
-              onChange={e => {
-                const files = Array.from(e.target.files || []);
-                const newDocs = files.map(f => ({ id: Date.now() + '_' + f.name, fileName: f.name, type: f.type.includes('pdf') ? 'PDF' : f.type.includes('image') ? 'Image' : 'Document', size: f.size < 1024 * 1024 ? `${Math.round(f.size / 1024)}KB` : `${(f.size / (1024 * 1024)).toFixed(1)}MB`, date: new Date().toLocaleDateString() }));
-                update('documents', [...(draft.documents || []), ...newDocs]);
-                e.target.value = '';
-              }} />
-            {(draft.documents || []).length > 0 ? (
-              <div className="space-y-2">
-                {(draft.documents || []).map(doc => (
-                  <div key={doc.id} className="group flex items-center gap-2.5 px-3.5 py-3 transition-colors"
-                    style={{ background: isDark ? 'rgba(255,255,255,0.08)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                    <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.accent }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[0.6875rem] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
-                      <div className="text-[0.625rem]" style={{ color: c.textSecondary, opacity: 0.6 }}>{doc.type} {'\u00b7'} {doc.size} {'\u00b7'} {doc.date}</div>
-                    </div>
-                    <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                      <button className="p-1 rounded-full" style={{ color: c.textSecondary }} title="Preview"><Eye className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="p-1 rounded-full" style={{ color: c.textSecondary }} title="Remove"><span className="text-[0.8125rem] leading-none">{'\u00d7'}</span></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-2.5 py-3 px-3.5 transition-all hover:opacity-80"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : FIELD_BG_LIGHT, color: c.textSecondary, borderRadius: CONTROL_RADIUS }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)' }}>
-                  <Paperclip className="w-3 h-3" style={{ opacity: 0.45 }} />
+              <Section title="Project Hub" subtitle="Tap any card to view full details" theme={theme}>
+                <div className="space-y-2">
+                  <DetailHubCard
+                    icon={Users}
+                    title="Contacts"
+                    count={projectContacts.length}
+                    summary={projectContacts[0] ? `${projectContacts[0].name}${projectContacts.length > 1 ? ` + ${projectContacts.length - 1} more` : ''}` : 'No contacts surfaced yet'}
+                    onClick={() => setHubModal('contacts')}
+                    theme={theme}
+                  />
+                  <DetailHubCard
+                    icon={FileText}
+                    title="Quotes"
+                    count={enrichedQuotes.length || null}
+                    summary={enrichedQuotes.length
+                      ? `${enrichedQuotes.filter(q => q.status === 'complete').length} complete · ${enrichedQuotes.filter(q => q.status && q.status !== 'complete').length} in queue`
+                      : 'No quote requests yet'}
+                    onClick={() => setHubModal('quotes')}
+                    theme={theme}
+                  />
+                  {relatedSampleOrders.length > 0 ? (
+                    <DetailHubCard
+                      icon={Package}
+                      title="Sample Activity"
+                      count={relatedSampleOrders.length}
+                      summary={(() => {
+                        const latest = relatedSampleOrders[0];
+                        const meta = SAMPLE_STATUS_META[latest.status] || SAMPLE_STATUS_META.processing;
+                        return `${meta.label} · ${formatSampleOrderDate(latest.deliveredDate || latest.eta || latest.date)}`;
+                      })()}
+                      onClick={() => setHubModal('samples')}
+                      theme={theme}
+                    />
+                  ) : null}
+                  <DetailHubCard
+                    icon={Paperclip}
+                    title="Documents"
+                    count={(draft.documents || []).length || null}
+                    summary={(draft.documents || []).length
+                      ? `Last upload ${(draft.documents || [])[(draft.documents || []).length - 1]?.date || ''}`
+                      : 'Drop in plans, specs, and PDFs'}
+                    onClick={() => setHubModal('documents')}
+                    theme={theme}
+                  />
                 </div>
-                <div className="text-left">
-                  <span className="text-[0.6875rem] font-semibold block">Drop files or click to upload</span>
-                  <span className="text-[0.5625rem]" style={{ opacity: 0.5 }}>PDF, DOC, images & more</span>
-                </div>
-              </button>
-            )}
               </Section>
             </div>
           </div>
@@ -1187,6 +1076,163 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
         theme={theme}
         onClose={() => setSelectedSampleOrder(null)}
       />
+
+      {/* Hidden file input for the documents hub */}
+      <input ref={fileInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" className="hidden"
+        onChange={e => {
+          const files = Array.from(e.target.files || []);
+          const newDocs = files.map(f => ({ id: Date.now() + '_' + f.name, fileName: f.name, type: f.type.includes('pdf') ? 'PDF' : f.type.includes('image') ? 'Image' : 'Document', size: f.size < 1024 * 1024 ? `${Math.round(f.size / 1024)}KB` : `${(f.size / (1024 * 1024)).toFixed(1)}MB`, date: new Date().toLocaleDateString() }));
+          update('documents', [...(draft.documents || []), ...newDocs]);
+          e.target.value = '';
+        }} />
+
+      {/* CONTACTS HUB MODAL */}
+      <Modal show={hubModal === 'contacts'} onClose={() => setHubModal(null)} title="Project Contacts" theme={theme} maxWidth="max-w-lg">
+        <div className="space-y-3.5">
+          <div className="px-3.5 py-3" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Linked customer profile</span>
+              {draft.customerId ? (
+                <button type="button" onClick={() => update('customerId', null)} className="text-[0.6875rem] font-semibold" style={{ color: c.accent }}>
+                  Clear link
+                </button>
+              ) : null}
+            </div>
+            <select value={draft.customerId ? String(draft.customerId) : ''} onChange={(event) => update('customerId', event.target.value || null)}
+              className="w-full bg-transparent outline-none text-[0.8125rem] font-medium" style={{ color: c.textPrimary }}>
+              <option value="">Select customer profile...</option>
+              {(customers || []).map((customer) => (
+                <option key={customer.id} value={customer.id}>{customer.name}</option>
+              ))}
+            </select>
+            <p className="mt-2 text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
+              {draft.customerId
+                ? 'This project is explicitly pinned to a customer profile.'
+                : customerLinkSource === 'inferred'
+                  ? 'A customer is matched from the project account. Lock it to keep contacts in sync.'
+                  : 'Link a customer profile to surface contacts, rep context, and quick navigation.'}
+            </p>
+          </div>
+
+          {projectContacts.length > 0 ? (
+            <div className="space-y-2">
+              {projectContacts.map((contact) => (
+                <ContactSummaryCard key={`${contact.kind}-${contact.id}`} contact={contact} theme={theme} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 px-3.5 py-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+              <Users className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+              <span className="text-[0.75rem]" style={{ color: c.textSecondary }}>
+                Add a primary contact or link a customer profile to surface project contacts here.
+              </span>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* QUOTES HUB MODAL */}
+      <Modal show={hubModal === 'quotes'} onClose={() => setHubModal(null)} title="Quotes" theme={theme} maxWidth="max-w-lg">
+        <QuoteTracker
+          quotes={enrichedQuotes}
+          theme={theme}
+          onRequestQuote={() => { setHubModal(null); setQuoteModalOpen(true); }}
+        />
+      </Modal>
+
+      {/* SAMPLES HUB MODAL */}
+      <Modal show={hubModal === 'samples'} onClose={() => setHubModal(null)} title="Sample Activity" theme={theme} maxWidth="max-w-lg">
+        {relatedSampleOrders.length > 0 ? (
+          <div className="space-y-2">
+            {relatedSampleOrders.map((order) => {
+              const meta = SAMPLE_STATUS_META[order.status] || SAMPLE_STATUS_META.processing;
+              const StatusIcon = meta.icon;
+              const totalItems = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
+              const primaryItemLabel = (order.items || [])[0]?.name || 'Sample order';
+              const summaryBits = [
+                order.id,
+                `${totalItems} sample${totalItems === 1 ? '' : 's'}`,
+                order.deliveredDate
+                  ? `Delivered ${formatSampleOrderDate(order.deliveredDate)}`
+                  : order.eta
+                    ? `ETA ${formatSampleOrderDate(order.eta)}`
+                    : `Ordered ${formatSampleOrderDate(order.date)}`,
+              ];
+              return (
+                <button
+                  key={order.id}
+                  type="button"
+                  onClick={() => { setHubModal(null); setSelectedSampleOrder(order); }}
+                  className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98]"
+                  style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}
+                >
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
+                    <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[0.8125rem] font-semibold truncate block" style={{ color: c.textPrimary }}>
+                          {primaryItemLabel}{totalItems > 1 ? ` + ${totalItems - 1} more` : ''}
+                        </span>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.82 }}>
+                          {summaryBits.map((bit) => <span key={bit}>{bit}</span>)}
+                          <span>{order.shipTo || 'Ship to TBD'}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: meta.bg, color: meta.color }}>
+                          {meta.label}
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-[0.75rem]" style={{ color: c.textSecondary, opacity: 0.7 }}>No sample orders linked to this project.</p>
+        )}
+      </Modal>
+
+      {/* DOCUMENTS HUB MODAL */}
+      <Modal show={hubModal === 'documents'} onClose={() => setHubModal(null)} title="Documents" theme={theme} maxWidth="max-w-lg">
+        <div className="space-y-3">
+          <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-2.5 py-3 px-3.5 transition-all hover:opacity-80"
+            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : FIELD_BG_LIGHT, color: c.textSecondary, borderRadius: CONTROL_RADIUS }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
+              <Upload className="w-4 h-4" />
+            </div>
+            <div className="text-left">
+              <span className="text-[0.8125rem] font-semibold block" style={{ color: c.textPrimary }}>Upload files</span>
+              <span className="text-[0.6875rem]" style={{ opacity: 0.65 }}>PDF, DOC, images and more</span>
+            </div>
+          </button>
+          {(draft.documents || []).length > 0 ? (
+            <div className="space-y-2">
+              {(draft.documents || []).map(doc => (
+                <div key={doc.id} className="group flex items-center gap-2.5 px-3.5 py-3 transition-colors"
+                  style={{ background: isDark ? 'rgba(255,255,255,0.06)' : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                  <FileText className="w-4 h-4 flex-shrink-0" style={{ color: c.accent }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
+                    <div className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.65 }}>{doc.type} {'\u00b7'} {doc.size} {'\u00b7'} {doc.date}</div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button className="p-1.5 rounded-full" style={{ color: c.textSecondary }} title="Preview"><Eye className="w-3.5 h-3.5" /></button>
+                    <button className="p-1.5 rounded-full" style={{ color: c.textSecondary }} title="Download"><Download className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="p-1.5 rounded-full" style={{ color: c.textSecondary }} title="Remove"><span className="text-[0.875rem] leading-none">{'\u00d7'}</span></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[0.75rem] text-center py-2" style={{ color: c.textSecondary, opacity: 0.7 }}>No documents uploaded yet.</p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
