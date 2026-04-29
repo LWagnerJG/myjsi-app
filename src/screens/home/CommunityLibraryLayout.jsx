@@ -7,6 +7,7 @@ import { ChannelAwareFeed } from './components/community/ChannelAwareFeed.jsx';
 import { MyBoardView } from './components/community/MyBoardView.jsx';
 import { MakersStudioTab } from './components/community/MakersStudioTab.jsx';
 import { ChannelChips } from './components/community/ChannelChips.jsx';
+import { ChannelSidebar } from './components/community/ChannelSidebar.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
@@ -282,9 +283,10 @@ export const CommunityLibraryLayout = ({
               </div>
             </div>
 
-            {/* Context strip — same height slot, no layout jump when entering a subreddit */}
+            {/* Context strip — same height slot, no layout jump when entering a subreddit. Hidden on lg+ where the sidebar takes over. */}
             <div
               aria-hidden={activeTab !== 'community' ? true : undefined}
+              className="lg:hidden"
               style={{
                 overflow: 'hidden',
                 maxHeight: activeTab === 'community' ? '44px' : '0px',
@@ -341,58 +343,83 @@ export const CommunityLibraryLayout = ({
 
       <div ref={containerRef} className="flex-1 overflow-y-auto pb-10 scrollbar-hide">
         <div className="mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8 pt-1" style={{ position: 'relative' }}>
-          <div style={{ position: 'relative' }}>
-            <div style={paneStyle('community')}>
-              <div key={`community-feed-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
-                <ChannelAwareFeed
+          <div
+            className={
+              activeTab === 'community' || activeTab === 'my board'
+                ? 'lg:grid lg:grid-cols-[224px_minmax(0,1fr)] lg:gap-8 lg:items-start'
+                : ''
+            }
+            style={{ position: 'relative' }}
+          >
+            {/* Desktop channel sidebar — always visible on lg+ for community/board tabs */}
+            {(activeTab === 'community' || activeTab === 'my board') ? (
+              <div className="hidden lg:block">
+                <ChannelSidebar
                   theme={theme}
                   dark={dark}
-                  posts={posts}
-                  polls={polls}
-                  likedPosts={likedPosts}
-                  pollChoices={pollChoices}
-                  postUpvotes={postUpvotes}
-                  onToggleLike={onToggleLike}
-                  onUpvote={onUpvote}
-                  onPollVote={onPollVote}
-                  onAddComment={onAddComment}
-                  openCreateContentModal={openCreateContentModal}
-                  query={query}
-                  activeSubreddit={activeSubreddit}
+                  activeId={activeSubreddit?.id || null}
+                  onSelect={handleSubredditSelect}
                 />
               </div>
-            </div>
+            ) : null}
 
-            <div style={paneStyle('library')}>
-              <LibraryGrid
-                theme={theme}
-                query={query}
-                savedImageIds={savedImageIds}
-                onToggleSaveImage={onToggleSaveImage}
-                assetsOverride={libraryAssets}
-              />
-            </div>
+            <div className="min-w-0 relative">
+              <div style={paneStyle('community')}>
+                <div className="md:max-w-[680px] md:mx-auto lg:mx-0 lg:max-w-[680px]">
+                  <div key={`community-feed-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
+                    <ChannelAwareFeed
+                      theme={theme}
+                      dark={dark}
+                      posts={posts}
+                      polls={polls}
+                      likedPosts={likedPosts}
+                      pollChoices={pollChoices}
+                      postUpvotes={postUpvotes}
+                      onToggleLike={onToggleLike}
+                      onUpvote={onUpvote}
+                      onPollVote={onPollVote}
+                      onAddComment={onAddComment}
+                      openCreateContentModal={openCreateContentModal}
+                      query={query}
+                      activeSubreddit={activeSubreddit}
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <div style={paneStyle('makers studio')}>
-              <MakersStudioTab theme={theme} />
-            </div>
-
-            {hasBoardContent && (
-              <div style={paneStyle('my board')}>
-                <MyBoardView
+              <div style={paneStyle('library')}>
+                <LibraryGrid
                   theme={theme}
-                  dark={dark}
+                  query={query}
                   savedImageIds={savedImageIds}
                   onToggleSaveImage={onToggleSaveImage}
-                  posts={posts}
-                  likedPosts={likedPosts}
-                  postUpvotes={postUpvotes}
-                  onToggleLike={onToggleLike}
-                  onUpvote={onUpvote}
-                  onAddComment={onAddComment}
+                  assetsOverride={libraryAssets}
                 />
               </div>
-            )}
+
+              <div style={paneStyle('makers studio')}>
+                <MakersStudioTab theme={theme} />
+              </div>
+
+              {hasBoardContent && (
+                <div style={paneStyle('my board')}>
+                  <div className="md:max-w-[680px] md:mx-auto lg:mx-0 lg:max-w-[680px]">
+                    <MyBoardView
+                      theme={theme}
+                      dark={dark}
+                      savedImageIds={savedImageIds}
+                      onToggleSaveImage={onToggleSaveImage}
+                      posts={posts}
+                      likedPosts={likedPosts}
+                      postUpvotes={postUpvotes}
+                      onToggleLike={onToggleLike}
+                      onUpvote={onUpvote}
+                      onAddComment={onAddComment}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
