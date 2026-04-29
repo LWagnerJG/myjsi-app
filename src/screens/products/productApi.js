@@ -66,7 +66,7 @@ export function getModelsByCategory(categorySlug) {
 
 // ─── Categories ─────────────────────────────────────────────────────────────
 
-/** The 7 top-level product category slugs + names. */
+/** The 8 top-level product category slugs + names. */
 export function getCategories() {
   return [...PRODUCT_CATEGORIES];
 }

@@ -370,7 +370,7 @@ export const PRODUCT_MODELS = [
   { id: 'bespace-bench-120', subcategoryId: 'bespace-bench', name: 'BeSPACE Bench 120"', price: 1440, material: 'laminate', leadTime: '3-5 weeks', image: img('/category-images/bench-images/api_bespace.jpg') },
 ];
 
-// ─── Product Categories (the 7 top-level buckets) ────────────────────────────
+// ─── Product Categories (the 8 top-level buckets) ────────────────────────────
 // These map to the flat category view on the Products landing page.
 export const PRODUCT_CATEGORIES = [
   { slug: 'casegoods', name: 'Casegoods' },
@@ -380,4 +380,5 @@ export const PRODUCT_CATEGORIES = [
   { slug: 'swivels', name: 'Swivels' },
   { slug: 'credenzas', name: 'Credenzas' },
   { slug: 'benches', name: 'Benches' },
+  { slug: 'customs', name: 'Customs' },
 ];
