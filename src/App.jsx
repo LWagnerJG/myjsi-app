@@ -49,6 +49,7 @@ const OrderDetailScreen = React.lazy(() => import('./screens/orders/index.js').t
 const ResourceDetailScreen = React.lazy(() => import('./screens/utility/UtilityScreens.jsx').then(m => ({ default: m.ResourceDetailScreen })));
 const CreateContentModal = React.lazy(() => import('./screens/community/CreateContentModal.jsx').then(m => ({ default: m.CreateContentModal })));
 const UploadToLibraryModal = React.lazy(() => import('./screens/library/UploadToLibraryModal.jsx').then(m => ({ default: m.UploadToLibraryModal })));
+const CustomsScreen = React.lazy(() => import('./screens/products/CustomsScreen.jsx').then(m => ({ default: m.CustomsScreen })));
 
 // Legacy underscore routes aliased to their canonical hyphenated slugs
 const RESOURCE_SLUG_ALIASES = {
@@ -181,6 +182,10 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
             return lazyWrap(SeriesCategoryPickerScreen, { seriesSlug: parts[2], categories: matches });
         }
         // Fallback: show products screen if slug not recognized
+    }
+
+    if (base === 'products' && parts[1] === 'category' && parts[2] === 'customs') {
+        return lazyWrap(CustomsScreen);
     }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {

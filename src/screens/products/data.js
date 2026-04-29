@@ -347,7 +347,137 @@ export const PRODUCTS_CATEGORIES_DATA = [
             '/category-images/bench-images/api_poet.jpg',
             '/category-images/bench-images/api_indie.jpg'
         ].map(localImage)
+    },
+    {
+        name: 'Customs',
+        description: 'Tailored builds and spec-driven concepts',
+        nav: 'products/category/customs',
+        images: [
+            '/category-images/casegood-images/api_finale.jpg',
+            '/category-images/conference-images/api_reef.jpg',
+            '/category-images/lounge-images/api_bespace.jpg'
+        ].map(localImage)
     }
+];
+
+export const CUSTOMS_CATEGORIES = [
+    { id: 'all', label: 'All' },
+    { id: 'reception', label: 'Reception' },
+    { id: 'conference', label: 'Conference' },
+    { id: 'casegoods', label: 'Casegoods' },
+    { id: 'seating', label: 'Seating' },
+    { id: 'lounge', label: 'Lounge' },
+];
+
+export const CUSTOM_OPPORTUNITIES = [
+    {
+        id: 'arrival-wall-system',
+        title: 'Arrival Wall',
+        category: 'reception',
+        priceLabel: 'Under $34,000 NET',
+        image: localImage('/category-images/conference-images/api_reef.jpg'),
+        summary: 'A welcome-zone gesture that fuses display shelving, branded surface, and touchdown storage into a single architectural moment.',
+        details: 'Integrated signage, display pocketing, and mixed laminate / veneer faces. Lead time 5–7 weeks.',
+    },
+    {
+        id: 'modesty-refresh-kit',
+        title: 'Branded Modesty Kit',
+        category: 'reception',
+        priceLabel: 'Under $6,500 NET',
+        image: localImage('/category-images/casegood-images/api_vision.jpg'),
+        summary: 'A small-footprint refresh package that updates fronts, reveals, and guest-facing details without reworking the station.',
+        details: 'Applied metal reveal, laser-cut logo panel, contrast edge detailing. Lead time 3–4 weeks.',
+    },
+    {
+        id: 'conference-spine-power',
+        title: 'Conference Spine',
+        category: 'conference',
+        priceLabel: 'Under $23,000 NET',
+        image: localImage('/category-images/conference-images/api_wellington.jpg'),
+        summary: 'A boardroom table organized around a central power spine, with custom access points and finish breaks that feel built-in.',
+        details: 'Custom power routing, inset metal details, segmented top construction. Lead time 7–9 weeks.',
+    },
+    {
+        id: 'anthology-boat-shape',
+        title: 'Anthology Boat Top',
+        category: 'conference',
+        priceLabel: 'Under $18,500 NET',
+        image: localImage('/category-images/conference-images/jsi_anthology_comp_0006.jpg'),
+        summary: 'A long-format Anthology table reshaped to a soft boat plan with paired veneer sequencing and integrated grommet line.',
+        details: 'Sequenced veneer faces, soft-radius edge, custom grommet routing. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'founder-suite-signature',
+        title: 'Founder Suite',
+        category: 'casegoods',
+        priceLabel: 'From $48,000 NET',
+        image: localImage('/category-images/casegood-images/api_finale.jpg'),
+        summary: 'A fully composed private-office statement: bespoke scale, integrated storage, and detail language carried across the room.',
+        details: 'Custom veneer sequencing, integrated credenza wall, extended trim and metal package. Lead time 10–14 weeks.',
+    },
+    {
+        id: 'hospitality-credenza-mix',
+        title: 'Hospitality Credenza',
+        category: 'casegoods',
+        priceLabel: 'Under $11,000 NET',
+        image: localImage('/category-images/casegood-images/api_brogan.jpg'),
+        summary: 'A tuned credenza blend that mixes open display, hidden storage, and a hospitality-friendly serving zone into one piece.',
+        details: 'Mixed door conditions, integrated serving shelf, material break at user touch points. Lead time 4–6 weeks.',
+    },
+    {
+        id: 'flux-private-office',
+        title: 'Flux Private Office',
+        category: 'casegoods',
+        priceLabel: 'Under $19,500 NET',
+        image: localImage('/category-images/casegood-images/api_flux-private-office.jpg'),
+        summary: 'A composed private office built on the Flux platform with custom worksurface scale and a tuned storage wall.',
+        details: 'Custom worksurface scale, paired storage wall, mixed pull hardware. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'guest-arc-collection',
+        title: 'Guest Arc',
+        category: 'seating',
+        priceLabel: 'From $2,400 NET / chair',
+        image: localImage('/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg'),
+        summary: 'A guest seating story where finish pairing, stitch detail, and base expression are tuned to the surrounding architecture.',
+        details: 'Contrast stitch spec, base finish customization, paired textile strategy. Lead time 5–7 weeks.',
+    },
+    {
+        id: 'market-hall-benching',
+        title: 'Market Hall Bench',
+        category: 'seating',
+        priceLabel: 'Under $9,800 NET',
+        image: localImage('/category-images/bench-images/api_native.jpg'),
+        summary: 'A modular benching direction with mixed lengths, integrated planters, and surface drops for casual work or waiting.',
+        details: 'Length tuning, accessory add-ons, laminate and solid-surface mixing. Lead time 4–5 weeks.',
+    },
+    {
+        id: 'soft-architecture-cove',
+        title: 'Soft Architecture Cove',
+        category: 'lounge',
+        priceLabel: 'Under $27,000 NET',
+        image: localImage('/category-images/lounge-images/api_bespace.jpg'),
+        summary: 'A semi-enclosed lounge that uses screening, power, and layered upholstery to carve a destination without full construction.',
+        details: 'Partial enclosure panels, power routing, COM and graded-in material story. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'harbor-lounge-pair',
+        title: 'Harbor Lounge Pair',
+        category: 'lounge',
+        priceLabel: 'From $7,400 NET',
+        image: localImage('/category-images/lounge-images/api_harbor.jpg'),
+        summary: 'A paired Harbor lounge composition with custom welt, base metal finish, and a tuned cushion build.',
+        details: 'Custom welt, base metal finish, tuned cushion build. Lead time 5–6 weeks.',
+    },
+    {
+        id: 'poet-component-cluster',
+        title: 'Poet Component Cluster',
+        category: 'lounge',
+        priceLabel: 'Under $14,200 NET',
+        image: localImage('/category-images/lounge-images/jsi_poet_component_00008.jpg'),
+        summary: 'A modular Poet cluster spec\u2019d with a custom upholstery palette and inset accent table arrangement.',
+        details: 'Custom upholstery palette, inset accent tables, paired ottoman scale. Lead time 5–7 weeks.',
+    },
 ];
 
 // Re-export the single-source-of-truth series list so existing imports keep working
