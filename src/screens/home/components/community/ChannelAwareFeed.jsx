@@ -45,22 +45,24 @@ export const ChannelAwareFeed = ({
   }
 
   const renderItem = (item) => {
-    if (item._type === 'poll') {
-      return <PollCard key={`poll-${item.id}`} poll={item} theme={theme} dark={dark} votedOption={pollChoices?.[item.id]} onPollVote={onPollVote} />;
-    }
-
+    const inner = item._type === 'poll'
+      ? <PollCard poll={item} theme={theme} dark={dark} votedOption={pollChoices?.[item.id]} onPollVote={onPollVote} />
+      : (
+        <SubredditPostCard
+          post={item}
+          dark={dark}
+          theme={theme}
+          isLiked={!!likedPosts?.[item.id]}
+          isUpvoted={!!postUpvotes?.[item.id]}
+          onUpvote={onUpvote}
+          onToggleLike={onToggleLike}
+          onAddComment={onAddComment}
+        />
+      );
     return (
-      <SubredditPostCard
-        key={item.id}
-        post={item}
-        dark={dark}
-        theme={theme}
-        isLiked={!!likedPosts?.[item.id]}
-        isUpvoted={!!postUpvotes?.[item.id]}
-        onUpvote={onUpvote}
-        onToggleLike={onToggleLike}
-        onAddComment={onAddComment}
-      />
+      <div key={`${item._type}-${item.id}`} className="break-inside-avoid xl:mb-3">
+        {inner}
+      </div>
     );
   };
 
@@ -75,13 +77,13 @@ export const ChannelAwareFeed = ({
           {trendingFeed.length > 0 && (
             <>
               <FeedDivider label="Trending" theme={theme} first />
-              <div className="space-y-3">{trendingFeed.map(renderItem)}</div>
+              <div className="space-y-3 xl:space-y-0 xl:columns-2 xl:gap-3">{trendingFeed.map(renderItem)}</div>
             </>
           )}
           {latestFeed.length > 0 && (
             <>
               <FeedDivider label="Latest" theme={theme} />
-              <div className="space-y-3">{latestFeed.map(renderItem)}</div>
+              <div className="space-y-3 xl:space-y-0 xl:columns-2 xl:gap-3">{latestFeed.map(renderItem)}</div>
             </>
           )}
         </>

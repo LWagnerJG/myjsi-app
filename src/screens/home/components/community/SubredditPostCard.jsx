@@ -46,8 +46,8 @@ export const SubredditPostCard = ({ post, idx, isTop, dark, theme, isLiked, isUp
           <p className="text-xs leading-relaxed line-clamp-3" style={{ color: theme.colors.textSecondary }}>{post.text}</p>
         </button>
         {post.image && (
-          <button onClick={() => setLightboxSrc(post.image)} className="block w-full relative group rounded-xl overflow-hidden mt-2">
-            <img src={post.image} alt="post" className="w-full rounded-xl object-cover max-h-40" />
+          <button onClick={() => setLightboxSrc(post.image)} className="block w-full relative group rounded-xl overflow-hidden mt-2 aspect-[4/3]">
+            <img src={post.image} alt="post" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
               <ZoomIn className="w-5 h-5 text-white drop-shadow-lg" />
             </div>

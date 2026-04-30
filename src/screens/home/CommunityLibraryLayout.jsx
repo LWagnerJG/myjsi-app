@@ -365,7 +365,7 @@ export const CommunityLibraryLayout = ({
 
             <div className="min-w-0 relative">
               <div style={paneStyle('community')}>
-                <div className="md:max-w-[680px] md:mx-auto lg:mx-0 lg:max-w-[680px]">
+                <div className="md:max-w-[680px] md:mx-auto lg:mx-0 lg:max-w-[680px] xl:max-w-none">
                   <div key={`community-feed-${activeSubreddit?.id || 'root'}`} className={communityTransitionClassName}>
                     <ChannelAwareFeed
                       theme={theme}

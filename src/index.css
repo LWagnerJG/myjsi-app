@@ -124,10 +124,10 @@ html {
 
 /* Responsive content width — scales up on xl / 2xl viewports */
 @media (min-width: 1280px) {
-    :root { --content-max-width: 1200px; }
+    :root { --content-max-width: 1280px; }
 }
 @media (min-width: 1536px) {
-    :root { --content-max-width: 1400px; }
+    :root { --content-max-width: 1480px; }
 }
 
 /* Dark theme overrides */
