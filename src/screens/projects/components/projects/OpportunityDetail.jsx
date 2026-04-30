@@ -219,7 +219,6 @@ const formatQuoteMoment = (value) => {
 const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
-  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(227,224,216,0.92)';
 
   const completed = quotes.filter(q => q.status === 'complete' || !q.status);
   const pending = quotes.filter(q => q.status && q.status !== 'complete');
@@ -603,7 +602,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const openLinkedCustomer = useCallback(() => {
     if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
   }, [linkedCustomer, onOpenCustomer]);
-  const locationSummary = draft.installationLocation || customerLocationLabel || 'Location pending';
   const stagePositionLabel = isOutcomeStage
     ? 'Outcome'
     : currentPipelineIndex >= 0

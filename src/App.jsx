@@ -546,7 +546,7 @@ function App() {
         const { project: _project, projectStatus: _projectStatus, ...leadRest } = lead;
         const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...leadRest };
         setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects', { tab: 'pipeline', stage: newOpp.stage }); flashSuccess('Lead Added');
-    }, [handleNavigate, setNewLeadData, flashSuccess]);
+    }, [handleNavigate, setNewLeadData, flashSuccess, setOpportunities]);
 
     const handleAddInstall = useCallback((install) => {
         const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
@@ -638,7 +638,7 @@ function App() {
         handleUpdateCart, sampleOrders, handleSubmitSampleOrder, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
         handleAddInstall, projectsTabOverride, clearProjectsInitialTab, projectsStageOverride, clearProjectsInitialStage,
-        homeApps, handleUpdateHomeApps, homeResetKey
+        homeApps, handleUpdateHomeApps, homeResetKey, setOpportunities
     ]);
 
     const suspenseFallback = useMemo(() => (

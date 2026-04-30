@@ -10,6 +10,7 @@ import { ChannelChips } from './components/community/ChannelChips.jsx';
 import { ChannelSidebar } from './components/community/ChannelSidebar.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
 const buildCommunityTabOptions = (hasBoardContent, compact = false) => {
   const base = [
@@ -35,7 +36,7 @@ export const CommunityLibraryLayout = ({
   setBackHandler,
 }) => {
   const dark = isDarkTheme(theme);
-  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const hasBoardContent = useMemo(() => {
     const hasComments = (posts || []).some((post) => (post.comments || []).some((comment) => comment.name === 'You'));
@@ -147,7 +148,6 @@ export const CommunityLibraryLayout = ({
       : null;
   const actionLabel = activeTab === 'library' ? '+ Upload' : '+ Post';
   const ActiveSubredditIcon = activeSubreddit?.icon || null;
-  const activeSubredditDescription = activeSubreddit?.description?.trim() || '';
   const searchPlaceholder = inSubCommunity
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';

@@ -10,7 +10,7 @@ import { getSampleProduct } from '../sampleIndex.js';
 import { DrawerItem } from './DrawerItem.jsx';
 import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
 import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
-import { getBottomSheetMotion, getModalMotion, MOTION_DURATIONS_MS, MOTION_EASINGS, buildCssTransition } from '../../../design-system/motion.js';
+import { getModalMotion } from '../../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
 
 const idOf = (x) => String(x);
@@ -30,12 +30,10 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
     const [address2, setAddress2] = useState('');
     const [shipToType, setShipToType] = useState('end-user');
     const [justSubmitted, setJustSubmitted] = useState(false);
-    const [overlayPhase, setOverlayPhase] = useState('idle');
     const [newContactType, setNewContactType] = useState(null);
     const [creatingNew, setCreatingNew] = useState(false);
     const isDark = isDarkTheme(theme);
     const prefersReduced = usePrefersReducedMotion();
-    const sheetMotion = getBottomSheetMotion(prefersReduced);
     const modalMotion = getModalMotion(prefersReduced);
     const dirSearchRef = useRef(null);
     const addr1Ref = useRef(null);
@@ -85,10 +83,8 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
             shipToType,
         });
         setIsExpanded(false);
-        setJustSubmitted(true); setOverlayPhase('enter');
+        setJustSubmitted(true);
         Object.entries(cart).forEach(([id, qty]) => { if (qty > 0) onUpdateCart({ id }, -qty); });
-        setTimeout(() => setOverlayPhase('hold'), prefersReduced ? 200 : 400);
-        setTimeout(() => { setOverlayPhase('exit'); }, prefersReduced ? 1200 : 2000);
         setTimeout(() => { onNavigate && onNavigate('home'); }, prefersReduced ? 1600 : 2600);
     }, [shipToName, address1, cartItems, cart, onUpdateCart, onNavigate, onSubmitOrder, address2, shipToType, prefersReduced]);
 

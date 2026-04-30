@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { animate, useMotionValue } from 'framer-motion';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
 // Lightweight reusable count up component
 // Props: value (number), decimals (int), prefix, suffix, duration (s), ease, format (fn)
@@ -14,7 +15,7 @@ export const CountUp = ({
   className,
   style
 }) => {
-  const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReduced = usePrefersReducedMotion();
   const mv = useMotionValue(prefersReduced ? value : 0);
   const [display, setDisplay] = useState(prefersReduced ? value : 0);
 
