@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Calendar, List, Building2, Package, X } from 'lucide-react';
+import { Calendar, List, Building2, Package, X, Layers, MapPin, CheckCircle2, Clock, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
@@ -7,6 +7,7 @@ import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
+import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
 import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 
 /* ---------------------- Calendar View ---------------------- */
@@ -135,6 +136,93 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     );
 };
 
+/* ---- Sample Order Status ---- */
+const SAMPLE_STATUS_CONFIG = {
+    'processing':  { label: 'Processing', icon: Clock,          color: '#B8860B' },
+    'in-transit':  { label: 'In Transit', icon: Truck,          color: '#2E75B6' },
+    'delivered':   { label: 'Delivered',  icon: CheckCircle2,   color: '#4A7C59' },
+};
+
+const SampleOrderCard = ({ order, theme, dark }) => {
+    const cfg = SAMPLE_STATUS_CONFIG[order.status] || SAMPLE_STATUS_CONFIG['processing'];
+    const Icon = cfg.icon;
+    const dateStr = new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const totalItems = order.items?.reduce((s, i) => s + (i.qty || 1), 0) ?? 0;
+
+    return (
+        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
+            <div className="px-5 py-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-[0.6875rem] font-semibold tabular-nums" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{order.id}</span>
+                            <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary, opacity: 0.3 }}>·</span>
+                            <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{dateStr}</span>
+                        </div>
+                        <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.shipTo}</p>
+                        <p className="text-[0.75rem] mt-0.5 flex items-center gap-1 truncate" style={{ color: theme.colors.textSecondary }}>
+                            <MapPin className="w-3 h-3 flex-shrink-0" style={{ opacity: 0.5 }} />
+                            {order.address}
+                        </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                        <div className="flex items-center gap-1 px-2.5 py-1 rounded-full" style={{ backgroundColor: `${cfg.color}18` }}>
+                            <Icon className="w-3 h-3" style={{ color: cfg.color }} />
+                            <span className="text-[0.6875rem] font-semibold" style={{ color: cfg.color }}>{cfg.label}</span>
+                        </div>
+                        <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
+                            {totalItems} sample{totalItems !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                </div>
+                {order.items?.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                        {order.items.slice(0, 4).map((item, i) => (
+                            <span key={i} className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>
+                                {item.qty > 1 ? `${item.qty}× ` : ''}{item.name}
+                            </span>
+                        ))}
+                        {order.items.length > 4 && (
+                            <span className="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', color: theme.colors.textSecondary }}>
+                                +{order.items.length - 4} more
+                            </span>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const SampleOrdersView = ({ theme, dark, searchTerm }) => {
+    const filtered = useMemo(() => {
+        const q = searchTerm.toLowerCase();
+        if (!q) return INITIAL_SAMPLE_ORDERS;
+        return INITIAL_SAMPLE_ORDERS.filter(o =>
+            o.id.toLowerCase().includes(q) ||
+            o.shipTo.toLowerCase().includes(q) ||
+            o.address?.toLowerCase().includes(q) ||
+            o.items?.some(i => i.name.toLowerCase().includes(q))
+        );
+    }, [searchTerm]);
+
+    if (!filtered.length) return (
+        <div className="flex flex-col items-center justify-center py-16 text-center gap-1">
+            <Layers className="w-10 h-10 mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
+            <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>No sample orders found</p>
+            <p className="text-xs" style={{ color: theme.colors.textSecondary }}>Try adjusting your search</p>
+        </div>
+    );
+
+    return (
+        <div className="space-y-3">
+            {filtered.map(o => (
+                <SampleOrderCard key={o.id} order={o} theme={theme} dark={dark} />
+            ))}
+        </div>
+    );
+};
+
 /* ---- Main Screen ---- */
 export const OrdersScreen = ({ theme, onNavigate }) => {
     const dark = isDarkTheme(theme);
@@ -190,10 +278,20 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                         <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
                         <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
-                                <SegmentedToggle value={dateType} onChange={setDateType} options={[{ value: 'shipDate', label: 'Ship Date' }, { value: 'date', label: 'PO Date' }]} theme={theme} size="sm" />
+                                <SegmentedToggle
+                                    value={dateType}
+                                    onChange={setDateType}
+                                    options={[
+                                        { value: 'shipDate', label: 'Ship Date' },
+                                        { value: 'date', label: 'PO Date' },
+                                        { value: 'samples', label: 'Samples' },
+                                    ]}
+                                    theme={theme}
+                                    size="sm"
+                                />
                             </div>
                             <div className="flex items-center gap-2.5">
-                                <div ref={dealerRef} className="relative flex-shrink-0">
+                                <div ref={dealerRef} className="relative flex-shrink-0" style={{ display: dateType === 'samples' ? 'none' : undefined }}>
                                     <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-2 min-w-[7rem] sm:min-w-[7.75rem] md:w-auto md:px-4" style={{ ...controlTile, borderRadius: '999px', height: 40, backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : controlTile.backgroundColor, border: selectedDealer !== 'All Dealers' ? `1px solid ${theme.colors.accent}24` : 'none' }} title={selectedDealer}>
                                         <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
                                         <span className="text-[0.75rem] sm:text-[0.8125rem] font-medium whitespace-nowrap truncate" style={{ color: theme.colors.textPrimary, maxWidth: '5.1rem' }}>
@@ -214,7 +312,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         </motion.div>
                                     )}
                                 </div>
-                                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition w-10 md:w-auto md:px-4 md:gap-2" style={{ ...controlTile, borderRadius: '999px', height: 40 }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
+                                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition w-10 md:w-auto md:px-4 md:gap-2" style={{ ...controlTile, borderRadius: '999px', height: 40, display: dateType === 'samples' ? 'none' : undefined }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
                                     {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
                                     <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                                         {viewMode === 'list' ? 'Calendar' : 'List'}
@@ -243,7 +341,11 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-24 max-w-content mx-auto w-full">
                     <AnimatePresence mode="wait">
-                      {viewMode === 'list' ? (
+                      {dateType === 'samples' ? (
+                        <motion.div key="samples" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                            <SampleOrdersView theme={theme} dark={dark} searchTerm={searchTerm} />
+                        </motion.div>
+                      ) : viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
                             <div className="space-y-4">
