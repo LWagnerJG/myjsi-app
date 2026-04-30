@@ -170,7 +170,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     return (
         <div className="h-full flex flex-col app-header-offset">
             {/* Title + search */}
-            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-5" contentClassName="pt-3 pb-3">
+            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-3">
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={(val) => setSearchTerm(val)}
@@ -179,7 +179,8 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 />
             </ScreenTopChrome>
 
-            <div className="flex-1 overflow-y-auto px-5 pb-8 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-8 scrollbar-hide">
+                <div className="max-w-content mx-auto w-full">
                 {grouped.length > 0 ? (
                     <div className="space-y-5 mt-1">
                         {grouped.map(([category, items]) => (
@@ -210,6 +211,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         theme={theme}
                     />
                 )}
+                </div>
             </div>
 
             {/* Modal */}

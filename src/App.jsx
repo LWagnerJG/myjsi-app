@@ -11,6 +11,8 @@ import { AppHeader } from './components/navigation/AppHeader.jsx';
 import { ProfileMenu } from './components/navigation/ProfileMenu.jsx';
 import { VoiceModal, SuccessToast } from './components/feedback/ToastsAndModals.jsx';
 import { SCREEN_MAP, ProductComparisonScreen, CompetitiveAnalysisScreen, SalesScreen, SamplesScreen } from './config/screenMap.js';
+import { SERIES_CATEGORIES } from './screens/products/data.js';
+import { SeriesCategoryPickerScreen } from './screens/products/SeriesCategoryPickerScreen.jsx';
 import { Modal } from './components/common/Modal.jsx';
 import { INITIAL_ASSETS } from './screens/library/data.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
@@ -19,6 +21,7 @@ import { ToastHost } from './components/common/ToastHost.jsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 import { ScreenSkeleton } from './components/common/ScreenSkeleton.jsx';
 import { submitLeadToExcel } from './utils/submitLeadToExcel.js';
+import { INITIAL_SAMPLE_ORDERS, buildSubmittedSampleOrder, syncSampleOrdersWithSeeds } from './screens/samples/sampleOrders.js';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -30,6 +33,7 @@ const DealerDetailScreen = React.lazy(() => import('./screens/resources/dealer-d
 const DiscontinuedFinishesScreen = React.lazy(() => import('./screens/resources/discontinued-finishes/index.js'));
 const TradeshowsScreen = React.lazy(() => import('./screens/resources/tradeshows/index.js'));
 const SampleDiscountsScreen = React.lazy(() => import('./screens/resources/sample-discounts/index.js'));
+const SampleOrdersScreen = React.lazy(() => import('./screens/samples/SampleOrdersScreen.jsx').then(m => ({ default: m.SampleOrdersScreen })));
 const LoanerPoolScreen = React.lazy(() => import('./screens/resources/loaner-pool/index.js'));
 const InstallInstructionsScreen = React.lazy(() => import('./screens/resources/install-instructions/index.js'));
 const NewDealerSignUpScreen = React.lazy(() => import('./screens/resources/new-dealer-signup/index.js'));
@@ -45,6 +49,8 @@ const OrderDetailScreen = React.lazy(() => import('./screens/orders/index.js').t
 const ResourceDetailScreen = React.lazy(() => import('./screens/utility/UtilityScreens.jsx').then(m => ({ default: m.ResourceDetailScreen })));
 const CreateContentModal = React.lazy(() => import('./screens/community/CreateContentModal.jsx').then(m => ({ default: m.CreateContentModal })));
 const UploadToLibraryModal = React.lazy(() => import('./screens/library/UploadToLibraryModal.jsx').then(m => ({ default: m.UploadToLibraryModal })));
+const CustomsScreen = React.lazy(() => import('./screens/products/CustomsScreen.jsx').then(m => ({ default: m.CustomsScreen })));
+const StudioOnePagerDetailScreen = React.lazy(() => import('./screens/studio/OnePagerDetailScreen.jsx').then(m => ({ default: m.OnePagerDetailScreen })));
 
 // Legacy underscore routes aliased to their canonical hyphenated slugs
 const RESOURCE_SLUG_ALIASES = {
@@ -126,6 +132,7 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     );
 
     if (screenKey === 'samples/cart') return lazyWrap(SamplesScreen, { initialCartOpen: true });
+    if (screenKey === 'samples/orders') return lazyWrap(SampleOrdersScreen);
     if (base === 'samples') return lazyWrap(SamplesScreen);
 
     if (base === 'new-trip') {
@@ -167,8 +174,27 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         );
     }
 
+    if (base === 'community' && parts[1] === 'studio' && parts[2]) {
+        return lazyWrap(StudioOnePagerDetailScreen, { screenParams: { ...(rest.screenParams || {}), slug: parts[2] } });
+    }
+
+    if (base === 'products' && parts[1] === 'series' && parts[2]) {
+        const matches = SERIES_CATEGORIES[parts[2]];
+        if (matches?.length === 1) {
+            return lazyWrap(ProductComparisonScreen, { categoryId: matches[0].categoryId, initialProductId: matches[0].productId });
+        }
+        if (matches?.length > 1) {
+            return lazyWrap(SeriesCategoryPickerScreen, { seriesSlug: parts[2], categories: matches });
+        }
+        // Fallback: show products screen if slug not recognized
+    }
+
+    if (base === 'products' && parts[1] === 'category' && parts[2] === 'customs') {
+        return lazyWrap(CustomsScreen);
+    }
+
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
-        return lazyWrap(ProductComparisonScreen, { categoryId: parts[2] });
+        return lazyWrap(ProductComparisonScreen, { categoryId: parts[2], initialProductId: rest.screenParams?.initialProductId });
     }
     if (base === 'products' && parts[1] === 'category' && (parts[2] === 'competition' || parts[3] === 'competition')) {
         const productId = parts[3] === 'competition' && parts[4] ? parts[4] : null;
@@ -203,6 +229,7 @@ function App() {
 
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [cart, setCart] = usePersistentState('samples.cart', {});
+    const [sampleOrders, setSampleOrders] = usePersistentState('samples.orders', INITIAL_SAMPLE_ORDERS);
     const [homeApps, setHomeApps] = usePersistentState('pref.homeApps', DEFAULT_HOME_APPS);
 
     // Reset to current default if stored count mismatches (e.g. after adding new apps)
@@ -213,6 +240,10 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        setSampleOrders((prev) => syncSampleOrdersWithSeeds(prev));
+    }, [setSampleOrders]);
+
     const [lastNavigationDirection, setLastNavigationDirection] = useState('forward');
     const [screenParams, setScreenParams] = useState({});
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -222,10 +253,63 @@ function App() {
     const [alertInfo, setAlertInfo] = useState({ show: false, message: '' });
     const [homeResetKey, setHomeResetKey] = useState(0);
     const backHandlerRef = useRef(null);
+    const backHandlerRegistrationRef = useRef(0);
+    const backInteractionLockRef = useRef(false);
+    const backInteractionTimerRef = useRef(null);
 
     const [navDepth, setNavDepth] = useState(0);
+    const navDepthRef = useRef(navDepth);
+    useEffect(() => { navDepthRef.current = navDepth; }, [navDepth]);
+
+    // Track whether the last navigation was initiated by our handleNavigate/handleBack
+    const internalNavRef = useRef(false);
 
     const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
+    const isHomeScreen = !currentScreen || currentScreen === 'home';
+
+    const releaseBackInteractionLock = useCallback(() => {
+        if (backInteractionTimerRef.current) {
+            clearTimeout(backInteractionTimerRef.current);
+            backInteractionTimerRef.current = null;
+        }
+        backInteractionLockRef.current = false;
+    }, []);
+
+    const lockBackInteraction = useCallback((ms = 260) => {
+        releaseBackInteractionLock();
+        backInteractionLockRef.current = true;
+        backInteractionTimerRef.current = setTimeout(() => {
+            backInteractionLockRef.current = false;
+            backInteractionTimerRef.current = null;
+        }, ms);
+    }, [releaseBackInteractionLock]);
+
+    useEffect(() => () => {
+        releaseBackInteractionLock();
+    }, [releaseBackInteractionLock]);
+
+    // Sync navDepth when browser native back/forward triggers a location change
+    // without going through handleNavigate/handleBack (e.g. native swipe-back,
+    // hardware back button, browser forward/back buttons).
+    useEffect(() => {
+        releaseBackInteractionLock();
+        if (internalNavRef.current) {
+            // This location change was triggered by our code — already handled
+            internalNavRef.current = false;
+            return;
+        }
+        // External navigation (native gesture, browser button, etc.)
+        // Use 'none' so AnimatedScreenWrapper skips its CSS slide animation —
+        // the browser/OS already provided the visual transition.
+        if (isHomeScreen) {
+            setLastNavigationDirection('none');
+            setNavDepth(0);
+        } else if (navDepthRef.current === 0) {
+            // Navigated to a non-home screen externally (e.g. browser forward)
+            setLastNavigationDirection('none');
+            setNavDepth(1);
+        }
+    }, [currentScreen, isHomeScreen, releaseBackInteractionLock]);
 
     const screenLabel = useMemo(() => {
         if (!currentScreen || currentScreen === 'home') return 'Home';
@@ -234,12 +318,22 @@ function App() {
     }, [currentScreen]);
 
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', shirtSize: 'L' });
-    const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
+    const [opportunities, setOpportunities] = usePersistentState('projects.opportunities', INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
     const [projectsTabOverride, setProjectsTabOverride] = useState(null);
     const [projectsStageOverride, setProjectsStageOverride] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
+
+    useEffect(() => {
+        setOpportunities((prev) => {
+            if (!Array.isArray(prev)) return INITIAL_OPPORTUNITIES;
+            const existingIds = new Set(prev.map((opportunity) => String(opportunity?.id)));
+            const missingSeeded = INITIAL_OPPORTUNITIES.filter((opportunity) => !existingIds.has(String(opportunity.id)));
+            if (missingSeeded.length === 0) return prev;
+            return [...prev, ...missingSeeded];
+        });
+    }, [setOpportunities]);
 
     const [posts, setPosts] = useState([...INITIAL_POSTS, ...INITIAL_WINS, ...SUBREDDIT_POSTS]);
     const [polls, setPolls] = useState(INITIAL_POLLS);
@@ -278,7 +372,24 @@ function App() {
         document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
+    const navigateHome = useCallback(({ reset = true, direction = 'home' } = {}) => {
+        internalNavRef.current = true;
+        setLastNavigationDirection(direction);
+        setScreenParams({});
+        setNavDepth(0);
+        routerNavigate('/', { replace: true });
+        if (reset) {
+            setHomeResetKey((prev) => prev + 1);
+        }
+    }, [routerNavigate]);
+
     const handleNavigate = useCallback((screen, params = {}) => {
+        if (!screen || screen === 'home') {
+            navigateHome({ reset: true, direction: 'home' });
+            return;
+        }
+
+        internalNavRef.current = true;
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
         if (screen === 'projects') {
@@ -287,34 +398,54 @@ function App() {
         }
         setNavDepth(d => d + 1);
         routerNavigate(screenToPath(screen));
-    }, [routerNavigate]);
+    }, [navigateHome, routerNavigate]);
 
     const handleBack = useCallback(() => {
+        if (backInteractionLockRef.current) {
+            return;
+        }
+
         if (typeof backHandlerRef.current === 'function') {
+            lockBackInteraction(220);
             const handled = backHandlerRef.current();
             if (handled) {
                 return;
             }
+            releaseBackInteractionLock();
         }
 
         if (navDepth > 0) {
-            setLastNavigationDirection('backward');
+            lockBackInteraction(navDepth <= 1 ? 420 : 320);
+            internalNavRef.current = true;
+            setLastNavigationDirection(navDepth <= 1 ? 'home' : 'backward');
             setScreenParams({});
             setNavDepth(d => Math.max(0, d - 1));
             routerNavigate(-1);
         }
-    }, [routerNavigate, navDepth]);
+    }, [routerNavigate, navDepth, lockBackInteraction, releaseBackInteractionLock]);
 
     const setBackHandler = useCallback((handler) => {
-        backHandlerRef.current = typeof handler === 'function' ? handler : null;
+        if (typeof handler !== 'function') {
+            backHandlerRegistrationRef.current += 1;
+            backHandlerRef.current = null;
+            return () => {};
+        }
+
+        const registrationId = ++backHandlerRegistrationRef.current;
+        backHandlerRef.current = handler;
+
+        return () => {
+            if (backHandlerRegistrationRef.current !== registrationId) {
+                return;
+            }
+            backHandlerRegistrationRef.current += 1;
+            backHandlerRef.current = null;
+        };
     }, []);
 
     const handleHome = useCallback(() => {
-        setLastNavigationDirection('backward');
-        setNavDepth(0);
-        routerNavigate('/', { replace: true });
-        setHomeResetKey((prev) => prev + 1);
-    }, [routerNavigate]);
+        navigateHome({ reset: true, direction: 'home' });
+    }, [navigateHome]);
 
     const handleVoiceActivate = useCallback((message) => { setVoiceMessage(message); setTimeout(() => setVoiceMessage(''), 1500); }, []);
     const handleAskAI = useCallback((query) => { setVoiceMessage(`AI Search: ${query}`); setTimeout(() => setVoiceMessage(''), 2500); }, []);
@@ -329,6 +460,26 @@ function App() {
             return next;
         });
     }, [setCart]);
+
+    const handleSubmitSampleOrder = useCallback((draft) => {
+        let createdOrder = null;
+        setSampleOrders((prev) => {
+            const existing = Array.isArray(prev) ? prev : INITIAL_SAMPLE_ORDERS;
+            createdOrder = buildSubmittedSampleOrder({
+                existingOrders: existing,
+                cartItems: draft?.cartItems || [],
+                shipToName: draft?.shipToName,
+                address1: draft?.address1,
+                address2: draft?.address2,
+                shipToType: draft?.shipToType,
+                linkedProjectId: draft?.linkedProjectId || null,
+                linkedProjectName: draft?.linkedProjectName || '',
+                userSettings,
+            });
+            return [createdOrder, ...existing];
+        });
+        return createdOrder;
+    }, [setSampleOrders, userSettings]);
 
     const handleToggleLike = useCallback((postId) => {
         setLikedPosts((prev) => {
@@ -400,7 +551,7 @@ function App() {
         const { project: _project, projectStatus: _projectStatus, ...leadRest } = lead;
         const newOpp = { id: Date.now(), name: lead.project || 'Untitled Project', stage: lead.projectStatus && STAGES.includes(lead.projectStatus) ? lead.projectStatus : STAGES[0], discount: lead.discount || 'Undecided', value: lead.estimatedList || '$0', company: lead.designFirms?.[0] || lead.dealers?.[0] || 'Unknown', contact: lead.contact || '', poTimeframe: lead.poTimeframe || '', ...leadRest };
         setOpportunities(prev => [newOpp, ...prev]); setNewLeadData(EMPTY_LEAD); handleNavigate('projects', { tab: 'pipeline', stage: newOpp.stage }); flashSuccess('Lead Added');
-    }, [handleNavigate, setNewLeadData, flashSuccess]);
+    }, [handleNavigate, setNewLeadData, flashSuccess, setOpportunities]);
 
     const handleAddInstall = useCallback((install) => {
         const enriched = { id: 'inst-' + Date.now(), photos: install.photos || [], standards: [], quotes: [], ...install };
@@ -461,6 +612,8 @@ function App() {
         cart,
         setCart,
         onUpdateCart: handleUpdateCart,
+        sampleOrders,
+        onSubmitSampleOrder: handleSubmitSampleOrder,
         dealerDirectory,
         setDealerDirectory,
         designFirms,
@@ -487,10 +640,10 @@ function App() {
         posts, polls, likedPosts, pollChoices, handleToggleLike,
         handleAddComment, handlePollVote, openCreateContentModal, openLibraryUploadModal, libraryAssets, savedImageIds,
         handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
-        handleUpdateCart, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
+        handleUpdateCart, sampleOrders, handleSubmitSampleOrder, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
         handleAddInstall, projectsTabOverride, clearProjectsInitialTab, projectsStageOverride, clearProjectsInitialStage,
-        homeApps, handleUpdateHomeApps, homeResetKey
+        homeApps, handleUpdateHomeApps, homeResetKey, setOpportunities
     ]);
 
     const suspenseFallback = useMemo(() => (
@@ -506,15 +659,15 @@ function App() {
                 <AppHeader
                     theme={currentTheme}
                     userName={userSettings.firstName}
-                    showBack={navDepth > 0}
+                    showBack={!isHomeScreen && navDepth > 0}
                     handleBack={handleBack}
                     onHomeClick={handleHome}
                     onProfileClick={toggleProfileMenu}
                     isDarkMode={isDarkMode}
                     profileBtnRef={profileBtnRef}
                 />
-                <main className="flex-1 overflow-hidden max-w-5xl mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
-                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection} onSwipeBack={navDepth > 0 ? handleBack : null}>
+                <main className="flex-1 overflow-hidden max-w-content mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
+                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection}>
                         <ErrorBoundary screenKey={currentScreen} theme={currentTheme}>
                             <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
                         </ErrorBoundary>

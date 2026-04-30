@@ -86,7 +86,7 @@ export const IncentiveRewardsScreen = ({ theme }) => {
 
     return (
         <div className="min-h-full app-header-offset" style={{ backgroundColor: theme.colors.background }}>
-            <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-6 max-w-4xl mx-auto w-full space-y-4">
+            <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 pb-6 max-w-content mx-auto w-full space-y-4">
                 <div className="flex items-center gap-3">
                     <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Dealer Rewards</p>
                     <div className="w-40">

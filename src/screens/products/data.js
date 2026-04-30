@@ -1,6 +1,10 @@
 // Products feature data
 
 const localImage = (path) => path;
+const jsiImg = (publicId, size = 'medium') => {
+  const t = size === 'thumb' ? 't_thumbnail/c_limit,w_256' : size === 'large' ? 't_large/c_limit,w_1200' : 't_medium/c_fill,w_640,h_640,g_auto';
+  return `https://res.cloudinary.com/jasper-jsi-furniture/image/upload/${t}/f_auto/q_auto/v1/${publicId}`;
+};
 
 const comp = (name, laminate, advantage) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-'), name, laminate, adv: advantage });
 
@@ -8,16 +12,16 @@ export const PRODUCT_DATA = {
     'benches': {
         name: 'Benches',
         products: [
-            { id: 'native', name: 'Native', price: 1200, image: localImage('/category-images/bench-images/api_native.jpg') },
-            { id: 'poet', name: 'Poet', price: 1280, image: localImage('/category-images/bench-images/api_poet.jpg') },
-            { id: 'indie', name: 'Indie', price: 1320, image: localImage('/category-images/bench-images/api_indie.jpg') },
-            { id: 'oxley', name: 'Oxley', price: 1360, image: localImage('/category-images/bench-images/api_oxley.jpg') },
+            { id: 'americana-bench', name: 'Americana', price: 1520, image: localImage('/category-images/bench-images/api_americana.jpg') },
             { id: 'arwyn-bench', name: 'Arwyn', price: 1400, image: localImage('/category-images/bench-images/api_arwyn.jpg') },
             { id: 'bespace-bench', name: 'BeSPACE', price: 1440, image: localImage('/category-images/bench-images/api_bespace.jpg') },
-            { id: 'finn-nu-bench', name: 'Finn Nu', price: 1480, image: localImage('/category-images/bench-images/api_finn-nu.jpg') },
-            { id: 'americana-bench', name: 'Americana', price: 1520, image: localImage('/category-images/bench-images/api_americana.jpg') },
             { id: 'boston-bench', name: 'Boston', price: 1560, image: localImage('/category-images/bench-images/api_boston.jpg') },
             { id: 'connect-bench', name: 'Connect', price: 1600, image: localImage('/category-images/bench-images/api_connect.jpg') },
+            { id: 'finn-nu-bench', name: 'Finn Nu', price: 1480, image: localImage('/category-images/bench-images/api_finn-nu.jpg') },
+            { id: 'indie', name: 'Indie', price: 1320, image: localImage('/category-images/bench-images/api_indie.jpg') },
+            { id: 'native', name: 'Native', price: 1200, image: localImage('/category-images/bench-images/api_native.jpg') },
+            { id: 'oxley', name: 'Oxley', price: 1360, image: localImage('/category-images/bench-images/api_oxley.jpg') },
+            { id: 'poet', name: 'Poet', price: 1280, image: localImage('/category-images/bench-images/api_poet.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -29,37 +33,29 @@ export const PRODUCT_DATA = {
     'casegoods': {
         name: 'Casegoods',
         products: [
-            { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/api_vision.jpg') },
-            { id: 'flux', name: 'Flux Private Office', price: 3700, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
             { id: 'brogan', name: 'Brogan', price: 4200, image: localImage('/category-images/casegood-images/api_brogan.jpg') },
             { id: 'finale', name: 'Finale', price: 4700, image: localImage('/category-images/casegood-images/api_finale.jpg') },
-            { id: 'walden', name: 'Walden', price: 5200, image: localImage('/category-images/casegood-images/api_walden.jpg') },
-            { id: 'wellington', name: 'Wellington', price: 5700, image: localImage('/category-images/casegood-images/api_wellington.jpg') },
-            { id: 'anthology-casegoods', name: 'Anthology', price: 5900, image: localImage('/category-images/casegood-images/api_anthology.jpg') },
-            { id: 'bespace-casegoods', name: 'BeSPACE', price: 5400, image: localImage('/category-images/casegood-images/api_bespace.jpg') },
-            { id: 'native-casegoods', name: 'Native', price: 5000, image: localImage('/category-images/casegood-images/api_native.jpg') },
-            { id: 'connect-casegoods', name: 'Connect', price: 4600, image: localImage('/category-images/casegood-images/api_connect.jpg') },
+            { id: 'flux', name: 'Flux', price: 3700, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
+            { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/api_vision.jpg') },
         ],
         competition: [],
         competitionByProduct: {
             'vision': [comp('OFS Staks', '$3350', '-5%'), comp('Kimball Narrate', '$3425', '-7%'), comp('Indiana Canvas', '$3180', '+1%'), comp('Hon Abound', '$3050', '+5%')],
             'flux': [comp('OFS ReframE', '$3825', '-3%'), comp('Kimball Alterna', '$3775', '-2%'), comp('Indiana Gesso', '$3650', '+1%')],
             'brogan': [comp('Kimball Priority', '$4350', '-4%'), comp('OFS Aptos', '$4425', '-6%'), comp('Teknion Expansion', '$4185', '+0%')],
-            'finale': [comp('OFS Impulse', '$4850', '-3%'), comp('Kimball Xsede', '$4920', '-4%'), comp('Hon Accelerate', '$4600', '+2%')],
-            'walden': [comp('Kimball Hum', '$5350', '-3%'), comp('OFS Eleven', '$5480', '-5%'), comp('Indiana Compel', '$5120', '+2%')],
-            'wellington': [comp('Kimball Evoke', '$5850', '-3%'), comp('OFS Slate', '$5980', '-5%'), comp('Hon Coordinate', '$5520', '+3%')]
+            'finale': [comp('OFS Impulse', '$4850', '-3%'), comp('Kimball Xsede', '$4920', '-4%'), comp('Hon Accelerate', '$4600', '+2%')]
         }
     },
     'conference-tables': {
         name: 'Conference Tables',
         products: [
-            { id: 'vision-table', name: 'Vision', price: 4500, image: localImage('/category-images/conference-images/api_vision.jpg') },
-            { id: 'reef', name: 'Reef', price: 4200, image: localImage('/category-images/conference-images/api_reef.jpg') },
-            { id: 'moto', name: 'Moto', price: 4000, image: localImage('/category-images/conference-images/api_moto.jpg') },
             { id: 'anthology-table', name: 'Anthology', price: 4700, image: localImage('/category-images/conference-images/api_anthology.jpg') },
-            { id: 'lok-conference-table', name: 'Lok Conference', price: 4300, image: localImage('/category-images/conference-images/api_lok-conference.jpg') },
             { id: 'brogan-table', name: 'Brogan', price: 4600, image: localImage('/category-images/conference-images/api_brogan.jpg') },
             { id: 'finale-table', name: 'Finale', price: 4800, image: localImage('/category-images/conference-images/api_finale.jpg') },
+            { id: 'lok-conference-table', name: 'Lok Conference', price: 4300, image: localImage('/category-images/conference-images/api_lok-conference.jpg') },
+            { id: 'moto', name: 'Moto', price: 4000, image: localImage('/category-images/conference-images/api_moto.jpg') },
+            { id: 'reef', name: 'Reef', price: 4200, image: localImage('/category-images/conference-images/api_reef.jpg') },
+            { id: 'vision-table', name: 'Vision', price: 4500, image: localImage('/category-images/conference-images/api_vision.jpg') },
             { id: 'walden-table', name: 'Walden', price: 5100, image: localImage('/category-images/conference-images/api_walden.jpg') },
             { id: 'wellington-table', name: 'Wellington', price: 5400, image: localImage('/category-images/conference-images/api_wellington.jpg') },
         ],
@@ -73,27 +69,29 @@ export const PRODUCT_DATA = {
     'guest': {
         name: 'Guest',
         products: [
+            { id: 'ansen', name: 'Ansen', price: 750, legType: 'wood', image: localImage('/series-images/jsi_ansen_comp_00002.jpg'), thumbScale: 1.5, heroScale: 1.25 },
             { id: 'arwyn-guest', name: 'Arwyn', price: 520, legType: 'wood', image: localImage('/category-images/guest-images/jsi_arwyn_comp_00032.jpg'), thumbScale: 1.4, heroScale: 1.2 },
+            { id: 'avini', name: 'Avini', price: 760, legType: 'wood', image: localImage('/category-images/guest-images/jsi_avini_comp_00007.jpg'), thumbScale: 1.7, heroScale: 1.35 },
+            { id: 'boston', name: 'Boston', price: 780, legType: 'wood', image: localImage('/category-images/guest-images/jsi_boston_comp_0007_jBfEUNr.jpg'), thumbScale: 1.65, heroScale: 1.3 },
             { id: 'bourne', name: 'Bourne', price: 560, legType: 'wood', image: localImage('/category-images/guest-images/jsi_bourne_comp_00002_k6eFRce.jpg'), thumbScale: 1.3, heroScale: 1.15 },
+            { id: 'bryn', name: 'Bryn', price: 900, legType: 'wood', image: localImage('/category-images/guest-images/jsi_bryn_comp_00023.jpg'), thumbScale: 1.6, heroScale: 1.3 },
+            { id: 'collective-motion', name: 'Collective Motion', price: 800, legType: 'metal', image: localImage('/category-images/guest-images/jsi_collectivemotion_comp_00014.jpg'), thumbScale: 1.6, heroScale: 1.25 },
             { id: 'cosgrove', name: 'Cosgrove', price: 610, legType: 'metal', image: localImage('/category-images/guest-images/jsi_cosgrove_comp_guest_midback_arms_00004.jpg'), thumbScale: 1.5, heroScale: 1.25 },
+            { id: 'harbor', name: 'Harbor', price: 880, legType: 'wood', image: localImage('/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg'), thumbScale: 1.55, heroScale: 1.25 },
             { id: 'henley', name: 'Henley', price: 630, legType: 'wood', image: localImage('/category-images/guest-images/jsi_henley_comp_00001.jpg'), thumbScale: 1.5, heroScale: 1.25 },
             { id: 'knox', name: 'Knox', price: 640, legType: 'metal', image: localImage('/category-images/guest-images/jsi_knox_comp_00020.jpg'), thumbScale: 1.8, heroScale: 1.35 },
+            { id: 'madison', name: 'Madison', price: 820, legType: 'wood', image: localImage('/category-images/guest-images/jsi_madison_comp_00003.jpg'), thumbScale: 1.6, heroScale: 1.3 },
+            { id: 'millie', name: 'Millie', price: 840, legType: 'wood', image: localImage('/category-images/guest-images/jsi_millie_comp_00005_g77W9GX.jpg'), thumbScale: 1.75, heroScale: 1.35 },
             { id: 'ramona', name: 'Ramona', price: 660, legType: 'wood', image: localImage('/category-images/guest-images/jsi_ramona_comp_rotation_ra2581f_00001.jpg'), thumbScale: 1.6, heroScale: 1.3 },
             { id: 'ria', name: 'Ria', price: 680, legType: 'metal', image: localImage('/category-images/guest-images/jsi_ria_comp_00007.jpg'), thumbScale: 1.9, heroScale: 1.4 },
             { id: 'satisse', name: 'Satisse', price: 705, legType: 'metal', image: localImage('/category-images/guest-images/jsi_satisse_comp_00001_LwTdLhw.jpg'), thumbScale: 2.0, heroScale: 1.5 },
             { id: 'sosa', name: 'Sosa', price: 720, legType: 'metal', image: localImage('/category-images/guest-images/jsi_sosa_comp_00020.jpg'), thumbScale: 1.7, heroScale: 1.3 },
-            { id: 'wink', name: 'Wink', price: 740, legType: 'wood', image: localImage('/category-images/guest-images/jsi_wink_comp_00070.jpg'), thumbScale: 1.9, heroScale: 1.4 },
-            { id: 'avini', name: 'Avini', price: 760, legType: 'wood', image: localImage('/category-images/guest-images/jsi_avini_comp_00007.jpg'), thumbScale: 1.7, heroScale: 1.35 },
-            { id: 'boston', name: 'Boston', price: 780, legType: 'wood', image: localImage('/category-images/guest-images/jsi_boston_comp_0007_jBfEUNr.jpg'), thumbScale: 1.65, heroScale: 1.3 },
-            { id: 'collective-motion', name: 'Collective Motion', price: 800, legType: 'metal', image: localImage('/category-images/guest-images/jsi_collectivemotion_comp_00014.jpg'), thumbScale: 1.6, heroScale: 1.25 },
-            { id: 'madison', name: 'Madison', price: 820, legType: 'wood', image: localImage('/category-images/guest-images/jsi_madison_comp_00003.jpg'), thumbScale: 1.6, heroScale: 1.3 },
-            { id: 'millie', name: 'Millie', price: 840, legType: 'wood', image: localImage('/category-images/guest-images/jsi_millie_comp_00005_g77W9GX.jpg'), thumbScale: 1.75, heroScale: 1.35 },
             { id: 'totem', name: 'Totem', price: 860, legType: 'wood', image: localImage('/category-images/guest-images/jsi_totem_comp_00003.jpg'), thumbScale: 1.5, heroScale: 1.2 },
-            { id: 'harbor', name: 'Harbor', price: 880, legType: 'wood', image: localImage('/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg'), thumbScale: 1.55, heroScale: 1.25 },
-            { id: 'bryn', name: 'Bryn', price: 900, legType: 'wood', image: localImage('/category-images/guest-images/jsi_bryn_comp_00023.jpg'), thumbScale: 1.6, heroScale: 1.3 }
+            { id: 'wink', name: 'Wink', price: 740, legType: 'wood', image: localImage('/category-images/guest-images/jsi_wink_comp_00070.jpg'), thumbScale: 1.9, heroScale: 1.4 }
         ],
         competition: [],
         competitionByProduct: {
+            'ansen': [comp('OFS Rowen Stool', '$775', '-3%'), comp('Kimball Pep Counter', '$760', '-1%'), comp('SitOnIt Wit Counter', '$740', '+1%')],
             'arwyn-guest': [comp('OFS Heya', '$550', '-5%'), comp('Kimball Joya', '$565', '-8%'), comp('Indiana Ovation', '$540', '-3%'), comp('SitOnIt Wit Guest', '$495', '+5%'), comp('Allsteel Aspect', '$590', '-11%')],
             'bourne': [comp('OFS Rowen', '$575', '-3%'), comp('Kimball Pep', '$560', '0%'), comp('Indiana Strut', '$545', '+2%')],
             'cosgrove': [comp('SitOnIt Cameo', '$640', '-5%'), comp('Kimball Kaia', '$655', '-7%'), comp('OFS Coact', '$625', '-2%')],
@@ -118,19 +116,19 @@ export const PRODUCT_DATA = {
         name: 'Lounge',
         products: [
             { id: 'arwyn', name: 'Arwyn', price: 1500, image: localImage('/category-images/lounge-images/api_arwyn.jpg') },
-            { id: 'caav', name: 'Caav', price: 1800, image: localImage('/category-images/lounge-images/api_caav.jpg') },
-            { id: 'finn', name: 'Finn', price: 1600, image: localImage('/category-images/lounge-images/api_finn.jpg') },
-            { id: 'indie-lounge', name: 'Indie', price: 1700, image: localImage('/category-images/lounge-images/api_indie.jpg') },
-            { id: 'poet-lounge', name: 'Poet', price: 1750, image: localImage('/category-images/lounge-images/api_poet.jpg') },
-            { id: 'finn-nu-lounge', name: 'Finn Nu', price: 1650, image: localImage('/category-images/lounge-images/api_finn-nu.jpg') },
-            { id: 'jude-lounge', name: 'Jude', price: 1680, image: localImage('/category-images/lounge-images/api_jude.jpg') },
-            { id: 'teekan-lounge', name: 'Teekan', price: 1850, image: localImage('/category-images/lounge-images/api_teekan.jpg') },
             { id: 'bespace-lounge', name: 'BeSPACE', price: 1900, image: localImage('/category-images/lounge-images/api_bespace.jpg') },
-            { id: 'satisse-lounge', name: 'Satisse', price: 1880, image: localImage('/category-images/lounge-images/api_satisse.jpg') },
-            { id: 'connect-lounge', name: 'Connect', price: 1720, image: localImage('/category-images/lounge-images/api_connect.jpg') },
-            { id: 'moto-lounge', name: 'Moto', price: 1760, image: localImage('/category-images/lounge-images/api_moto.jpg') },
             { id: 'bourne-lounge', name: 'Bourne', price: 1625, image: localImage('/category-images/lounge-images/api_bourne.jpg') },
+            { id: 'caav', name: 'Caav', price: 1800, image: localImage('/category-images/lounge-images/api_caav.jpg') },
+            { id: 'connect-lounge', name: 'Connect', price: 1720, image: localImage('/category-images/lounge-images/api_connect.jpg') },
+            { id: 'finn', name: 'Finn', price: 1600, image: localImage('/category-images/lounge-images/api_finn.jpg') },
+            { id: 'finn-nu-lounge', name: 'Finn Nu', price: 1650, image: localImage('/category-images/lounge-images/api_finn-nu.jpg') },
             { id: 'harbor-lounge', name: 'Harbor', price: 1820, image: localImage('/category-images/lounge-images/api_harbor.jpg') },
+            { id: 'indie-lounge', name: 'Indie', price: 1700, image: localImage('/category-images/lounge-images/api_indie.jpg') },
+            { id: 'jude-lounge', name: 'Jude', price: 1680, image: localImage('/category-images/lounge-images/api_jude.jpg') },
+            { id: 'moto-lounge', name: 'Moto', price: 1760, image: localImage('/category-images/lounge-images/api_moto.jpg') },
+            { id: 'poet-lounge', name: 'Poet', price: 1750, image: localImage('/category-images/lounge-images/api_poet.jpg') },
+            { id: 'satisse-lounge', name: 'Satisse', price: 1880, image: localImage('/category-images/lounge-images/api_satisse.jpg') },
+            { id: 'teekan-lounge', name: 'Teekan', price: 1850, image: localImage('/category-images/lounge-images/api_teekan.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -142,17 +140,17 @@ export const PRODUCT_DATA = {
     'swivels': {
         name: 'Swivels',
         products: [
+            { id: 'americana-swivel', name: 'Americana', price: 860, image: localImage('/category-images/swivel-images/api_americana.jpg') },
             { id: 'arwyn-swivel', name: 'Arwyn', price: 1300, image: localImage('/category-images/swivel-images/api_arwyn.jpg') },
-            { id: 'protocol', name: 'Protocol', price: 1180, image: localImage('/category-images/swivel-images/api_protocol.jpg') },
+            { id: 'boston-swivel', name: 'Boston', price: 890, image: localImage('/category-images/swivel-images/api_boston.jpg') },
             { id: 'cosgrove-swivel', name: 'Cosgrove', price: 1250, image: localImage('/category-images/swivel-images/api_cosgrove.jpg') },
             { id: 'garvey-r5', name: 'Garvey R5', price: 980, image: localImage('/category-images/swivel-images/api_garvey-r5.jpg') },
-            { id: 'newton-swivel', name: 'Newton', price: 920, image: localImage('/category-images/swivel-images/api_newton.jpg') },
-            { id: 'proxy-swivel', name: 'Proxy', price: 1050, image: localImage('/category-images/swivel-images/api_proxy.jpg') },
-            { id: 'americana-swivel', name: 'Americana', price: 860, image: localImage('/category-images/swivel-images/api_americana.jpg') },
-            { id: 'boston-swivel', name: 'Boston', price: 890, image: localImage('/category-images/swivel-images/api_boston.jpg') },
-            { id: 'knox-swivel', name: 'Knox', price: 940, image: localImage('/category-images/swivel-images/api_knox.jpg') },
             { id: 'harbor-swivel', name: 'Harbor', price: 1010, image: localImage('/category-images/swivel-images/api_harbor.jpg') },
+            { id: 'knox-swivel', name: 'Knox', price: 940, image: localImage('/category-images/swivel-images/api_knox.jpg') },
             { id: 'madison-swivel', name: 'Madison', price: 1070, image: localImage('/category-images/swivel-images/api_madison.jpg') },
+            { id: 'newton-swivel', name: 'Newton', price: 920, image: localImage('/category-images/swivel-images/api_newton.jpg') },
+            { id: 'protocol', name: 'Protocol', price: 1180, image: localImage('/category-images/swivel-images/api_protocol.jpg') },
+            { id: 'proxy-swivel', name: 'Proxy', price: 1050, image: localImage('/category-images/swivel-images/api_proxy.jpg') },
         ],
         competition: [],
         competitionByProduct: {
@@ -161,22 +159,26 @@ export const PRODUCT_DATA = {
             'protocol': [comp('SitOnIt Amplify', '$835', '-4%'), comp('Kimball Task Pro', '$825', '-3%'), comp('OFS Rally Lite', '$810', '-1%')]
         }
     },
-    'training-tables': {
-        name: 'Training Tables',
+    'credenzas': {
+        name: 'Credenzas',
         products: [
-            { id: 'moto-training', name: 'Moto', price: 900, image: localImage('/category-images/training-images/api_moto.jpg') },
-            { id: 'connect', name: 'Connect', price: 850, image: localImage('/category-images/training-images/api_connect.jpg') },
-            { id: 'bespace', name: 'BeSPACE', price: 950, image: localImage('/category-images/training-images/api_bespace.jpg') },
-            { id: 'lok-training', name: 'Lok Training', price: 980, image: localImage('/category-images/training-images/api_lok-training.jpg') },
-            { id: 'lok-teamwork', name: 'Lok Teamwork Tables', price: 1020, image: localImage('/category-images/training-images/api_lok-teamwork-tables.jpg') },
-            { id: 'nosh-training', name: 'Nosh', price: 920, image: localImage('/category-images/training-images/api_nosh.jpg') },
-            { id: 'draft-training', name: 'Draft', price: 880, image: localImage('/category-images/training-images/api_draft.jpg') },
+            { id: 'anthology-credenza', name: 'Anthology', price: 3800, image: jsiImg('65C203636CBT_tub1u5') },
+            { id: 'bespace-credenza', name: 'BeSPACE', price: 2600, image: jsiImg('BS1854-16SOS_vrllgw') },
+            { id: 'brogan-credenza', name: 'Brogan', price: 3200, image: jsiImg('BG2472BSC_tmlvpm') },
+            { id: 'finale-credenza', name: 'Finale', price: 3600, image: jsiImg('FN2472BSC_ysfjt7') },
+            { id: 'flux-credenza', name: 'Flux', price: 2800, image: jsiImg('FLT2272-29F282_sqzk2c') },
+            { id: 'lok-credenza', name: 'Lok', price: 2500, image: jsiImg('LKT2072-29L777_tza7jd') },
+            { id: 'native-credenza', name: 'Native', price: 3000, image: jsiImg('NAT2436-36RSC_zjjpem') },
+            { id: 'vision-credenza', name: 'Vision', price: 2400, image: jsiImg('VST2472SC_pvusmr') },
+            { id: 'walden-credenza', name: 'Walden', price: 4000, image: jsiImg('WN2HDP1-2574_pllrs7') },
+            { id: 'wellington-credenza', name: 'Wellington', price: 4400, image: jsiImg('CR8071-HD_szybmv') },
         ],
         competition: [],
         competitionByProduct: {
-            'moto-training': [comp('SitOnIt Switch', '$930', '-3%'), comp('Kimball KORE Train', '$920', '-2%'), comp('OFS Applause Train', '$905', '-1%')],
-            'connect': [comp('SitOnIt Link', '$875', '-3%'), comp('Kimball Pairings Train', '$865', '-2%'), comp('OFS Motum Train', '$852', '-0%')],
-            'bespace': [comp('SitOnIt Flex Train', '$980', '-3%'), comp('Kimball Dock Train', '$970', '-2%'), comp('OFS Thrive Train', '$955', '-1%')]
+            'vision-credenza': [comp('OFS Staks Credenza', '$2550', '-6%'), comp('Kimball Narrate Storage', '$2620', '-8%'), comp('Hon Abound Credenza', '$2340', '+3%')],
+            'flux-credenza': [comp('OFS ReframE Storage', '$2920', '-4%'), comp('Kimball Alterna Credenza', '$2880', '-3%'), comp('Indiana Gesso Storage', '$2750', '+2%')],
+            'walden-credenza': [comp('Kimball Hum Credenza', '$4150', '-4%'), comp('OFS Eleven Credenza', '$4280', '-7%'), comp('Indiana Compel Storage', '$3900', '+3%')],
+            'wellington-credenza': [comp('Kimball Evoke Credenza', '$4580', '-4%'), comp('OFS Slate Credenza', '$4680', '-6%'), comp('Hon Coordinate Storage', '$4280', '+3%')]
         }
     }
 };
@@ -278,7 +280,7 @@ export const VISION_MATERIALS = ['TFL', 'HPL', 'Veneer'];
 export const PRODUCTS_CATEGORIES_DATA = [
     {
         name: 'Casegoods',
-        description: 'Storage and workspace solutions',
+        description: 'Private office desk systems',
         nav: 'products/category/casegoods',
         images: [
             '/category-images/casegood-images/api_vision.jpg',
@@ -327,14 +329,14 @@ export const PRODUCTS_CATEGORIES_DATA = [
         ].map(localImage)
     },
     {
-        name: 'Training Tables',
-        description: 'Flexible training furniture',
-        nav: 'products/category/training-tables',
+        name: 'Credenzas',
+        description: 'Storage and credenza solutions',
+        nav: 'products/category/credenzas',
         images: [
-            '/category-images/training-images/lok-training-lkt022.jpg',
-            '/category-images/training-images/lok-training-lkt023.jpg',
-            '/category-images/training-images/lok-training-lkt024.jpg'
-        ].map(localImage)
+            jsiImg('VST2472SC_pvusmr'),
+            jsiImg('WN2HDP1-2574_pllrs7'),
+            jsiImg('FLT2272-29F282_sqzk2c'),
+        ]
     },
     {
         name: 'Benches',
@@ -345,11 +347,164 @@ export const PRODUCTS_CATEGORIES_DATA = [
             '/category-images/bench-images/api_poet.jpg',
             '/category-images/bench-images/api_indie.jpg'
         ].map(localImage)
+    },
+    {
+        name: 'Customs',
+        description: 'Tailored builds and spec-driven concepts',
+        nav: 'products/category/customs',
+        images: [
+            '/category-images/casegood-images/api_finale.jpg',
+            '/category-images/conference-images/api_reef.jpg',
+            '/category-images/lounge-images/api_bespace.jpg'
+        ].map(localImage)
     }
+];
+
+export const CUSTOMS_CATEGORIES = [
+    { id: 'all', label: 'All' },
+    { id: 'reception', label: 'Reception' },
+    { id: 'conference', label: 'Conference' },
+    { id: 'casegoods', label: 'Casegoods' },
+    { id: 'seating', label: 'Seating' },
+    { id: 'lounge', label: 'Lounge' },
+];
+
+export const CUSTOM_OPPORTUNITIES = [
+    {
+        id: 'arrival-wall-system',
+        title: 'Arrival Wall',
+        category: 'reception',
+        priceLabel: 'Under $34,000 NET',
+        image: localImage('/category-images/conference-images/api_reef.jpg'),
+        summary: 'A welcome-zone gesture that fuses display shelving, branded surface, and touchdown storage into a single architectural moment.',
+        details: 'Integrated signage, display pocketing, and mixed laminate / veneer faces. Lead time 5–7 weeks.',
+    },
+    {
+        id: 'modesty-refresh-kit',
+        title: 'Branded Modesty Kit',
+        category: 'reception',
+        priceLabel: 'Under $6,500 NET',
+        image: localImage('/category-images/casegood-images/api_vision.jpg'),
+        summary: 'A small-footprint refresh package that updates fronts, reveals, and guest-facing details without reworking the station.',
+        details: 'Applied metal reveal, laser-cut logo panel, contrast edge detailing. Lead time 3–4 weeks.',
+    },
+    {
+        id: 'conference-spine-power',
+        title: 'Conference Spine',
+        category: 'conference',
+        priceLabel: 'Under $23,000 NET',
+        image: localImage('/category-images/conference-images/api_wellington.jpg'),
+        summary: 'A boardroom table organized around a central power spine, with custom access points and finish breaks that feel built-in.',
+        details: 'Custom power routing, inset metal details, segmented top construction. Lead time 7–9 weeks.',
+    },
+    {
+        id: 'anthology-boat-shape',
+        title: 'Anthology Boat Top',
+        category: 'conference',
+        priceLabel: 'Under $18,500 NET',
+        image: localImage('/category-images/conference-images/jsi_anthology_comp_0006.jpg'),
+        summary: 'A long-format Anthology table reshaped to a soft boat plan with paired veneer sequencing and integrated grommet line.',
+        details: 'Sequenced veneer faces, soft-radius edge, custom grommet routing. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'founder-suite-signature',
+        title: 'Founder Suite',
+        category: 'casegoods',
+        priceLabel: 'From $48,000 NET',
+        image: localImage('/category-images/casegood-images/api_finale.jpg'),
+        summary: 'A fully composed private-office statement: bespoke scale, integrated storage, and detail language carried across the room.',
+        details: 'Custom veneer sequencing, integrated credenza wall, extended trim and metal package. Lead time 10–14 weeks.',
+    },
+    {
+        id: 'hospitality-credenza-mix',
+        title: 'Hospitality Credenza',
+        category: 'casegoods',
+        priceLabel: 'Under $11,000 NET',
+        image: localImage('/category-images/casegood-images/api_brogan.jpg'),
+        summary: 'A tuned credenza blend that mixes open display, hidden storage, and a hospitality-friendly serving zone into one piece.',
+        details: 'Mixed door conditions, integrated serving shelf, material break at user touch points. Lead time 4–6 weeks.',
+    },
+    {
+        id: 'flux-private-office',
+        title: 'Flux Private Office',
+        category: 'casegoods',
+        priceLabel: 'Under $19,500 NET',
+        image: localImage('/category-images/casegood-images/api_flux-private-office.jpg'),
+        summary: 'A composed private office built on the Flux platform with custom worksurface scale and a tuned storage wall.',
+        details: 'Custom worksurface scale, paired storage wall, mixed pull hardware. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'guest-arc-collection',
+        title: 'Guest Arc',
+        category: 'seating',
+        priceLabel: 'From $2,400 NET / chair',
+        image: localImage('/category-images/guest-images/jsi_harbor_comp_00010_7pPSeR6.jpg'),
+        summary: 'A guest seating story where finish pairing, stitch detail, and base expression are tuned to the surrounding architecture.',
+        details: 'Contrast stitch spec, base finish customization, paired textile strategy. Lead time 5–7 weeks.',
+    },
+    {
+        id: 'market-hall-benching',
+        title: 'Market Hall Bench',
+        category: 'seating',
+        priceLabel: 'Under $9,800 NET',
+        image: localImage('/category-images/bench-images/api_native.jpg'),
+        summary: 'A modular benching direction with mixed lengths, integrated planters, and surface drops for casual work or waiting.',
+        details: 'Length tuning, accessory add-ons, laminate and solid-surface mixing. Lead time 4–5 weeks.',
+    },
+    {
+        id: 'soft-architecture-cove',
+        title: 'Soft Architecture Cove',
+        category: 'lounge',
+        priceLabel: 'Under $27,000 NET',
+        image: localImage('/category-images/lounge-images/api_bespace.jpg'),
+        summary: 'A semi-enclosed lounge that uses screening, power, and layered upholstery to carve a destination without full construction.',
+        details: 'Partial enclosure panels, power routing, COM and graded-in material story. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'harbor-lounge-pair',
+        title: 'Harbor Lounge Pair',
+        category: 'lounge',
+        priceLabel: 'From $7,400 NET',
+        image: localImage('/category-images/lounge-images/api_harbor.jpg'),
+        summary: 'A paired Harbor lounge composition with custom welt, base metal finish, and a tuned cushion build.',
+        details: 'Custom welt, base metal finish, tuned cushion build. Lead time 5–6 weeks.',
+    },
+    {
+        id: 'poet-component-cluster',
+        title: 'Poet Component Cluster',
+        category: 'lounge',
+        priceLabel: 'Under $14,200 NET',
+        image: localImage('/category-images/lounge-images/jsi_poet_component_00008.jpg'),
+        summary: 'A modular Poet cluster spec\u2019d with a custom upholstery palette and inset accent table arrangement.',
+        details: 'Custom upholstery palette, inset accent tables, paired ottoman scale. Lead time 5–7 weeks.',
+    },
 ];
 
 // Re-export the single-source-of-truth series list so existing imports keep working
 export { JSI_SERIES } from '../../data/jsiSeries.js';
+
+// Map series slug (e.g. 'harbor') → array of { categoryId, categoryName, productId, productName, image }
+// by scanning PRODUCT_DATA. Collects ALL categories a series appears in.
+const _seriesMulti = {};
+for (const [catId, cat] of Object.entries(PRODUCT_DATA)) {
+    for (const p of cat.products || []) {
+        const slug = p.name.toLowerCase().replace(/\s+/g, '-');
+        const entry = { categoryId: catId, categoryName: cat.name, productId: p.id, productName: p.name, image: p.image };
+        if (!_seriesMulti[slug]) _seriesMulti[slug] = [];
+        _seriesMulti[slug].push(entry);
+        // Also index by product id for direct lookups
+        if (slug !== p.id) {
+            if (!_seriesMulti[p.id]) _seriesMulti[p.id] = [];
+            _seriesMulti[p.id].push(entry);
+        }
+    }
+}
+export const SERIES_CATEGORIES = Object.freeze(_seriesMulti);
+
+// Convenience: single-match lookup (first category found) — kept for backwards compat
+export const SERIES_TO_CATEGORY = Object.freeze(
+    Object.fromEntries(Object.entries(_seriesMulti).map(([k, v]) => [k, v[0]]))
+);
 
 // Re-export new hierarchical data + API abstraction
 export { PRODUCT_FAMILIES, PRODUCT_SUBCATEGORIES, PRODUCT_MODELS, PRODUCT_CATEGORIES } from './productHierarchy.js';

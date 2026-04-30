@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, modalCardSurface } from '../../design-system/tokens.js';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from './modalUtils.js';
 import { getModalMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
@@ -104,10 +104,7 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                         tabIndex={-1}
                         className={`w-full ${maxWidth} flex flex-col relative outline-none`}
                         style={{
-                            backgroundColor: theme?.colors?.surface || (isDark ? '#282828' : '#FFFFFF'),
-                            border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
-                            borderRadius: DESIGN_TOKENS.borderRadius.xl,
-                            boxShadow: DESIGN_TOKENS.shadows.modal,
+                            ...modalCardSurface(theme),
                             maxHeight: '85vh',
                         }}
                         initial={modalMotion.card.initial}

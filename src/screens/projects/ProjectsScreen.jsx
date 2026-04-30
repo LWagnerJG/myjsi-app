@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search, ChevronDown, Check, Store, Pencil } from 'lucide-react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
@@ -8,19 +8,25 @@ import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobo
 import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { TabContent } from '../../components/common/TabContent.jsx';
-import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
+import { isDarkTheme, JSI_COLORS, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
-import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
+import { buildOpportunityProjectContacts, resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
 
 const CUSTOMER_TYPES = [
   { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
   { id: 'dealers',      label: 'Dealers',      singular: 'Dealer',      icon: Store     },
   { id: 'design-firms', label: 'Design Firms', singular: 'Design Firm', icon: Pencil    },
+];
+
+const COMPACT_PROJECTS_TAB_OPTIONS = [
+  { value: 'pipeline', label: 'Projects' },
+  { value: 'customers', label: 'Customers' },
+  { value: 'my-projects', label: 'Installs' },
 ];
 
 const TypeDropdown = React.memo(({ value, onChange, theme }) => {
@@ -98,7 +104,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
-  const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
+  const fieldTile = fieldTileSurface(theme);
 
   const [name, setName]       = useState('');
   const [location, setLocation] = useState('');
@@ -134,6 +140,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
       approvedMaterials: {},
       projects: [],
       contacts: [],
+      contactVisibilityLocked: false,
       documents: [],
     };
     onAdd(newCustomer);
@@ -145,10 +152,10 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
       <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
-        style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
+        style={{ ...modalCardSurface(theme), overflow: 'visible', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderBottom: `1px solid ${border}`, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <Building2 className="w-4 h-4" style={{ color: c.accent }} />
@@ -163,18 +170,18 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Account Name</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Account Name</label>
             <input
               ref={nameRef}
               value={name} onChange={e => { setName(e.target.value); setError(''); }}
               placeholder="e.g. Midwest Health Partners"
               className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{ backgroundColor: fieldBg, border: `1.5px solid ${border}`, color: c.textPrimary }}
+              style={{ ...fieldTile, color: c.textPrimary }}
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Location</label>
             <AutoCompleteCombobox
               value={location}
               onChange={(val) => { setLocation(val); setError(''); }}
@@ -189,7 +196,7 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Vertical</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Vertical</label>
             <div className="flex flex-wrap gap-2">
               {VERTICAL_OPTIONS.map(v => {
                 const active = vertical === v;
@@ -265,7 +272,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
-  const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#f9f9f9';
+  const fieldTile = fieldTileSurface(theme);
   const MAX_PHOTOS = INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos;
 
   const [selectedProject, setSelectedProject] = useState(null);
@@ -366,10 +373,10 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
       style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       onClick={onClose}>
       <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
-        style={{ backgroundColor: c.surface, border: `1px solid ${border}`, overflow: 'visible' }}
+        style={{ ...modalCardSurface(theme), overflow: 'visible', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderColor: border, backgroundColor: c.surface }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderBottom: `1px solid ${border}`, backgroundColor: c.surface }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
               <ImageIcon className="w-4 h-4" style={{ color: c.accent }} />
@@ -384,7 +391,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Project</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Project</label>
             <div className="relative" ref={projectDropdownRef}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: c.textSecondary }} />
               <input
@@ -394,15 +401,13 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
                 onChange={e => { setProjectSearch(e.target.value); setSelectedProject(null); setProjectOpen(true); setError(''); }}
                 placeholder="Search customer or project..."
                 className="w-full rounded-full pl-[34px] pr-4 text-sm outline-none"
-                style={{ height: 40, backgroundColor: isDark ? c.background : c.surface, border: `1px solid ${isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)'}`, color: c.textPrimary }}
+                style={{ ...fieldTile, height: 44, color: c.textPrimary }}
               />
               {projectOpen && filteredProjects.length > 0 && (
-                <div className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+                <div className="absolute left-0 right-0 z-50 overflow-hidden"
                   style={{
+                    ...modalCardSurface(theme),
                     top: 'calc(100% + 6px)',
-                    backgroundColor: c.surface,
-                    borderColor: isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
-                    boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
                   }}>
                   <div className="overflow-y-auto py-1" style={{ maxHeight: 216 }}>
                     {filteredProjects.map(proj => (
@@ -419,12 +424,10 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
                 </div>
               )}
               {projectOpen && filteredProjects.length === 0 && projectSearch.trim() && (
-                <div className="absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden"
+                <div className="absolute left-0 right-0 z-50 overflow-hidden"
                   style={{
+                    ...modalCardSurface(theme),
                     top: 'calc(100% + 6px)',
-                    backgroundColor: c.surface,
-                    borderColor: isDark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)',
-                    boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 24px rgba(0,0,0,0.11)',
                   }}>
                   <div className="px-4 py-3 text-[0.8125rem]" style={{ color: c.textSecondary }}>
                     No matching projects
@@ -435,7 +438,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: c.textSecondary, opacity: 0.7 }}>Location</label>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Location</label>
             <AutoCompleteCombobox
               value={location}
               onChange={(val) => { setLocation(val); setError(''); }}
@@ -451,13 +454,13 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: c.textSecondary, opacity: 0.7 }}>Photos</label>
+              <label className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.84 }}>Photos</label>
               <span className="text-xs font-semibold tabular-nums" style={{ color: c.textSecondary, opacity: 0.6 }}>{photos.length}/{MAX_PHOTOS}</span>
             </div>
             {photos.length === 0 ? (
               <button type="button" onClick={() => fileInputRef.current?.click()}
                 className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors"
-                style={{ borderColor: border, backgroundColor: fieldBg, color: c.textSecondary }}>
+                style={{ borderColor: border, ...fieldTile, color: c.textSecondary }}>
                 <Upload className="w-5 h-5" style={{ opacity: 0.5 }} />
                 <span className="text-xs font-semibold" style={{ color: c.textPrimary }}>Add Photos</span>
               </button>
@@ -476,7 +479,7 @@ const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
                 {photos.length < MAX_PHOTOS && (
                   <button type="button" onClick={() => fileInputRef.current?.click()}
                     className="aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors"
-                    style={{ borderColor: border, color: c.textSecondary, backgroundColor: fieldBg }}>
+                    style={{ borderColor: border, color: c.textSecondary, ...fieldTile }}>
                     <Plus className="w-4 h-4" />
                     <span className="text-[0.625rem] font-semibold">Add</span>
                   </button>
@@ -519,7 +522,7 @@ export const ProjectsScreen = forwardRef(({
   projectsInitialTab, clearProjectsInitialTab,
   projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
-  setBackHandler, onAddInstall,
+  setBackHandler, onAddInstall, sampleOrders,
 }, ref) => {
   const isDark = isDarkTheme(theme);
   const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
@@ -533,6 +536,22 @@ export const ProjectsScreen = forwardRef(({
   const stagesScrollRef = useRef(null);
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
+  const headerControlsRef = useRef(null);
+  const projectsToggleRef = useRef(null);
+  const projectsStandardMeasureRef = useRef(null);
+  const projectsCompactMeasureRef = useRef(null);
+  const [projectsToggleMode, setProjectsToggleMode] = useState('default');
+  const hasRouteOpportunityDetail = Boolean(deepLinkOppId);
+  const selectedOpportunityRef = useRef(selectedOpportunity);
+  const selectedCustomerRef = useRef(selectedCustomer);
+
+  useEffect(() => {
+    selectedOpportunityRef.current = selectedOpportunity;
+  }, [selectedOpportunity]);
+
+  useEffect(() => {
+    selectedCustomerRef.current = selectedCustomer;
+  }, [selectedCustomer]);
 
   useEffect(() => {
     if (projectsInitialTab) {
@@ -549,32 +568,52 @@ export const ProjectsScreen = forwardRef(({
   }, [projectsInitialStage, clearProjectsInitialStage, setSelectedPipelineStage]);
 
   useEffect(() => {
-    if (deepLinkOppId && opportunities) {
-      const match = opportunities.find(o => String(o.id) === String(deepLinkOppId));
-      if (match) setSelectedOpportunity(match);
+    if (!deepLinkOppId) {
+      setSelectedOpportunity(null);
+      return;
     }
+
+    if (!Array.isArray(opportunities)) {
+      setSelectedOpportunity(null);
+      return;
+    }
+
+    const match = opportunities.find(o => String(o.id) === String(deepLinkOppId));
+    setSelectedOpportunity(match || null);
   }, [deepLinkOppId, opportunities]);
 
   useImperativeHandle(ref, () => ({
     clearSelection: () => {
       if (selectedCustomer)    { setSelectedCustomer(null);    return true; }
-      if (selectedOpportunity) { setSelectedOpportunity(null); return true; }
+      if (selectedOpportunity && !hasRouteOpportunityDetail) {
+        setSelectedOpportunity(null);
+        return true;
+      }
       return false;
     },
-  }));
+  }), [selectedCustomer, selectedOpportunity, hasRouteOpportunityDetail]);
 
   useEffect(() => {
-    if (selectedCustomer || selectedOpportunity) {
-      setBackHandler?.(() => {
-        if (selectedCustomer)    { setSelectedCustomer(null);    return true; }
-        if (selectedOpportunity) { setSelectedOpportunity(null); return true; }
-        return false;
-      });
-    } else {
-      setBackHandler?.(null);
+    if (typeof setBackHandler !== 'function') return undefined;
+    const hasLocalOpportunityDetail = Boolean(selectedOpportunity) && !hasRouteOpportunityDetail;
+
+    if (!selectedCustomer && !hasLocalOpportunityDetail) {
+      setBackHandler(null);
+      return undefined;
     }
-    return () => setBackHandler?.(null);
-  }, [selectedCustomer, selectedOpportunity, setBackHandler]);
+
+    return setBackHandler(() => {
+      if (selectedCustomerRef.current) {
+        setSelectedCustomer(null);
+        return true;
+      }
+      if (!hasRouteOpportunityDetail && selectedOpportunityRef.current) {
+        setSelectedOpportunity(null);
+        return true;
+      }
+      return false;
+    });
+  }, [selectedCustomer, selectedOpportunity, hasRouteOpportunityDetail, setBackHandler]);
 
   const updateStageFade = useCallback(() => {
     const el = stagesScrollRef.current;
@@ -602,6 +641,19 @@ export const ProjectsScreen = forwardRef(({
     [selectedPipelineStage, opportunities],
   );
 
+  const presentedOpportunities = useMemo(
+    () => filteredOpportunities.map((opportunity) => {
+      const { customer, source } = resolveOpportunityCustomerLink(opportunity, customers);
+      return {
+        opportunity,
+        linkedCustomer: customer,
+        customerLinkSource: source,
+        projectContacts: buildOpportunityProjectContacts(opportunity, customer),
+      };
+    }),
+    [customers, filteredOpportunities],
+  );
+
   const stageTotalValue = useMemo(() =>
     filteredOpportunities.reduce((sum, o) => {
       const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : o.value;
@@ -618,6 +670,11 @@ export const ProjectsScreen = forwardRef(({
     setCustomers(prev => [...prev, newCustomer]);
   }, []);
 
+  const updateCustomer = useCallback(updatedCustomer => {
+    setCustomers(prev => prev.map(customer => customer.id === updatedCustomer.id ? updatedCustomer : customer));
+    setSelectedCustomer(prev => prev?.id === updatedCustomer.id ? updatedCustomer : prev);
+  }, []);
+
   const filteredCustomers = useMemo(() => {
     if (customerType === 'dealers')       return customers.filter(c => c.type === 'dealer');
     if (customerType === 'design-firms')  return customers.filter(c => c.type === 'design-firm');
@@ -628,16 +685,86 @@ export const ProjectsScreen = forwardRef(({
     () => CUSTOMER_TYPES.find(t => t.id === customerType)?.singular || 'Customer',
     [customerType],
   );
+  const noopToggleChange = useCallback(() => {}, []);
+  const projectsTabOptions = useMemo(
+    () => projectsToggleMode === 'compact' ? COMPACT_PROJECTS_TAB_OPTIONS : PROJECTS_TAB_OPTIONS,
+    [projectsToggleMode],
+  );
+  const projectsToggleSize = projectsToggleMode === 'compact' ? 'smDense' : 'sm';
+
   const cta = useMemo(() => ({
-    pipeline:      { label: 'Project',    action: () => onNavigate('new-lead') },
-    customers:     { label: ctaSingular,  action: () => setShowAddCustomer(true) },
-    'my-projects': { label: 'Install',    action: () => onNavigate('add-new-install') },
+    pipeline:      { label: 'New', ariaLabel: 'Create project', action: () => onNavigate('new-lead') },
+    customers:     { label: 'New', ariaLabel: `Add ${ctaSingular.toLowerCase()}`, action: () => setShowAddCustomer(true) },
+    'my-projects': { label: 'New', ariaLabel: 'Add installation', action: () => onNavigate('add-new-install') },
   })[projectsTab], [projectsTab, ctaSingular, onNavigate]);
+
+  const updateProjectsToggleMode = useCallback(() => {
+    const toggleViewport = projectsToggleRef.current;
+    if (!toggleViewport) return;
+
+    const availableToggleWidth = toggleViewport.clientWidth;
+    const standardWidth = projectsStandardMeasureRef.current?.scrollWidth || 0;
+    const compactWidth = projectsCompactMeasureRef.current?.scrollWidth || 0;
+    if (!availableToggleWidth || !standardWidth) return;
+
+    const nextMode = standardWidth > availableToggleWidth - 4 && compactWidth > 0 ? 'compact' : 'default';
+    setProjectsToggleMode((prev) => prev === nextMode ? prev : nextMode);
+  }, []);
+
+  useLayoutEffect(() => {
+    updateProjectsToggleMode();
+    const row = headerControlsRef.current;
+    if (!row) return undefined;
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => updateProjectsToggleMode())
+      : null;
+
+    resizeObserver?.observe(row);
+    if (projectsToggleRef.current) resizeObserver?.observe(projectsToggleRef.current);
+    if (projectsStandardMeasureRef.current) resizeObserver?.observe(projectsStandardMeasureRef.current);
+    if (projectsCompactMeasureRef.current) resizeObserver?.observe(projectsCompactMeasureRef.current);
+
+    window.addEventListener('resize', updateProjectsToggleMode);
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateProjectsToggleMode);
+    };
+  }, [updateProjectsToggleMode, projectsTabOptions, projectsToggleSize]);
+
+  useLayoutEffect(() => {
+    const toggleViewport = projectsToggleRef.current;
+    if (!toggleViewport) return undefined;
+
+    const selectedIndex = projectsTabOptions.findIndex((option) => option.value === projectsTab);
+    const selectedButton = toggleViewport.querySelectorAll('[data-toggle-btn]')[selectedIndex];
+    if (!selectedButton) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      const gutter = projectsToggleMode === 'compact' ? 16 : 14;
+      const nextLeft = Math.max(0, selectedButton.offsetLeft - gutter);
+      const nextRight = selectedButton.offsetLeft + selectedButton.offsetWidth + gutter;
+      const viewportLeft = toggleViewport.scrollLeft;
+      const viewportRight = viewportLeft + toggleViewport.clientWidth;
+
+      if (nextLeft < viewportLeft) {
+        toggleViewport.scrollLeft = nextLeft;
+        return;
+      }
+
+      if (nextRight > viewportRight) {
+        toggleViewport.scrollLeft = Math.max(0, nextRight - toggleViewport.clientWidth);
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [projectsTab, projectsTabOptions, projectsToggleMode]);
 
   if (selectedCustomer) return (
     <CustomerMicrositeScreen
       customer={selectedCustomer}
       theme={theme}
+      onUpdateCustomer={updateCustomer}
     />
   );
 
@@ -645,8 +772,13 @@ export const ProjectsScreen = forwardRef(({
     <OpportunityDetail
       opp={selectedOpportunity}
       theme={theme}
+      customers={customers}
       members={members}
       currentUserId={currentUserId}
+      sampleOrders={sampleOrders}
+      opportunities={opportunities}
+      onNavigate={onNavigate}
+      onOpenCustomer={setSelectedCustomer}
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
     />
   );
@@ -656,37 +788,62 @@ export const ProjectsScreen = forwardRef(({
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
-      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full">
-          <SegmentedToggle
-            value={projectsTab}
-            onChange={setProjectsTab}
-            options={PROJECTS_TAB_OPTIONS}
-            size="sm"
-            theme={theme}
-            fullWidth
-          />
-        </div>
-
-        <div className="px-4 sm:px-6 lg:px-8 pb-3 max-w-5xl mx-auto w-full flex items-center justify-between gap-3">
-          {projectsTab === 'customers' ? (
-            <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
-          ) : (
-            <div /> /* spacer keeps CTA right-aligned on other tabs */
-          )}
+      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
+        <div ref={headerControlsRef} className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div ref={projectsToggleRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
+            <div className="inline-block pr-4">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={setProjectsTab}
+                options={projectsTabOptions}
+                size={projectsToggleSize}
+                theme={theme}
+              />
+            </div>
+          </div>
           {cta && (
             <button
+              type="button"
+              aria-label={cta.ariaLabel}
               onClick={cta.action}
-              className="flex-shrink-0 inline-flex items-center justify-center gap-1 rounded-full text-sm font-semibold transition-all whitespace-nowrap active:scale-[0.97]"
-              style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText, paddingTop: 9, paddingBottom: 9, paddingLeft: 14, paddingRight: 16 }}
+              className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] gap-1.5 text-sm leading-none px-3"
+              style={{ height: 'var(--jsi-ctrl-h)', backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
             >
-              <Plus size={13} strokeWidth={2.5} /> {cta.label}
+              <Plus size={14} strokeWidth={2.5} />
+              {cta.label}
             </button>
           )}
+
+          <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
+            <div ref={projectsStandardMeasureRef} className="inline-block">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={noopToggleChange}
+                options={PROJECTS_TAB_OPTIONS}
+                size="sm"
+                theme={theme}
+              />
+            </div>
+            <div ref={projectsCompactMeasureRef} className="inline-block ml-4">
+              <SegmentedToggle
+                value={projectsTab}
+                onChange={noopToggleChange}
+                options={COMPACT_PROJECTS_TAB_OPTIONS}
+                size="smDense"
+                theme={theme}
+              />
+            </div>
+          </div>
         </div>
 
+        {projectsTab === 'customers' && (
+          <div className="px-4 sm:px-6 lg:px-8 pb-1 max-w-content mx-auto w-full">
+            <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
+          </div>
+        )}
+
         {projectsTab === 'pipeline' && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-5xl mx-auto w-full">
+          <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-content mx-auto w-full">
             <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
               <div className="inline-flex items-center gap-0 py-0.5 whitespace-nowrap">
                 {STAGES.map((stage, i) => {
@@ -721,16 +878,33 @@ export const ProjectsScreen = forwardRef(({
         )}
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-40 max-w-5xl mx-auto w-full">
-        <TabContent activeKey={projectsTab}>
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-10 max-w-content mx-auto w-full">
+        <TabContent activeKey={projectsTab} tabIndex={PROJECTS_TAB_OPTIONS.findIndex(o => o.value === projectsTab)}>
           {projectsTab === 'pipeline' && (
-            filteredOpportunities.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {filteredOpportunities.map(opp => (
-                  <ProjectCard key={opp.id} opp={opp} theme={theme}
-                    onClick={() => { setSelectedOpportunity(opp); onNavigate(`projects/${opp.id}`); }} />
-                ))}
-              </div>
+            presentedOpportunities.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                  {presentedOpportunities.map(({ opportunity, linkedCustomer, customerLinkSource, projectContacts }) => (
+                    <ProjectCard key={opportunity.id} opp={opportunity} theme={theme}
+                      linkedCustomer={linkedCustomer}
+                      customerLinkSource={customerLinkSource}
+                      projectContacts={projectContacts}
+                      onClick={() => onNavigate(`projects/${opportunity.id}`)} />
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-center">
+                  <div
+                    className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[0.8125rem] font-semibold"
+                    style={{
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)',
+                      color: theme.colors.textSecondary,
+                    }}
+                  >
+                    <Briefcase size={15} style={{ opacity: 0.5 }} />
+                    {selectedPipelineStage} · {presentedOpportunities.length} {presentedOpportunities.length === 1 ? 'project' : 'projects'} · {fmtCurrency(stageTotalValue)}
+                  </div>
+                </div>
+              </>
             ) : (
               <SharedEmptyState icon={Briefcase} theme={theme}
                 title={`No projects in ${selectedPipelineStage}`}
@@ -740,7 +914,7 @@ export const ProjectsScreen = forwardRef(({
 
           {projectsTab === 'customers' && (
             filteredCustomers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
                 {filteredCustomers.map(cust => (
                   <CustomerCard key={cust.id} customer={cust} isDark={isDark}
                     onClick={() => setSelectedCustomer(cust)} />
@@ -755,7 +929,7 @@ export const ProjectsScreen = forwardRef(({
 
           {projectsTab === 'my-projects' && (
             allProjects.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
                 {allProjects.map(p => {
                   const ownerCustomer = customers.find(c => c.id === p.customerId);
                   return (
@@ -772,13 +946,6 @@ export const ProjectsScreen = forwardRef(({
           )}
         </TabContent>
       </div>
-
-      <FloatingActionCTA
-        theme={theme}
-        visible={projectsTab === 'pipeline' && filteredOpportunities.length > 0}
-        icon={<Briefcase />}
-        label={`${selectedPipelineStage} · ${filteredOpportunities.length} ${filteredOpportunities.length === 1 ? 'project' : 'projects'} · ${fmtCurrency(stageTotalValue)}`}
-      />
 
       {showAddCustomer && (
         <AddCustomerModal

@@ -144,7 +144,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   return (
     <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-6 space-y-5 max-w-5xl mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-6 space-y-5 max-w-content mx-auto w-full">
 
         {/* ── Hero KPI + sidebar ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-5">

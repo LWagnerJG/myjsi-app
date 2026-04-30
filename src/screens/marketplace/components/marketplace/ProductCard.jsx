@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
-import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { HAT_SIZES, SHIRT_SIZES, formatElliottBucks } from '../../data.js';
 import { SizePicker } from './SizePicker.jsx';
+import { getMarketplacePalette } from '../../theme.js';
 
 const CATEGORY_LABELS = {
   cups: 'Drinkware',
@@ -10,8 +10,8 @@ const CATEGORY_LABELS = {
   hats: 'Headwear',
 };
 
-export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, defaultSize, theme }) => {
-  const isDark = isDarkTheme(theme);
+export const ProductCard = React.memo(({ product, productQty, variantQtyByKey, onAdd, onRemoveOne, defaultSize, theme }) => {
+  const palette = getMarketplacePalette(theme);
   const sizes = product.hasSizes ? (product.sizeType === 'hat' ? HAT_SIZES : SHIRT_SIZES) : null;
   const initialSize = defaultSize && sizes?.includes(defaultSize) ? defaultSize : (sizes ? sizes[2] || sizes[0] : null);
   const [selectedSize, setSelectedSize] = useState(initialSize);
@@ -21,6 +21,9 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
       setSelectedSize(defaultSize);
     }
   }, [defaultSize, sizes]);
+
+  const selectedVariantKey = `${product.id}::${selectedSize || ''}`;
+  const selectedQty = variantQtyByKey?.[selectedVariantKey] || 0;
 
   const handleAdd = useCallback((event) => {
     event.stopPropagation();
@@ -33,32 +36,30 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
     if (onRemoveOne) onRemoveOne(product.id, selectedSize);
   }, [onRemoveOne, product.id, selectedSize]);
 
-  const inCart = cartQty > 0;
+  const inCart = selectedQty > 0;
+  const hasAnyInCart = productQty > 0;
   const lowStock = product.stock <= 35;
   const categoryLabel = CATEGORY_LABELS[product.category] || 'Collection';
   const stockLabel = lowStock ? `${product.stock} left` : `${product.stock} available`;
 
   const badgeColors = {
-    'Best Seller': { bg: theme.colors.successLight, text: theme.colors.success },
-    'New': { bg: theme.colors.accent, text: theme.colors.accentText },
-    'Popular': { bg: theme.colors.infoLight, text: theme.colors.info },
-    'Fan Favorite': { bg: theme.colors.warningLight, text: theme.colors.warning },
+    'Best Seller': { bg: palette.successSoft, text: palette.success },
+    'New': { bg: palette.brand, text: palette.brandInk },
+    'Popular': { bg: palette.infoSoft, text: palette.info },
+    'Fan Favorite': { bg: palette.warningSoft, text: palette.warning },
   };
 
   return (
     <div
       className="overflow-hidden flex flex-col transition-all duration-200"
       style={{
-        borderRadius: 24,
+        borderRadius: 26,
         backgroundColor: theme.colors.surface,
-        border: inCart
-          ? `1.5px solid ${theme.colors.accent}`
-          : (isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)'),
-        boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.18)' : '0 2px 8px rgba(0,0,0,0.04)',
+        border: hasAnyInCart ? `1.5px solid ${palette.brand}` : `1px solid ${palette.border}`,
+        boxShadow: palette.shadow,
       }}
     >
-      {/* Image — clean, no gradient overlay */}
-      <div className="relative aspect-square overflow-hidden" style={{ borderRadius: '24px 24px 0 0' }}>
+      <div className="relative aspect-square overflow-hidden" style={{ borderRadius: '26px 26px 0 0', backgroundColor: palette.panelSubtle }}>
         <img
           src={product.image}
           alt={product.name}
@@ -78,70 +79,106 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
           </span>
         )}
 
-        {inCart && (
+        {hasAnyInCart && (
           <div
-            className="absolute top-3 right-3 min-w-[28px] h-7 px-2 flex items-center justify-center font-bold text-xs"
+            className="absolute top-3 right-3 min-w-[30px] h-7 px-2.5 flex items-center justify-center font-bold text-xs"
             style={{
               borderRadius: 9999,
-              backgroundColor: theme.colors.accent,
-              color: theme.colors.accentText,
+              backgroundColor: palette.brand,
+              color: palette.brandInk,
             }}
           >
-            {cartQty}
+            {productQty}
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col p-3.5 gap-2.5">
-        <div>
-          <h4 className="text-sm font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
-            {product.name}
-          </h4>
-          <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>
-            {categoryLabel} · {formatElliottBucks(product.price)}
-          </p>
+      <div className="flex-1 flex flex-col p-4 gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em]" style={{ color: theme.colors.textSecondary }}>
+              {categoryLabel}
+            </p>
+            <h4 className="text-[0.9375rem] font-semibold leading-tight mt-1" style={{ color: theme.colors.textPrimary }}>
+              {product.name}
+            </h4>
+          </div>
+          <span
+            className="px-2.5 py-1 rounded-full text-[0.6875rem] font-bold whitespace-nowrap"
+            style={{ backgroundColor: palette.panelStrong, color: theme.colors.textPrimary }}
+          >
+            {formatElliottBucks(product.price)}
+          </span>
         </div>
 
-        {lowStock && (
-          <span
-            className="self-start px-2.5 py-1 rounded-full text-[0.625rem] font-semibold"
-            style={{
-              backgroundColor: theme.colors.warningLight,
-              color: theme.colors.warning,
-            }}
-          >
-            {stockLabel}
-          </span>
-        )}
+        <p
+          className="text-[0.75rem] leading-snug"
+          style={{
+            color: theme.colors.textSecondary,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {product.description}
+        </p>
+
+        <div className="flex items-center gap-2 flex-wrap min-h-[28px]">
+          {lowStock ? (
+            <span
+              className="self-start px-2.5 py-1 rounded-full text-[0.625rem] font-semibold"
+              style={{
+                backgroundColor: palette.warningSoft,
+                color: palette.warning,
+              }}
+            >
+              {stockLabel}
+            </span>
+          ) : (
+            <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>
+              {stockLabel}
+            </span>
+          )}
+        </div>
 
         {sizes && (
           <SizePicker sizes={sizes} selected={selectedSize} onSelect={setSelectedSize} theme={theme} />
+        )}
+
+        {sizes && hasAnyInCart && !inCart && (
+          <p className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
+            {productQty} in cart across other size{productQty > 1 ? 's' : ''}
+          </p>
         )}
 
         {inCart ? (
           <div className="flex items-center gap-2 mt-auto">
             <button
               onClick={handleRemoveOne}
-              className="flex items-center justify-center w-9 h-9 rounded-full transition-all active:scale-90"
+              className="flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-90"
               style={{
-                backgroundColor: isDark ? 'rgba(184,92,92,0.18)' : 'rgba(184,92,92,0.10)',
-                border: '1px solid rgba(184,92,92,0.30)',
+                backgroundColor: palette.errorSoft,
+                border: `1px solid ${palette.errorSoft}`,
               }}
-              aria-label={cartQty === 1 ? 'Remove from cart' : 'Remove one'}
+              aria-label={selectedQty === 1 ? 'Remove from cart' : 'Remove one'}
             >
-              {cartQty === 1
-                ? <Trash2 className="w-3.5 h-3.5" style={{ color: theme.colors.error }} />
-                : <Minus className="w-3.5 h-3.5" style={{ color: theme.colors.error }} />}
+              {selectedQty === 1
+                ? <Trash2 className="w-4 h-4" style={{ color: palette.error }} />
+                : <Minus className="w-4 h-4" style={{ color: palette.error }} />}
             </button>
+
+            <div className="min-w-[2rem] text-center text-sm font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+              {selectedQty}
+            </div>
 
             <button
               onClick={handleAdd}
               disabled={sizes && !selectedSize}
               className="flex-1 h-10 flex items-center justify-center gap-1.5 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40"
               style={{
-                backgroundColor: theme.colors.accent,
-                color: theme.colors.accentText,
+                backgroundColor: palette.brand,
+                color: palette.brandInk,
               }}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -152,10 +189,10 @@ export const ProductCard = React.memo(({ product, cartQty, onAdd, onRemoveOne, d
           <button
             onClick={handleAdd}
             disabled={sizes && !selectedSize}
-            className="mt-auto w-full py-2.5 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="mt-auto w-full py-2.75 rounded-full text-xs font-bold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{
-              backgroundColor: theme.colors.accent,
-              color: theme.colors.accentText,
+              backgroundColor: palette.brand,
+              color: palette.brandInk,
             }}
           >
             <Plus className="w-3.5 h-3.5" />

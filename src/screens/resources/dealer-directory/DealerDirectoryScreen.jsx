@@ -84,7 +84,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
-            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-4" contentClassName="pt-3 pb-3">
+            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-3">
                 <PageTitle
                     title="Dealers"
                     subtitle={`${dealers.length} accounts \u00B7 ${formatCurrency(totalSales)}`}
@@ -113,7 +113,8 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
             </ScreenTopChrome>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-10">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-10">
+                <div className="max-w-content mx-auto w-full">
                 {sorted.length > 0 ? (
                     <div
                         className="rounded-[20px] overflow-hidden"
@@ -197,6 +198,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         <p className="text-[0.8125rem]" style={{ color: colors.textSecondary, opacity: 0.7 }}>Try a different search term.</p>
                     </div>
                 )}
+                </div>
             </div>
 
             {/* ── Add Dealer Modal ── */}

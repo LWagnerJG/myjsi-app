@@ -10,9 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 // ─── Configuration option sets ───────────────────────────────────────────────
 const CASEGOODS_TYPICAL_OPTIONS = ['U-Shape','L-Shape','Single Ped','AH Desk'];
 const CONFERENCE_SIZE_OPTIONS = ['30x72','42x90','48x108','54x180','60x210'];
-const LOUNGE_SEATING_OPTIONS = ['Single Seater','Two Seater','Three Seater','Ottoman'];
+const LOUNGE_SEATING_BASE = ['Single Seater','Two Seater','Three Seater'];
+const SERIES_WITH_OTTOMAN = new Set(['arwyn','bespace-lounge','indie-lounge','teekan-lounge']);
+const CREDENZA_SIZE_OPTIONS = ['20x60','20x66','20x72','24x72','24x84'];
 const MATERIAL_UPCHARGE = { laminate: 1, veneer: 1.12 };
 const TYPICAL_MULTIPLIERS = { 'U-Shape': 1, 'L-Shape': 0.92, 'Single Ped': 0.85, 'AH Desk': 1.05 };
+const CREDENZA_SIZE_MULTIPLIERS = { '20x60': 0.82, '20x66': 0.88, '20x72': 1, '24x72': 1.06, '24x84': 1.18 };
 
 
 
@@ -21,6 +24,22 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
   const dark = isDarkTheme(theme);
   const isCasegoods = categoryName?.toLowerCase() === 'casegoods';
   const scrollRef = useRef(null);
+
+  // Auto-scroll the active product into view
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container || !activeProduct) return;
+    const idx = products.findIndex(p => p.id === activeProduct.id);
+    if (idx < 0) return;
+    const btn = container.children[idx];
+    if (!btn) return;
+    const btnLeft = btn.offsetLeft;
+    const btnWidth = btn.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    // Center the button in the scroll area
+    const scrollTarget = btnLeft - (containerWidth / 2) + (btnWidth / 2);
+    container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+  }, [activeProduct, products]);
 
   return (
     <div
@@ -118,17 +137,25 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
     >
       {/* Product image with crossfade */}
       <AnimatePresence mode="wait">
-        <motion.img
+        <motion.div
           key={product.id}
-          src={product.image}
-          alt={product.name}
-          className="absolute inset-0 w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-700"
-          style={{ transform: `scale(${baseZoom})` }}
+          className="absolute inset-0 w-full h-full"
+          style={{
+            maskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 55%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 55%, transparent 100%)',
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-        />
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-700"
+            style={{ transform: `scale(${baseZoom})` }}
+          />
+        </motion.div>
       </AnimatePresence>
 
       {/* Bottom gradient */}
@@ -200,16 +227,17 @@ const PricingTable = React.memo(({
   conferenceSize, onConferenceSizeChange,
   loungeConfig, onLoungeConfigChange,
   guestLegType, onGuestLegTypeChange,
+  credenzaSize, onCredenzaSizeChange,
   materialMode, onMaterialModeChange,
 }) => {
   const dark = isDarkTheme(theme);
   const isGuest = categoryId === 'guest';
   const isCasegoods = categoryId === 'casegoods';
   const isConference = categoryId === 'conference-tables';
-  const isTraining = categoryId === 'training-tables';
+  const isCredenzas = categoryId === 'credenzas';
   const isLounge = categoryId === 'lounge';
 
-  const showMaterialToggle = isCasegoods || isConference || isTraining;
+  const showMaterialToggle = isCasegoods || isConference || isCredenzas;
 
   let configOptions = [];
   let configValue = '';
@@ -221,11 +249,17 @@ const PricingTable = React.memo(({
     configOptions = CONFERENCE_SIZE_OPTIONS.map(v => ({ value: v, label: v }));
     configValue = conferenceSize; onConfigChange = onConferenceSizeChange;
   } else if (isLounge) {
-    configOptions = LOUNGE_SEATING_OPTIONS.map(v => ({ value: v, label: v }));
-    configValue = loungeConfig; onConfigChange = onLoungeConfigChange;
+    const hasOttoman = SERIES_WITH_OTTOMAN.has(activeProduct?.id);
+    const opts = hasOttoman ? [...LOUNGE_SEATING_BASE, 'Ottoman'] : LOUNGE_SEATING_BASE;
+    configOptions = opts.map(v => ({ value: v, label: v }));
+    configValue = (!hasOttoman && loungeConfig === 'Ottoman') ? 'Single Seater' : loungeConfig;
+    onConfigChange = onLoungeConfigChange;
   } else if (isGuest) {
     configOptions = [{ value: 'wood', label: 'Wood' }, { value: 'metal', label: 'Metal' }];
     configValue = guestLegType; onConfigChange = onGuestLegTypeChange;
+  } else if (isCredenzas) {
+    configOptions = CREDENZA_SIZE_OPTIONS.map(v => ({ value: v, label: v }));
+    configValue = credenzaSize; onConfigChange = onCredenzaSizeChange;
   }
 
   const sorted = useMemo(() => [...products].sort((a, b) => (a.price || 0) - (b.price || 0)), [products]);
@@ -236,8 +270,13 @@ const PricingTable = React.memo(({
       const typicalFactor = TYPICAL_MULTIPLIERS[typicalLayout] || 1;
       return Math.round((p.price || 0) * materialFactor * typicalFactor / 10) * 10;
     }
+    if (isCredenzas) {
+      const materialFactor = MATERIAL_UPCHARGE[materialMode] || 1;
+      const sizeFactor = CREDENZA_SIZE_MULTIPLIERS[credenzaSize] || 1;
+      return Math.round((p.price || 0) * materialFactor * sizeFactor / 10) * 10;
+    }
     return p.price;
-  }, [isCasegoods, materialMode, typicalLayout]);
+  }, [isCasegoods, isCredenzas, materialMode, typicalLayout, credenzaSize]);
 
   return (
     <div
@@ -361,16 +400,26 @@ const ErrorState = ({ theme, message = 'The requested item does not exist.' }) =
 };
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
-export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
+export const ProductComparisonScreen = ({ categoryId, initialProductId, onNavigate, theme }) => {
   const categoryData = PRODUCT_DATA?.[categoryId];
   const isGuest = categoryId === 'guest';
 
-  const [activeProduct, setActiveProduct] = useState(categoryData?.products?.[0]);
+  const initialProduct = useMemo(() => {
+    if (!categoryData) return null;
+    if (initialProductId) {
+      const match = categoryData.products.find(p => p.id === initialProductId);
+      if (match) return match;
+    }
+    return categoryData.products[0];
+  }, [categoryData, initialProductId]);
+
+  const [activeProduct, setActiveProduct] = useState(initialProduct);
   const [materialMode, setMaterialMode] = useState(isGuest ? 'wood' : 'laminate');
   const [typicalLayout, setTypicalLayout] = useState('U-Shape');  // matches TYPICAL_MULTIPLIERS keys
   const [conferenceSize, setConferenceSize] = useState('30x72');
   const [loungeConfig, setLoungeConfig] = useState('Single Seater');
   const [guestLegType, setGuestLegType] = useState('wood');
+  const [credenzaSize, setCredenzaSize] = useState('20x72');
 
   const handleProductSelect = useCallback(p => setActiveProduct(p), []);
 
@@ -392,7 +441,7 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
   return (
     <div className="flex flex-col h-full app-header-offset">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-5 lg:px-8 pt-2 pb-8 space-y-3 max-w-5xl mx-auto w-full">
+        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 max-w-content mx-auto w-full">
           {/* Category title */}
           <h1
             className="text-[1.25rem] font-bold tracking-tight px-1"
@@ -434,6 +483,8 @@ export const ProductComparisonScreen = ({ categoryId, onNavigate, theme }) => {
             onLoungeConfigChange={setLoungeConfig}
             guestLegType={guestLegType}
             onGuestLegTypeChange={setGuestLegType}
+            credenzaSize={credenzaSize}
+            onCredenzaSizeChange={setCredenzaSize}
             materialMode={materialMode}
             onMaterialModeChange={setMaterialMode}
           />

@@ -25,7 +25,7 @@ export const ScreenSkeleton = ({ theme }) => {
 
     return (
         <div
-            className="flex flex-col h-full overflow-hidden app-header-offset px-4 sm:px-6 lg:px-8 pt-4 max-w-5xl mx-auto w-full"
+            className="flex flex-col h-full overflow-hidden app-header-offset px-4 sm:px-6 lg:px-8 pt-4 max-w-content mx-auto w-full"
             style={{ backgroundColor: bg }}
         >
             <style>{`

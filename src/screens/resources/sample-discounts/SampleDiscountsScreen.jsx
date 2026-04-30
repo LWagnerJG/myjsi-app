@@ -69,7 +69,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
             {/* ── Page header ── */}
-            <ScreenTopChrome theme={theme} maxWidthClass="" horizontalPaddingClass="px-4" contentClassName="pt-3 pb-2">
+            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-2">
                 <PageTitle
                     title="Sample Policies"
                     subtitle="Effective May 1, 2021 - Commission not paid"
@@ -81,7 +81,8 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
             </ScreenTopChrome>
 
             {/* ── Policy card ── */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-10">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-10">
+                <div className="max-w-content mx-auto w-full">
                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
 
                     <CardHeader dark={isDark} colors={colors} right={
@@ -202,6 +203,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                         );
                     })}
                 </GlassCard>
+                </div>
             </div>
         </div>
     );

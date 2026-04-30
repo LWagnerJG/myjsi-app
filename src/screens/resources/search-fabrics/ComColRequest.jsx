@@ -66,7 +66,7 @@ export const ComColRequest = ({ theme, showAlert }) => {
       onSubmit={handleSubmit}
       title="COM / COL Pattern Submission"
       subtitle="Submit material details for testing and approval. Fields marked with * are required."
-      maxWidthClass="max-w-3xl"
+      maxWidthClass="max-w-content"
       horizontalPaddingClass="px-4"
       contentPaddingBottomClass="pb-28"
       contentClassName="pt-1 space-y-5"

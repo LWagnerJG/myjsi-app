@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { Package, Plus, Info } from 'lucide-react';
+import { Check, ChevronDown, Package, Plus } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
-import { COMPETITION_METRICS } from './comparison-data.js';
 import { Modal } from '../../components/common/Modal.jsx';
 import { PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
 import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
@@ -30,134 +29,229 @@ const applyDiscount = (list, discountOption) =>
 
 const shortDiscount = (opt) => opt.replace(/\s*\(.*\)/, '');
 
-const AdvantageChip = ({ value, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`min-w-[42px] inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 transition ${value > 0 ? COMPETITION_METRICS.displayFormat.advantage.positive : COMPETITION_METRICS.displayFormat.advantage.negative}`}
-    >
-        {value > 0 ? `+${value}%` : `${value}%`}
-    </button>
+const formatCurrency = (value) => `$${value.toLocaleString()}`;
+
+const formatNetRate = (discountOption) => {
+    const netPercent = parseNetMultiplier(discountOption) * 100;
+    const rounded = Math.round(netPercent * 100) / 100;
+    return `${rounded.toFixed(Number.isInteger(rounded) ? 0 : 2)}% net`;
+};
+
+const PriceMetaLine = ({ discount, listPrice, theme, accent = false }) => (
+    <div className="mt-2 inline-flex flex-wrap items-center gap-1.5 text-[0.75rem] leading-none"
+        style={{ color: theme.colors.textSecondary, opacity: accent ? 0.88 : 0.8 }}>
+        <span className="inline-flex items-center gap-1 font-semibold" style={{ color: theme.colors.textPrimary }}>
+            {shortDiscount(discount)}
+            <ChevronDown className="h-3 w-3" style={{ color: theme.colors.textSecondary }} />
+        </span>
+        <span className="opacity-35">•</span>
+        <span className="tabular-nums">{formatCurrency(listPrice)} list</span>
+    </div>
 );
 
-const DiscountPicker = ({ value, onChange, theme }) => (
-    <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="text-[0.6875rem] font-medium rounded-md px-1.5 py-0.5 cursor-pointer focus:outline-none focus:ring-1 transition-colors"
-        style={{
-            background: theme.colors.subtle,
-            color: theme.colors.textSecondary,
-            border: `1px solid ${theme.colors.border}`,
-        }}
-    >
-        {STANDARD_DISCOUNT_OPTIONS.map(opt => (
-            <option key={opt} value={opt}>{shortDiscount(opt)}</option>
-        ))}
-    </select>
-);
+const AdvantageChip = ({ compPremium, theme }) => {
+    const isParity = compPremium === 0;
+    const jsiWins = compPremium > 0;
+
+    return (
+        <span
+            className="inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold tabular-nums"
+            style={{
+                background: isParity
+                    ? theme.colors.subtle
+                    : jsiWins
+                        ? 'rgba(74,124,89,0.12)'
+                        : 'rgba(184,92,92,0.12)',
+                color: isParity
+                    ? theme.colors.textSecondary
+                    : jsiWins
+                        ? '#4A7C59'
+                        : '#B85C5C',
+            }}
+        >
+            {isParity ? 'Parity' : `${compPremium > 0 ? '+' : ''}${compPremium}%`}
+        </span>
+    );
+};
 
 const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
-    const [openAdv, setOpenAdv] = useState(null);
     const [jsiDiscount, setJsiDiscount] = useState(DEFAULT_DISCOUNT);
     const [compDiscounts, setCompDiscounts] = useState(() =>
         Object.fromEntries(competitors.map(c => [c.id, DEFAULT_DISCOUNT]))
     );
+    const [discountTarget, setDiscountTarget] = useState(null);
 
-    // Reset discounts whenever the competitor set changes (new product selected)
     const compKey = competitors.map(c => c.id).join(',');
     useEffect(() => {
         setCompDiscounts(Object.fromEntries(competitors.map(c => [c.id, DEFAULT_DISCOUNT])));
         setJsiDiscount(DEFAULT_DISCOUNT);
-        setOpenAdv(null);
+        setDiscountTarget(null);
     }, [compKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const jsiList = jsiProduct.price || 0;
     const jsiNet = applyDiscount(jsiList, jsiDiscount);
+    const activeDiscountValue = discountTarget === 'jsi'
+        ? jsiDiscount
+        : (discountTarget ? (compDiscounts[discountTarget] ?? DEFAULT_DISCOUNT) : DEFAULT_DISCOUNT);
+    const activeDiscountName = discountTarget === 'jsi'
+        ? jsiProduct.name
+        : competitors.find((competitor) => competitor.id === discountTarget)?.name;
 
-    const getMessage = (val) => {
-        if (isNaN(val)) return '';
-        const abs = Math.abs(val);
-        if (val === 0) return 'Price parity with JSI.';
-        if (val < 0) return `Competitor is ${abs}% higher than JSI (JSI advantage).`;
-        return `Competitor is ${abs}% lower than JSI (Competitor advantage).`;
+    const handleDiscountSelect = (nextValue) => {
+        if (discountTarget === 'jsi') {
+            setJsiDiscount(nextValue);
+        } else if (discountTarget) {
+            setCompDiscounts((prev) => ({ ...prev, [discountTarget]: nextValue }));
+        }
+        setDiscountTarget(null);
     };
 
     return (
-        <GlassCard theme={theme} className="p-0 overflow-hidden">
-            <div className="px-6 pt-5 pb-3">
-                <h2 className="text-sm font-semibold tracking-wide" style={{ color: theme.colors.textPrimary }}>{title}</h2>
-            </div>
-            <div className="space-y-0.5 pb-4">
-                {/* JSI row */}
-                <div className="px-6 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                            <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ background: theme.colors.accent }} />
-                            <p className="font-semibold" style={{ color: theme.colors.textPrimary }}>{jsiProduct.name}</p>
-                        </div>
-                        <DiscountPicker value={jsiDiscount} onChange={setJsiDiscount} theme={theme} />
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1 ml-4">
-                        <span className="text-xs tabular-nums font-medium" style={{ color: theme.colors.textSecondary }}>
-                            ${jsiList.toLocaleString()} list
-                        </span>
-                        <span className="text-xs opacity-40" style={{ color: theme.colors.textSecondary }}>·</span>
-                        <span className="text-xs tabular-nums font-semibold" style={{ color: theme.colors.textPrimary }}>
-                            ${jsiNet.toLocaleString()} net
+        <>
+            <GlassCard theme={theme} className="overflow-hidden p-0">
+                <div className="px-5 pt-5 pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                        <h2
+                            className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
+                            style={{ color: theme.colors.textSecondary, opacity: 0.88 }}
+                        >
+                            {title}
+                        </h2>
+                        <span
+                            className="pt-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                            style={{ color: theme.colors.textSecondary, opacity: 0.58 }}
+                        >
+                            % Δ on net
                         </span>
                     </div>
                 </div>
 
-                <div className="h-px mx-6" style={{ background: theme.colors.border }} />
-
-                {/* Competitor rows */}
-                {competitors.map(c => {
-                    const val = parseInt(c.adv?.replace(/[^-\d]/g, '') || 0);
-                    const open = openAdv === c.id;
-                    const cList = parseListPrice(c.laminate);
-                    const cDiscount = compDiscounts[c.id] ?? DEFAULT_DISCOUNT;
-                    const cNet = applyDiscount(cList, cDiscount);
-
-                    return (
-                        <div key={c.id} className="px-6 py-2.5">
-                            <div className="flex items-center justify-between gap-4">
-                                <p className="text-[0.8125rem] font-medium leading-snug" style={{ color: theme.colors.textSecondary }}>
-                                    {c.name}
+                <div className="px-4 pb-5 space-y-2.5">
+                    <button
+                        type="button"
+                        onClick={() => setDiscountTarget('jsi')}
+                        className="w-full rounded-[24px] px-4 py-4 text-left transition-all active:scale-[0.99]"
+                        style={{
+                            background: `linear-gradient(180deg, ${theme.colors.accent}14 0%, ${theme.colors.accent}0D 100%)`,
+                        }}
+                        aria-label={`Edit discount for ${jsiProduct.name}`}
+                    >
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: theme.colors.accent }} />
+                                    <span
+                                        className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                        style={{ color: theme.colors.textSecondary, opacity: 0.78 }}
+                                    >
+                                        JSI benchmark
+                                    </span>
+                                </div>
+                                <p className="mt-2 text-[1rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                    {jsiProduct.name}
                                 </p>
-                                <AdvantageChip value={val} onClick={() => setOpenAdv(o => o === c.id ? null : c.id)} />
+                                <PriceMetaLine discount={jsiDiscount} listPrice={jsiList} theme={theme} accent />
                             </div>
-                            <div className="flex items-center justify-between mt-1">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-xs tabular-nums font-medium" style={{ color: theme.colors.textSecondary }}>
-                                        ${cList.toLocaleString()} list
-                                    </span>
-                                    <span className="text-xs opacity-40" style={{ color: theme.colors.textSecondary }}>·</span>
-                                    <span className="text-xs tabular-nums font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                        ${cNet.toLocaleString()} net
-                                    </span>
-                                </div>
-                                <DiscountPicker
-                                    value={cDiscount}
-                                    onChange={v => setCompDiscounts(prev => ({ ...prev, [c.id]: v }))}
-                                    theme={theme}
-                                />
+
+                            <div className="flex-shrink-0 text-right">
+                                <p className="text-[1.625rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                    {formatCurrency(jsiNet)}
+                                </p>
+                                <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.74 }}>
+                                    baseline
+                                </p>
                             </div>
-                            {open && (
-                                <div className="mt-2 rounded-lg px-3 py-2 text-xs leading-relaxed flex items-start gap-2" style={{ background: theme.colors.subtle, color: theme.colors.textSecondary }}>
-                                    <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                                    <span>{getMessage(val)}</span>
-                                </div>
-                            )}
                         </div>
-                    );
-                })}
-                {!competitors.length && (
-                    <p className="px-6 py-3 text-xs" style={{ color: theme.colors.textSecondary }}>
-                        No competitive data added yet.
+                    </button>
+
+                    {competitors.length > 0 ? competitors.map((c) => {
+                        const cList = parseListPrice(c.laminate);
+                        const cDiscount = compDiscounts[c.id] ?? DEFAULT_DISCOUNT;
+                        const cNet = applyDiscount(cList, cDiscount);
+                        const compPremium = jsiNet > 0 ? Math.round(((cNet - jsiNet) / jsiNet) * 100) : 0;
+
+                        return (
+                            <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => setDiscountTarget(c.id)}
+                                className="w-full rounded-[22px] px-4 py-4 text-left transition-all active:scale-[0.99]"
+                                style={{
+                                    background: theme.colors.subtle,
+                                }}
+                                aria-label={`Edit discount for ${c.name}`}
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[0.9375rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                            {c.name}
+                                        </p>
+                                        <PriceMetaLine discount={cDiscount} listPrice={cList} theme={theme} />
+                                    </div>
+
+                                    <div className="flex-shrink-0 text-right">
+                                        <p className="text-[1.25rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                            {formatCurrency(cNet)}
+                                        </p>
+                                        <div className="mt-2 flex justify-end">
+                                            <AdvantageChip compPremium={compPremium} theme={theme} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        );
+                    }) : (
+                        <p className="px-1 pb-1 text-xs" style={{ color: theme.colors.textSecondary }}>
+                            No competitive data added yet.
+                        </p>
+                    )}
+                </div>
+            </GlassCard>
+
+            <Modal
+                show={!!discountTarget}
+                onClose={() => setDiscountTarget(null)}
+                title="Select Discount"
+                theme={theme}
+            >
+                <div className="space-y-3">
+                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                        {activeDiscountName || 'Series'}
                     </p>
-                )}
-            </div>
-        </GlassCard>
+
+                    <div className="max-h-[52vh] space-y-2 overflow-y-auto pr-1 scrollbar-hide">
+                        {STANDARD_DISCOUNT_OPTIONS.map((option) => {
+                            const isSelected = option === activeDiscountValue;
+
+                            return (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => handleDiscountSelect(option)}
+                                    className="w-full rounded-[20px] px-4 py-3 text-left transition-all active:scale-[0.99]"
+                                    style={{
+                                        background: isSelected ? `${theme.colors.accent}10` : (theme.colors.surface || '#FFFFFF'),
+                                        border: `1px solid ${isSelected ? `${theme.colors.accent}2E` : theme.colors.border}`,
+                                    }}
+                                >
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                {shortDiscount(option)}
+                                            </p>
+                                            <p className="mt-1 text-[0.75rem]" style={{ color: theme.colors.textSecondary }}>
+                                                {formatNetRate(option)}
+                                            </p>
+                                        </div>
+                                        {isSelected ? <Check className="h-4 w-4 flex-shrink-0" style={{ color: theme.colors.accent }} /> : null}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </Modal>
+        </>
     );
 };
 
@@ -198,7 +292,7 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
     return (
         <div className="flex flex-col h-full app-header-offset">
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 py-4 space-y-6 pb-32 max-w-5xl mx-auto">
+                <div className="px-4 sm:px-6 lg:px-8 py-4 space-y-6 pb-32 max-w-content mx-auto">
                     <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm" style={{ background: theme.colors.surface }}>
                         <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-contain" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />

@@ -312,6 +312,43 @@ export const MOCK_CUSTOMERS = [
 
     jsiRep: { name: 'Tom Bradley', role: 'Territory Manager', email: 'tbradley@jsifurniture.com', phone: '317-555-0163' },
   },
+  {
+    id: 'cust-5',
+    type: 'end-user',
+    name: 'Metro Hospitality',
+    domain: 'metrohospitality.com',
+    location: { city: 'Nashville', state: 'TN' },
+    vertical: 'Hospitality',
+    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&q=80',
+    activeProjectIds: ['opp-6'],
+
+    standardsPrograms: [],
+    approvedMaterials: { laminates: [], metals: [], upholstery: [], woods: [], paintPlastic: [] },
+
+    orders: {
+      current: [],
+      history: [],
+    },
+
+    typicals: [],
+
+    projects: [
+      {
+        id: 'proj-5-1', name: 'Hotel Lobby Seating', location: 'Broadway Flagship',
+        image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&q=80',
+        installs: [],
+      },
+    ],
+
+    documents: [],
+
+    contacts: [
+      { id: 'c5', name: 'Chris Dow', role: 'Brand Experience Director', email: 'cdow@metrohospitality.com', visibility: 'dealer' },
+      { id: 'c6', name: 'Lena Ortiz', role: 'Procurement Lead', email: 'lortiz@metrohospitality.com', visibility: 'dealer' },
+    ],
+
+    jsiRep: { name: 'Sarah Mitchell', role: 'Account Executive', email: 'smitchell@jsifurniture.com', phone: '317-555-0142' },
+  },
 
   /* ── Dealers ── */
   {
