@@ -50,6 +50,7 @@ const ResourceDetailScreen = React.lazy(() => import('./screens/utility/UtilityS
 const CreateContentModal = React.lazy(() => import('./screens/community/CreateContentModal.jsx').then(m => ({ default: m.CreateContentModal })));
 const UploadToLibraryModal = React.lazy(() => import('./screens/library/UploadToLibraryModal.jsx').then(m => ({ default: m.UploadToLibraryModal })));
 const CustomsScreen = React.lazy(() => import('./screens/products/CustomsScreen.jsx').then(m => ({ default: m.CustomsScreen })));
+const StudioOnePagerDetailScreen = React.lazy(() => import('./screens/studio/OnePagerDetailScreen.jsx').then(m => ({ default: m.OnePagerDetailScreen })));
 
 // Legacy underscore routes aliased to their canonical hyphenated slugs
 const RESOURCE_SLUG_ALIASES = {
@@ -171,6 +172,10 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
                 <ScreenComponent {...rest} focusPostId={parts[2]} />
             </Suspense>
         );
+    }
+
+    if (base === 'community' && parts[1] === 'studio' && parts[2]) {
+        return lazyWrap(StudioOnePagerDetailScreen, { screenParams: { ...(rest.screenParams || {}), slug: parts[2] } });
     }
 
     if (base === 'products' && parts[1] === 'series' && parts[2]) {

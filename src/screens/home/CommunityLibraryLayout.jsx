@@ -11,6 +11,8 @@ import { ChannelSidebar } from './components/community/ChannelSidebar.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
+import { CreateOnePagerModal } from '../studio/CreateOnePagerModal.jsx';
+import { useToast } from '../../components/common/ToastHost.jsx';
 
 const buildCommunityTabOptions = (hasBoardContent, compact = false) => {
   const base = [
@@ -26,6 +28,14 @@ const buildCommunityTabOptions = (hasBoardContent, compact = false) => {
   return base;
 };
 
+// Map tab values <-> URL slug. Default tab `community` lives at /community (no slug).
+const TAB_TO_SLUG = { 'community': '', 'library': 'library', 'makers studio': 'studio', 'my board': 'board' };
+const SLUG_TO_TAB = { '': 'community', 'library': 'library', 'studio': 'makers studio', 'board': 'my board' };
+const tabPath = (tab) => {
+  const slug = TAB_TO_SLUG[tab] ?? '';
+  return slug ? `community/${slug}` : 'community';
+};
+
 export const CommunityLibraryLayout = ({
   theme,
   posts, polls, likedPosts, pollChoices, postUpvotes = {},
@@ -34,6 +44,7 @@ export const CommunityLibraryLayout = ({
   libraryAssets,
   savedImageIds = [], onToggleSaveImage,
   setBackHandler,
+  currentScreen, onNavigate, currentUserId,
 }) => {
   const dark = isDarkTheme(theme);
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -43,10 +54,30 @@ export const CommunityLibraryLayout = ({
     return savedImageIds.length > 0 || Object.keys(likedPosts || {}).length > 0 || hasComments;
   }, [savedImageIds, likedPosts, posts]);
 
-  const [activeTab, setActiveTab] = useState('community');
+  // Derive active tab from URL: /community | /community/library | /community/studio | /community/board
+  const urlTab = useMemo(() => {
+    const parts = (currentScreen || 'community').split('/');
+    if (parts[0] !== 'community') return 'community';
+    return SLUG_TO_TAB[parts[1] || ''] || 'community';
+  }, [currentScreen]);
+  const activeTab = urlTab;
+  const setActiveTab = useCallback((tab) => {
+    if (typeof onNavigate === 'function') onNavigate(tabPath(tab));
+  }, [onNavigate]);
   const [activeSubreddit, setActiveSubreddit] = useState(null);
   const [query, setQuery] = useState('');
   const [communityTabMode, setCommunityTabMode] = useState('default');
+  const [createOnePagerOpen, setCreateOnePagerOpen] = useState(false);
+  const [createOnePagerTemplate, setCreateOnePagerTemplate] = useState('product-one-pager');
+  const toast = useToast();
+  const openCreateOnePager = useCallback((templateId) => {
+    if (typeof templateId === 'string') setCreateOnePagerTemplate(templateId);
+    setCreateOnePagerOpen(true);
+  }, []);
+  const closeCreateOnePager = useCallback(() => setCreateOnePagerOpen(false), []);
+  const handleOnePagerPublished = useCallback((record) => {
+    toast?.push?.(`Published \u201C${record.title}\u201D`, { ttl: 2400 });
+  }, [toast]);
   const scrollPositions = useRef({});
   const containerRef = useRef(null);
   const activeSubredditRef = useRef(activeSubreddit);
@@ -66,7 +97,7 @@ export const CommunityLibraryLayout = ({
 
   useEffect(() => {
     if (!hasBoardContent && activeTab === 'my board') setActiveTab('community');
-  }, [hasBoardContent, activeTab]);
+  }, [hasBoardContent, activeTab, setActiveTab]);
 
   useEffect(() => {
     activeSubredditRef.current = activeSubreddit;
@@ -82,7 +113,7 @@ export const CommunityLibraryLayout = ({
         containerRef.current.scrollTop = scrollPositions.current[tab] || 0;
       }
     });
-  }, [activeTab]);
+  }, [activeTab, setActiveTab]);
 
   const enterSubreddit = useCallback((subreddit) => {
     if (containerRef.current) containerRef.current.scrollTop = 0;
@@ -398,7 +429,7 @@ export const CommunityLibraryLayout = ({
               </div>
 
               <div style={paneStyle('makers studio')}>
-                <MakersStudioTab theme={theme} />
+                <MakersStudioTab theme={theme} currentUserId={currentUserId} onNavigate={onNavigate} onCreateOnePager={openCreateOnePager} />
               </div>
 
               {hasBoardContent && (
@@ -423,6 +454,14 @@ export const CommunityLibraryLayout = ({
           </div>
         </div>
       </div>
+
+      <CreateOnePagerModal
+        show={createOnePagerOpen}
+        onClose={closeCreateOnePager}
+        theme={theme}
+        initialTemplate={createOnePagerTemplate}
+        onPublished={handleOnePagerPublished}
+      />
     </div>
   );
 };
