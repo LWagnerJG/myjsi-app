@@ -21,8 +21,18 @@ const CONTACT_TYPES = [
     { id: 'end-user', label: 'End User', icon: User, color: '#8B7355' },
 ];
 
-export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFirms, initialOpen = false, onNavigate, onSubmitOrder }) => {
-    const [isExpanded, setIsExpanded] = useState(initialOpen);
+export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFirms, open, onOpenChange, initialOpen = false, onNavigate, onSubmitOrder }) => {
+    const [isExpanded, setIsExpanded] = useState(open ?? initialOpen);
+
+    // Sync with external open signal from parent
+    useEffect(() => {
+        if (open !== undefined) setIsExpanded(open);
+    }, [open]);
+
+    const setExpanded = useCallback((val) => {
+        setIsExpanded(val);
+        onOpenChange?.(val);
+    }, [onOpenChange]);
     const [dirOpen, setDirOpen] = useState(false);
     const [dirQuery, setDirQuery] = useState('');
     const [shipToName, setShipToName] = useState('');
@@ -82,7 +92,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
             address2,
             shipToType,
         });
-        setIsExpanded(false);
+        setExpanded(false);
         setJustSubmitted(true);
         Object.entries(cart).forEach(([id, qty]) => { if (qty > 0) onUpdateCart({ id }, -qty); });
         setTimeout(() => { onNavigate && onNavigate('home'); }, prefersReduced ? 1600 : 2600);
@@ -107,7 +117,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                 <FloatingCart
                     itemCount={totalCartItems}
                     label={`View Cart (${totalCartItems})`}
-                    onClick={() => setIsExpanded(true)}
+                    onClick={() => setExpanded(true)}
                     theme={theme}
                 />
             )}
@@ -116,7 +126,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>
                 {isExpanded && (
-                    <div className="fixed inset-0 flex items-start justify-center pt-[8vh] sm:pt-[10vh]" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setIsExpanded(false)}>
+                    <div className="fixed inset-0 flex items-start justify-center pt-[8vh] sm:pt-[10vh]" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setExpanded(false)}>
                         <motion.div
                             initial={modalMotion.backdrop.initial}
                             animate={modalMotion.backdrop.animate}
@@ -135,7 +145,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             onClick={(e) => e.stopPropagation()}
                         >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 cursor-pointer" onClick={() => setIsExpanded(false)}>
+                        <div className="flex items-center justify-between px-5 py-4 cursor-pointer" onClick={() => setExpanded(false)}>
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}>
                                     <ShoppingCart className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />

@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme } from '../../design-system/tokens.js';
-import { Plus, Trash2, Minus, CheckCircle, Layers, Package } from 'lucide-react';
+import { Plus, Trash2, Minus, CheckCircle, Layers, ShoppingCart } from 'lucide-react';
 import { hapticMedium } from '../../utils/haptics.js';
 import { SAMPLE_PRODUCTS, SAMPLE_CATEGORIES, FINISH_CATEGORIES, FINISH_SAMPLES } from './data.js';
 import { CartDrawer } from './components/CartDrawer.jsx';
@@ -53,7 +53,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0, opacity: 0 }}
                         transition={badgeSpring}
-                        className="absolute top-2 left-2 z-10 min-w-[22px] h-[22px] px-1.5 rounded-full text-[0.6875rem] font-bold flex items-center justify-center"
+                        className="absolute top-2 left-2 z-10 min-w-[26px] h-[26px] px-1.5 rounded-full text-xs font-bold flex items-center justify-center"
                         style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
                     >
                         <AnimatePresence mode="popLayout" initial={false}>
@@ -179,6 +179,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     }, [onUpdateCart]);
 
     const [selectedCategory, setSelectedCategory] = useState('tfl');
+    const [cartOpen, setCartOpen] = useState(initialCartOpen);
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
     const isFinishCategory = useMemo(
@@ -308,25 +309,28 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             );
                         })}
                     </div>
-                    {/* Orders CTA */}
+                    {/* Cart CTA */}
                     <button
-                        onClick={() => onNavigate('samples/orders')}
+                        onClick={() => setCartOpen(true)}
                         className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[0.8125rem] font-bold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)',
-                            color: theme.colors.textPrimary,
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.92)' : theme.colors.textPrimary,
+                            color: isDark ? '#1a1a1a' : '#fff',
                         }}
                     >
-                        <Package className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
-                        Orders
-                        <span
-                            className="ml-0.5 w-5 h-5 rounded-full text-[0.625rem] font-bold flex items-center justify-center"
-                            style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
-                        >
-                            {activeOrderCount}
-                        </span>
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        Cart
+                        {totalCartItems > 0 && (
+                            <span
+                                className="min-w-[18px] h-[18px] px-1 rounded-full text-[0.625rem] font-bold flex items-center justify-center"
+                                style={{
+                                    backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)',
+                                    color: isDark ? '#1a1a1a' : '#fff',
+                                }}
+                            >
+                                {totalCartItems}
+                            </span>
+                        )}
                     </button>
                 </div>
             </ScreenTopChrome>
@@ -404,7 +408,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                     </div>
                 </div>
             </div>
-            <CartDrawer cart={cart} onUpdateCart={onUpdateCart} theme={theme} userSettings={userSettings} dealers={dealerDirectory} designFirms={designFirms} initialOpen={initialCartOpen} onNavigate={onNavigate} onSubmitOrder={onSubmitSampleOrder} />
+            <CartDrawer cart={cart} onUpdateCart={onUpdateCart} theme={theme} userSettings={userSettings} dealers={dealerDirectory} designFirms={designFirms} open={cartOpen} onOpenChange={setCartOpen} onNavigate={onNavigate} onSubmitOrder={onSubmitSampleOrder} />
         </div>
     );
 };
