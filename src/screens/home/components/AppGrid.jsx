@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Plus, Settings2, Info } from 'lucide-react';
+import { Check, Plus, Settings2, Info, ChevronRight } from 'lucide-react';
 import {
     DndContext,
     DragOverlay,
@@ -196,28 +196,26 @@ export const AppGrid = ({
                 )}
             </div>
 
-            {/* Resources — wide pill below the grid, distinct shape */}
+            {/* Resources — wide bar below the grid */}
             {resourcesApp && (
                 <button
                     onClick={() => onNavigate('resources')}
                     aria-label="Open Resources"
-                    className="w-full flex items-center gap-3 px-4 mt-2.5 sm:mt-3 rounded-2xl transition-all active:scale-[0.98] group"
+                    className="w-full flex items-center gap-3 px-3.5 mt-2.5 sm:mt-3 rounded-2xl transition-all active:scale-[0.98] group"
                     style={{
-                        height: 52,
-                        background: `linear-gradient(145deg, ${colors.tileSurface}, ${resourcesIconColor}0D)`,
-                        border: `1px solid ${resourcesIconColor}28`,
+                        height: 56,
+                        backgroundColor: colors.tileSurface,
+                        border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
                     }}
                 >
                     <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                        style={{ backgroundColor: `${resourcesIconColor}18` }}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                        style={{ backgroundColor: `${resourcesIconColor}12` }}
                     >
-                        <resourcesApp.icon className="w-4 h-4" style={{ color: resourcesIconColor }} />
+                        <resourcesApp.icon className="w-[18px] h-[18px]" style={{ color: resourcesIconColor }} />
                     </div>
-                    <span className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
-                    <span className="ml-auto text-[0.6875rem] truncate" style={{ color: colors.textSecondary, opacity: 0.45 }}>
-                        Lead Times · Finishes · More
-                    </span>
+                    <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
+                    <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
                 </button>
             )}
         </>
