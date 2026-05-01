@@ -128,9 +128,16 @@ export const AppGrid = ({
     const resourcesApp = currentApps.find(a => a.route === 'resources');
     const resourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
 
+    // Put Customize in the grid only when it won't sit alone in the last row.
+    // gridApps.length % 3 === 0 means adding one more gives remainder 1 → alone.
+    const customizeInGrid = onUpdateHomeApps && (gridApps.length % 3 !== 0);
+    const itemsInGrid = gridApps.length + (customizeInGrid ? 1 : 0);
+    const GRID_COLS_MAP = { 3: 'grid-cols-3', 4: 'grid-cols-3 sm:grid-cols-4', 5: 'grid-cols-3 sm:grid-cols-5', 6: 'grid-cols-3', 7: 'grid-cols-3 sm:grid-cols-4', 8: 'grid-cols-3 sm:grid-cols-4', 9: 'grid-cols-3' };
+    const gridColsClass = GRID_COLS_MAP[itemsInGrid] || 'grid-cols-3 sm:grid-cols-4';
+
     return (
         <>
-            <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
+            <div className={`grid gap-2.5 sm:gap-3 ${gridColsClass}`}>
                 {gridApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
@@ -171,8 +178,9 @@ export const AppGrid = ({
                         </button>
                     );
                 })}
-                {/* Customize — lives in the grid as a ghost utility tile */}
-                {onUpdateHomeApps && (
+
+                {/* Customize ghost tile — only when it fills a row cleanly */}
+                {customizeInGrid && (
                     <button
                         onClick={() => setIsEditMode(true)}
                         aria-label="Customize home apps"
@@ -189,7 +197,7 @@ export const AppGrid = ({
                         >
                             <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
                         </div>
-                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight" style={{ color: colors.textSecondary, opacity: 0.45 }}>
                             Customize
                         </span>
                     </button>
@@ -217,6 +225,25 @@ export const AppGrid = ({
                     <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
                     <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
                 </button>
+            )}
+
+            {/* Customize pill — fallback when it can't fill a grid row cleanly */}
+            {onUpdateHomeApps && !customizeInGrid && (
+                <div className="flex justify-center mt-2">
+                    <button
+                        onClick={() => setIsEditMode(true)}
+                        aria-label="Customize home apps"
+                        className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
+                        style={{
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                            border: isDark ? '1px dashed rgba(255,255,255,0.13)' : '1px dashed rgba(0,0,0,0.11)',
+                            color: colors.textSecondary,
+                        }}
+                    >
+                        <Settings2 className="w-3.5 h-3.5" style={{ opacity: 0.45 }} />
+                        <span className="text-xs font-semibold" style={{ opacity: 0.45 }}>Customize</span>
+                    </button>
+                </div>
             )}
         </>
     );
