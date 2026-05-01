@@ -37,6 +37,12 @@ export const AppGrid = ({
     replacementRequests
 }) => {
     if (isEditMode) {
+        const editGridApps = currentApps.filter(a => a.route !== 'resources');
+        const editResourcesApp = currentApps.find(a => a.route === 'resources');
+        const editResourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
+        // Resources is excluded from dragging — only movable apps are sortable
+        const sortableIds = safeHomeApps.filter(r => r !== 'resources');
+
         return (
             <>
             <DndContext
@@ -50,9 +56,9 @@ export const AppGrid = ({
                 }}
                 onDragCancel={() => setActiveDragId(null)}
             >
-                <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
-                        {currentApps.map((app) => (
+                <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
+                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.edit}`}>
+                        {editGridApps.map((app) => (
                             <SortableAppTile
                                 key={app.route}
                                 id={app.route}
@@ -66,21 +72,48 @@ export const AppGrid = ({
                     </div>
                 </SortableContext>
 
-                {/* Done CTA — compact, right-aligned */}
+                {/* Done CTA */}
                 {onUpdateHomeApps && (
-                    <div className="flex justify-end pt-2 pb-0 pr-0.5">
+                    <div className="flex justify-center pt-3">
                         <button
                             onClick={() => setIsEditMode(false)}
                             aria-label="Done customizing"
-                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all active:scale-95"
+                            className="flex items-center gap-2 px-6 py-2 rounded-full transition-all active:scale-95"
                             style={{
                                 backgroundColor: colors.accent,
                                 color: colors.accentText || (isDark ? '#000' : '#fff'),
                             }}
                         >
                             <Check className="w-3.5 h-3.5" />
-                            <span className="text-xs font-bold tracking-wide">Done</span>
+                            <span className="text-sm font-bold tracking-wide">Done</span>
                         </button>
+                    </div>
+                )}
+
+                {/* Resources — static pinned bar, not part of the drag area */}
+                {editResourcesApp && (
+                    <div
+                        className="w-full flex items-center gap-3 px-3.5 mt-2.5 sm:mt-3 rounded-2xl"
+                        style={{
+                            height: 52,
+                            backgroundColor: colors.tileSurface,
+                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
+                            opacity: 0.55,
+                        }}
+                    >
+                        <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: `${editResourcesIconColor}10` }}
+                        >
+                            <editResourcesApp.icon className="w-[16px] h-[16px]" style={{ color: editResourcesIconColor }} />
+                        </div>
+                        <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
+                        <span
+                            className="ml-auto text-[0.625rem] font-bold uppercase tracking-widest"
+                            style={{ color: colors.textSecondary }}
+                        >
+                            Always included
+                        </span>
                     </div>
                 )}
 
@@ -187,17 +220,17 @@ export const AppGrid = ({
                         className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 gap-1.5 p-2.5 sm:p-3"
                         style={{
                             minHeight: 88,
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                            border: isDark ? '1px dashed rgba(255,255,255,0.13)' : '1px dashed rgba(0,0,0,0.11)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)',
+                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
                         }}
                     >
                         <div
                             className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
                         >
-                            <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+                            <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.32 }} />
                         </div>
-                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight" style={{ color: colors.textSecondary, opacity: 0.32 }}>
                             Customize
                         </span>
                     </button>
@@ -235,8 +268,8 @@ export const AppGrid = ({
                         aria-label="Customize home apps"
                         className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-                            border: isDark ? '1px dashed rgba(255,255,255,0.13)' : '1px dashed rgba(0,0,0,0.11)',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
                             color: colors.textSecondary,
                         }}
                     >
