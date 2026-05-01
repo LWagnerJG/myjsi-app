@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Plus, Settings2, Info, ChevronRight } from 'lucide-react';
+import { Check, Plus, Settings2, Info } from 'lucide-react';
 import {
     DndContext,
     DragOverlay,
@@ -51,7 +51,7 @@ export const AppGrid = ({
                 onDragCancel={() => setActiveDragId(null)}
             >
                 <SortableContext items={safeHomeApps} strategy={rectSortingStrategy}>
-                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.edit}`}>
+                    <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
                         {currentApps.map((app) => (
                             <SortableAppTile
                                 key={app.route}
@@ -124,78 +124,16 @@ export const AppGrid = ({
         );
     }
 
-    const resourcesApp = currentApps.find((app) => app.route === 'resources') || null;
-    const otherApps = resourcesApp
-        ? currentApps.filter((app) => app.route !== 'resources')
-        : currentApps;
-    const iconColor = APP_ICON_COLORS.resources || colors.accent;
-    const count = otherApps.length;
-    const gridConfig = {
-        mobileCols: count === 1 ? 1 : count === 2 ? 2 : count === 4 ? 2 : 3,
-        desktopCols: count === 4 ? 4 : count === 5 ? 5 : count === 7 || count === 8 ? 4 : (count === 1 ? 1 : count === 2 ? 2 : 3),
-    };
-    const otherGridCols = count === 1
-        ? 'grid-cols-1'
-        : count === 2
-            ? 'grid-cols-2'
-            : count === 4
-                ? 'grid-cols-2 sm:grid-cols-4'
-                : count === 5
-                    ? 'grid-cols-3 sm:grid-cols-5'
-                    : count === 7 || count === 8
-                        ? 'grid-cols-3 sm:grid-cols-4'
-                        : 'grid-cols-3';
-    const mobileHasGap = count > gridConfig.mobileCols && count % gridConfig.mobileCols !== 0;
-    const desktopHasGap = count > gridConfig.desktopCols && count % gridConfig.desktopCols !== 0;
-    const showCustomizeInGrid = Boolean(onUpdateHomeApps) && (mobileHasGap || desktopHasGap);
-    const customizeTileClassName = mobileHasGap && desktopHasGap
-        ? 'flex'
-        : mobileHasGap
-            ? 'flex sm:hidden'
-            : desktopHasGap
-                ? 'hidden sm:flex'
-                : 'hidden';
-    const customizeBelowClassName = !showCustomizeInGrid
-        ? 'flex'
-        : mobileHasGap && !desktopHasGap
-            ? 'hidden sm:flex'
-            : !mobileHasGap && desktopHasGap
-                ? 'flex sm:hidden'
-                : 'hidden';
-    const showCustomizeBelowGrid = Boolean(onUpdateHomeApps) && customizeBelowClassName !== 'hidden';
-
-    const customizeTile = showCustomizeInGrid ? (
-        <button
-            key="customize-home"
-            onClick={() => setIsEditMode(true)}
-            aria-label="Customize home apps"
-            className={`${customizeTileClassName} relative flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3`}
-            style={{
-                minHeight: 88,
-                backgroundColor: colors.tileSurface,
-                border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.04)',
-                color: colors.textSecondary,
-            }}
-        >
-            <div
-                className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.03)' }}
-            >
-                <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ opacity: 0.62 }} />
-            </div>
-            <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5">
-                Customize
-            </span>
-        </button>
-    ) : null;
+    const gridApps = currentApps.filter(a => a.route !== 'resources');
+    const resourcesApp = currentApps.find(a => a.route === 'resources');
+    const resourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
 
     return (
         <>
-            <div className={`grid gap-2.5 sm:gap-3 ${otherGridCols}`}>
-                {otherApps.map((app) => {
+            <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
+                {gridApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
-                    const isResources = app.route === 'resources';
                     return (
                         <button
                             key={app.route}
@@ -204,17 +142,13 @@ export const AppGrid = ({
                             className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
                             style={{
                                 minHeight: 88,
-                                background: isResources
-                                    ? `linear-gradient(145deg, ${colors.tileSurface}, ${iconColor}0D)`
-                                    : colors.tileSurface,
-                                border: isResources
-                                    ? `1px solid ${iconColor}28`
-                                    : isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
+                                backgroundColor: colors.tileSurface,
+                                border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
                             }}
                         >
                             <div
                                 className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
-                                style={{ backgroundColor: isResources ? `${iconColor}18` : `${iconColor}10` }}
+                                style={{ backgroundColor: `${iconColor}10` }}
                             >
                                 <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
@@ -237,54 +171,54 @@ export const AppGrid = ({
                         </button>
                     );
                 })}
-                {customizeTile}
-            </div>
-            {resourcesApp && (
-                <button
-                    onClick={() => onNavigate(resourcesApp.route)}
-                    aria-label="Open Resources"
-                    className="w-full mt-2 rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2 text-left transition-all active:scale-[0.99] group"
-                    style={{
-                        minHeight: 54,
-                        backgroundColor: colors.tileSurface,
-                        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}`,
-                    }}
-                >
-                    <div className="flex items-center gap-2.5">
-                        <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${iconColor}10` }}
-                        >
-                            <resourcesApp.icon className="w-4 h-4" style={{ color: iconColor }} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-[0.8125rem] sm:text-sm font-medium tracking-tight" style={{ color: colors.textPrimary }}>
-                                {resourcesApp.name}
-                            </p>
-                            <p className="text-[0.6875rem] sm:text-[0.72rem] mt-0.5 truncate" style={{ color: colors.textSecondary, opacity: 0.66 }}>
-                                Lead times, contracts, dealer tools
-                            </p>
-                        </div>
-                        <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: colors.textSecondary, opacity: 0.6 }} />
-                    </div>
-                </button>
-            )}
-            {/* Customize CTA */}
-            {showCustomizeBelowGrid && (
-                <div className={`${customizeBelowClassName} justify-center pt-2.5 pb-1`}>
+                {/* Customize — lives in the grid as a ghost utility tile */}
+                {onUpdateHomeApps && (
                     <button
                         onClick={() => setIsEditMode(true)}
                         aria-label="Customize home apps"
-                        className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
+                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 gap-1.5 p-2.5 sm:p-3"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
-                            color: colors.textSecondary,
+                            minHeight: 88,
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                            border: isDark ? '1px dashed rgba(255,255,255,0.13)' : '1px dashed rgba(0,0,0,0.11)',
                         }}
                     >
-                        <Settings2 className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
-                        <span className="text-xs font-bold tracking-wide">Customize</span>
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)' }}
+                        >
+                            <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+                        </div>
+                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                            Customize
+                        </span>
                     </button>
-                </div>
+                )}
+            </div>
+
+            {/* Resources — wide pill below the grid, distinct shape */}
+            {resourcesApp && (
+                <button
+                    onClick={() => onNavigate('resources')}
+                    aria-label="Open Resources"
+                    className="w-full flex items-center gap-3 px-4 mt-2.5 sm:mt-3 rounded-2xl transition-all active:scale-[0.98] group"
+                    style={{
+                        height: 52,
+                        background: `linear-gradient(145deg, ${colors.tileSurface}, ${resourcesIconColor}0D)`,
+                        border: `1px solid ${resourcesIconColor}28`,
+                    }}
+                >
+                    <div
+                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                        style={{ backgroundColor: `${resourcesIconColor}18` }}
+                    >
+                        <resourcesApp.icon className="w-4 h-4" style={{ color: resourcesIconColor }} />
+                    </div>
+                    <span className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
+                    <span className="ml-auto text-[0.6875rem] truncate" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                        Lead Times · Finishes · More
+                    </span>
+                </button>
             )}
         </>
     );
