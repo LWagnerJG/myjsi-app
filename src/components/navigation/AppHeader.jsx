@@ -129,8 +129,7 @@ export const AppHeader = React.memo(({
 
             {!isHome && (
                 <>
-                    {/* Inner-page scrim — tinted blur that matches the page background,
-                        giving scrolled content the same polished fade as the Home screen. */}
+                    {/* Inner-page scrim — covers only the header pill, no bleed below */}
                     <div
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none"
@@ -142,18 +141,16 @@ export const AppHeader = React.memo(({
                             background: `linear-gradient(to bottom,
                                 rgba(${bgR},0.82) 0%,
                                 rgba(${bgR},0.60) 40%,
-                                rgba(${bgR},0.20) 70%,
+                                rgba(${bgR},0.10) 72%,
                                 rgba(${bgR},0) 100%)`,
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
                         }}
                     />
                 </>
             )}
 
-            {/* ── Universal top-blur backing ──────────────────────────────────────────
-                Pure blur layer — no background color. Lets the blur effect alone
-                soften content scrolling behind the header pill on all screens. */}
+            {/* ── Universal top-blur backing — stops at pill edge, no bleed ── */}
             <div
                 aria-hidden="true"
                 className="fixed top-0 left-0 right-0 pointer-events-none"
@@ -162,8 +159,8 @@ export const AppHeader = React.memo(({
                     zIndex: 27,
                     backdropFilter: 'blur(16px) saturate(1.8)',
                     WebkitBackdropFilter: 'blur(16px) saturate(1.8)',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 52%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.12) 88%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
                 }}
             />
 
