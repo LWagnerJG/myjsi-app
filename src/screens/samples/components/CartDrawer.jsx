@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { FloatingCart } from '../../../components/common/FloatingCart.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { ShoppingCart, ChevronDown, ChevronUp, Building2, Home, Send, CheckCircle, Search, MapPin, Plus, User, Briefcase, PenTool } from 'lucide-react';
 import { hapticSuccess } from '../../../utils/haptics.js';
@@ -112,16 +111,6 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
 
     return (
         <>
-            {/* Floating cart pill  shared component */}
-            {!isExpanded && (
-                <FloatingCart
-                    itemCount={totalCartItems}
-                    label={`View Cart (${totalCartItems})`}
-                    onClick={() => setExpanded(true)}
-                    theme={theme}
-                />
-            )}
-
             {/* Expanded drawer modal */}
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>

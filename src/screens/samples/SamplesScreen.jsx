@@ -9,7 +9,6 @@ import { CartDrawer } from './components/CartDrawer.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 
 const idOf = (x) => String(x);
-const COLLAPSED_HEIGHT = 96;
 const cleanName = (name) => String(name || '').split('|')[0].trim();
 
 /* ── Animation presets ── */
@@ -309,35 +308,48 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             );
                         })}
                     </div>
-                    {/* Cart CTA */}
+                    {/* Cart icon button with animated badge */}
                     <button
                         onClick={() => setCartOpen(true)}
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[0.8125rem] font-bold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+                        className="relative w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.92)' : theme.colors.textPrimary,
-                            color: isDark ? '#1a1a1a' : '#fff',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.07)',
                         }}
+                        aria-label={`Cart${totalCartItems > 0 ? ` (${totalCartItems})` : ''}`}
                     >
-                        <ShoppingCart className="w-3.5 h-3.5" />
-                        Cart
-                        {totalCartItems > 0 && (
-                            <span
-                                className="min-w-[18px] h-[18px] px-1 rounded-full text-[0.625rem] font-bold flex items-center justify-center"
-                                style={{
-                                    backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)',
-                                    color: isDark ? '#1a1a1a' : '#fff',
-                                }}
-                            >
-                                {totalCartItems}
-                            </span>
-                        )}
+                        <ShoppingCart className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+                        <AnimatePresence>
+                            {totalCartItems > 0 && (
+                                <motion.span
+                                    key="badge"
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={badgeSpring}
+                                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[0.5625rem] font-bold flex items-center justify-center"
+                                    style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
+                                >
+                                    <AnimatePresence mode="popLayout" initial={false}>
+                                        <motion.span
+                                            key={totalCartItems}
+                                            initial={{ y: -6, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            exit={{ y: 6, opacity: 0 }}
+                                            transition={{ duration: 0.12, ease: 'easeOut' }}
+                                        >
+                                            {totalCartItems}
+                                        </motion.span>
+                                    </AnimatePresence>
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
                     </button>
                 </div>
             </ScreenTopChrome>
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: theme.colors.background }}>
-                <div className="px-4 pt-2" style={{ paddingBottom: totalCartItems > 0 ? `${COLLAPSED_HEIGHT + 16}px` : '16px' }}>
+                <div className="px-4 pt-2 pb-6">
                     <div className="max-w-content mx-auto w-full space-y-3">
 
                         {/* ── Full JSI Set — prominent banner ── */}
