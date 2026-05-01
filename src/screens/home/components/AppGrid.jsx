@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Plus, Settings2, Info } from 'lucide-react';
+import { Check, Plus, Settings2, Info, ChevronRight } from 'lucide-react';
 import {
     DndContext,
     DragOverlay,
@@ -124,10 +124,44 @@ export const AppGrid = ({
         );
     }
 
+    const resourcesApp = currentApps.find(a => a.route === 'resources');
+    const otherApps = currentApps.filter(a => a.route !== 'resources');
+    const OTHER_GRID_COLS = { 3: 'grid-cols-3', 4: 'grid-cols-3 sm:grid-cols-4', 5: 'grid-cols-3 sm:grid-cols-5', 6: 'grid-cols-3', 7: 'grid-cols-3 sm:grid-cols-4', 8: 'grid-cols-3 sm:grid-cols-4', 9: 'grid-cols-3' };
+    const otherGridCols = OTHER_GRID_COLS[otherApps.length] || 'grid-cols-3 sm:grid-cols-4';
+    const resourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
+
     return (
         <>
-            <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
-                {currentApps.map((app) => {
+            {/* Resources hub — full-width gateway tile */}
+            {resourcesApp && (
+                <button
+                    onClick={() => onNavigate('resources')}
+                    aria-label="Open Resources"
+                    className="w-full flex items-center gap-3.5 rounded-2xl px-4 py-3 mb-2.5 sm:mb-3 transition-all active:scale-[0.98] group"
+                    style={{
+                        backgroundColor: colors.tileSurface,
+                        border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
+                    }}
+                >
+                    <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                        style={{ backgroundColor: `${resourcesIconColor}10` }}
+                    >
+                        <resourcesApp.icon className="w-5 h-5" style={{ color: resourcesIconColor }} />
+                    </div>
+                    <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-bold tracking-tight" style={{ color: colors.textPrimary }}>Resources</p>
+                        <p className="text-[0.6875rem] mt-0.5 truncate" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                            Lead Times · Finishes · Contracts · Events · More
+                        </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 shrink-0 opacity-25 group-hover:opacity-50 transition-opacity" style={{ color: colors.textSecondary }} />
+                </button>
+            )}
+
+            {/* All other apps in the normal tile grid */}
+            <div className={`grid gap-2.5 sm:gap-3 ${otherGridCols}`}>
+                {otherApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
                     return (
