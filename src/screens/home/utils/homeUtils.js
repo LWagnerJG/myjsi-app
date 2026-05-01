@@ -4,11 +4,14 @@
  * Returns a badge object for a given app route based on live data.
  * Used to show counts/values on the home screen app tiles.
  */
-export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount) => {
+export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests) => {
     switch (route) {
         case 'orders': {
-            const open = recentOrders?.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length || 0;
-            return open > 0 ? { value: String(open), label: 'Open', color: '#5B7B8C' } : null;
+            const unacked = recentOrders?.filter(o => o.status === 'Order Entry').length || 0;
+            if (unacked > 0) return { value: String(unacked), label: 'To Ack', color: '#C4956A' };
+            const shipping = recentOrders?.filter(o => o.status === 'Shipping').length || 0;
+            if (shipping > 0) return { value: String(shipping), label: 'Shipping', color: '#5B7B8C' };
+            return null;
         }
         case 'sales': {
             const ytd = recentOrders?.reduce((s, o) => s + (o.net || 0), 0) || 0;
@@ -17,15 +20,23 @@ export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, s
             return { value: fmt, label: 'YTD', color: '#4A7C59' };
         }
         case 'community': {
-            const count = posts?.length || 0;
-            return count > 0 ? { value: String(count), label: 'Posts', color: '#C4956A' } : null;
+            const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+            const recent = posts?.filter(p => p.createdAt && p.createdAt > cutoff).length || 0;
+            return recent > 0 ? { value: String(recent), label: 'New', color: '#C4956A' } : null;
         }
         case 'resources': {
-            const faveCount = leadTimeFavoritesData?.length || 0;
-            return faveCount > 0 ? { value: String(faveCount), label: 'Tracked', color: '#5B7B8C' } : null;
+            return null;
+        }
+        case 'projects': {
+            const active = opportunities?.filter(o => o.stage !== 'Won' && o.stage !== 'Lost').length || 0;
+            return active > 0 ? { value: String(active), label: 'Active', color: '#4A7C59' } : null;
         }
         case 'samples': {
             return samplesCartCount > 0 ? { value: String(samplesCartCount), label: 'In Cart', color: '#C4956A' } : null;
+        }
+        case 'replacements': {
+            const pending = replacementRequests?.filter(r => r.status === 'Pending').length || 0;
+            return pending > 0 ? { value: String(pending), label: 'Pending', color: '#C4956A' } : null;
         }
         default:
             return null;
