@@ -308,42 +308,34 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             );
                         })}
                     </div>
-                    {/* Cart icon button with animated badge */}
-                    <button
-                        onClick={() => setCartOpen(true)}
-                        className="relative w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform"
-                        style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.07)',
-                        }}
-                        aria-label={`Cart${totalCartItems > 0 ? ` (${totalCartItems})` : ''}`}
-                    >
-                        <ShoppingCart className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
-                        <AnimatePresence>
-                            {totalCartItems > 0 && (
+                    {/* Cart icon — only visible when cart has items */}
+                    <AnimatePresence>
+                        {totalCartItems > 0 && (
+                            <motion.button
+                                key="cart-btn"
+                                initial={{ scale: 0.6, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.6, opacity: 0 }}
+                                transition={badgeSpring}
+                                onClick={() => setCartOpen(true)}
+                                className="relative w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 active:scale-90"
+                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.07)' }}
+                                aria-label={`Cart (${totalCartItems})`}
+                            >
+                                <ShoppingCart className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
                                 <motion.span
-                                    key="badge"
-                                    initial={{ scale: 0, opacity: 0 }}
+                                    key={totalCartItems}
+                                    initial={{ scale: 0.5, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0, opacity: 0 }}
                                     transition={badgeSpring}
                                     className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[0.5625rem] font-bold flex items-center justify-center"
                                     style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
                                 >
-                                    <AnimatePresence mode="popLayout" initial={false}>
-                                        <motion.span
-                                            key={totalCartItems}
-                                            initial={{ y: -6, opacity: 0 }}
-                                            animate={{ y: 0, opacity: 1 }}
-                                            exit={{ y: 6, opacity: 0 }}
-                                            transition={{ duration: 0.12, ease: 'easeOut' }}
-                                        >
-                                            {totalCartItems}
-                                        </motion.span>
-                                    </AnimatePresence>
+                                    {totalCartItems}
                                 </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </button>
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
                 </div>
             </ScreenTopChrome>
 
