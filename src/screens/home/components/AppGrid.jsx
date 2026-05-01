@@ -130,6 +130,7 @@ export const AppGrid = ({
                 {currentApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
+                    const isResources = app.route === 'resources';
                     return (
                         <button
                             key={app.route}
@@ -138,13 +139,17 @@ export const AppGrid = ({
                             className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
                             style={{
                                 minHeight: 88,
-                                backgroundColor: colors.tileSurface,
-                                border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
+                                background: isResources
+                                    ? `linear-gradient(145deg, ${colors.tileSurface}, ${iconColor}0D)`
+                                    : colors.tileSurface,
+                                border: isResources
+                                    ? `1px solid ${iconColor}28`
+                                    : isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
                             }}
                         >
                             <div
                                 className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
-                                style={{ backgroundColor: `${iconColor}10` }}
+                                style={{ backgroundColor: isResources ? `${iconColor}18` : `${iconColor}10` }}
                             >
                                 <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
