@@ -32,7 +32,9 @@ export const AppGrid = ({
     recentOrders,
     posts,
     leadTimeFavoritesData,
-    samplesCartCount
+    samplesCartCount,
+    opportunities,
+    replacementRequests
 }) => {
     if (isEditMode) {
         return (
@@ -126,7 +128,7 @@ export const AppGrid = ({
         <>
             <div className={`grid gap-2.5 sm:gap-3 ${appGridCols.view}`}>
                 {currentApps.map((app) => {
-                    const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount);
+                    const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
                     const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
                     return (
                         <button
@@ -151,14 +153,16 @@ export const AppGrid = ({
                             </span>
                             {badge && (
                                 <div
-                                    className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full text-xs font-bold"
+                                    className="absolute top-1.5 right-1.5 px-1.5 py-[1px] rounded-full font-bold leading-tight"
                                     style={{
+                                        fontSize: '0.625rem',
                                         backgroundColor: `${badge.color}18`,
                                         color: badge.color,
                                         border: `1px solid ${badge.color}30`,
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    {badge.value}
+                                    {badge.value}{badge.label ? ` ${badge.label}` : ''}
                                 </div>
                             )}
                         </button>

@@ -9,6 +9,8 @@ import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { MessageSquarePlus } from 'lucide-react';
 import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
+import { INITIAL_OPPORTUNITIES } from '../projects/data.js';
+import { REPLACEMENT_REQUESTS_DATA } from '../replacements/data.js';
 import {
     PointerSensor,
     KeyboardSensor,
@@ -359,6 +361,12 @@ export const HomeScreen = React.memo(({
 
     const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
+    const allOpportunities = useMemo(() => {
+        return opportunities.length > 0 ? opportunities : INITIAL_OPPORTUNITIES;
+    }, [opportunities]);
+
+    const replacementRequests = useMemo(() => REPLACEMENT_REQUESTS_DATA, []);
+
     // Always 3 cols on mobile; sm+ picks column count to avoid orphaned tiles
     const appGridCols = useMemo(() => {
         const count = currentApps.length;
@@ -455,6 +463,8 @@ export const HomeScreen = React.memo(({
                         posts={posts}
                         leadTimeFavoritesData={leadTimeFavoritesData}
                         samplesCartCount={samplesCartCount}
+                        opportunities={allOpportunities}
+                        replacementRequests={replacementRequests}
                     />
                 </div>
 
