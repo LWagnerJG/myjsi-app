@@ -21,7 +21,8 @@ export const ModalSafeAreaCover = React.memo(({ visible }) => {
                     style={{
                         position: 'fixed',
                         top: 0, left: 0, right: 0,
-                        height: 'env(safe-area-inset-top, 0px)',
+                        height: 'env(safe-area-inset-top, 54px)',
+                        minHeight: '44px',
                         zIndex: UNIFIED_MODAL_Z + 50,
                         backgroundColor: `rgba(18, 18, 18, ${UNIFIED_BACKDROP_DIM + 0.1})`,
                         backdropFilter: `blur(${UNIFIED_BACKDROP_BLUR_PX}px)`,

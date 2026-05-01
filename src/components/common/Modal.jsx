@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS, modalCardSurface } from '../../design-system/tokens.js';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
+import { UNIFIED_BACKDROP_BLUR_PX, UNIFIED_BACKDROP_DIM, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
 import { getModalMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
@@ -77,22 +77,23 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
         <AnimatePresence>
             {show && (
                 <motion.div
+                    key="modal-root"
                     className="fixed inset-0 flex items-center justify-center pointer-events-auto p-4"
-                    style={{ zIndex: Math.max(DESIGN_TOKENS.zIndex.modal || 0, UNIFIED_MODAL_Z) }}
+                    style={{
+                        zIndex: Math.max(DESIGN_TOKENS.zIndex.modal || 0, UNIFIED_MODAL_Z),
+                        backdropFilter: prefersReducedMotion ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
+                        WebkitBackdropFilter: prefersReducedMotion ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
+                    }}
                     initial={modalMotion.backdrop.initial}
                     animate={modalMotion.backdrop.animate}
                     exit={modalMotion.backdrop.exit}
                     transition={modalMotion.backdrop.transition}
                     onClick={onClose}
                 >
-                    {/* Backdrop */}
-                    <motion.div
-                        className="absolute inset-0"
-                        style={getUnifiedBackdropStyle(true, prefersReducedMotion)}
-                        initial={modalMotion.backdrop.initial}
-                        animate={modalMotion.backdrop.animate}
-                        exit={modalMotion.backdrop.exit}
-                        transition={modalMotion.backdrop.transition}
+                    {/* Dark dim */}
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundColor: `rgba(18, 18, 18, ${UNIFIED_BACKDROP_DIM})` }}
                     />
 
                     {/* Modal card */}

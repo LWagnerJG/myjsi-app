@@ -8,7 +8,7 @@ import { SAMPLE_CATEGORIES, FINISH_CATEGORIES } from '../data.js';
 import { getSampleProduct } from '../sampleIndex.js';
 import { DrawerItem } from './DrawerItem.jsx';
 import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
-import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../components/common/modalUtils.js';
+import { UNIFIED_BACKDROP_BLUR_PX, UNIFIED_BACKDROP_DIM, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../components/common/modalUtils.js';
 import { getModalMotion } from '../../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
 
@@ -116,14 +116,24 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>
                 {isExpanded && (
-                    <div className="fixed inset-0 flex items-start justify-center pt-[8vh] sm:pt-[10vh]" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setExpanded(false)}>
-                        <motion.div
-                            initial={modalMotion.backdrop.initial}
-                            animate={modalMotion.backdrop.animate}
-                            exit={modalMotion.backdrop.exit}
-                            transition={modalMotion.backdrop.transition}
-                            className="absolute inset-0"
-                            style={getUnifiedBackdropStyle(true, prefersReduced)}
+                    <motion.div
+                        key="cart-modal-root"
+                        className="fixed inset-0 flex items-start justify-center pt-[8vh] sm:pt-[10vh]"
+                        style={{
+                            zIndex: UNIFIED_MODAL_Z,
+                            backdropFilter: prefersReduced ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
+                            WebkitBackdropFilter: prefersReduced ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={modalMotion.backdrop.transition}
+                        onClick={() => setExpanded(false)}
+                    >
+                        {/* Dark dim — no blur here, blur is on the outer fixed container */}
+                        <div
+                            className="absolute inset-0 pointer-events-none"
+                            style={{ backgroundColor: `rgba(18, 18, 18, ${UNIFIED_BACKDROP_DIM})` }}
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.96, y: 24 }}
@@ -329,7 +339,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                             </PrimaryButton>
                         </div>
                         </motion.div>
-                    </div>
+                    </motion.div>
                 )}
                 </AnimatePresence>,
                 document.body
