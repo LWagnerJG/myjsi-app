@@ -23,7 +23,7 @@ export const AppHeader = React.memo(({
 
     const bgR = dark ? '26,26,26' : '240,237,232';
     const homeScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 88px)';
-    const innerScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 96px)';
+    const innerScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 68px)';
     const scrimProgress = isHome ? Math.min(Math.max((scrollDepth - 2) / 36, 0), 1) : 0;
     const scrimOpacity = scrimProgress * 0.92;
     const gradientOpacity = scrimProgress * 0.9;
@@ -141,10 +141,10 @@ export const AppHeader = React.memo(({
                             background: `linear-gradient(to bottom,
                                 rgba(${bgR},0.82) 0%,
                                 rgba(${bgR},0.60) 40%,
-                                rgba(${bgR},0.10) 72%,
+                                rgba(${bgR},0.10) 80%,
                                 rgba(${bgR},0) 100%)`,
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
                         }}
                     />
                 </>
@@ -155,12 +155,12 @@ export const AppHeader = React.memo(({
                 aria-hidden="true"
                 className="fixed top-0 left-0 right-0 pointer-events-none"
                 style={{
-                    height: 'calc(env(safe-area-inset-top, 0px) + 96px)',
+                    height: 'calc(env(safe-area-inset-top, 0px) + 68px)',
                     zIndex: 27,
                     backdropFilter: 'blur(16px) saturate(1.8)',
                     WebkitBackdropFilter: 'blur(16px) saturate(1.8)',
-                    maskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 62%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
                 }}
             />
 
