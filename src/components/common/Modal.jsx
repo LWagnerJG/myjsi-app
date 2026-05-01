@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS, modalCardSurface } from '../../design-system/tokens.js';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from './modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
 import { getModalMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
@@ -72,6 +72,8 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
     }, []);
 
     return ReactDOM.createPortal(
+        <>
+        <ModalSafeAreaCover visible={show} />
         <AnimatePresence>
             {show && (
                 <motion.div
@@ -140,7 +142,8 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                     </motion.div>
                 </motion.div>
             )}
-        </AnimatePresence>,
+        </AnimatePresence>
+        </>,
         document.body
     );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Download, Share2, X } from 'lucide-react';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../../components/common/modalUtils.js';
 
 export const ImageLightbox = ({ src, alt, onClose }) => {
   useEffect(() => {
@@ -42,6 +42,8 @@ export const ImageLightbox = ({ src, alt, onClose }) => {
   }, [src, alt]);
 
   return createPortal(
+    <>
+    <ModalSafeAreaCover visible={true} />
     <div
       className="fixed inset-0 flex items-center justify-center"
       style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z + 100 }}
@@ -81,7 +83,8 @@ export const ImageLightbox = ({ src, alt, onClose }) => {
         className="max-w-[92vw] max-h-[85vh] rounded-2xl object-contain select-none"
         style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}
       />
-    </div>,
+    </div>
+    </>,
     document.body
   );
 };

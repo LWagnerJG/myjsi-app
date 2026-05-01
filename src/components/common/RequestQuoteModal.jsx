@@ -11,7 +11,7 @@ import { PrimaryButton, SecondaryButton } from './JSIButtons.jsx';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
 import { CONTRACTS_DATA } from '../../screens/resources/contracts/data.js';
 import { SearchSelect } from './RequestQuoteModalComponents.jsx';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from './modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
 
 const FORMAT_OPTIONS = [
     { id: 'pdf', label: 'PDF' },
@@ -191,6 +191,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     };
 
     return ReactDOM.createPortal(
+        <>
+        <ModalSafeAreaCover visible={show} />
         <AnimatePresence>
             <motion.div
                 initial={modalMotion.backdrop.initial} animate={modalMotion.backdrop.animate} exit={modalMotion.backdrop.exit}
@@ -434,7 +436,8 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                     </div>
                 </motion.div>
             </motion.div>
-        </AnimatePresence>,
+        </AnimatePresence>
+        </>,
         document.body
     );
 };

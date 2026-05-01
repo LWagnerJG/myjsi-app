@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { INITIAL_ASSETS } from './data.js';
 import { X, Download, Share2, Copy, Heart } from 'lucide-react';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../components/common/modalUtils.js';
 import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
 
 // Simple in-memory library grid with mock data
@@ -69,6 +69,8 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
 
       {/* Detail modal via portal so it's never clipped by overflow containers */}
       {selected && createPortal(
+        <>
+        <ModalSafeAreaCover visible={true} />
         <div
           className="fixed inset-0 flex items-end sm:items-center justify-center"
           style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
@@ -168,7 +170,8 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
               </div>
             </div>
           </div>
-        </div>,
+        </div>
+        </>,
         document.body
       )}
     </div>

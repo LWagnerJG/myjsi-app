@@ -4,7 +4,7 @@ import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { ShoppingCart, ChevronDown, Trash2, Minus, Plus, CreditCard } from 'lucide-react';
 import { FloatingCart } from '../../../../components/common/FloatingCart.jsx';
 import { formatElliottBucks } from '../../data.js';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../../components/common/modalUtils.js';
 import { getMarketplacePalette } from '../../theme.js';
 
 export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, theme }) => {
@@ -32,6 +32,8 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
 
       {/* Expanded */}
       {expanded && createPortal(
+        <>
+        <ModalSafeAreaCover visible={expanded} />
         <div className="fixed inset-0" style={{ zIndex: UNIFIED_MODAL_Z }} onClick={() => setExpanded(false)}>
           <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} />
           <div
@@ -139,7 +141,8 @@ export const CartDrawer = ({ cart, balance, onUpdateQty, onRemove, onCheckout, t
               </button>
             </div>
           </div>
-        </div>,
+        </div>
+        </>,
         document.body
       )}
     </>

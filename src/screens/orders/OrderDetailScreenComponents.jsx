@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Share2, X, Play, Download, MapPin } from 'lucide-react';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../components/common/modalUtils.js';
 import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
 import { formatCurrencyDecimal, formatCurrency, formatLongDate, formatShortDate } from '../../utils/format.js';
 
@@ -193,6 +193,8 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
 
 /* ── ACK modal ───────────────────────────────────────────────── */
 export const AckModal = ({ order, onClose, onShare, dark, c }) => (
+  <>
+  <ModalSafeAreaCover visible={true} />
   <Portal>
     <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Acknowledgment">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
@@ -273,10 +275,13 @@ export const AckModal = ({ order, onClose, onShare, dark, c }) => (
       </div>
     </div>
   </Portal>
+  </>
 );
 
 /* ── Clips modal ─────────────────────────────────────────────── */
 export const ClipsModal = ({ onClose, dark, c }) => (
+  <>
+  <ModalSafeAreaCover visible={true} />
   <Portal>
     <div className="fixed inset-0 flex items-end sm:items-center justify-center" style={{ zIndex: UNIFIED_MODAL_Z }} role="dialog" aria-label="Production clips">
       <div className="absolute inset-0" style={getUnifiedBackdropStyle(true)} onClick={onClose} />
@@ -315,4 +320,5 @@ export const ClipsModal = ({ onClose, dark, c }) => (
       </div>
     </div>
   </Portal>
+  </>
 );

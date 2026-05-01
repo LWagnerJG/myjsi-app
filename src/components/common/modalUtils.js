@@ -13,6 +13,8 @@ export const getUnifiedBackdropStyle = (visible = true, prefersReducedMotion = f
     };
 };
 
+export { ModalSafeAreaCover } from './ModalSafeAreaCover.jsx';
+
 export const UNIFIED_BACKDROP_TRANSITION = [
     buildCssTransition('background-color', MOTION_DURATIONS_MS.standard, MOTION_EASINGS.standard),
     buildCssTransition('backdrop-filter', MOTION_DURATIONS_MS.standard, MOTION_EASINGS.standard),

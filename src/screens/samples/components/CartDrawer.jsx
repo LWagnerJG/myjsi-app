@@ -8,7 +8,7 @@ import { SAMPLE_CATEGORIES, FINISH_CATEGORIES } from '../data.js';
 import { getSampleProduct } from '../sampleIndex.js';
 import { DrawerItem } from './DrawerItem.jsx';
 import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
-import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../components/common/modalUtils.js';
 import { getModalMotion } from '../../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
 
@@ -111,6 +111,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
 
     return (
         <>
+            <ModalSafeAreaCover visible={isExpanded} />
             {/* Expanded drawer modal */}
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>

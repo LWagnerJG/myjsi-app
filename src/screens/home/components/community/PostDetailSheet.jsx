@@ -5,7 +5,7 @@ import { MiniAvatar } from './MiniAvatar.jsx';
 import { ImageLightbox } from './ImageLightbox.jsx';
 import { formatTs, formatExact } from './utils.js';
 import { hapticMedium } from '../../../../utils/haptics.js';
-import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../../components/common/modalUtils.js';
 
 export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggleLike, onUpvote, onAddComment, onClose }) => {
   const [draft, setDraft] = useState('');
@@ -30,6 +30,8 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
   }, [draft, post.id, onAddComment]);
 
   return createPortal(
+    <>
+    <ModalSafeAreaCover visible={true} />
     <div
       className="fixed inset-0 flex items-end sm:items-center justify-center"
       style={{ ...getUnifiedBackdropStyle(true), zIndex: UNIFIED_MODAL_Z }}
@@ -137,7 +139,8 @@ export const PostDetailSheet = ({ post, theme, dark, isLiked, isUpvoted, onToggl
         </form>
       </div>
       {lightboxSrc && <ImageLightbox src={lightboxSrc} alt={post.title || 'Post image'} onClose={() => setLightboxSrc(null)} />}
-    </div>,
+    </div>
+    </>,
     document.body
   );
 };
