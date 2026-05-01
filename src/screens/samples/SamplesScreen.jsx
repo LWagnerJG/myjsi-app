@@ -52,7 +52,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0, opacity: 0 }}
                         transition={badgeSpring}
-                        className="absolute top-2 left-2 z-10 min-w-[26px] h-[26px] px-1.5 rounded-full text-xs font-bold flex items-center justify-center"
+                        className="absolute top-2 left-2 z-10 min-w-[28px] h-[28px] px-1.5 rounded-full text-[0.8125rem] font-bold flex items-center justify-center"
                         style={{ backgroundColor: theme.colors.accent, color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
                     >
                         <AnimatePresence mode="popLayout" initial={false}>
@@ -328,7 +328,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     initial={{ scale: 0.5, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={badgeSpring}
-                                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[0.5625rem] font-bold flex items-center justify-center"
+                                    className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full text-[0.6875rem] font-bold flex items-center justify-center"
                                     style={{ backgroundColor: theme.colors.accent, color: '#fff' }}
                                 >
                                     {totalCartItems}
