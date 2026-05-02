@@ -44,7 +44,7 @@ const FeatureCard = ({
         }}
     >
         {/* Header */}
-        <div className="flex items-center justify-between pl-5 pr-3.5 pt-4 pb-2.5 flex-shrink-0">
+        <div className="flex items-center justify-between pl-5 pr-3.5 py-[13px] flex-shrink-0">
             <h4 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: colors.textPrimary }}>
                     {headerLabel}
                 </h4>
