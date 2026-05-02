@@ -96,6 +96,7 @@ export const AppHeader = React.memo(({
             {isHome && (
                 <>
                     <div
+                        data-app-header-scrim
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-200 ease-out"
                         style={{
@@ -110,6 +111,7 @@ export const AppHeader = React.memo(({
                     />
 
                     <div
+                        data-app-header-scrim
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none transition-opacity duration-200 ease-out"
                         style={{
@@ -131,6 +133,7 @@ export const AppHeader = React.memo(({
                 <>
                     {/* Inner-page scrim — covers only the header pill, no bleed below */}
                     <div
+                        data-app-header-scrim
                         aria-hidden="true"
                         className="fixed top-0 left-0 right-0 pointer-events-none"
                         style={{
@@ -152,6 +155,7 @@ export const AppHeader = React.memo(({
 
             {/* ── Universal top-blur backing — stops at pill edge, no bleed ── */}
             <div
+                data-app-header-scrim
                 aria-hidden="true"
                 className="fixed top-0 left-0 right-0 pointer-events-none"
                 style={{

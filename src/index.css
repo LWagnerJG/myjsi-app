@@ -198,6 +198,10 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+body.jsi-modal-backdrop-active [data-app-header-scrim] {
+    opacity: 0 !important;
+}
+
 /* Universal search input placeholder — consistent muted style */
 input[type="search"]::placeholder,
 input::placeholder {

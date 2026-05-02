@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UNIFIED_MODAL_Z, UNIFIED_BACKDROP_BLUR_PX } from './modalUtils.js';
@@ -8,6 +8,26 @@ import { UNIFIED_MODAL_Z, UNIFIED_BACKDROP_BLUR_PX } from './modalUtils.js';
  * backdrop. Renders via its own portal so it works inside any modal structure.
  */
 export const ModalSafeAreaCover = React.memo(({ visible }) => {
+    useEffect(() => {
+        if (!visible || typeof document === 'undefined') return undefined;
+        const { body } = document;
+        const key = 'jsiModalBackdropCount';
+        const count = Number(body.dataset[key] || '0') + 1;
+        body.dataset[key] = String(count);
+        body.classList.add('jsi-modal-backdrop-active');
+
+        return () => {
+            const current = Number(body.dataset[key] || '0');
+            const next = Math.max(0, current - 1);
+            if (next === 0) {
+                delete body.dataset[key];
+                body.classList.remove('jsi-modal-backdrop-active');
+            } else {
+                body.dataset[key] = String(next);
+            }
+        };
+    }, [visible]);
+
     if (typeof document === 'undefined') return null;
     return createPortal(
         <AnimatePresence>
