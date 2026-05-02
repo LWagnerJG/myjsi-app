@@ -44,8 +44,8 @@ const FeatureCard = ({
         }}
     >
         {/* Header */}
-        <div className="flex items-center justify-between pl-5 pr-3.5 py-[13px] flex-shrink-0">
-            <h4 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: colors.textPrimary }}>
+        <div className="flex items-center justify-between pl-5 pr-[1.125rem] py-[13px] flex-shrink-0">
+            <h4 className="text-sm font-medium" style={{ color: colors.textPrimary, letterSpacing: 'normal' }}>
                     {headerLabel}
                 </h4>
             {isEditMode ? (
