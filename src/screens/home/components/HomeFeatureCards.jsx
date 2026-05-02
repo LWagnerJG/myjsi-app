@@ -59,10 +59,10 @@ const FeatureCard = ({
             ) : (
                 <button
                     onClick={() => navigateFeature(mode)}
-                    className="group flex items-center gap-0.5 transition-opacity hover:opacity-90"
+                    aria-label="Open recent activity"
+                    className="group flex items-center transition-opacity hover:opacity-90"
                     style={{ color: colors.textSecondary }}
                 >
-                    <span className="text-[0.6875rem] font-semibold tracking-[0.02em]" style={{ opacity: 0.55 }}>Open</span>
                     <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
                 </button>
             )}
