@@ -24,15 +24,15 @@ const FeatureCard = ({
 }) => (
     <GlassCard
         theme={theme}
-        className={`flex flex-col cursor-pointer transition-all duration-300 ${isEditMode ? 'ring-2 ring-dashed' : ''} ${className}`}
+        className={`flex flex-col transition-all duration-300 ${className}`}
         style={{
-            borderRadius: 24,
+            borderRadius: 20,
             backgroundColor: colors.tileSurface,
             padding: 0,
             border: isEditMode
-                ? `2px dashed ${isDark ? 'rgba(255,255,255,0.25)' : 'rgba(53,53,53,0.20)'}`
+                ? `1.5px dashed ${isDark ? 'rgba(255,255,255,0.20)' : 'rgba(53,53,53,0.15)'}`
                 : 'none',
-            boxShadow: isEditMode ? 'none' : colors.tileShadow,
+            boxShadow: 'none',
         }}
         onClick={(e) => {
             if (isEditMode) return;
@@ -40,8 +40,9 @@ const FeatureCard = ({
             navigateFeature(mode);
         }}
     >
-        <div className="flex items-center justify-between px-6 pt-5 pb-3 flex-shrink-0">
-            <h4 className="text-lg font-bold" style={{ color: colors.textPrimary }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-2.5 flex-shrink-0">
+            <h4 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: colors.textPrimary }}>
                 {homeFeatureOptions.find(o => o.id === mode)?.label || 'Recent Activity'}
             </h4>
             {isEditMode ? (
@@ -55,31 +56,29 @@ const FeatureCard = ({
             ) : (
                 <button
                     onClick={() => navigateFeature(mode)}
-                    className="text-xs font-semibold flex items-center gap-1 px-2.5 py-1 rounded-full transition-all hover:opacity-80"
-                    style={{
-                        color: colors.textSecondary,
-                        opacity: 0.6,
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)',
-                    }}
+                    className="flex items-center gap-0.5 transition-opacity hover:opacity-60"
+                    style={{ color: colors.textSecondary, opacity: 0.45 }}
                 >
-                    Open
+                    <span className="text-xs font-semibold">Open</span>
                     <ChevronRight className="w-3 h-3" />
                 </button>
             )}
         </div>
         {isEditMode && (
-            <p className="text-xs font-medium mb-3 px-6 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.7 }}>
-                <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card's content
+            <p className="text-xs font-medium mb-2.5 px-5 flex items-center gap-1" style={{ color: colors.accent, opacity: 0.65 }}>
+                <ChevronDown className="w-3 h-3" /> Use the dropdown above to change this card
             </p>
         )}
-        <div className="px-6 pb-5">
+        {/* Thin divider */}
+        <div className="mx-5 mb-0" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
+        <div className="px-4 pb-4 pt-1">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={mode}
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.18 }}
                 >
                     <HomeFeatureContent
                         mode={mode}
@@ -122,7 +121,7 @@ export const HomeFeatureCards = ({
     };
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <FeatureCard
                 {...shared}
                 mode={homeFeatureMode}
