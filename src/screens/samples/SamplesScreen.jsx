@@ -1,5 +1,5 @@
 // src/screens/samples/SamplesScreen.jsx
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { Plus, Trash2, Minus, CheckCircle, Layers, ShoppingCart } from 'lucide-react';
@@ -157,6 +157,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const [cartInternal, setCartInternal] = useState({});
     const cart = cartProp ?? cartInternal;
     const isDark = isDarkTheme(theme);
+    const bgRgb = isDark ? '26,26,26' : '240,237,232';
+    const categoryScrollRef = useRef(null);
     const fallbackUpdateCart = useCallback((item, delta) => {
         setCartInternal((prev) => {
             const id = idOf(item.id);
@@ -179,6 +181,7 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
 
     const [selectedCategory, setSelectedCategory] = useState('tfl');
     const [cartOpen, setCartOpen] = useState(initialCartOpen);
+    const [chipEdgeFade, setChipEdgeFade] = useState({ left: false, right: false });
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
     const isFinishCategory = useMemo(
@@ -206,6 +209,46 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         () => (Array.isArray(sampleOrders) ? sampleOrders.filter((order) => order.status !== 'delivered').length : 0),
         [sampleOrders]
     );
+
+    const updateChipEdgeFade = useCallback(() => {
+        const viewport = categoryScrollRef.current;
+        if (!viewport) return;
+
+        const maxScrollLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+        const hasOverflow = maxScrollLeft > 2;
+        const leftVisible = hasOverflow && viewport.scrollLeft > 4;
+        const rightVisible = hasOverflow && viewport.scrollLeft < maxScrollLeft - 4;
+
+        setChipEdgeFade((prev) => {
+            if (prev.left === leftVisible && prev.right === rightVisible) return prev;
+            return { left: leftVisible, right: rightVisible };
+        });
+    }, []);
+
+    useEffect(() => {
+        const viewport = categoryScrollRef.current;
+        if (!viewport) return undefined;
+
+        updateChipEdgeFade();
+
+        const onScroll = () => updateChipEdgeFade();
+        viewport.addEventListener('scroll', onScroll, { passive: true });
+
+        const resizeObserver = typeof ResizeObserver !== 'undefined'
+            ? new ResizeObserver(() => updateChipEdgeFade())
+            : null;
+
+        resizeObserver?.observe(viewport);
+        if (viewport.firstElementChild) resizeObserver?.observe(viewport.firstElementChild);
+
+        window.addEventListener('resize', updateChipEdgeFade);
+
+        return () => {
+            viewport.removeEventListener('scroll', onScroll);
+            resizeObserver?.disconnect();
+            window.removeEventListener('resize', updateChipEdgeFade);
+        };
+    }, [updateChipEdgeFade, totalCartItems]);
 
     /* Full JSI Set — lives above the grid, always visible regardless of category */
     const fullId = idOf('full-jsi-set');
@@ -285,28 +328,67 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             {/* Category chips — scrollable pills with Orders CTA */}
             <ScreenTopChrome theme={theme} horizontalPaddingClass="px-0" contentClassName="pt-2.5 pb-2" fade={false}>
                 <div className="flex items-center gap-2 px-4">
-                    <div className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2 flex-1 min-w-0" style={{ maskImage: 'linear-gradient(to right, black 92%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 92%, transparent 100%)' }}>
-                        {allCategories.map((cat) => {
-                            const isActive = selectedCategory === cat.id;
-                            return (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className="px-3.5 py-2 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 flex-shrink-0"
-                                    style={{
-                                        backgroundColor: isActive
-                                            ? (isDark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
-                                            : 'transparent',
-                                        color: isActive
-                                            ? (isDark ? '#fff' : '#fff')
-                                            : theme.colors.textSecondary,
-                                        opacity: isActive ? 1 : 0.7,
-                                    }}
-                                >
-                                    {cat.name}
-                                </button>
-                            );
-                        })}
+                    <div className="relative flex-1 min-w-0">
+                        <div data-category-scroll ref={categoryScrollRef} className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2">
+                            {allCategories.map((cat) => {
+                                const isActive = selectedCategory === cat.id;
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className="px-3.5 py-2 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 flex-shrink-0"
+                                        style={{
+                                            backgroundColor: isActive
+                                                ? (isDark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
+                                                : 'transparent',
+                                            color: isActive
+                                                ? (isDark ? '#fff' : '#fff')
+                                                : theme.colors.textSecondary,
+                                            opacity: isActive ? 1 : 0.7,
+                                        }}
+                                    >
+                                        {cat.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div
+                            data-edge-fade="left"
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 left-0 w-12"
+                            style={{
+                                opacity: chipEdgeFade.left ? 1 : 0,
+                                transition: 'opacity 220ms ease',
+                                background: `linear-gradient(to right,
+                                    rgba(${bgRgb},0.97) 0%,
+                                    rgba(${bgRgb},0.86) 34%,
+                                    rgba(${bgRgb},0.56) 68%,
+                                    rgba(${bgRgb},0.18) 88%,
+                                    rgba(${bgRgb},0) 100%)`,
+                                backdropFilter: 'blur(6px) saturate(1.08)',
+                                WebkitBackdropFilter: 'blur(6px) saturate(1.08)',
+                            }}
+                        />
+
+                        <div
+                            data-edge-fade="right"
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 right-0 w-16"
+                            style={{
+                                opacity: chipEdgeFade.right ? 1 : 0,
+                                transition: 'opacity 220ms ease',
+                                background: `linear-gradient(to left,
+                                    rgba(${bgRgb},0.99) 0%,
+                                    rgba(${bgRgb},0.92) 22%,
+                                    rgba(${bgRgb},0.72) 48%,
+                                    rgba(${bgRgb},0.42) 72%,
+                                    rgba(${bgRgb},0.14) 88%,
+                                    rgba(${bgRgb},0) 100%)`,
+                                backdropFilter: 'blur(8px) saturate(1.08)',
+                                WebkitBackdropFilter: 'blur(8px) saturate(1.08)',
+                            }}
+                        />
                     </div>
                     {/* Cart icon — only visible when cart has items */}
                     <AnimatePresence>
