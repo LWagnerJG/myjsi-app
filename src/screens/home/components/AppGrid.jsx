@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Plus, Settings2, Info, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { Check, Plus, Settings2, ChevronRight } from 'lucide-react';
 import {
     DndContext,
     DragOverlay,
@@ -87,33 +87,6 @@ export const AppGrid = ({
                             <Check className="w-3.5 h-3.5" />
                             <span className="text-sm font-bold tracking-wide">Done</span>
                         </button>
-                    </div>
-                )}
-
-                {/* Resources — static pinned bar, not part of the drag area */}
-                {editResourcesApp && (
-                    <div
-                        className="w-full flex items-center gap-3 px-3.5 mt-2.5 sm:mt-3 rounded-2xl"
-                        style={{
-                            height: 52,
-                            backgroundColor: colors.tileSurface,
-                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
-                            opacity: 0.55,
-                        }}
-                    >
-                        <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${editResourcesIconColor}10` }}
-                        >
-                            <editResourcesApp.icon className="w-[16px] h-[16px]" style={{ color: editResourcesIconColor }} />
-                        </div>
-                        <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
-                        <span
-                            className="ml-auto text-[0.625rem] font-bold uppercase tracking-widest"
-                            style={{ color: colors.textSecondary }}
-                        >
-                            Always included
-                        </span>
                     </div>
                 )}
 
@@ -282,89 +255,34 @@ export const AppGrid = ({
 
 /* ── Available apps to add ──── */
 const AvailableAppsList = ({ availableApps, toggleApp, colors, isDark }) => {
-    const [activeRoute, setActiveRoute] = useState(null);
-
-    // Auto-dismiss after 3s
-    useEffect(() => {
-        if (!activeRoute) return;
-        const t = setTimeout(() => setActiveRoute(null), 3000);
-        return () => clearTimeout(t);
-    }, [activeRoute]);
-
     if (availableApps.length === 0) {
         return (
             <div className="text-center py-3">
-                <span className="text-xs font-medium" style={{ color: colors.textSecondary, opacity: 0.5 }}>All apps added</span>
+                <span className="text-[0.625rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.35 }}>All apps added</span>
             </div>
         );
     }
 
     return (
-        <div className="pt-0.5">
-            <div
-                className="flex items-center gap-1.5 px-1 mb-1"
-                style={{ color: colors.textSecondary, opacity: 0.56 }}
-            >
-                <div
-                    className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
-                    style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)',
-                        border: isDark ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.04)',
-                    }}
-                >
-                    <Plus className="w-2.5 h-2.5" style={{ opacity: 0.7 }} />
-                </div>
-                <p className="text-xs font-semibold tracking-[0.02em]">
-                    Tap an app below to add it to Home
-                </p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {availableApps.map((app) => {
-                    const isActive = activeRoute === app.route;
-                    return (
-                        <div key={app.route}>
-                            <button
-                                onClick={() => toggleApp(app.route)}
-                                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-semibold transition-all active:scale-[0.97]"
-                                style={{
-                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
-                                    color: colors.textSecondary,
-                                    border: isActive
-                                        ? `1px solid ${colors.accent}30`
-                                        : `1px solid ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}`,
-                                }}
-                            >
-                                <Plus className="w-3.5 h-3.5 opacity-30 shrink-0" />
-                                <span className="truncate text-left flex-1">{app.name}</span>
-                                {app.desc && (
-                                    <span
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            setActiveRoute(isActive ? null : app.route);
-                                        }}
-                                        className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-all"
-                                        style={{
-                                            opacity: isActive ? 0.6 : 0.18,
-                                            backgroundColor: isActive ? `${colors.accent}12` : 'transparent',
-                                        }}
-                                    >
-                                        <Info className="w-2.5 h-2.5" style={{ color: isActive ? colors.accent : colors.textSecondary }} />
-                                    </span>
-                                )}
-                            </button>
-                            {/* Inline description — slides open under this specific pill */}
-                            <div
-                                className="overflow-hidden transition-all duration-200 ease-out"
-                                style={{ maxHeight: isActive ? 28 : 0, opacity: isActive ? 1 : 0 }}
-                            >
-                                <p className="text-xs font-medium px-3 pt-1 pb-0.5 truncate" style={{ color: colors.textSecondary, opacity: 0.6 }}>
-                                    {app.desc}
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
+        <div className="pt-3">
+            <p className="text-[0.625rem] font-bold uppercase tracking-widest px-0.5 mb-2" style={{ color: colors.textSecondary, opacity: 0.38 }}>
+                Add to Home
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                {availableApps.map((app) => (
+                    <button
+                        key={app.route}
+                        onClick={() => toggleApp(app.route)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.97]"
+                        style={{
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                            color: colors.textSecondary,
+                        }}
+                    >
+                        <Plus className="w-3 h-3 shrink-0" style={{ opacity: 0.3 }} />
+                        <span className="truncate text-left">{app.name}</span>
+                    </button>
+                ))}
             </div>
         </div>
     );
