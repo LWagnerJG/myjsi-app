@@ -63,7 +63,7 @@ const FeatureCard = ({
                     style={{ color: colors.textSecondary }}
                 >
                     <span className="text-[0.6875rem] font-semibold tracking-[0.02em]" style={{ opacity: 0.55 }}>Open</span>
-                    <ChevronRight className="w-4 h-4 opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
+                    <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
                 </button>
             )}
         </div>
