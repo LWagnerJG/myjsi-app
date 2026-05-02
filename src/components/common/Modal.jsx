@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme, DESIGN_TOKENS, modalCardSurface } from '../../design-system/tokens.js';
-import { UNIFIED_BACKDROP_BLUR_PX, UNIFIED_BACKDROP_DIM, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
 import { getModalMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 
@@ -81,20 +81,15 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                     className="fixed inset-0 flex items-center justify-center pointer-events-auto p-4"
                     style={{
                         zIndex: Math.max(DESIGN_TOKENS.zIndex.modal || 0, UNIFIED_MODAL_Z),
-                        backdropFilter: prefersReducedMotion ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
-                        WebkitBackdropFilter: prefersReducedMotion ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
+                        ...getUnifiedBackdropStyle(true, prefersReducedMotion),
+                        touchAction: 'none',
                     }}
                     initial={modalMotion.backdrop.initial}
                     animate={modalMotion.backdrop.animate}
                     exit={modalMotion.backdrop.exit}
                     transition={modalMotion.backdrop.transition}
-                    onClick={onClose}
                 >
-                    {/* Dark dim */}
-                    <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{ backgroundColor: `rgba(18, 18, 18, ${UNIFIED_BACKDROP_DIM})` }}
-                    />
+                    <div data-modal-backdrop="app-modal" className="absolute inset-0" onClick={onClose} aria-hidden="true" />
 
                     {/* Modal card */}
                     <motion.div
@@ -105,7 +100,7 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                         aria-modal="true"
                         aria-labelledby={title ? titleId : undefined}
                         tabIndex={-1}
-                        className={`w-full ${maxWidth} flex flex-col relative outline-none`}
+                        className={`w-full ${maxWidth} flex flex-col relative z-10 outline-none`}
                         style={{
                             ...modalCardSurface(theme),
                             maxHeight: '85vh',

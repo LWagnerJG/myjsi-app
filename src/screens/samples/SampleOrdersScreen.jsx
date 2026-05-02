@@ -74,7 +74,7 @@ const FollowUpModal = ({ order, theme, onClose }) => {
             {/* Backdrop */}
             <motion.div
                 className="absolute inset-0"
-                style={getUnifiedBackdropStyle(dk)}
+                style={getUnifiedBackdropStyle(true)}
                 onClick={onClose}
             />
             {/* Sheet */}
@@ -247,7 +247,7 @@ const TrackingModal = ({ order, theme, onClose }) => {
             {/* Backdrop */}
             <motion.div
                 className="absolute inset-0"
-                style={getUnifiedBackdropStyle(dk)}
+                style={getUnifiedBackdropStyle(true)}
                 onClick={onClose}
             />
             {/* Sheet */}

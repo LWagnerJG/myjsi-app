@@ -8,7 +8,7 @@ import { SAMPLE_CATEGORIES, FINISH_CATEGORIES } from '../data.js';
 import { getSampleProduct } from '../sampleIndex.js';
 import { DrawerItem } from './DrawerItem.jsx';
 import { PrimaryButton } from '../../../components/common/JSIButtons.jsx';
-import { UNIFIED_BACKDROP_BLUR_PX, UNIFIED_BACKDROP_DIM, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../components/common/modalUtils.js';
+import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../../components/common/modalUtils.js';
 import { getModalMotion } from '../../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion.js';
 
@@ -72,6 +72,15 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
         if (!dirOpen) setDirQuery('');
     }, [dirOpen]);
 
+    useEffect(() => {
+        if (!isExpanded) return undefined;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isExpanded]);
+
     const cartItems = useMemo(() => Object.entries(cart).map(([rawId, quantity]) => {
         const id = idOf(rawId);
         if (id === 'full-jsi-set') return { id, name: 'Full JSI Sample Set', quantity, isSet: true };
@@ -121,26 +130,22 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
                         className="fixed inset-0 flex items-start justify-center pt-[8vh] sm:pt-[10vh]"
                         style={{
                             zIndex: UNIFIED_MODAL_Z,
-                            backdropFilter: prefersReduced ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
-                            WebkitBackdropFilter: prefersReduced ? 'none' : `blur(${UNIFIED_BACKDROP_BLUR_PX}px) saturate(1.4)`,
+                            ...getUnifiedBackdropStyle(true, prefersReduced),
+                            touchAction: 'none',
                         }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={modalMotion.backdrop.transition}
-                        onClick={() => setExpanded(false)}
                     >
-                        {/* Dark dim — no blur here, blur is on the outer fixed container */}
-                        <div
-                            className="absolute inset-0 pointer-events-none"
-                            style={{ backgroundColor: `rgba(18, 18, 18, ${UNIFIED_BACKDROP_DIM})` }}
-                        />
+                        <div data-modal-backdrop="samples-cart" className="absolute inset-0" onClick={() => setExpanded(false)} aria-hidden="true" />
+
                         <motion.div
                             initial={{ opacity: 0, scale: 0.96, y: 24 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.96, y: 24 }}
                             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                            className="relative w-[calc(100%-2rem)] max-w-md rounded-3xl overflow-hidden"
+                            className="relative z-10 w-[calc(100%-2rem)] max-w-md rounded-3xl overflow-hidden"
                             style={{ backgroundColor: theme.colors.surface, boxShadow: '0 8px 32px -4px rgba(0,0,0,0.14)', maxHeight: '80vh' }}
                             onClick={(e) => e.stopPropagation()}
                         >
