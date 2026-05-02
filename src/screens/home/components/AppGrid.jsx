@@ -221,7 +221,6 @@ export const AppGrid = ({
                         style={{
                             minHeight: 88,
                             backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)',
-                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
                         }}
                     >
                         <div
@@ -269,7 +268,6 @@ export const AppGrid = ({
                         className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
                         style={{
                             backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
                             color: colors.textSecondary,
                         }}
                     >
