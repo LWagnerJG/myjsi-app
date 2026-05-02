@@ -9,6 +9,7 @@ export const FloatingActionCTA = React.memo(({
     theme,
     onClick,
     visible = true,
+    disableInitialAnimation = false,
     icon,
     label,
     className = '',
@@ -20,6 +21,7 @@ export const FloatingActionCTA = React.memo(({
         theme={theme}
         onClick={onClick}
         visible={visible}
+        disableInitialAnimation={disableInitialAnimation}
         icon={icon}
         label={label}
         className={className}

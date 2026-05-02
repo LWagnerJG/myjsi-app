@@ -28,6 +28,7 @@ const FloatingPill = ({
   type = 'button',
   disabled = false,
   zIndex = 20,
+  disableInitialAnimation = false,
   style = {},
   iconContainerStyle = {},
 }) => {
@@ -38,10 +39,10 @@ const FloatingPill = ({
   const Tag = onClick ? motion.button : motion.div;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence initial={!disableInitialAnimation}>
       {visible && (
         <Tag
-          initial={m.initial}
+          initial={disableInitialAnimation ? false : m.initial}
           animate={m.animate}
           exit={m.exit}
           transition={m.transition}

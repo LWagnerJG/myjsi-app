@@ -38,6 +38,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     const FADE_MS = 1500;
     const FADE_IN_DELAY = 360;
     const phraseFor = useCallback((i) => phrases[i % phrases.length], [phrases]);
+    const isInitialPhrase = tick === 0;
     useEffect(() => {
         const id = setInterval(() => setTick(p => p + 1), DISPLAY_MS);
         return () => clearInterval(id);
@@ -125,7 +126,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                                 zIndex: 1,
                                 color: theme.colors.textSecondary,
                                 opacity: 0.52,
-                                animation: `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both`,
+                                animation: isInitialPhrase ? 'none' : `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both`,
                                 fontWeight: 400,
                             }}
                         >

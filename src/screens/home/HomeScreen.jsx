@@ -409,6 +409,7 @@ export const HomeScreen = React.memo(({
                 theme={theme}
                 onClick={() => onNavigate('feedback')}
                 visible={!isEditMode}
+                disableInitialAnimation
                 icon={<MessageSquarePlus />}
                 label="Share Feedback"
                 className="sm:hidden"
