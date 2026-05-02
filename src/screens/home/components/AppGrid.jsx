@@ -116,7 +116,7 @@ export const AppGrid = ({
                                     <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
                                 </div>
                                 <span
-                                    className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
+                                    className="text-[0.875rem] sm:text-[0.9375rem] font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
                                     style={{ color: colors.textPrimary }}
                                 >
                                     {activeApp.name}
@@ -168,7 +168,7 @@ export const AppGrid = ({
                             >
                                 <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
-                            <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
+                            <span className="text-[0.875rem] sm:text-[0.9375rem] font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                 {app.name}
                             </span>
                             {badge && (
@@ -205,7 +205,7 @@ export const AppGrid = ({
                         >
                             <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.32 }} />
                         </div>
-                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight" style={{ color: colors.textSecondary, opacity: 0.32 }}>
+                        <span className="text-[0.875rem] sm:text-[0.9375rem] font-semibold tracking-tight" style={{ color: colors.textSecondary, opacity: 0.32 }}>
                             Customize
                         </span>
                     </button>
@@ -230,7 +230,7 @@ export const AppGrid = ({
                     >
                         <resourcesApp.icon className="w-[18px] h-[18px]" style={{ color: resourcesIconColor }} />
                     </div>
-                    <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
+                    <span className="text-[0.875rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
                     <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
                 </button>
             )}

@@ -202,8 +202,8 @@ export const AppHeader = React.memo(({
                             className={`flex items-baseline justify-end transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[250px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}
                             style={{ color: theme.colors.textPrimary }}
                         >
-                            <span className="text-sm font-medium">{getTimeGreeting()},</span>
-                            <span className="text-sm font-medium ml-1 md:ml-1.5">{userName}</span>
+                            <span className="text-[0.9375rem] font-medium">{getTimeGreeting()},</span>
+                            <span className="text-[0.9375rem] font-medium ml-1 md:ml-1.5">{userName}</span>
                         </div>
 
                         <button

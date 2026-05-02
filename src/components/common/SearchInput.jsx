@@ -84,7 +84,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                     className="w-full bg-transparent outline-none"
                     style={{
                         color: theme.colors.textPrimary,
-                        fontSize: "1rem",
+                        fontSize: "1.0625rem",
                         height: 56,
                         lineHeight: '56px',
                         fontWeight: 400,

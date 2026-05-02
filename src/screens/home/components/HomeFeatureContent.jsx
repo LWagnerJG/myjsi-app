@@ -44,14 +44,14 @@ export const HomeFeatureContent = ({
                                 ) : null;
                             })()}
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
+                                <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>
                                     {getCommunityAuthorSafe(post)}
                                 </div>
-                                <div className="text-xs line-clamp-1 mt-0.5" style={{ color: colors.textSecondary }}>
+                                <div className="text-[0.8125rem] line-clamp-1 mt-0.5" style={{ color: colors.textSecondary }}>
                                     {getCommunityTextSafe(post)}
                                 </div>
                                 {post.timeAgo && (
-                                    <div className="text-[0.625rem] mt-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                                    <div className="text-[0.6875rem] mt-0.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>
                                         {post.timeAgo}
                                     </div>
                                 )}
@@ -76,17 +76,17 @@ export const HomeFeatureContent = ({
                             className={`${ROW} ${hoverBg}`}
                         >
                             <div className="flex-1 text-left min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{item.series}</div>
-                                <div className="text-[0.625rem] uppercase tracking-widest mt-0.5" style={{ color: colors.textSecondary, opacity: 0.55 }}>{item.type}</div>
+                                <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{item.series}</div>
+                                <div className="text-[0.6875rem] uppercase tracking-widest mt-0.5" style={{ color: colors.textSecondary, opacity: 0.55 }}>{item.type}</div>
                             </div>
-                            <div className="text-sm font-bold tabular-nums flex-shrink-0" style={{ color: colors.textPrimary }}>{item.weeks} wks</div>
+                            <div className="text-[0.9375rem] font-bold tabular-nums flex-shrink-0" style={{ color: colors.textPrimary }}>{item.weeks} wks</div>
                         </button>
                     ))
                 ) : (
                     <EmptyState icon={Clock} colors={colors} isDark={isDark} title="No favorites yet">
                         <button
                             onClick={() => onNavigate('resources/lead-times')}
-                            className="text-xs font-medium underline underline-offset-2 transition-opacity hover:opacity-70 mt-1"
+                            className="text-[0.8125rem] font-medium underline underline-offset-2 transition-opacity hover:opacity-70 mt-1"
                             style={{ color: colors.accent }}
                         >
                             Open Lead Times
@@ -119,8 +119,8 @@ export const HomeFeatureContent = ({
                                 <Icon className="w-3.5 h-3.5" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{ann.title}</div>
-                                <div className="text-xs mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
+                                <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{ann.title}</div>
+                                <div className="text-[0.8125rem] mt-0.5 line-clamp-1" style={{ color: colors.textSecondary }}>{ann.subtitle || ann.text}</div>
                             </div>
                             <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-25" style={{ color: colors.textSecondary }} />
                         </button>
@@ -152,10 +152,10 @@ export const HomeFeatureContent = ({
                                 />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{category.name}</div>
-                                <div className="text-xs truncate mt-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>{category.description}</div>
+                                <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{category.name}</div>
+                                <div className="text-[0.8125rem] truncate mt-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>{category.description}</div>
                             </div>
-                            <div className="text-xs font-semibold flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                            <div className="text-[0.8125rem] font-semibold flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.6 }}>
                                 {seriesCount}
                             </div>
                             <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-25" style={{ color: colors.textSecondary }} />
@@ -181,12 +181,12 @@ export const HomeFeatureContent = ({
                             className={`${ROW} text-left ${hoverBg}`}
                         >
                             <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{project.name}</div>
-                                <div className="text-xs truncate mt-0.5" style={{ color: colors.textSecondary }}>{project.company || project.contact || project.stage}</div>
+                                <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{project.name}</div>
+                                <div className="text-[0.8125rem] truncate mt-0.5" style={{ color: colors.textSecondary }}>{project.company || project.contact || project.stage}</div>
                             </div>
                             <div className="text-right flex-shrink-0">
-                                <div className="text-[0.625rem] uppercase tracking-wider font-semibold" style={{ color: colors.textSecondary, opacity: 0.6 }}>{project.stage}</div>
-                                <div className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>${parseCurrencyValue(project.value).toLocaleString()}</div>
+                                <div className="text-[0.6875rem] uppercase tracking-wider font-semibold" style={{ color: colors.textSecondary, opacity: 0.6 }}>{project.stage}</div>
+                                <div className="text-[0.9375rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>${parseCurrencyValue(project.value).toLocaleString()}</div>
                             </div>
                         </button>
                     ))
@@ -196,8 +196,8 @@ export const HomeFeatureContent = ({
                         className={`${ROW} text-left ${hoverBg}`}
                     >
                         <div>
-                            <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
-                            <div className="text-xs mt-0.5" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
+                            <div className="text-[0.9375rem] font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
+                            <div className="text-[0.8125rem] mt-0.5" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
                         </div>
                     </button>
                 )}
@@ -217,10 +217,10 @@ export const HomeFeatureContent = ({
                     }}
                 >
                     <div className="text-left">
-                        <div className="text-[0.625rem] uppercase tracking-widest font-semibold" style={{ color: colors.textSecondary, opacity: 0.55 }}>Balance</div>
+                        <div className="text-[0.6875rem] uppercase tracking-widest font-semibold" style={{ color: colors.textSecondary, opacity: 0.55 }}>Balance</div>
                         <div className="text-base font-bold tabular-nums" style={{ color: colors.textPrimary }}>{formatElliottBucks(INITIAL_BALANCE)}</div>
                     </div>
-                    <span className="text-xs font-semibold" style={{ color: '#C4956A' }}>Redeem →</span>
+                    <span className="text-[0.8125rem] font-semibold" style={{ color: '#C4956A' }}>Redeem →</span>
                 </button>
                 {featured.map(p => (
                     <button
@@ -232,8 +232,8 @@ export const HomeFeatureContent = ({
                             <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
-                            <div className="text-xs mt-0.5" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
+                            <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{p.name}</div>
+                            <div className="text-[0.8125rem] mt-0.5" style={{ color: colors.textSecondary }}>{formatElliottBucks(p.price)}</div>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 opacity-25" style={{ color: colors.textSecondary }} />
                     </button>
@@ -270,12 +270,12 @@ export const HomeFeatureContent = ({
                             style={{ backgroundColor: statusColor }}
                         />
                         <div className="text-left min-w-0 flex-1">
-                            <div className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>{smartTitleCase(order.details)}</div>
-                            <div className="text-xs truncate mt-0.5" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
+                            <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{smartTitleCase(order.details)}</div>
+                            <div className="text-[0.8125rem] truncate mt-0.5" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
                         </div>
                         <div className="text-right flex-shrink-0 w-[6.25rem]">
-                            <div className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
-                            <div className="text-[0.625rem] font-medium mt-0.5" style={{ color: statusColor }}>{order.status}</div>
+                            <div className="text-[0.9375rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
+                            <div className="text-[0.6875rem] font-medium mt-0.5" style={{ color: statusColor }}>{order.status}</div>
                         </div>
                     </button>
                 );
@@ -292,8 +292,8 @@ const EmptyState = ({ icon: Icon, colors, isDark, title, subtitle, children }) =
         >
             <Icon className="w-4 h-4" style={{ color: colors.textSecondary, opacity: 0.4 }} />
         </div>
-        <p className="text-sm font-semibold" style={{ color: colors.textPrimary }}>{title}</p>
-        {subtitle && <p className="text-xs leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.6 }}>{subtitle}</p>}
+        <p className="text-[0.9375rem] font-semibold" style={{ color: colors.textPrimary }}>{title}</p>
+        {subtitle && <p className="text-[0.8125rem] leading-relaxed" style={{ color: colors.textSecondary, opacity: 0.6 }}>{subtitle}</p>}
         {children}
     </div>
 );

@@ -45,7 +45,7 @@ const FeatureCard = ({
     >
         {/* Header */}
         <div className="flex items-center justify-between pl-5 pr-[1.125rem] py-[13px] flex-shrink-0">
-            <h4 className="text-sm font-medium" style={{ color: colors.textPrimary, letterSpacing: 'normal' }}>
+            <h4 className="text-[0.9375rem] font-medium" style={{ color: colors.textPrimary, letterSpacing: 'normal' }}>
                     {headerLabel}
                 </h4>
             {isEditMode ? (
@@ -75,7 +75,7 @@ const FeatureCard = ({
         {/* Thin divider */}
         <div className="mx-5 mb-0" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
         <div className="px-4 pb-4 pt-1">
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false} mode="wait">
                 <motion.div
                     key={mode}
                     initial={{ opacity: 0, y: 5 }}
