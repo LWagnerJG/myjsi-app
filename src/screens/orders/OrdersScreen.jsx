@@ -120,18 +120,23 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
 
 /* ---- Date Group ---- */
 const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
+    const dark = isDarkTheme(theme);
     const date = new Date(dateKey);
     date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
     const label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
+    const metaColor = dark ? 'rgba(240,240,240,0.58)' : 'rgba(53,53,53,0.56)';
+    const headerDivider = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     return (
-        <div>
-            <p className="text-[0.6875rem] font-semibold tracking-wide px-2 mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>{label}</p>
-            <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
-                {group.orders.map((o, idx) => (
-                    <OrderRow key={o.orderNumber} order={o} theme={theme} onNavigate={onNavigate} isLast={idx === group.orders.length - 1} />
-                ))}
+        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
+            <div className="flex items-center justify-between gap-3 px-5 pt-3 pb-2">
+                <p className="text-[0.6875rem] font-semibold tracking-[0.08em]" style={{ color: metaColor }}>{label}</p>
+                <p className="text-[0.6875rem] font-semibold tabular-nums" style={{ color: metaColor }}>{formatCurrency(group.total)}</p>
             </div>
+            <div className="mx-5" style={{ borderTop: `1px solid ${headerDivider}` }} />
+            {group.orders.map((o, idx) => (
+                <OrderRow key={o.orderNumber} order={o} theme={theme} onNavigate={onNavigate} isLast={idx === group.orders.length - 1} />
+            ))}
         </div>
     );
 };
@@ -274,10 +279,10 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
             {/* Controls */}
             <div className="flex-shrink-0 max-w-content mx-auto w-full">
                 <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-col gap-2.5">
-                    <div className="space-y-2.5">
+                    <div className="space-y-3">
                         <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
+                        <div className="flex items-center gap-2.5">
+                            <div className="min-w-0 flex-1">
                                 <SegmentedToggle
                                     value={dateType}
                                     onChange={setDateType}
@@ -290,9 +295,15 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                     size="sm"
                                 />
                             </div>
-                            <div className="flex items-center gap-2.5">
+                            <div
+                                className="ml-auto flex items-center gap-1.5 rounded-full p-1"
+                                style={{
+                                    display: dateType === 'samples' ? 'none' : undefined,
+                                    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.035)',
+                                }}
+                            >
                                 <div ref={dealerRef} className="relative flex-shrink-0" style={{ display: dateType === 'samples' ? 'none' : undefined }}>
-                                    <button onClick={() => setDealerMenuOpen(o => !o)} className="h-10 rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-2 min-w-[7rem] sm:min-w-[7.75rem] md:w-auto md:px-4" style={{ ...controlTile, borderRadius: '999px', height: 40, backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : controlTile.backgroundColor, border: selectedDealer !== 'All Dealers' ? `1px solid ${theme.colors.accent}24` : 'none' }} title={selectedDealer}>
+                                    <button onClick={() => setDealerMenuOpen(o => !o)} className="rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-2 min-w-[7rem] sm:min-w-[7.75rem] md:w-auto md:px-4" style={{ ...controlTile, borderRadius: '999px', height: 'var(--jsi-ctrl-h)', backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : 'transparent', border: selectedDealer !== 'All Dealers' ? `1px solid ${theme.colors.accent}24` : '1px solid transparent', boxShadow: 'none' }} title={selectedDealer}>
                                         <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
                                         <span className="text-[0.75rem] sm:text-[0.8125rem] font-medium whitespace-nowrap truncate" style={{ color: theme.colors.textPrimary, maxWidth: '5.1rem' }}>
                                             {selectedDealer === 'All Dealers' ? 'All Dealers' : formatCompanyName(selectedDealer)}
@@ -312,7 +323,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                                         </motion.div>
                                     )}
                                 </div>
-                                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="h-10 rounded-full flex items-center justify-center active:scale-95 transition w-10 md:w-auto md:px-4 md:gap-2" style={{ ...controlTile, borderRadius: '999px', height: 40, display: dateType === 'samples' ? 'none' : undefined }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
+                                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="rounded-full flex items-center justify-center active:scale-95 transition w-[var(--jsi-ctrl-h)] md:w-auto md:px-4 md:gap-2" style={{ ...controlTile, borderRadius: '999px', height: 'var(--jsi-ctrl-h)', backgroundColor: viewMode === 'calendar' ? `${theme.colors.accent}12` : 'transparent', border: viewMode === 'calendar' ? `1px solid ${theme.colors.accent}24` : '1px solid transparent', boxShadow: 'none', display: dateType === 'samples' ? 'none' : undefined }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
                                     {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
                                     <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
                                         {viewMode === 'list' ? 'Calendar' : 'List'}
@@ -348,7 +359,7 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                       ) : viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
-                            <div className="space-y-4">
+                                                        <div className="space-y-3">
                                 {groupKeys.map((k) => (
                                   <div key={k}>
                                     <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
