@@ -134,11 +134,14 @@ export const AppGrid = ({
     const resourcesApp = currentApps.find(a => a.route === 'resources');
     const resourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
 
-    // Put Customize in the grid only when it won't sit alone in the last row.
-    // gridApps.length % 3 === 0 means adding one more gives remainder 1 → alone.
-    const customizeInGrid = onUpdateHomeApps && (gridApps.length % 3 !== 0);
+    // Customize goes in the grid when it fills a row cleanly, or when total
+    // would be exactly 4 (so we get a clean 2×2 instead of 3-wide with orphan).
+    const wouldBeWithCustomize = gridApps.length + 1;
+    const customizeInGrid = onUpdateHomeApps && (
+        wouldBeWithCustomize === 4 || gridApps.length % 3 !== 0
+    );
     const itemsInGrid = gridApps.length + (customizeInGrid ? 1 : 0);
-    const GRID_COLS_MAP = { 3: 'grid-cols-3', 4: 'grid-cols-3 sm:grid-cols-4', 5: 'grid-cols-3 sm:grid-cols-5', 6: 'grid-cols-3', 7: 'grid-cols-3 sm:grid-cols-4', 8: 'grid-cols-3 sm:grid-cols-4', 9: 'grid-cols-3' };
+    const GRID_COLS_MAP = { 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-2', 5: 'grid-cols-3 sm:grid-cols-5', 6: 'grid-cols-3', 7: 'grid-cols-3 sm:grid-cols-4', 8: 'grid-cols-3 sm:grid-cols-4', 9: 'grid-cols-3' };
     const gridColsClass = GRID_COLS_MAP[itemsInGrid] || 'grid-cols-3 sm:grid-cols-4';
 
     return (
