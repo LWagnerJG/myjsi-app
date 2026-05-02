@@ -70,7 +70,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
             {!isOverlay && isRemoveLocked && (
                 <div
                     className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center z-10"
-                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)', border: 'none' }}
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)' }}
                     aria-label={`${app.name} is pinned`}
                 >
                     <Lock className="w-2 h-2" style={{ color: colors.textSecondary, opacity: 0.4 }} />
