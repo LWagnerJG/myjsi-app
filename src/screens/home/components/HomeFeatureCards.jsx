@@ -21,7 +21,10 @@ const FeatureCard = ({
     recentOrders,
     hoverBg,
     className = '',
-}) => (
+}) => {
+    const headerLabel = homeFeatureOptions.find(o => o.id === mode)?.label || 'Recent Activity';
+
+    return (
     <GlassCard
         theme={theme}
         className={`flex flex-col transition-all duration-300 ${className}`}
@@ -43,8 +46,8 @@ const FeatureCard = ({
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-4 pb-2.5 flex-shrink-0">
             <h4 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: colors.textPrimary }}>
-                {homeFeatureOptions.find(o => o.id === mode)?.label || 'Recent Activity'}
-            </h4>
+                    {headerLabel}
+                </h4>
             {isEditMode ? (
                 <FeaturePicker
                     value={mode}
@@ -56,10 +59,10 @@ const FeatureCard = ({
             ) : (
                 <button
                     onClick={() => navigateFeature(mode)}
-                    className="flex items-center gap-0.5 transition-opacity hover:opacity-60"
-                    style={{ color: colors.textSecondary, opacity: 0.45 }}
+                    className="flex items-center gap-1 transition-opacity hover:opacity-70"
+                    style={{ color: colors.textSecondary, opacity: 0.5 }}
                 >
-                    <span className="text-xs font-semibold">Open</span>
+                    <span className="text-[0.6875rem] font-semibold tracking-[0.02em]">Open</span>
                     <ChevronRight className="w-3 h-3" />
                 </button>
             )}
@@ -95,7 +98,8 @@ const FeatureCard = ({
             </AnimatePresence>
         </div>
     </GlassCard>
-);
+    );
+};
 
 export const HomeFeatureCards = ({
     theme,
