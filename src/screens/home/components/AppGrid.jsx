@@ -159,7 +159,6 @@ export const AppGrid = ({
                             style={{
                                 minHeight: 88,
                                 backgroundColor: colors.tileSurface,
-                                border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
                             }}
                         >
                             <div
@@ -221,7 +220,6 @@ export const AppGrid = ({
                     style={{
                         height: 56,
                         backgroundColor: colors.tileSurface,
-                        border: isDark ? '1px solid rgba(255,255,255,0.10)' : 'none',
                     }}
                 >
                     <div
