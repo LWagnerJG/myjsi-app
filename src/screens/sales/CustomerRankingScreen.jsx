@@ -26,7 +26,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const isDark = isDarkTheme(theme);
-    const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+    const bdr = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
 
     const allRows = useMemo(() => {
         const list = [...CUSTOMER_RANK_DATA].sort((a, b) => (b[tab] || 0) - (a[tab] || 0));
@@ -63,7 +63,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
         }
         return (
             <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : 'rgba(0,0,0,0.04)', color: theme.colors.textSecondary }}>
                 {rank}
             </div>
         );
@@ -82,8 +82,8 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
             >
                 <div
                     className="flex items-center gap-3 px-4 py-4 transition-colors"
-                    style={{ borderTop: i === 0 ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)'}` }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.015)'}
+                    style={{ borderTop: i === 0 ? 'none' : `1px solid ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)'}` }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.015)'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                     <RankBadge rank={c.rank} />
@@ -100,13 +100,13 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
 
                         <div className="flex items-center gap-3">
                             {/* Progress bar */}
-                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}>
+                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.05)' }}>
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${pct}%` }}
                                     transition={{ duration: 0.4, ease: 'easeOut' }}
                                     className="h-full rounded-full"
-                                    style={{ backgroundColor: theme.colors.accent }}
+                                    style={{ background: isDark ? 'rgba(228,220,210,0.74)' : theme.colors.accent }}
                                 />
                             </div>
                             {/* Secondary metric */}
@@ -149,7 +149,7 @@ export const CustomerRankingScreen = ({ theme, onNavigate }) => {
                             <button
                                 onClick={() => { setShowSearch(!showSearch); if (showSearch) setSearch(''); }}
                                 className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                                style={{ backgroundColor: showSearch ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)') : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)') }}
+                                style={{ backgroundColor: showSearch ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') : (isDark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.04)') }}
                             >
                                 {showSearch ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
                             </button>

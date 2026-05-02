@@ -1,10 +1,27 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Send, Share2, Sparkles } from 'lucide-react';
+import { Send, Share2 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal.jsx';
+import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { useToast } from '../../components/common/ToastHost.jsx';
 import { cardSurface, fieldTileSurface, isDarkTheme } from '../../design-system/tokens.js';
 import { CUSTOMS_CATEGORIES, CUSTOM_OPPORTUNITIES } from './data.js';
+
+const extractPriceNumber = (priceLabel = '') => {
+    const match = String(priceLabel).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+    return match ? Number(match[1]) : null;
+};
+
+const getPriceTier = (priceLabel = '') => {
+    const value = extractPriceNumber(priceLabel);
+    if (value === null) return '$$$';
+    if (value <= 7000) return '$';
+    if (value <= 15000) return '$$';
+    if (value <= 26000) return '$$$';
+    if (value <= 38000) return '$$$$';
+    return '$$$$$';
+};
 
 const PriceBadge = ({ children, theme, dark, onLight }) => (
     <span
@@ -41,11 +58,11 @@ const GalleryCard = React.memo(({ item, theme, dark, onOpen }) => (
                 }}
             />
             <div className="absolute left-3 top-3">
-                <PriceBadge theme={theme} dark={dark} onLight>{item.priceLabel}</PriceBadge>
+                <PriceBadge theme={theme} dark={dark} onLight>{item.priceTier}</PriceBadge>
             </div>
             <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                 <div className="text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-white/70">
-                    {CUSTOMS_CATEGORIES.find((c) => c.id === item.category)?.label || ''}
+                    {item.categoryLabel}
                 </div>
                 <div className="mt-1 text-[1.15rem] font-semibold tracking-[-0.02em] leading-tight">
                     {item.title}
@@ -55,20 +72,6 @@ const GalleryCard = React.memo(({ item, theme, dark, onOpen }) => (
     </button>
 ));
 GalleryCard.displayName = 'GalleryCard';
-
-const FilterChip = ({ active, label, onClick, theme, dark }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold whitespace-nowrap transition-colors"
-        style={{
-            backgroundColor: active ? theme.colors.textPrimary : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-            color: active ? (dark ? '#111111' : '#FFFFFF') : theme.colors.textSecondary,
-        }}
-    >
-        {label}
-    </button>
-);
 
 const InquireForm = ({ item, theme, dark, onClose }) => {
     const [message, setMessage] = useState('');
@@ -135,14 +138,43 @@ export const CustomsScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const toast = useToast();
     const [activeCategory, setActiveCategory] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
     const [selected, setSelected] = useState(null);
     const [inquireFor, setInquireFor] = useState(null);
 
-    const items = useMemo(() => (
-        activeCategory === 'all'
-            ? CUSTOM_OPPORTUNITIES
-            : CUSTOM_OPPORTUNITIES.filter((item) => item.category === activeCategory)
-    ), [activeCategory]);
+    const categoryLabelById = useMemo(() => Object.fromEntries(
+        CUSTOMS_CATEGORIES.map((category) => [category.id, category.label])
+    ), []);
+
+    const categoryOptions = useMemo(() => CUSTOMS_CATEGORIES.map((category) => ({
+        value: category.id,
+        label: category.label,
+    })), []);
+
+    const allItems = useMemo(() => CUSTOM_OPPORTUNITIES.map((item) => ({
+        ...item,
+        priceTier: getPriceTier(item.priceLabel),
+        categoryLabel: categoryLabelById[item.category] || '',
+    })), [categoryLabelById]);
+
+    const items = useMemo(() => {
+        const query = searchTerm.trim().toLowerCase();
+        return allItems.filter((item) => {
+            const categoryMatch = activeCategory === 'all' || item.category === activeCategory;
+            if (!categoryMatch) return false;
+            if (!query) return true;
+
+            return [item.title, item.summary, item.details, item.categoryLabel]
+                .some((value) => String(value || '').toLowerCase().includes(query));
+        });
+    }, [activeCategory, allItems, searchTerm]);
+
+    const showingFilteredState = activeCategory !== 'all' || !!searchTerm.trim();
+
+    const clearFilters = useCallback(() => {
+        setSearchTerm('');
+        setActiveCategory('all');
+    }, []);
 
     const handleShare = useCallback(async (item) => {
         const shareData = {
@@ -167,35 +199,45 @@ export const CustomsScreen = ({ theme }) => {
             style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}
         >
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <ScreenTopChrome theme={theme} fade={false} contentClassName="pt-4 pb-3">
-                    <div className="space-y-4">
-                        <div>
-                            <div
-                                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em]"
-                                style={{ backgroundColor: `${theme.colors.accent}14`, color: theme.colors.accent }}
-                            >
-                                <Sparkles className="w-3 h-3" />
-                                <span>Customs Library</span>
+                <ScreenTopChrome theme={theme} fade={false} contentClassName="pt-3 pb-2">
+                    <div className="space-y-3">
+                        <div className="flex items-end justify-between gap-3">
+                            <div className="min-w-0">
+                                <h1 className="text-[1.5rem] sm:text-[1.75rem] font-semibold tracking-[-0.02em] leading-tight">
+                                    Customs
+                                </h1>
+                                <p className="mt-1 text-[0.8rem] sm:text-[0.84rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>
+                                    Search concepts and tap a card to open the full brief.
+                                </p>
                             </div>
-                            <h1 className="mt-2 text-[1.85rem] sm:text-[2.25rem] font-semibold tracking-[-0.03em] leading-[1.05]">
-                                Browse what we&rsquo;ve built before.
-                            </h1>
-                            <p className="mt-1.5 text-[0.92rem] leading-relaxed max-w-xl" style={{ color: theme.colors.textSecondary }}>
-                                Photography-first concepts with rough budget cues. Tap any image for the brief, then inquire or share.
-                            </p>
+                            <span
+                                className="rounded-full px-2.5 py-1 text-[0.72rem] font-semibold whitespace-nowrap"
+                                style={{
+                                    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                                    color: theme.colors.textSecondary,
+                                }}
+                            >
+                                {items.length} shown
+                            </span>
                         </div>
 
-                        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
-                            {CUSTOMS_CATEGORIES.map((cat) => (
-                                <FilterChip
-                                    key={cat.id}
-                                    active={activeCategory === cat.id}
-                                    label={cat.label}
-                                    onClick={() => setActiveCategory(cat.id)}
+                        <StandardSearchBar
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            placeholder="Search concepts, categories, or keywords..."
+                            theme={theme}
+                        />
+
+                        <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+                            <div className="min-w-max pr-1">
+                                <SegmentedToggle
+                                    value={activeCategory}
+                                    onChange={setActiveCategory}
+                                    options={categoryOptions}
                                     theme={theme}
-                                    dark={dark}
+                                    size="smDense"
                                 />
-                            ))}
+                            </div>
                         </div>
                     </div>
                 </ScreenTopChrome>
@@ -204,9 +246,25 @@ export const CustomsScreen = ({ theme }) => {
                     <div className="max-w-content mx-auto w-full">
                         {items.length === 0 ? (
                             <div className="rounded-[24px] p-8 text-center" style={cardSurface(theme)}>
-                                <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
-                                    No custom concepts in this category yet.
+                                <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                    No concepts found
                                 </p>
+                                <p className="mt-1 text-[0.82rem]" style={{ color: theme.colors.textSecondary }}>
+                                    Try a different search or category.
+                                </p>
+                                {showingFilteredState && (
+                                    <button
+                                        type="button"
+                                        onClick={clearFilters}
+                                        className="mt-4 rounded-full px-4 py-2 text-[0.78rem] font-semibold"
+                                        style={{
+                                            backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                                            color: theme.colors.textPrimary,
+                                        }}
+                                    >
+                                        Reset filters
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 pt-2">
@@ -251,7 +309,7 @@ export const CustomsScreen = ({ theme }) => {
                                     color: theme.colors.textSecondary,
                                 }}
                             >
-                                {CUSTOMS_CATEGORIES.find((c) => c.id === selected.category)?.label}
+                                {selected.categoryLabel || CUSTOMS_CATEGORIES.find((c) => c.id === selected.category)?.label}
                             </span>
                         </div>
 

@@ -73,7 +73,7 @@ const FeatureCard = ({
             </p>
         )}
         {/* Thin divider */}
-        <div className="mx-5 mb-0" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
+        <div className="mx-5 mb-0" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)' }} />
         <div className="px-4 pb-4 pt-1">
             <AnimatePresence initial={false} mode="wait">
                 <motion.div

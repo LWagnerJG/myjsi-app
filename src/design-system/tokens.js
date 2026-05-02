@@ -271,8 +271,8 @@ export const SECTION_TITLE_CLASSNAME = 'text-[0.95rem] sm:text-[1rem] font-semib
 export const cardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : (theme?.colors?.surface || '#FFFFFF'),
-    border: dark ? '1px solid rgba(255,255,255,0.12)' : 'none',
+    backgroundColor: dark ? 'rgba(255,255,255,0.065)' : (theme?.colors?.surface || '#FFFFFF'),
+    border: dark ? '1px solid rgba(255,255,255,0.042)' : 'none',
     boxShadow: dark ? DESIGN_TOKENS.shadowsDark.card : DESIGN_TOKENS.shadows.card,
   };
 };
@@ -283,7 +283,7 @@ export const cardSurface = (theme) => {
 export const subtleBg = (theme, strength = 1) => {
   const dark = isDarkTheme(theme);
   return dark
-    ? `rgba(255,255,255,${(0.07 * strength).toFixed(3)})`
+    ? `rgba(255,255,255,${(0.042 * strength).toFixed(3)})`
     : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
 };
 
@@ -292,7 +292,7 @@ export const subtleBg = (theme, strength = 1) => {
  */
 export const subtleBorder = (theme) => {
   const dark = isDarkTheme(theme);
-  return dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.03)';
+  return dark ? '1px solid rgba(255,255,255,0.042)' : '1px solid rgba(0,0,0,0.03)';
 };
 
 /**
@@ -301,7 +301,7 @@ export const subtleBorder = (theme) => {
 export const sectionCardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.90)',
+    backgroundColor: dark ? 'rgba(255,255,255,0.035)' : 'rgba(255,255,255,0.90)',
     border: dark ? subtleBorder(theme) : 'none',
     boxShadow: dark ? '0 12px 28px rgba(0,0,0,0.16)' : '0 10px 24px rgba(53,53,53,0.05)',
     borderRadius: SECTION_CARD_RADIUS,
@@ -314,7 +314,7 @@ export const sectionCardSurface = (theme) => {
 export const fieldTileSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.065)' : 'rgba(240,237,232,0.88)',
+    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : 'rgba(240,237,232,0.88)',
     border: 'none',
     borderRadius: DESIGN_TOKENS.borderRadius.xl,
   };
@@ -327,7 +327,7 @@ export const modalCardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
     backgroundColor: theme?.colors?.surface || (dark ? '#282828' : '#FFFFFF'),
-    border: subtleBorder(theme),
+    border: dark ? '1px solid rgba(255,255,255,0.042)' : subtleBorder(theme),
     borderRadius: DESIGN_TOKENS.borderRadius.xl,
     boxShadow: dark ? DESIGN_TOKENS.shadowsDark.modal : DESIGN_TOKENS.shadows.modal,
   };
@@ -339,8 +339,8 @@ export const modalCardSurface = (theme) => {
 export const inputSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.10)' : (theme?.colors?.surface || '#FFFFFF'),
-    border: dark ? `1px solid ${theme?.colors?.border || JSI_COLORS.stone}` : '1px solid rgba(0,0,0,0.04)',
+    backgroundColor: dark ? 'rgba(255,255,255,0.075)' : (theme?.colors?.surface || '#FFFFFF'),
+    border: dark ? '1px solid rgba(255,255,255,0.045)' : '1px solid rgba(0,0,0,0.04)',
     color: theme?.colors?.textPrimary || JSI_COLORS.charcoal,
   };
 };
@@ -354,10 +354,10 @@ export const floatingBarStyle = (theme) => {
   return {
     backdropFilter: 'blur(24px) saturate(1.8)',
     WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-    backgroundColor: dark ? 'rgba(38, 36, 34, 0.62)' : 'rgba(240, 237, 232, 0.72)',
-    border: dark ? '1px solid rgba(255,255,255,0.14)' : 'none',
+    backgroundColor: dark ? 'rgba(38, 36, 34, 0.52)' : 'rgba(240, 237, 232, 0.72)',
+    border: dark ? '1px solid rgba(255,255,255,0.05)' : 'none',
     boxShadow: dark
-      ? '0 -4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08)'
+      ? '0 -4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03)'
       : '0 -2px 16px rgba(0,0,0,0.04)',
   };
 };

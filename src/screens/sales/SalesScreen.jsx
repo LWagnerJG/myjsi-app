@@ -140,7 +140,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
   /* shared content row */
   const flatRowCls = "flex items-center justify-between gap-3 py-2.5";
-  const flatRowsDivider = { borderColor: subtleBg(theme, 1.35) };
+  const rowDividerColor = isDark ? 'rgba(255,255,255,0.024)' : subtleBg(theme, 1.35);
+  const flatRowsDividerClass = isDark ? 'divide-y divide-white/[0.03]' : 'divide-y divide-black/[0.05]';
+  const progressFill = isDark
+    ? 'rgba(228,220,210,0.74)'
+    : colors.accent;
+  const chartBarFill = isDark
+    ? 'rgba(224,214,203,0.72)'
+    : colors.accent;
 
   return (
     <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
@@ -195,11 +202,11 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   ))}
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="relative flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
+                  <div className="relative flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, isDark ? 0.95 : 1.5) }}>
                     <div
                       className="h-full rounded-full"
                       style={{
-                        backgroundColor: colors.accent,
+                        background: progressFill,
                         width: ready ? `${progressPct}%` : '0%',
                         transition: 'width 0.7s ease-out 0.1s',
                       }}
@@ -220,7 +227,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <tr
                           key={`table-row-${row.left.month}`}
                           className={index < tableRows.length - 1 ? 'border-b' : ''}
-                          style={{ borderColor: subtleBg(theme, 1.35) }}
+                          style={{ borderColor: rowDividerColor }}
                         >
                           <td className="py-2 pr-3 font-medium" style={{ color: colors.textSecondary }}>
                             {row.left.month}
@@ -258,10 +265,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <div className="w-full flex items-end flex-1">
                           <div className="w-full rounded-md" style={{
                             height: ready ? `${Math.max(8, pct)}%` : '0%',
-                            backgroundColor: isDark
-                              ? 'rgba(245,240,235,0.55)'
-                              : colors.accent,
-                            opacity: isDark ? 1 : (0.18 + (pct / 100) * 0.28),
+                            background: chartBarFill,
+                            opacity: isDark ? (0.44 + (pct / 100) * 0.32) : (0.18 + (pct / 100) * 0.28),
                             transition: `height 0.5s ease-out ${0.05 + i * 0.03}s, opacity 0.3s ease`,
                           }} />
                         </div>
@@ -282,7 +287,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             <button onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
               <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
                 <TileHeader title="Leaderboard" action />
-                <div className="flex-1 divide-y" style={flatRowsDivider}>
+                <div className={`flex-1 ${flatRowsDividerClass}`}>
                   {topLeaders.map((leader) => (
                     <div key={leader.id} className={flatRowCls}>
                       <span className="text-sm font-semibold truncate">{leader.name}</span>
@@ -303,7 +308,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                       <span className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>{rewardsSnapshot.key}</span>
                       <span className="text-lg font-black tabular-nums">{formatCurrency(rewardsSnapshot.totalAll)}</span>
                     </div>
-                    <div className="divide-y" style={flatRowsDivider}>
+                    <div className={flatRowsDividerClass}>
                       {topSalesLeader && (
                         <div className={flatRowCls}>
                           <span className="text-sm font-semibold truncate">{topSalesLeader.name}</span>
@@ -332,7 +337,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           <button onClick={() => onNavigate('orders')} className="w-full text-left group">
             <GlassCard theme={theme} className="p-5" variant="elevated">
               <TileHeader title="Recent Activity" action />
-              <div className="divide-y" style={flatRowsDivider}>
+              <div className={flatRowsDividerClass}>
                 {recentOrders.map((order) => {
                   return (
                     <div key={order.orderNumber} className={flatRowCls}>
@@ -340,7 +345,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                         <p className="text-sm font-semibold truncate">{formatCompanyName(order.company)}</p>
                         <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
                       </div>
-                      <div className="text-right shrink-0 ml-2">
+                      <div className="text-right shrink-0 ml-2 pr-0.5">
                         <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
                         <p className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>
                           {order.status}
@@ -365,7 +370,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           <button onClick={() => onNavigate('commissions')} className="w-full text-left group">
             <GlassCard theme={theme} className="p-5" variant="elevated">
               <TileHeader title="Commissions" action detail={formatCurrency(commissionsSnapshot.ytdTotal)} />
-              <div className="divide-y" style={flatRowsDivider}>
+              <div className={flatRowsDividerClass}>
                 {commissionsSnapshot.topEarners.map(([name, amount]) => (
                   <div key={name} className={flatRowCls}>
                     <span className="text-sm font-semibold truncate">{name}</span>

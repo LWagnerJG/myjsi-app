@@ -121,6 +121,10 @@ export const HomeHeader = ({
                         ...searchPillStyles,
                         paddingTop: 0,
                         paddingBottom: 0,
+                        transform: 'translateZ(0)',
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        isolation: 'isolate',
                         border: fileDragOver ? `2px solid ${colors.accent}` : searchPillStyles.border,
                         boxShadow: fileDragOver
                             ? `0 0 0 4px ${colors.accent}22, ${searchPillStyles.boxShadow}`

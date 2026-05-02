@@ -15,7 +15,7 @@
     will-change: transform, opacity;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    contain: layout style paint;
+    contain: layout paint;
 }
 
 /* Current screen always sits above the previous */
@@ -63,7 +63,7 @@
 }
 
 .enter-home {
-    animation: enterHome var(--screen-motion-duration, 460ms) var(--screen-motion-ease, cubic-bezier(0.22,1,0.36,1)) forwards;
+    animation: none;
 }
 
 /* ─── Keyframes ─────────────────────────────────────────────── */

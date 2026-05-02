@@ -159,6 +159,7 @@ export const HomeScreen = React.memo(({
     const {
         lampOn,
         lampLightReady,
+        shouldAnimateIn,
         lampAnim,
         lampRight,
         handleLampClick
@@ -402,6 +403,7 @@ export const HomeScreen = React.memo(({
                 lampAnim={lampAnim}
                 lampLightReady={lampLightReady}
                 lampOn={lampOn}
+                shouldAnimateIn={shouldAnimateIn}
             />
 
             {/* Mobile sticky feedback pill — hidden on sm+ */}

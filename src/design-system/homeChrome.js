@@ -13,9 +13,9 @@ const HOME_CHROME_SURFACES = {
       WebkitBackdropFilter: 'none',
     },
     dark: {
-      backgroundColor: 'rgba(255,255,255,0.08)',
-      border: '1px solid rgba(255,255,255,0.12)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.30)',
+      backgroundColor: 'rgba(255,255,255,0.055)',
+      border: 'none',
+      boxShadow: '0 2px 14px rgba(0,0,0,0.24)',
     },
   },
   soft: {
@@ -27,9 +27,9 @@ const HOME_CHROME_SURFACES = {
       WebkitBackdropFilter: 'none',
     },
     dark: {
-      backgroundColor: 'rgba(255,255,255,0.12)',
-      border: '1px solid rgba(255,255,255,0.11)',
-      boxShadow: '0 4px 18px rgba(0,0,0,0.26)',
+      backgroundColor: 'rgba(255,255,255,0.07)',
+      border: 'none',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.22)',
     },
   },
 };
@@ -49,8 +49,8 @@ export function getHomeChromePillStyles(isDark, { tone = 'primary' } = {}) {
 export function getHomeChromeIconButtonStyles(isDark, { active = false } = {}) {
   if (isDark) {
     return {
-      backgroundColor: active ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)',
-      border: '1px solid rgba(255,255,255,0.10)',
+      backgroundColor: active ? 'rgba(255,255,255,0.095)' : 'rgba(255,255,255,0.058)',
+      border: 'none',
     };
   }
 

@@ -28,12 +28,12 @@ export const GlassCard = React.memo(
 
     // Match the frosted-glass header pill in dark mode; solid white in light
     const cardBg = isDark
-      ? 'rgba(255,255,255,0.08)'
+      ? 'rgba(255,255,255,0.065)'
       : (theme?.colors?.surface || '#FFFFFF');
 
     // Subtle border for edge definition
     const cardBorder = isDark
-      ? '1px solid rgba(255, 255, 255, 0.12)'
+      ? '1px solid rgba(255, 255, 255, 0.055)'
       : '1px solid rgba(0, 0, 0, 0.06)';
 
     const borderColor = theme?.colors?.border || JSI_COLORS.stone;

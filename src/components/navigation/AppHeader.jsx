@@ -25,8 +25,8 @@ export const AppHeader = React.memo(({
     const homeScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 88px)';
     const innerScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 68px)';
     const scrimProgress = isHome ? Math.min(Math.max((scrollDepth - 2) / 36, 0), 1) : 0;
-    const scrimOpacity = scrimProgress * 0.92;
-    const gradientOpacity = scrimProgress * 0.9;
+    const scrimOpacity = scrimProgress * 0.78;
+    const gradientOpacity = scrimProgress * 0.64;
 
     useEffect(() => {
         if (!isHome) {
@@ -93,7 +93,7 @@ export const AppHeader = React.memo(({
 
     return (
         <>
-            {isHome && (
+            {isHome && scrimProgress > 0.02 && (
                 <>
                     <div
                         data-app-header-scrim
@@ -119,10 +119,10 @@ export const AppHeader = React.memo(({
                             zIndex: 29,
                             opacity: gradientOpacity,
                             background: `linear-gradient(to bottom,
-                                rgba(${bgR},0.30) 0%,
-                                rgba(${bgR},0.16) 30%,
-                                rgba(${bgR},0.06) 56%,
-                                rgba(${bgR},0.015) 74%,
+                                rgba(${bgR},0.22) 0%,
+                                rgba(${bgR},0.14) 32%,
+                                rgba(${bgR},0.06) 58%,
+                                rgba(${bgR},0.015) 78%,
                                 rgba(${bgR},0) 100%)`,
                         }}
                     />
@@ -142,12 +142,12 @@ export const AppHeader = React.memo(({
                             backdropFilter: 'blur(16px) saturate(1.6)',
                             WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
                             background: `linear-gradient(to bottom,
-                                rgba(${bgR},0.82) 0%,
-                                rgba(${bgR},0.60) 40%,
-                                rgba(${bgR},0.10) 80%,
+                                rgba(${bgR},0.56) 0%,
+                                rgba(${bgR},0.34) 46%,
+                                rgba(${bgR},0.10) 76%,
                                 rgba(${bgR},0) 100%)`,
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 76%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 76%, transparent 100%)',
                         }}
                     />
                 </>
@@ -161,8 +161,8 @@ export const AppHeader = React.memo(({
                 style={{
                     height: 'calc(env(safe-area-inset-top, 0px) + 68px)',
                     zIndex: 27,
-                    backdropFilter: 'blur(16px) saturate(1.8)',
-                    WebkitBackdropFilter: 'blur(16px) saturate(1.8)',
+                    backdropFilter: 'blur(16px) saturate(1.55)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(1.55)',
                     maskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 70%, transparent 100%)',
                 }}

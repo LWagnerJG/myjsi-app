@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect';
 import { formatCurrency } from '../../utils/format.js';
 import { INCENTIVE_REWARDS_DATA } from './data.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
 
 const parseQuarterKey = (key = '') => {
     const match = key.match(/^(\d{4})-Q(\d)$/);
@@ -37,12 +38,14 @@ const aggregate = (data, year) => {
     return { sales, designers };
 };
 
-const Row = ({ rank, name, amount, theme }) => (
+const Row = ({ rank, name, amount, theme }) => {
+    const isDark = isDarkTheme(theme);
+    return (
     <div className="flex items-center justify-between py-2">
         <div className="min-w-0 flex items-center gap-2.5">
             <span
                 className="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center shrink-0"
-                style={{ color: theme.colors.textSecondary, backgroundColor: theme.colors.border }}
+                style={{ color: theme.colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.085)' : theme.colors.border }}
             >
                 {rank}
             </span>
@@ -52,11 +55,12 @@ const Row = ({ rank, name, amount, theme }) => (
             {formatCurrency(amount)}
         </span>
     </div>
-);
+    );
+};
 
 const Leaderboard = ({ title, people, emptyLabel, theme }) => {
-    const isDark = theme?.name === 'dark';
-    const bdr = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+    const isDark = isDarkTheme(theme);
+    const bdr = isDark ? 'rgba(255,255,255,0.065)' : 'rgba(0,0,0,0.06)';
     return (
         <div className="rounded-[22px] overflow-hidden p-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
             <p className="text-[0.6875rem] font-bold uppercase tracking-[0.07em] opacity-55 mb-1" style={{ color: theme.colors.textSecondary }}>{title}</p>

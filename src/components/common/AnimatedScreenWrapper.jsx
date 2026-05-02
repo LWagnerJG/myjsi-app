@@ -68,7 +68,9 @@ export const AnimatedScreenWrapper = ({
 
         if (direction === 'home') {
             prev?.classList.add('panel', 'exit-to-home');
-            cur?.classList.add('panel', 'enter-home');
+            // Keep Home static on re-entry. Animating opacity/scale on a view
+            // with layered glass/blur surfaces can trigger compositor flicker.
+            cur?.classList.add('panel');
         } else if (direction === 'forward') {
             prev?.classList.add('panel', 'exit-left');
             cur?.classList.add('panel', 'enter-right');

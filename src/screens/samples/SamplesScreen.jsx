@@ -209,6 +209,53 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
         () => (Array.isArray(sampleOrders) ? sampleOrders.filter((order) => order.status !== 'delivered').length : 0),
         [sampleOrders]
     );
+    const hasCartShortcut = totalCartItems > 0;
+
+    const chipFadeProfile = hasCartShortcut
+        ? {
+            leftWidth: 58,
+            rightWidth: 96,
+            leftGradient: `linear-gradient(to right,
+                rgba(${bgRgb},0.88) 0%,
+                rgba(${bgRgb},0.78) 22%,
+                rgba(${bgRgb},0.54) 48%,
+                rgba(${bgRgb},0.28) 72%,
+                rgba(${bgRgb},0.10) 88%,
+                rgba(${bgRgb},0) 100%)`,
+            rightGradient: `linear-gradient(to left,
+                rgba(${bgRgb},0.86) 0%,
+                rgba(${bgRgb},0.76) 16%,
+                rgba(${bgRgb},0.54) 40%,
+                rgba(${bgRgb},0.31) 64%,
+                rgba(${bgRgb},0.12) 84%,
+                rgba(${bgRgb},0) 100%)`,
+            leftBlur: 'blur(8px) saturate(1.06)',
+            rightBlur: 'blur(13px) saturate(1.06)',
+            leftMask: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 26%, rgba(0,0,0,0.62) 58%, rgba(0,0,0,0.26) 82%, rgba(0,0,0,0) 100%)',
+            rightMask: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 20%, rgba(0,0,0,0.62) 54%, rgba(0,0,0,0.24) 82%, rgba(0,0,0,0) 100%)',
+        }
+        : {
+            leftWidth: 52,
+            rightWidth: 78,
+            leftGradient: `linear-gradient(to right,
+                rgba(${bgRgb},0.92) 0%,
+                rgba(${bgRgb},0.82) 24%,
+                rgba(${bgRgb},0.54) 52%,
+                rgba(${bgRgb},0.24) 76%,
+                rgba(${bgRgb},0.06) 90%,
+                rgba(${bgRgb},0) 100%)`,
+            rightGradient: `linear-gradient(to left,
+                rgba(${bgRgb},0.94) 0%,
+                rgba(${bgRgb},0.86) 18%,
+                rgba(${bgRgb},0.62) 44%,
+                rgba(${bgRgb},0.34) 68%,
+                rgba(${bgRgb},0.13) 86%,
+                rgba(${bgRgb},0) 100%)`,
+            leftBlur: 'blur(7px) saturate(1.06)',
+            rightBlur: 'blur(10px) saturate(1.06)',
+            leftMask: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 24%, rgba(0,0,0,0.66) 56%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0) 100%)',
+            rightMask: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.66) 52%, rgba(0,0,0,0.28) 80%, rgba(0,0,0,0) 100%)',
+        };
 
     const updateChipEdgeFade = useCallback(() => {
         const viewport = categoryScrollRef.current;
@@ -329,7 +376,12 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             <ScreenTopChrome theme={theme} horizontalPaddingClass="px-0" contentClassName="pt-2.5 pb-2" fade={false}>
                 <div className="flex items-center gap-2 px-4">
                     <div className="relative flex-1 min-w-0">
-                        <div data-category-scroll ref={categoryScrollRef} className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2">
+                        <div
+                            data-category-scroll
+                            ref={categoryScrollRef}
+                            className="flex overflow-x-auto scrollbar-hide no-scrollbar gap-2"
+                            style={{ paddingRight: hasCartShortcut ? 10 : 2 }}
+                        >
                             {allCategories.map((cat) => {
                                 const isActive = selectedCategory === cat.id;
                                 return (
@@ -356,37 +408,32 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                         <div
                             data-edge-fade="left"
                             aria-hidden="true"
-                            className="pointer-events-none absolute inset-y-0 left-0 w-12"
+                            className="pointer-events-none absolute inset-y-0 left-0"
                             style={{
+                                width: `${chipFadeProfile.leftWidth}px`,
                                 opacity: chipEdgeFade.left ? 1 : 0,
-                                transition: 'opacity 220ms ease',
-                                background: `linear-gradient(to right,
-                                    rgba(${bgRgb},0.97) 0%,
-                                    rgba(${bgRgb},0.86) 34%,
-                                    rgba(${bgRgb},0.56) 68%,
-                                    rgba(${bgRgb},0.18) 88%,
-                                    rgba(${bgRgb},0) 100%)`,
-                                backdropFilter: 'blur(6px) saturate(1.08)',
-                                WebkitBackdropFilter: 'blur(6px) saturate(1.08)',
+                                transition: 'opacity 220ms ease, width 240ms ease',
+                                background: chipFadeProfile.leftGradient,
+                                backdropFilter: chipFadeProfile.leftBlur,
+                                WebkitBackdropFilter: chipFadeProfile.leftBlur,
+                                maskImage: chipFadeProfile.leftMask,
+                                WebkitMaskImage: chipFadeProfile.leftMask,
                             }}
                         />
 
                         <div
                             data-edge-fade="right"
                             aria-hidden="true"
-                            className="pointer-events-none absolute inset-y-0 right-0 w-16"
+                            className="pointer-events-none absolute inset-y-0 right-0"
                             style={{
+                                width: `${chipFadeProfile.rightWidth}px`,
                                 opacity: chipEdgeFade.right ? 1 : 0,
-                                transition: 'opacity 220ms ease',
-                                background: `linear-gradient(to left,
-                                    rgba(${bgRgb},0.99) 0%,
-                                    rgba(${bgRgb},0.92) 22%,
-                                    rgba(${bgRgb},0.72) 48%,
-                                    rgba(${bgRgb},0.42) 72%,
-                                    rgba(${bgRgb},0.14) 88%,
-                                    rgba(${bgRgb},0) 100%)`,
-                                backdropFilter: 'blur(8px) saturate(1.08)',
-                                WebkitBackdropFilter: 'blur(8px) saturate(1.08)',
+                                transition: 'opacity 220ms ease, width 240ms ease',
+                                background: chipFadeProfile.rightGradient,
+                                backdropFilter: chipFadeProfile.rightBlur,
+                                WebkitBackdropFilter: chipFadeProfile.rightBlur,
+                                maskImage: chipFadeProfile.rightMask,
+                                WebkitMaskImage: chipFadeProfile.rightMask,
                             }}
                         />
                     </div>

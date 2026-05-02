@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal.jsx';
-import { Camera, FileText, AlertCircle, CheckCircle, Clock, XCircle, Image } from 'lucide-react';
+import { Camera, FileText, AlertCircle, CheckCircle, Clock, XCircle, Image, ChevronRight } from 'lucide-react';
 import { FloatingSubmitCTA } from '../../components/common/FloatingSubmitCTA.jsx';
+import { EmptyState } from '../../components/common/EmptyState.jsx';
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
-import jsQR from 'jsqr';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
 
@@ -27,19 +27,31 @@ function StatusBadge({ status }) {
 }
 
 /* ── Single request card ── */
-function RequestCard({ r, onClick, theme }) {
+function RequestCard({ r, onClick, theme, dark }) {
+    const statusIconBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+
     return (
-        <button onClick={onClick} className="w-full text-left active:scale-[0.98] transition-transform">
-            <div className="flex items-center gap-3 py-3 px-1">
-                <div className="flex-1 min-w-0">
+        <button onClick={onClick} className="w-full text-left px-4 py-3.5 active:scale-[0.98] transition-transform">
+            <div className="flex items-center gap-3">
+                <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: statusIconBg }}
+                >
+                    <FileText className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                </div>
+
+                <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="font-semibold text-[0.875rem] truncate" style={{ color: theme.colors.textPrimary }}>
                         {r.name}
                     </div>
-                    <div className="text-xs mt-0.5 truncate opacity-50" style={{ color: theme.colors.textSecondary }}>
+                    <div className="text-[0.72rem] truncate opacity-60" style={{ color: theme.colors.textSecondary }}>
                         {r.dealer || 'Unknown Dealer'} · {new Date(r.date).toLocaleDateString()}
                     </div>
                 </div>
+
                 <StatusBadge status={r.status} />
+
+                <ChevronRight className="w-4 h-4 opacity-35 flex-shrink-0" style={{ color: theme.colors.textSecondary }} />
             </div>
         </button>
     );
@@ -48,7 +60,8 @@ function RequestCard({ r, onClick, theme }) {
 /* ── Manual entry form ── */
 function ReplacementForm({ theme, formData, onChange, fileInputRef, onPickPhotos, openPhotoPicker }) {
     const dark = isDarkTheme(theme);
-    const inputBg = dark ? 'rgba(255,255,255,0.07)' : theme.colors.surface || '#FFFFFF';
+    const inputBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+    const shellBorder = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
     const Field = ({ label, children }) => (
         <div>
@@ -70,7 +83,7 @@ function ReplacementForm({ theme, formData, onChange, fileInputRef, onPickPhotos
 
     return (
         <div className="px-4 sm:px-6 lg:px-8 pb-28 max-w-content mx-auto w-full" style={{ paddingTop: CONTENT_PT }}>
-            <div className="space-y-5">
+            <div className="rounded-[24px] p-4 sm:p-5 space-y-5" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${shellBorder}` }}>
                 <Field label="Sales Order">
                     <input value={formData.salesOrder} onChange={e => onChange('salesOrder', e.target.value)}
                         className={inputCls} style={inputStyle} autoComplete="off" placeholder="e.g. SO-12345" />
@@ -86,7 +99,7 @@ function ReplacementForm({ theme, formData, onChange, fileInputRef, onPickPhotos
                 <Field label="Notes">
                     <textarea rows={3} value={formData.notes} onChange={e => onChange('notes', e.target.value)}
                         className={`${inputCls} resize-none`} style={inputStyle}
-                        placeholder="Describe the issue or parts needed…" />
+                        placeholder="Describe the issue or parts needed..." />
                 </Field>
 
                 <Field label="Photos">
@@ -126,6 +139,7 @@ export const ReplacementsScreen = ({ theme }) => {
     const canvasRef = useRef(null);
     const intervalRef = useRef(null);
     const streamRef   = useRef(null);
+    const qrScannerRef = useRef(null);
     const fileInputRef = useRef(null);
     const inFormRef   = useRef(false);
 
@@ -137,7 +151,7 @@ export const ReplacementsScreen = ({ theme }) => {
     );
 
     const dark = isDarkTheme(theme);
-    const bdr  = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+    const bdr  = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
     /* back-button handling */
     useEffect(() => {
@@ -179,9 +193,11 @@ export const ReplacementsScreen = ({ theme }) => {
         intervalRef.current = setInterval(() => {
             if (videoRef.current && canvasRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
                 const v = videoRef.current, c = canvasRef.current, ctx = c.getContext('2d');
+                const scanQr = qrScannerRef.current;
+                if (!scanQr) return;
                 c.width = v.videoWidth; c.height = v.videoHeight;
                 ctx.drawImage(v, 0, 0, c.width, c.height);
-                const code = jsQR(ctx.getImageData(0, 0, c.width, c.height).data, c.width, c.height);
+                const code = scanQr(ctx.getImageData(0, 0, c.width, c.height).data, c.width, c.height);
                 if (code) {
                     stopScanning();
                     const qr = code.data || '';
@@ -197,6 +213,14 @@ export const ReplacementsScreen = ({ theme }) => {
     const startScanning = useCallback(async () => {
         setCameraError(null);
         try {
+            if (!qrScannerRef.current) {
+                const qrModule = await import('jsqr');
+                qrScannerRef.current = qrModule?.default || qrModule;
+                if (typeof qrScannerRef.current !== 'function') {
+                    throw new Error('Unable to load QR scanner. Try manual entry.');
+                }
+            }
+
             if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera not supported on this device');
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
             streamRef.current = stream;
@@ -247,23 +271,35 @@ export const ReplacementsScreen = ({ theme }) => {
         <div className="min-h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div className="px-4 sm:px-6 lg:px-8 pb-8 max-w-content mx-auto w-full"
                 style={{ paddingTop: CONTENT_PT }}>
+                <div className="flex items-center justify-between mb-3 px-1">
+                    <h2 className="text-[1rem] sm:text-[1.08rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                        Replacement Requests
+                    </h2>
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
+                        Start
+                    </span>
+                </div>
 
                 {/* ── Action tiles — side-by-side ── */}
-                <div className="grid grid-cols-2 gap-2.5 mb-5">
+                <div className="grid grid-cols-2 gap-2.5 mb-4">
                     {/* Scan QR */}
                     <button onClick={startScanning}
-                        className="rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
+                        className="rounded-2xl px-3 py-3.5 flex items-center justify-center gap-2 active:scale-[0.97] transition-transform"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-                        <Camera className="w-5 h-5" style={{ color: theme.colors.accent }} />
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : `${theme.colors.accent}12` }}>
+                            <Camera className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                        </div>
                         <span className="font-semibold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>Scan QR</span>
                     </button>
                     {/* Manual entry */}
                     <button
                         onClick={() => { setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); goToForm(); }}
-                        className="rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
+                        className="rounded-2xl px-3 py-3.5 flex items-center justify-center gap-2 active:scale-[0.97] transition-transform"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-                        <FileText className="w-5 h-5" style={{ color: theme.colors.accent }} />
-                        <span className="font-semibold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>Enter Manually</span>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : `${theme.colors.accent}12` }}>
+                            <FileText className="w-4 h-4" style={{ color: theme.colors.accent }} />
+                        </div>
+                        <span className="font-semibold text-[0.8125rem]" style={{ color: theme.colors.textPrimary }}>Enter Manual</span>
                     </button>
                 </div>
 
@@ -272,6 +308,12 @@ export const ReplacementsScreen = ({ theme }) => {
                     style={{ height: isScanning ? 240 : 0, transition: 'height 0.3s ease', border: isScanning ? `1px solid ${theme.colors.accent}50` : 'none' }}>
                     <div className="relative w-full h-full">
                         <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
+                        {isScanning && (
+                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[0.65rem] font-semibold uppercase tracking-[0.07em]"
+                                style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#FFFFFF' }}>
+                                Scanning...
+                            </div>
+                        )}
                         {isScanning && (
                             <>
                                 {[['top-3 left-3', 'border-t-2 border-l-2 rounded-tl-md'],
@@ -300,32 +342,39 @@ export const ReplacementsScreen = ({ theme }) => {
 
                 {/* ── Previous Requests ── */}
                 <div className="flex items-baseline justify-between mb-1 px-1">
-                    <h3 className="text-[0.8125rem] font-semibold opacity-50" style={{ color: theme.colors.textSecondary }}>
-                        History
+                    <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.62 }}>
+                        Recent Requests
                     </h3>
                     {replacementRequests.length > 0 && (
-                        <span className="text-xs opacity-35" style={{ color: theme.colors.textSecondary }}>
+                        <span className="text-[0.72rem] opacity-45" style={{ color: theme.colors.textSecondary }}>
                             {replacementRequests.length}
                         </span>
                     )}
                 </div>
 
                 {replacementRequests.length > 0 ? (
-                    <div className="rounded-2xl overflow-hidden divide-y px-4"
+                    <div className="rounded-2xl overflow-hidden divide-y"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}`, borderColor: bdr }}>
                         {replacementRequests.map((r, i) => (
                             <div key={`${r.name}-${i}`} style={{ borderColor: bdr }}>
-                                <RequestCard r={r} theme={theme}
+                                <RequestCard r={r} theme={theme} dark={dark}
                                     onClick={() => setSelectedRequest(r)} />
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="rounded-2xl py-10 text-center"
+                    <div className="rounded-2xl"
                         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${bdr}` }}>
-                        <div className="text-sm font-medium opacity-40" style={{ color: theme.colors.textSecondary }}>
-                            No requests yet
-                        </div>
+                        <EmptyState
+                            icon={FileText}
+                            title="No replacement requests yet"
+                            description="Scan a QR code or submit a manual request to start tracking replacements."
+                            action={{
+                                label: 'Create Request',
+                                onClick: () => { setFormData({ salesOrder: '', lineItem: '', dealer: '', notes: '', photos: [] }); goToForm(); },
+                            }}
+                            theme={theme}
+                        />
                     </div>
                 )}
             </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { motion } from 'framer-motion';
 
-export const IndieSconce = ({ isDarkMode, lampRight, handleLampClick, lampAnim, lampLightReady, lampOn }) => {
+export const IndieSconce = ({ isDarkMode, lampRight, handleLampClick, lampAnim, lampLightReady, lampOn, shouldAnimateIn }) => {
     if (!isDarkMode) return null;
 
     return ReactDOM.createPortal(
@@ -17,6 +17,9 @@ export const IndieSconce = ({ isDarkMode, lampRight, handleLampClick, lampAnim, 
                 flexDirection: 'column',
                 alignItems: 'center',
                 cursor: 'pointer',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                isolation: 'isolate',
             }}
             onClick={handleLampClick}
             title="Turn light off"
@@ -25,7 +28,7 @@ export const IndieSconce = ({ isDarkMode, lampRight, handleLampClick, lampAnim, 
             <div style={{ perspective: '800px' }}>
                 <div style={{ transform: 'rotateY(8deg) rotateX(-2deg)', transformStyle: 'preserve-3d' }}>
                     <motion.div
-                        initial={{ y: -70, opacity: 0, rotate: 0 }}
+                        initial={shouldAnimateIn ? { y: -70, opacity: 0, rotate: 0 } : false}
                         animate={lampAnim}
                         style={{ transformOrigin: '80% 0%' }}
                     >

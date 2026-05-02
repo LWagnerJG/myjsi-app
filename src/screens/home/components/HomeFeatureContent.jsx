@@ -263,7 +263,7 @@ export const HomeFeatureContent = ({
                     <button
                         key={order.orderNumber}
                         onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-                        className={`${i >= 5 ? 'hidden sm:flex' : 'flex'} w-full items-center gap-3 pl-2.5 pr-0.5 py-2.5 rounded-xl ${hoverBg} transition-colors`}
+                        className={`${i >= 5 ? 'hidden sm:flex' : 'flex'} w-full items-center gap-3 pl-2.5 pr-2 py-2.5 rounded-xl ${hoverBg} transition-colors`}
                     >
                         <div
                             className="w-2 h-2 rounded-full flex-shrink-0"
@@ -271,11 +271,11 @@ export const HomeFeatureContent = ({
                         />
                         <div className="text-left min-w-0 flex-1">
                             <div className="text-[0.9375rem] font-semibold truncate" style={{ color: colors.textPrimary }}>{smartTitleCase(order.details)}</div>
-                            <div className="text-[0.8125rem] truncate mt-0.5" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
+                            <div className="text-[0.875rem] truncate mt-0.5" style={{ color: colors.textSecondary }}>{smartTitleCase(order.company)}</div>
                         </div>
                         <div className="text-right flex-shrink-0 w-[6.25rem]">
                             <div className="text-[0.9375rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>${order.net.toLocaleString()}</div>
-                            <div className="text-[0.6875rem] font-medium mt-0.5" style={{ color: statusColor }}>{order.status}</div>
+                            <div className="text-[0.75rem] font-medium mt-0.5" style={{ color: statusColor }}>{order.status}</div>
                         </div>
                     </button>
                 );

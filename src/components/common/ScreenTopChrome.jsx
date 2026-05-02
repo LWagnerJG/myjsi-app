@@ -12,6 +12,17 @@ export const ScreenTopChrome = React.memo(({
 }) => {
     const dark = isDarkTheme(theme);
     const bgRgb = dark ? '26,26,26' : '240,237,232';
+    const fadeGradient = dark
+        ? `linear-gradient(to bottom,
+            rgba(${bgRgb},0.30) 0%,
+            rgba(${bgRgb},0.18) 36%,
+            rgba(${bgRgb},0.07) 68%,
+            rgba(${bgRgb},0) 100%)`
+        : `linear-gradient(to bottom,
+            rgba(${bgRgb},0.52) 0%,
+            rgba(${bgRgb},0.28) 35%,
+            rgba(${bgRgb},0.10) 65%,
+            rgba(${bgRgb},0) 100%)`;
 
     return (
         <div className={`relative flex-shrink-0 ${className}`.trim()} style={{ backgroundColor: theme.colors.background }}>
@@ -25,11 +36,7 @@ export const ScreenTopChrome = React.memo(({
                     style={{
                         height: 32,
                         zIndex: 1,
-                        background: `linear-gradient(to bottom,
-                            rgba(${bgRgb},0.52) 0%,
-                            rgba(${bgRgb},0.28) 35%,
-                            rgba(${bgRgb},0.10) 65%,
-                            rgba(${bgRgb},0) 100%)`,
+                        background: fadeGradient,
                     }}
                 />
             ) : null}

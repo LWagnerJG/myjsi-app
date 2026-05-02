@@ -133,18 +133,18 @@ textarea {
 [data-theme="dark"] {
     --theme-background: #1A1A1A;
     --theme-surface: #262626;
-    --theme-primary: #F5F0EB;
-    --theme-accent: #F5F0EB;
+    --theme-primary: #ECE5DD;
+    --theme-accent: #E5DDD3;
     --theme-accent-text: #1A1A1A;
-    --theme-text-primary: #EDE8E3;
-    --theme-text-secondary: #958E85;
-    --theme-border: rgba(255, 255, 255, 0.12);
-    --theme-subtle: rgba(255, 255, 255, 0.07);
+    --theme-text-primary: #E9E2DA;
+    --theme-text-secondary: #9A9188;
+    --theme-border: rgba(255, 255, 255, 0.05);
+    --theme-subtle: rgba(255, 255, 255, 0.06);
     --theme-shadow: rgba(0, 0, 0, 0.5);
-    --theme-input-bg: rgba(255, 255, 255, 0.08);
+    --theme-input-bg: rgba(255, 255, 255, 0.065);
     --theme-overlay: rgba(0, 0, 0, 0.7);
-    --theme-hover: rgba(255, 255, 255, 0.05);
-    --theme-active: rgba(255, 255, 255, 0.08);
+    --theme-hover: rgba(255, 255, 255, 0.038);
+    --theme-active: rgba(255, 255, 255, 0.065);
     --theme-focus-ring: rgba(255, 255, 255, 0.3);
     --theme-success: #6B9B7A;
     --theme-success-light: rgba(107, 155, 122, 0.2);
@@ -155,7 +155,7 @@ textarea {
     --theme-info: #7B9BAC;
     --theme-info-light: rgba(123, 155, 172, 0.2);
     --theme-card-bg: #2A2A2A;
-    --theme-card-border: 1px solid rgba(255, 255, 255, 0.06);
+    --theme-card-border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 @media (prefers-reduced-motion: reduce) {
