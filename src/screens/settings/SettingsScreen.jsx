@@ -1,27 +1,66 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { User, Bell, Palette, ChevronDown, MapPin, Loader2 } from 'lucide-react';
+import { User, Bell, Palette, ChevronDown, Loader2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
-import { isDarkTheme, DESIGN_TOKENS, inputSurface, subtleBorder } from '../../design-system/tokens.js';
+import {
+  isDarkTheme,
+  DESIGN_TOKENS,
+  inputSurface,
+  fieldTileSurface,
+  modalCardSurface,
+  FIELD_LABEL_CLASSNAME,
+  SECTION_TITLE_CLASSNAME,
+} from '../../design-system/tokens.js';
 import { hapticLight } from '../../utils/haptics.js';
 
-const Toggle = ({ checked, onChange, theme }) => {
+const Toggle = ({ checked, onChange, theme, ariaLabel }) => {
   const isDark = isDarkTheme(theme);
+  const trackColor = checked
+    ? theme.colors.accent
+    : (isDark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.16)');
+  const thumbColor = checked
+    ? (isDark ? '#1D1D1D' : '#FFFFFF')
+    : '#FFFFFF';
+
   return (
-    <button onClick={() => { hapticLight(); onChange(!checked); }} className="w-12 h-7 rounded-full transition-all duration-200 relative flex-shrink-0" style={{ backgroundColor: checked ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : theme.colors.border) }}>
-      <div className="w-5.5 h-5.5 rounded-full transition-transform duration-200 absolute top-[3px]" style={{ width: 22, height: 22, backgroundColor: checked ? (isDark ? '#1A1A1A' : '#FFFFFF') : (isDark ? 'rgba(255,255,255,0.5)' : '#FFFFFF'), transform: checked ? 'translateX(24px)' : 'translateX(3px)', boxShadow: '0 1px 4px rgba(0,0,0,0.15)', left: 0 }} />
+    <button
+      type="button"
+      role="switch"
+      aria-label={ariaLabel}
+      aria-checked={checked}
+      onClick={() => {
+        hapticLight();
+        onChange(!checked);
+      }}
+      className="w-12 h-7 rounded-full transition-all duration-200 relative flex-shrink-0"
+      style={{ backgroundColor: trackColor }}
+    >
+      <span
+        className="rounded-full transition-transform duration-200 absolute top-[3px]"
+        style={{
+          width: 22,
+          height: 22,
+          backgroundColor: thumbColor,
+          transform: checked ? 'translateX(24px)' : 'translateX(3px)',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+          left: 0,
+        }}
+      />
     </button>
   );
 };
 
-// Glass portal dropdown Select
-const Select = ({ value, onChange, options, theme }) => {
+const Select = ({ value, onChange, options, theme, surfaceStyle }) => {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const portalRef = useRef(null);
   const [rect, setRect] = useState(null);
   const isDark = isDarkTheme(theme);
+  const popoverSurface = modalCardSurface(theme);
+  const selectedBg = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)';
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -48,20 +87,23 @@ const Select = ({ value, onChange, options, theme }) => {
 
   return (
     <div className="relative" ref={triggerRef}>
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full px-4 py-2.5 rounded-2xl flex items-center justify-between text-sm font-medium transition-all" style={{ ...inputSurface(theme) }}>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+        className="w-full px-4 h-11 rounded-2xl flex items-center justify-between text-sm font-medium transition-all"
+        style={{ ...inputSurface(theme), ...surfaceStyle }}
+      >
         <span>{current}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: theme.colors.textSecondary }} />
       </button>
       {open && rect && createPortal(
         <div ref={portalRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, width: rect.width, zIndex: DESIGN_TOKENS.zIndex.popover }}>
-          <div className="py-1.5 rounded-2xl overflow-hidden" style={{
-            backgroundColor: theme.colors.surface,
-            border: subtleBorder(theme),
-            boxShadow: DESIGN_TOKENS.shadows.modal
-          }}>
+          <div className="py-1.5 rounded-2xl overflow-hidden" style={popoverSurface}>
             {options.map(o => (
-              <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.99]" style={{ color: o.value === value ? theme.colors.accent : theme.colors.textPrimary, backgroundColor: o.value === value ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
-                onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)'; }}
+              <button key={o.value} onClick={() => { onChange(o.value); setOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.99]" style={{ color: o.value === value ? theme.colors.accent : theme.colors.textPrimary, backgroundColor: o.value === value ? selectedBg : 'transparent' }}
+                onMouseEnter={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = hoverBg; }}
                 onMouseLeave={e => { if (o.value !== value) e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 {o.label}
@@ -74,16 +116,15 @@ const Select = ({ value, onChange, options, theme }) => {
   );
 };
 
-// Section header
 const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
-  <div className="px-5 py-4" style={{ borderBottom: subtleBorder(theme) }}>
-    <div className="flex items-center gap-2.5">
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}>
+  <div className="px-5 pt-4 pb-3">
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ ...fieldTileSurface(theme), borderRadius: '999px' }}>
         <Icon className="w-4 h-4" style={{ color: theme.colors.accent }} />
       </div>
       <div>
-        <h2 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: theme.colors.textPrimary }}>{title}</h2>
-        {subtitle && <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>{subtitle}</p>}
+        <h2 className={SECTION_TITLE_CLASSNAME} style={{ color: theme.colors.textPrimary }}>{title}</h2>
+        {subtitle && <p className="text-[0.75rem] mt-1 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{subtitle}</p>}
       </div>
     </div>
   </div>
@@ -102,9 +143,9 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   const addressCacheRef = useRef(new Map());
   const [notif, setNotif] = useState({ newOrder: true, samplesShipped: true, leadTimeChange: true, communityPost: false, replacementApproved: true, commissionPosted: true, orderUpdate: true });
   const notifGroups = [
-    { label: 'Orders & Shipping', keys: ['newOrder', 'orderUpdate', 'samplesShipped'] },
-    { label: 'Projects & Revenue', keys: ['replacementApproved', 'commissionPosted'] },
-    { label: 'Products & Community', keys: ['leadTimeChange', 'communityPost'] },
+    { label: 'Orders and shipping', keys: ['newOrder', 'orderUpdate', 'samplesShipped'] },
+    { label: 'Projects and revenue', keys: ['replacementApproved', 'commissionPosted'] },
+    { label: 'Products and community', keys: ['leadTimeChange', 'communityPost'] },
   ];
   const notifLabels = { newOrder:'New order placed', orderUpdate:'Order status update', samplesShipped:'Samples shipped', leadTimeChange:'Lead time change', replacementApproved:'Replacement approved', commissionPosted:'Commission posted', communityPost:'New JSI community post' };
   const [leadTimeFavorites, setLeadTimeFavorites] = useState(() => {
@@ -133,7 +174,18 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     ];
     return Array.from(new Set(candidates.filter(Boolean).map((item) => String(item).trim()))).slice(0, 6);
   }, [userSettings?.homeAddress, userSettings?.streetAddress]);
-  const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)';
+  const fieldTile = fieldTileSurface(theme);
+  const rowDivider = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)';
+  const groupedTileSurface = {
+    ...fieldTile,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(240,237,232,0.72)',
+  };
+  const settingsCardStyle = isDark ? {} : { border: 'none' };
+  const settingsInputStyle = {
+    ...inputSurface(theme),
+    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(246,243,238,0.88)',
+    border: isDark ? '1px solid rgba(255,255,255,0.045)' : 'none',
+  };
 
   useEffect(() => {
     setFirstName(userSettings?.firstName || 'Luke');
@@ -195,170 +247,188 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
   }, [streetAddress, fallbackAddressHints]);
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-12 space-y-5 max-w-content mx-auto w-full pt-4">
-
-          {/* Account */}
-          <GlassCard theme={theme} className="overflow-hidden">
-            <SectionHeader icon={User} title="Account" theme={theme} />
-            <div className="p-4 space-y-3.5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>First Name</label>
-                  <input
-                    value={firstName}
-                    onChange={e => {
-                      const value = e.target.value;
-                      setFirstName(value);
-                      setUserSettings?.(prev => ({ ...prev, firstName: value }));
-                    }}
-                    autoComplete="given-name"
-                    className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ ...inputSurface(theme) }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Last Name</label>
-                  <input
-                    value={lastName}
-                    onChange={e => {
-                      const value = e.target.value;
-                      setLastName(value);
-                      setUserSettings?.(prev => ({ ...prev, lastName: value }));
-                    }}
-                    autoComplete="family-name"
-                    className="w-full px-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ ...inputSurface(theme) }}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>Street Address</label>
-                <div className="relative">
-                  <input
-                    value={streetAddress}
-                    onChange={e => applyStreetAddress(e.target.value)}
-                    onFocus={() => setShowAddressSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowAddressSuggestions(false), 120)}
-                    autoComplete="street-address"
-                    inputMode="text"
-                    placeholder="Start typing full street address"
-                    className="w-full pl-10 pr-4 h-10 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                    style={{ ...inputSurface(theme) }}
-                  />
-                  <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: theme.colors.textSecondary }} />
-                  {showAddressSuggestions && (
-                    <div
-                      className="absolute left-0 right-0 mt-1.5 rounded-2xl border overflow-hidden z-20"
-                      style={{
-                        borderColor: theme.colors.border,
-                        backgroundColor: isDark ? theme.colors.surface : '#FFFFFF',
-                        boxShadow: DESIGN_TOKENS.shadows.modal,
-                      }}
-                    >
-                      {addressLoading && (
-                        <div className="px-3 py-2.5 text-xs flex items-center gap-2" style={{ color: theme.colors.textSecondary }}>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Searching addresses...
-                        </div>
-                      )}
-                      {!addressLoading && addressSuggestions.length === 0 && (
-                        <div className="px-3 py-2.5 text-xs" style={{ color: theme.colors.textSecondary }}>
-                          Keep typing to search full addresses
-                        </div>
-                      )}
-                      {!addressLoading && addressSuggestions.map((address) => (
-                        <button
-                          key={address}
-                          type="button"
-                          onMouseDown={() => applyStreetAddress(address)}
-                          className="w-full text-left px-3 py-2.5 text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                          style={{ color: theme.colors.textPrimary }}
-                        >
-                          {address}
-                        </button>
-                      ))}
-                      <div className="px-3 py-1.5 text-[0.625rem] border-t" style={{ color: theme.colors.textSecondary, borderColor: theme.colors.border }}>
-                        Search powered by OpenStreetMap
-                      </div>
+    <AppScreenLayout
+      theme={theme}
+      showTitle={false}
+      maxWidthClass="max-w-content"
+      horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
+      contentPaddingBottomClass="pb-24 lg:pb-12"
+      contentClassName="pt-4 space-y-4"
+    >
+      <GlassCard theme={theme} className="overflow-visible" style={settingsCardStyle}>
+        <SectionHeader icon={User} title="Account" subtitle="Keep your profile details up to date." theme={theme} />
+        <div className="px-5 pb-5 space-y-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>First name</label>
+              <input
+                value={firstName}
+                onChange={e => {
+                  const value = e.target.value;
+                  setFirstName(value);
+                  setUserSettings?.(prev => ({ ...prev, firstName: value }));
+                }}
+                autoComplete="given-name"
+                className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                style={settingsInputStyle}
+              />
+            </div>
+            <div>
+              <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>Last name</label>
+              <input
+                value={lastName}
+                onChange={e => {
+                  const value = e.target.value;
+                  setLastName(value);
+                  setUserSettings?.(prev => ({ ...prev, lastName: value }));
+                }}
+                autoComplete="family-name"
+                className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                style={settingsInputStyle}
+              />
+            </div>
+          </div>
+          <div>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>Street address</label>
+            <div className="relative">
+              <input
+                value={streetAddress}
+                onChange={e => applyStreetAddress(e.target.value)}
+                onFocus={() => setShowAddressSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowAddressSuggestions(false), 120)}
+                autoComplete="street-address"
+                inputMode="text"
+                placeholder="Start typing your address"
+                className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+                style={settingsInputStyle}
+              />
+              {showAddressSuggestions && (
+                <div
+                  className="absolute left-0 right-0 mt-1.5 rounded-2xl overflow-hidden z-20"
+                  style={modalCardSurface(theme)}
+                >
+                  {addressLoading && (
+                    <div className="px-3 py-2.5 text-xs flex items-center gap-2" style={{ color: theme.colors.textSecondary }}>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Searching addresses...
                     </div>
                   )}
-                </div>
-              </div>
-              <div>
-                <label className="block text-[0.6875rem] font-semibold uppercase tracking-wider mb-1" style={{ color: theme.colors.textSecondary }}>T-Shirt Size</label>
-                <Select value={shirtSize} onChange={(s) => { setShirtSize(s); setUserSettings?.(prev => ({ ...prev, shirtSize: s })); }} options={['XS','S','M','L','XL','XXL'].map(s=>({value:s,label:s}))} theme={theme} />
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Push Notifications */}
-          <GlassCard theme={theme} className="overflow-hidden">
-            <SectionHeader icon={Bell} title="Push Notifications" subtitle="Choose which alerts you want to receive." theme={theme} />
-            <div className="p-3">
-              {notifGroups.map((group, gi) => (
-                <div key={group.label}>
-                  {gi > 0 && <div className="mx-3 my-1" style={{ borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)'}` }} />}
-                  <div className="px-3 pt-3 pb-1">
-                    <span className="text-[0.625rem] font-bold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>{group.label}</span>
+                  {!addressLoading && addressSuggestions.length === 0 && (
+                    <div className="px-3 py-2.5 text-xs" style={{ color: theme.colors.textSecondary }}>
+                      Keep typing to find your full address.
+                    </div>
+                  )}
+                  {!addressLoading && addressSuggestions.map((address) => (
+                    <button
+                      key={address}
+                      type="button"
+                      onMouseDown={() => applyStreetAddress(address)}
+                      className="w-full text-left px-3 py-2.5 text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                      style={{ color: theme.colors.textPrimary }}
+                    >
+                      {address}
+                    </button>
+                  ))}
+                  <div className="px-3 py-1.5 text-[0.625rem]" style={{ color: theme.colors.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.018)' }}>
+                    Powered by OpenStreetMap
                   </div>
-                  {group.keys.map((k) => (
-                    <div key={k}>
-                      <div className="flex items-center justify-between px-3 py-3 rounded-2xl transition-colors" onMouseEnter={e => e.currentTarget.style.backgroundColor = hoverBg} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                        <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
-                        <Toggle checked={!!notif[k]} onChange={v=>setNotif(p=>({...p,[k]:v}))} theme={theme} />
-                      </div>
-                      {k === 'leadTimeChange' && notif.leadTimeChange && (
-                        <div className="px-3 pb-3 -mt-1">
-                          <div className="p-4 rounded-2xl" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.02)' }}>
-                            <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: theme.colors.textSecondary }}>Favorite lead time series</div>
-                            <div className="flex flex-wrap gap-2">
-                              {leadTimeOptions.map((series) => {
-                                const active = leadTimeFavorites.includes(series);
-                                return (
-                                  <button
-                                    key={series}
-                                    type="button"
-                                    onClick={() => setLeadTimeFavorites(prev => active ? prev.filter(s => s !== series) : [...prev, series])}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
-                                    style={{
-                                      backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : theme.colors.subtle),
-                                      color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
-                                      border: `1px solid ${active ? 'transparent' : theme.colors.border}`
-                                    }}
-                                  >
-                                    {series}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <div className="text-[0.6875rem] mt-3 font-medium" style={{ color: theme.colors.textSecondary }}>
-                              {leadTimeFavorites.length} selected
-                            </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>T-shirt size</label>
+            <Select
+              value={shirtSize}
+              onChange={(s) => {
+                setShirtSize(s);
+                setUserSettings?.(prev => ({ ...prev, shirtSize: s }));
+              }}
+              options={['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(s => ({ value: s, label: s }))}
+              theme={theme}
+              surfaceStyle={settingsInputStyle}
+            />
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard theme={theme} className="overflow-hidden" style={settingsCardStyle}>
+        <SectionHeader icon={Bell} title="Push Notifications" subtitle="Only keep alerts that are useful for your day-to-day." theme={theme} />
+        <div className="px-4 pb-4 space-y-4">
+          {notifGroups.map((group) => (
+            <div key={group.label}>
+              <div className="px-2.5 pb-2">
+                <span className={`${FIELD_LABEL_CLASSNAME}`} style={{ color: theme.colors.textSecondary }}>
+                  {group.label}
+                </span>
+              </div>
+              <div className="rounded-2xl overflow-hidden" style={groupedTileSurface}>
+                {group.keys.map((k, index) => (
+                  <div key={k}>
+                    <div className="flex items-center justify-between px-4 py-3 gap-4">
+                      <span className="text-[0.875rem] font-medium leading-tight" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
+                      <Toggle
+                        checked={!!notif[k]}
+                        onChange={v => setNotif(p => ({ ...p, [k]: v }))}
+                        theme={theme}
+                        ariaLabel={notifLabels[k]}
+                      />
+                    </div>
+                    {k === 'leadTimeChange' && notif.leadTimeChange && (
+                      <div className="px-4 pb-4">
+                        <div className="rounded-2xl p-3.5" style={{ ...fieldTile, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(240,237,232,0.92)' }}>
+                          <div className={`${FIELD_LABEL_CLASSNAME} mb-2`} style={{ color: theme.colors.textSecondary }}>
+                            Lead time series alerts
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {leadTimeOptions.map((series) => {
+                              const active = leadTimeFavorites.includes(series);
+                              return (
+                                <button
+                                  key={series}
+                                  type="button"
+                                  onClick={() => setLeadTimeFavorites(prev => (active ? prev.filter(s => s !== series) : [...prev, series]))}
+                                  className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                                  style={{
+                                    backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : '#FFFFFF'),
+                                    color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
+                                    border: `1px solid ${active ? 'transparent' : theme.colors.border}`
+                                  }}
+                                >
+                                  {series}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="text-[0.6875rem] mt-2" style={{ color: theme.colors.textSecondary }}>
+                            {leadTimeFavorites.length} selected
                           </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
+                      </div>
+                    )}
+                    {index < group.keys.length - 1 && <div className="mx-4" style={{ borderTop: `1px solid ${rowDivider}` }} />}
+                  </div>
+                ))}
+              </div>
             </div>
-          </GlassCard>
-
-
-          {/* Appearance */}
-          <GlassCard theme={theme} className="overflow-hidden">
-            <SectionHeader icon={Palette} title="Appearance" theme={theme} />
-            <div className="px-5 py-4 flex items-center justify-between">
-              <span className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>Dark mode</span>
-              <Toggle checked={isDarkMode} onChange={onToggleTheme} theme={theme} />
-            </div>
-          </GlassCard>
-
-          <div className="pt-1 pb-4 text-center text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
+          ))}
         </div>
-      </div>
-    </div>
+      </GlassCard>
+
+      <GlassCard theme={theme} className="overflow-hidden" style={settingsCardStyle}>
+        <SectionHeader icon={Palette} title="Appearance" theme={theme} />
+        <div className="px-5 pb-5">
+          <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between gap-4" style={groupedTileSurface}>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Dark mode</p>
+              <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>Use a lower-glare theme throughout the app.</p>
+            </div>
+            <Toggle checked={isDarkMode} onChange={onToggleTheme} theme={theme} ariaLabel="Dark mode" />
+          </div>
+        </div>
+      </GlassCard>
+
+      <div className="pt-1 pb-4 text-center text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
+    </AppScreenLayout>
   );
 };

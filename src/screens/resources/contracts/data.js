@@ -4,31 +4,61 @@
 export const CONTRACTS_DATA = {
     omnia: {
         id: 'omnia',
-        name: 'Omnia Partners (TCPN)',
+        name: 'Omnia',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn.pdf',
         dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_dealer.pdf',
         publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_public.pdf',
-        discounts: [
+        pricingTableTitle: 'Discounts',
+        discountLayout: 'tier-chart',
+
+        documentEntries: [
             {
-                label: 'Dock Delivery',
-                discount: '54%',
-                dealerCommission: '15%',
-                repCommission: '3.90%',
-                margin: '60.90%',
+                key: 'documentUrl',
+                label: 'Rep Version',
+                short: 'Rep',
+                url: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn.pdf',
             },
             {
-                label: 'Inside Delivery',
-                discount: '53%',
-                dealerCommission: '17%',
-                repCommission: '3.83%',
-                margin: '60.99%',
+                key: 'dealerDocumentUrl',
+                label: 'Dealer Version',
+                short: 'Dealer',
+                url: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_dealer.pdf',
             },
             {
-                label: 'Delivered & Installed',
-                discount: '52%',
-                dealerCommission: '18%',
-                repCommission: '3.75%',
-                margin: '60.64%',
+                key: 'dealerRewardsDocumentUrl',
+                label: 'Dealer Version with Rewards',
+                short: 'Dealer Rewards',
+                url: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_dealer.pdf',
+            },
+            {
+                key: 'publicDocumentUrl',
+                label: 'Public Version',
+                short: 'Public',
+                url: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_public.pdf',
+            },
+        ],
+        tierRows: [
+            {
+                tier: '$1-$149,999 list',
+                shortTier: '$1-$149K',
+                dealerDiscount: '62%',
+                repCommission: '5.5%',
+                memberDiscounts: [
+                    { label: 'Dock Delivery', value: '54%' },
+                    { label: 'Inside Delivery', value: '53%' },
+                    { label: 'Delivered & Installed', value: '52%' },
+                ],
+            },
+            {
+                tier: '$150,000+ list',
+                shortTier: '$150K+',
+                dealerDiscount: '63.6%',
+                repCommission: '5.0%',
+                memberDiscounts: [
+                    { label: 'Dock Delivery', value: '56%' },
+                    { label: 'Inside Delivery', value: '53%' },
+                    { label: 'Delivered & Installed', value: '52%' },
+                ],
             },
         ],
     },

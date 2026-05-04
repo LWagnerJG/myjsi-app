@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, X } from 'lucide-react';
 
 // === jsifurniture.com type system =========================================
@@ -83,8 +83,17 @@ const SitePill = ({ children, dark = false, small = false }) => {
 };
 
 // =========================================================================
-export const LawFirmsLandingConcept = ({ concept, onClose }) => {
-    const [activeNav, setActiveNav] = useState(concept.sections[0]?.label);
+export const LawFirmsLandingConcept = ({ concept, onClose, activeSectionSlug, onSectionNavigate }) => {
+    const sectionItems = useMemo(
+        () => (concept.sections || []).map((section, index) => ({
+            ...section,
+            slug: section.slug || section.label?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+            target: section.target || concept.spaces?.[index]?.slug || null,
+        })),
+        [concept.sections, concept.spaces],
+    );
+
+    const [activeNav, setActiveNav] = useState(activeSectionSlug || sectionItems[0]?.slug);
 
     // Inject Typekit on mount, remove on unmount.
     useEffect(() => {
@@ -104,10 +113,41 @@ export const LawFirmsLandingConcept = ({ concept, onClose }) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (activeSectionSlug && sectionItems.some((item) => item.slug === activeSectionSlug)) {
+            setActiveNav(activeSectionSlug);
+            return;
+        }
+        if (!activeSectionSlug && sectionItems[0]?.slug) {
+            setActiveNav(sectionItems[0].slug);
+        }
+    }, [activeSectionSlug, sectionItems]);
+
+    useEffect(() => {
+        if (!activeSectionSlug) return undefined;
+        const selectedSection = sectionItems.find((item) => item.slug === activeSectionSlug);
+        if (!selectedSection?.target) return undefined;
+        const timer = setTimeout(() => {
+            const target = document.getElementById(`law-firms-space-${selectedSection.target}`);
+            target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+        return () => clearTimeout(timer);
+    }, [activeSectionSlug, sectionItems]);
+
+    const handleSectionClick = (section) => {
+        setActiveNav(section.slug);
+        onSectionNavigate?.(section.slug);
+        if (section.target) {
+            const target = document.getElementById(`law-firms-space-${section.target}`);
+            target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
     return (
         <div
             className="fixed inset-0 z-[60] overflow-y-auto scrollbar-hide"
             style={{
+                paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 4px)',
                 background: PAGE_BG,
                 color: INK,
                 fontFamily: FONT_TEXT,
@@ -208,34 +248,38 @@ export const LawFirmsLandingConcept = ({ concept, onClose }) => {
                         <div style={{ width: '100%', height: 1, background: HAIRLINE, margin: '24px 0 0' }} />
 
                         {/* Subtext + numbered nav row (mirrors page sub-nav strip) */}
-                        <div
-                            className="flex flex-col lg:flex-row items-start lg:items-end justify-between"
-                            style={{ gap: 24, padding: '24px 0 36px' }}
-                        >
-                            <p
-                                style={{
-                                    flex: 1,
-                                    fontFamily: FONT_TEXT,
-                                    fontSize: 19,
-                                    lineHeight: 1.55,
-                                    color: INK,
-                                    maxWidth: 720,
-                                    margin: 0,
-                                }}
-                            >
-                                {concept.subtitle}
-                            </p>
+                        <div className="grid lg:grid-cols-12" style={{ gap: 28, padding: '28px 0 40px' }}>
+                            <div className="lg:col-span-7">
+                                <p
+                                    style={{
+                                        fontFamily: FONT_TEXT,
+                                        fontSize: 'clamp(1.28rem, 2.1vw, 1.85rem)',
+                                        lineHeight: 1.34,
+                                        color: INK,
+                                        maxWidth: 840,
+                                        margin: 0,
+                                        letterSpacing: '-0.01em',
+                                    }}
+                                >
+                                    {concept.subtitle}
+                                </p>
+                                <div className="flex flex-wrap items-center" style={{ gap: 12, marginTop: 22 }}>
+                                    <SitePill>Explore Products</SitePill>
+                                    <SitePill small>Talk to a Rep</SitePill>
+                                </div>
+                            </div>
+
                             <div
-                                className="flex flex-wrap items-center"
-                                style={{ gap: 28, fontFamily: FONT_TEXT, fontSize: 15, color: INK }}
+                                className="lg:col-span-5 flex flex-wrap items-center lg:justify-end"
+                                style={{ gap: '14px 20px', fontFamily: FONT_TEXT, fontSize: 15, color: INK }}
                             >
-                                {concept.sections.map((section) => {
-                                    const active = activeNav === section.label;
+                                {sectionItems.map((section) => {
+                                    const active = activeNav === section.slug;
                                     return (
                                         <button
                                             key={section.number}
                                             type="button"
-                                            onClick={() => setActiveNav(section.label)}
+                                            onClick={() => handleSectionClick(section)}
                                             className="inline-flex items-baseline"
                                             style={{ gap: 10, color: INK, fontFamily: FONT_TEXT }}
                                         >
@@ -369,7 +413,7 @@ export const LawFirmsLandingConcept = ({ concept, onClose }) => {
                             style={{ gap: '4.5rem 2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}
                         >
                             {concept.spaces.map((space) => (
-                                <article key={space.slug}>
+                                <article key={space.slug} id={`law-firms-space-${space.slug}`}>
                                     <div
                                         className="overflow-hidden mb-6"
                                         style={{

@@ -91,11 +91,11 @@ export const LAW_FIRM_LANDING_PAGE = {
     subtitle: 'Spaces that earn trust at the front door and hold focus from reception to boardroom.',
     heroImage: '/category-images/casegood-images/jsi_vision_config_000007.jpg',
     sections: [
-        { number: '01', label: 'Reception & Arrival' },
-        { number: '02', label: 'Admin & Benching' },
-        { number: '03', label: 'Private Offices' },
-        { number: '04', label: 'Boardrooms' },
-        { number: '05', label: 'Custom Casegoods' },
+        { number: '01', label: 'Reception & Arrival', slug: 'reception-arrival', target: 'reception' },
+        { number: '02', label: 'Admin & Benching', slug: 'admin-benching', target: 'admin' },
+        { number: '03', label: 'Private Offices', slug: 'private-offices', target: 'private-office' },
+        { number: '04', label: 'Boardrooms', slug: 'boardrooms', target: 'boardroom' },
+        { number: '05', label: 'Custom Casegoods', slug: 'custom-casegoods', target: 'custom' },
     ],
     featuredProducts: [
         { category: 'Casegoods & Storage', family: 'Vision', label: 'Vision Reception & Casegoods', image: '/category-images/casegood-images/jsi_vision_config_000001_dkm0wsV.jpg' },
