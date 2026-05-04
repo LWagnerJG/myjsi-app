@@ -8,7 +8,7 @@ export const CONTRACTS_DATA = {
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn.pdf',
         dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_dealer.pdf',
         publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tcpn_public.pdf',
-        pricingTableTitle: 'Discounts',
+        pricingTableTitle: 'Omnia Discounts',
         discountLayout: 'tier-chart',
 
         documentEntries: [
@@ -58,6 +58,7 @@ export const CONTRACTS_DATA = {
                     },
                     {
                         label: 'Delivered & Installed',
+                        shortLabel: 'Deliver & Install',
                         discount: '52%',
                         dealerCommission: '20.83%',
                         repCommission: '4.12%',
@@ -85,6 +86,7 @@ export const CONTRACTS_DATA = {
                     },
                     {
                         label: 'Delivered & Installed',
+                        shortLabel: 'Deliver & Install',
                         discount: '52%',
                         dealerCommission: '20.83%',
                         repCommission: '4.09%',
@@ -98,7 +100,7 @@ export const CONTRACTS_DATA = {
     tips: {
         id: 'tips',
         name: 'TIPS / TAPS',
-        pricingTableTitle: 'Discounts',
+        pricingTableTitle: 'TIPS Discounts',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps.pdf',
         dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps_dealer.pdf',
         publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_tips_taps_public.pdf',
@@ -122,7 +124,7 @@ export const CONTRACTS_DATA = {
     premier: {
         id: 'premier',
         name: 'Premier (Healthcare GPO)',
-        pricingTableTitle: 'Discounts',
+        pricingTableTitle: 'Premier Discounts',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier.pdf',
         dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier_dealer.pdf',
         publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/j_contracts_premier_public.pdf',
@@ -151,18 +153,11 @@ export const CONTRACTS_DATA = {
     gsa: {
         id: 'gsa',
         name: 'GSA (Federal Government)',
-        subtitle: 'Wellington & Walden contract tiers',
-        pricingTableTitle: 'Discounts',
+        pricingTableTitle: 'GSA Discounts',
         documentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_gsa.pdf',
         dealerDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_gsa_dealer.pdf',
         publicDocumentUrl: 'https://webresources.jsifurniture.com/production/uploads/jsi_contracts_gsa_public.pdf',
         discounts: [
-            {
-                label: 'Wellington & Walden only',
-                discount: '61.6%',
-                dealerCommission: '10%',
-                repCommission: '5%',
-            },
             {
                 label: 'Baseline tier',
                 discount: '61.71%',
@@ -184,6 +179,12 @@ export const CONTRACTS_DATA = {
             {
                 label: '$400,001 - $450,000 net',
                 discount: '63.21%',
+                dealerCommission: '10%',
+                repCommission: '5%',
+            },
+            {
+                label: 'Wellington & Walden only',
+                discount: '61.6%',
                 dealerCommission: '10%',
                 repCommission: '5%',
             },

@@ -126,15 +126,26 @@ const CardHeader = ({ children, theme, dark, right }) => (
     </div>
 );
 
-const MetricHeaderLabel = ({ shortLabel, longLabel, theme }) => (
-    <span
-        className="text-[0.6875rem] text-center"
-        style={{ color: theme.colors.textSecondary, opacity: 0.45 }}
-    >
-        <span className="font-bold uppercase tracking-[0.06em] md:hidden">{shortLabel}</span>
-        <span className="hidden md:inline font-semibold tracking-[0.01em]">{longLabel}</span>
-    </span>
-);
+const MetricHeaderLabel = ({ shortLabel, longLabel, theme }) => {
+    const [shortTop, shortBottom] = String(shortLabel).split('|');
+    const [longTop, longBottom] = String(longLabel).split('|');
+
+    return (
+        <span
+            className="text-[0.6875rem] text-center"
+            style={{ color: theme.colors.textSecondary, opacity: 0.52 }}
+        >
+            <span className="font-bold uppercase tracking-[0.05em] leading-[1.06] md:hidden">
+                <span className="block">{shortTop}</span>
+                {shortBottom && <span className="block">{shortBottom}</span>}
+            </span>
+            <span className="hidden md:inline font-semibold tracking-[0.01em] leading-[1.08]">
+                <span className="block">{longTop}</span>
+                {longBottom && <span className="block">{longBottom}</span>}
+            </span>
+        </span>
+    );
+};
 
 /* ── main screen ──────────────────────────────────────── */
 export const ContractsScreen = ({ theme, setSuccessMessage }) => {
@@ -165,6 +176,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
             ...ver,
             url: contract[ver.key],
         })).filter((entry) => entry.url);
+    const showStandaloneContractTitle = isState;
     const pricingTableTitle = contract.pricingTableTitle || 'Pricing Tiers';
     const pricingNoteSurface = {
         ...fieldTileSurface(theme),
@@ -213,16 +225,18 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                     <div className="space-y-4">
 
                         {/* Contract title */}
-                        <div className="pt-1 px-1">
-                            <h2 className="text-[1.3125rem] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
-                                {contract.name}
-                            </h2>
-                            {contract.subtitle && (
-                                <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>
-                                    {contract.subtitle}
-                                </p>
-                            )}
-                        </div>
+                        {showStandaloneContractTitle && (
+                            <div className="pt-1 px-1">
+                                <h2 className="text-[1.3125rem] font-bold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                    {contract.name}
+                                </h2>
+                                {contract.subtitle && (
+                                    <p className="text-sm mt-1" style={{ color: theme.colors.textSecondary }}>
+                                        {contract.subtitle}
+                                    </p>
+                                )}
+                            </div>
+                        )}
 
                         {isState ? (
                             /* ── State contracts: custom picker sheet + detail ── */
@@ -302,18 +316,22 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                     <CardHeader theme={theme} dark={dark} right={
                                         usesTierChartLayout ? (
                                             <div className={tierMetricGridClass}>
-                                                <MetricHeaderLabel shortLabel="Dlr" longLabel="Dealer Commission" theme={theme} />
-                                                <MetricHeaderLabel shortLabel="Rep" longLabel="Rep Commission" theme={theme} />
+                                                <MetricHeaderLabel
+                                                    shortLabel={tierChartHasDealerDiscount ? 'Dealer|Mgn' : 'Dealer|Comm'}
+                                                    longLabel={tierChartHasDealerDiscount ? 'Dealer|Margin' : 'Dealer|Commission'}
+                                                    theme={theme}
+                                                />
+                                                <MetricHeaderLabel shortLabel="Rep|Comm" longLabel="Rep|Commission" theme={theme} />
                                                 {tierChartHasDealerDiscount && (
-                                                    <MetricHeaderLabel shortLabel="Dlr Disc" longLabel="Dealer Discount" theme={theme} />
+                                                    <MetricHeaderLabel shortLabel="Dealer|Disc" longLabel="Dealer|Discount" theme={theme} />
                                                 )}
                                             </div>
                                         ) : (
                                             <div className={standardMetricGridClass}>
-                                                <MetricHeaderLabel shortLabel="Dlr" longLabel="Dealer Commission" theme={theme} />
-                                                <MetricHeaderLabel shortLabel="Rep" longLabel="Rep Commission" theme={theme} />
+                                                <MetricHeaderLabel shortLabel="Dealer|Comm" longLabel="Dealer|Commission" theme={theme} />
+                                                <MetricHeaderLabel shortLabel="Rep|Comm" longLabel="Rep|Commission" theme={theme} />
                                                 {hasMargins && (
-                                                    <MetricHeaderLabel shortLabel="Margin" longLabel="Gross Margin" theme={theme} />
+                                                    <MetricHeaderLabel shortLabel="Gross|Mgn" longLabel="Gross|Margin" theme={theme} />
                                                 )}
                                             </div>
                                         )
@@ -344,7 +362,8 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                                                     {item.discount}
                                                                 </span>
                                                                 <div className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
-                                                                    {item.label}
+                                                                    <span className="md:hidden">{item.shortLabel || item.label}</span>
+                                                                    <span className="hidden md:inline">{item.label}</span>
                                                                 </div>
                                                             </div>
                                                             <div className={tierMetricGridClass}>
