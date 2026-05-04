@@ -126,6 +126,16 @@ const CardHeader = ({ children, theme, dark, right }) => (
     </div>
 );
 
+const MetricHeaderLabel = ({ shortLabel, longLabel, theme }) => (
+    <span
+        className="text-[0.6875rem] text-center"
+        style={{ color: theme.colors.textSecondary, opacity: 0.45 }}
+    >
+        <span className="font-bold uppercase tracking-[0.06em] md:hidden">{shortLabel}</span>
+        <span className="hidden md:inline font-semibold tracking-[0.01em]">{longLabel}</span>
+    </span>
+);
+
 /* ── main screen ──────────────────────────────────────── */
 export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     const [active, setActive] = useState('omnia');
@@ -137,6 +147,13 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     const usesTierChartLayout = contract.discountLayout === 'tier-chart';
     const hasMargins = !isState && !usesTierChartLayout && contract.discounts?.some(r => r.margin);
     const tierChartRows = usesTierChartLayout ? (contract.tierRows || []) : [];
+    const tierChartHasDealerDiscount = tierChartRows.some((row) => (row.rows || []).some((item) => item.dealerDiscount));
+    const tierMetricGridClass = tierChartHasDealerDiscount
+        ? 'grid grid-cols-[52px_52px_58px] md:grid-cols-[118px_118px_120px] items-center gap-2 shrink-0'
+        : 'grid grid-cols-[52px_52px] md:grid-cols-[118px_118px] items-center gap-2 shrink-0';
+    const standardMetricGridClass = hasMargins
+        ? 'grid grid-cols-[52px_52px_56px] md:grid-cols-[118px_118px_108px] items-center gap-2 shrink-0'
+        : 'grid grid-cols-[52px_52px] md:grid-cols-[118px_118px] items-center gap-2 shrink-0';
 
     // Auto-open picker when switching to the State tab
     useEffect(() => {
@@ -284,21 +301,19 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                 <GlassCard theme={theme} className="rounded-[22px] overflow-hidden">
                                     <CardHeader theme={theme} dark={dark} right={
                                         usesTierChartLayout ? (
-                                            <div className="flex items-center gap-5">
-                                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
-                                                    style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dlr</span>
-                                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
-                                                    style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
+                                            <div className={tierMetricGridClass}>
+                                                <MetricHeaderLabel shortLabel="Dlr" longLabel="Dealer Commission" theme={theme} />
+                                                <MetricHeaderLabel shortLabel="Rep" longLabel="Rep Commission" theme={theme} />
+                                                {tierChartHasDealerDiscount && (
+                                                    <MetricHeaderLabel shortLabel="Dlr Disc" longLabel="Dealer Discount" theme={theme} />
+                                                )}
                                             </div>
                                         ) : (
-                                            <div className="flex items-center gap-5">
-                                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
-                                                    style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Dlr</span>
-                                                <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[52px] text-center"
-                                                    style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Rep</span>
+                                            <div className={standardMetricGridClass}>
+                                                <MetricHeaderLabel shortLabel="Dlr" longLabel="Dealer Commission" theme={theme} />
+                                                <MetricHeaderLabel shortLabel="Rep" longLabel="Rep Commission" theme={theme} />
                                                 {hasMargins && (
-                                                    <span className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] w-[56px] text-center"
-                                                        style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>Margin</span>
+                                                    <MetricHeaderLabel shortLabel="Margin" longLabel="Gross Margin" theme={theme} />
                                                 )}
                                             </div>
                                         )
@@ -311,37 +326,42 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                             <motion.div
                                                 key={row.tier}
                                                 {...stagger(idx)}
-                                                className="flex items-start px-5 gap-5"
+                                                className="px-5"
                                                 style={{
                                                     paddingTop: 13,
                                                     paddingBottom: 13,
                                                     borderBottom: idx < tierChartRows.length - 1 ? `1px solid ${subtleBorder}` : 'none',
                                                 }}
                                             >
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary, opacity: 0.58 }}>
-                                                        {row.shortTier || row.tier}
-                                                    </div>
-                                                    <div className="mt-1.5 space-y-1.5 min-w-0">
-                                                        {row.memberDiscounts.map((item) => (
-                                                            <div key={`${row.tier}-${item.label}`} className="flex items-baseline gap-2.5 min-w-0">
-                                                                <span className="text-base font-extrabold tabular-nums" style={{ color: theme.colors.accent }}>
-                                                                    {item.value}
-                                                                </span>
-                                                                <span className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
-                                                                    {item.label}
-                                                                </span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                <div className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]" style={{ color: theme.colors.textSecondary, opacity: 0.58 }}>
+                                                    {row.shortTier || row.tier}
                                                 </div>
-                                                <div className="flex items-start shrink-0 gap-5 pt-0.5">
-                                                    <span className="text-sm font-semibold tabular-nums w-[52px] text-center" style={{ color: theme.colors.textPrimary }}>
-                                                        {row.dealerDiscount}
-                                                    </span>
-                                                    <span className="text-sm tabular-nums w-[52px] text-center" style={{ color: theme.colors.textSecondary }}>
-                                                        {row.repCommission}
-                                                    </span>
+                                                <div className="mt-2 space-y-2 min-w-0">
+                                                    {(row.rows || []).map((item) => (
+                                                        <div key={`${row.tier}-${item.label}`} className="flex items-start gap-5 min-w-0">
+                                                            <div className="flex-1 min-w-0 flex items-baseline gap-2.5">
+                                                                <span className="text-[1.0625rem] font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
+                                                                    {item.discount}
+                                                                </span>
+                                                                <div className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
+                                                                    {item.label}
+                                                                </div>
+                                                            </div>
+                                                            <div className={tierMetricGridClass}>
+                                                                <span className="text-sm font-semibold tabular-nums text-center" style={{ color: theme.colors.textPrimary }}>
+                                                                    {item.dealerCommission}
+                                                                </span>
+                                                                <span className="text-sm tabular-nums text-center" style={{ color: theme.colors.textSecondary }}>
+                                                                    {item.repCommission}
+                                                                </span>
+                                                                {tierChartHasDealerDiscount && (
+                                                                    <span className="text-sm tabular-nums text-center" style={{ color: theme.colors.textSecondary }}>
+                                                                        {item.dealerDiscount || '—'}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </motion.div>
                                         ))
@@ -359,7 +379,7 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                             >
                                                 <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                                                     <div className="flex items-baseline gap-2.5">
-                                                        <span className="text-base font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
+                                                        <span className="text-[1.0625rem] font-extrabold tabular-nums shrink-0" style={{ color: theme.colors.accent }}>
                                                             {row.discount}
                                                         </span>
                                                         <span className="text-sm font-medium truncate" style={{ color: theme.colors.textPrimary }}>
@@ -367,15 +387,15 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center shrink-0 gap-5">
-                                                    <span className="text-sm font-semibold tabular-nums w-[52px] text-center" style={{ color: theme.colors.textPrimary }}>
+                                                <div className={standardMetricGridClass}>
+                                                    <span className="text-sm font-semibold tabular-nums text-center" style={{ color: theme.colors.textPrimary }}>
                                                         {row.dealerCommission}
                                                     </span>
-                                                    <span className="text-sm tabular-nums w-[52px] text-center" style={{ color: theme.colors.textSecondary }}>
+                                                    <span className="text-sm tabular-nums text-center" style={{ color: theme.colors.textSecondary }}>
                                                         {row.repCommission}
                                                     </span>
                                                     {hasMargins && (
-                                                        <span className="text-[0.8125rem] tabular-nums w-[56px] text-center font-medium"
+                                                        <span className="text-[0.8125rem] tabular-nums text-center font-medium"
                                                             style={{ color: theme.colors.textSecondary, opacity: row.margin ? 0.65 : 0.3 }}>
                                                             {row.margin || '—'}
                                                         </span>
