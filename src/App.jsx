@@ -145,6 +145,12 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         const normalizedFirst = normalizeResourceSlug(firstSegment);
         const normalized = [normalizedFirst, ...slug.split('/').slice(1)].join('/');
 
+        // Social media supports nested vertical/deep-link routes, e.g.
+        // resources/social-media/law-firms or resources/social-media/workplace.
+        if (normalizedFirst === 'social-media') {
+            return lazyWrap(SocialMediaScreen);
+        }
+
         // Tradeshows sub-routes: resources/tradeshows/{brandId}/{showId?}
         if (normalizedFirst === 'tradeshows' && parts.length >= 3) {
             return lazyWrap(TradeshowsScreen, {

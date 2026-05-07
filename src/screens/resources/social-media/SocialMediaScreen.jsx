@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Check, ChevronDown, Copy, Instagram, Linkedin } from 'lucide-react';
 import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { useToast } from '../../../components/common/ToastHost.jsx';
@@ -11,12 +11,41 @@ import {
 } from './data.js';
 import { LawFirmsLandingConcept } from './LawFirmsLandingConcept.jsx';
 
-export const SocialMediaScreen = ({ theme }) => {
+const parseSocialRoute = (screenKey) => {
+    const parts = String(screenKey || '').split('/').filter(Boolean);
+    if (parts[0] !== 'resources' || parts[1] !== 'social-media') {
+        return { vertical: DEFAULT_SOCIAL_VERTICAL, section: null };
+    }
+    return {
+        vertical: parts[2] || DEFAULT_SOCIAL_VERTICAL,
+        section: parts[3] || null,
+    };
+};
+
+export const SocialMediaScreen = ({ theme, onNavigate, currentScreen }) => {
     const dark = isDarkTheme(theme);
     const toast = useToast();
     const menuRef = useRef(null);
-    const [selectedVertical, setSelectedVertical] = useState(DEFAULT_SOCIAL_VERTICAL);
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const routeState = useMemo(() => parseSocialRoute(currentScreen), [currentScreen]);
+    const selectedVertical = useMemo(() => {
+        const validVertical = SOCIAL_VERTICALS.some((item) => item.id === routeState.vertical);
+        return validVertical ? routeState.vertical : DEFAULT_SOCIAL_VERTICAL;
+    }, [routeState.vertical]);
+
+    const drilldownSection = selectedVertical === 'law-firms' ? routeState.section : null;
+
+    const navigateToVertical = useCallback((verticalId, sectionSlug = null) => {
+        if (!onNavigate) return;
+        const baseRoute = verticalId === DEFAULT_SOCIAL_VERTICAL
+            ? 'resources/social-media'
+            : `resources/social-media/${verticalId}`;
+        const nextRoute = sectionSlug ? `${baseRoute}/${sectionSlug}` : baseRoute;
+        if (nextRoute !== currentScreen) {
+            onNavigate(nextRoute);
+        }
+    }, [currentScreen, onNavigate]);
 
     const activeVertical = useMemo(
         () => SOCIAL_VERTICALS.find((item) => item.id === selectedVertical) || SOCIAL_VERTICALS[0],
@@ -37,6 +66,16 @@ export const SocialMediaScreen = ({ theme }) => {
         document.addEventListener('mousedown', handlePointerDown);
         return () => document.removeEventListener('mousedown', handlePointerDown);
     }, []);
+
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [selectedVertical]);
+
+    useEffect(() => {
+        if (routeState.vertical && !SOCIAL_VERTICALS.some((item) => item.id === routeState.vertical)) {
+            navigateToVertical(DEFAULT_SOCIAL_VERTICAL);
+        }
+    }, [navigateToVertical, routeState.vertical]);
 
     const flash = (message) => toast?.push(message, { ttl: 2200 });
 
@@ -62,7 +101,9 @@ export const SocialMediaScreen = ({ theme }) => {
         return (
             <LawFirmsLandingConcept
                 concept={LAW_FIRM_LANDING_PAGE}
-                onClose={() => setSelectedVertical(DEFAULT_SOCIAL_VERTICAL)}
+                activeSectionSlug={drilldownSection}
+                onSectionNavigate={(sectionSlug) => navigateToVertical('law-firms', sectionSlug)}
+                onClose={() => navigateToVertical(DEFAULT_SOCIAL_VERTICAL)}
             />
         );
     }
@@ -118,7 +159,7 @@ export const SocialMediaScreen = ({ theme }) => {
                                                 key={item.id}
                                                 type="button"
                                                 onClick={() => {
-                                                    setSelectedVertical(item.id);
+                                                    navigateToVertical(item.id);
                                                     setMenuOpen(false);
                                                 }}
                                                 className="w-full text-left px-3 py-2.5 rounded-[14px] transition active:scale-[0.99] flex items-center justify-between gap-3"
