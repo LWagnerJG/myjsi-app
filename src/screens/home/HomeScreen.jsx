@@ -11,6 +11,8 @@ import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { INITIAL_OPPORTUNITIES } from '../projects/data.js';
 import { REPLACEMENT_REQUESTS_DATA } from '../replacements/data.js';
+import { PRODUCTS_CATEGORIES_DATA } from '../products/data.js';
+import { smartTitleCase, formatCurrencyCompact } from '../../utils/format.js';
 import {
     PointerSensor,
     KeyboardSensor,
@@ -237,16 +239,64 @@ export const HomeScreen = React.memo(({
     // useDeferredValue so keystrokes feel instant even on slow devices
     const deferredSearchQuery = useDeferredValue(searchQuery);
     const spotlightResults = useMemo(() => {
-        const query = deferredSearchQuery.trim().toLowerCase();
-        if (!query) return [];
-        return allApps
-            .filter(app => {
-                const name = app.name?.toLowerCase() || '';
-                const route = app.route?.toLowerCase() || '';
-                return name.includes(query) || route.includes(query);
-            })
-            .slice(0, 6);
-    }, [deferredSearchQuery]);
+        const q = deferredSearchQuery.trim().toLowerCase();
+        if (!q) return [];
+        const results = [];
+
+        // Apps — max 3
+        allApps
+            .filter(app => app.name?.toLowerCase().includes(q) || app.route?.toLowerCase().includes(q))
+            .slice(0, 3)
+            .forEach(app => results.push({ type: 'app', ...app }));
+
+        // Orders — max 2
+        ORDER_DATA
+            .filter(o =>
+                o.details?.toLowerCase().includes(q) ||
+                o.company?.toLowerCase().includes(q) ||
+                o.orderNumber?.toLowerCase().includes(q)
+            )
+            .slice(0, 2)
+            .forEach(o => results.push({
+                type: 'order',
+                name: smartTitleCase(o.details),
+                subtitle: smartTitleCase(o.company),
+                route: `orders/${o.orderNumber}`,
+                status: o.status,
+                net: o.net,
+            }));
+
+        // Projects — max 2
+        allOpportunities
+            .filter(p =>
+                (p.name || '').toLowerCase().includes(q) ||
+                (p.company || '').toLowerCase().includes(q) ||
+                (p.contact || '').toLowerCase().includes(q)
+            )
+            .slice(0, 2)
+            .forEach(p => results.push({
+                type: 'project',
+                name: p.name,
+                subtitle: p.company || p.stage,
+                route: `projects/${p.id}`,
+            }));
+
+        // Products — max 2
+        (PRODUCTS_CATEGORIES_DATA || [])
+            .filter(cat =>
+                (cat.name || '').toLowerCase().includes(q) ||
+                (cat.description || '').toLowerCase().includes(q)
+            )
+            .slice(0, 2)
+            .forEach(cat => results.push({
+                type: 'product',
+                name: cat.name,
+                subtitle: cat.description,
+                route: cat.nav,
+            }));
+
+        return results.slice(0, 8);
+    }, [deferredSearchQuery, allOpportunities]);
 
     const toggleApp = useCallback((route) => {
         if (!onUpdateHomeApps) return;
@@ -349,6 +399,13 @@ export const HomeScreen = React.memo(({
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
     }, []);
 
+    const homeStats = useMemo(() => {
+        const unacked = ORDER_DATA.filter(o => o.status === 'Order Entry').length;
+        const ytd = ORDER_DATA.reduce((s, o) => s + (o.net || 0), 0);
+        const active = allOpportunities.filter(o => o.stage !== 'Won' && o.stage !== 'Lost').length;
+        return { unacked, ytd, active };
+    }, [allOpportunities]);
+
     const FEATURE_ROUTES = useMemo(() => ({
         community: 'community',
         'lead-times': 'resources/lead-times',
@@ -441,6 +498,8 @@ export const HomeScreen = React.memo(({
                     openChatFromQuery={openChatFromQuery}
                     isDark={isDark}
                     onRfpFileDrop={handleRfpFileDrop}
+                    homeStats={homeStats}
+                    formatCurrencyCompact={formatCurrencyCompact}
                 />
 
                 {/* App grid */}

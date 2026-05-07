@@ -8,7 +8,7 @@ import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
-import { formatCurrency, formatCompanyName } from '../../utils/format.js';
+import { formatCurrency, formatCompanyName, formatRelativeTime } from '../../utils/format.js';
 
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
@@ -101,14 +101,15 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
             <div className="flex items-center justify-between gap-4 px-5 py-3.5">
                 <div className="flex-1 min-w-0">
                     <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
-                    <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                        {formatCompanyName(order.company)}
+                    <p className="text-[0.8125rem] mt-0.5 flex items-center gap-1.5" style={{ color: theme.colors.textSecondary }}>
+                        <span className="truncate">{formatCompanyName(order.company)}</span>
+                        <span className="text-[0.75rem] flex-shrink-0" style={{ opacity: 0.5 }}>{formatRelativeTime(order.date)}</span>
                     </p>
                 </div>
                 <div className="flex-shrink-0 text-right">
                     <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
                     <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
-                        <span>{order.orderNumber}</span>
+                        <span style={{ opacity: 0.6 }}>{order.orderNumber}</span>
                         <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                     </p>
                 </div>
