@@ -4,6 +4,7 @@ import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { JSI_SERIES } from '../../../products/data.js';
+import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from '../../../resources/lead-times/data.js';
 import { PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
 import { Modal } from '../../../../components/common/Modal.jsx';
 import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlider.jsx';
@@ -34,6 +35,14 @@ const DETAIL_SECTION_TITLE_CLASS = 'text-[1.05rem] sm:text-[1.125rem] font-semib
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1.5 text-[0.75rem] leading-snug';
 const HERO_TITLE_INPUT_CLASS = 'project-display-title w-full bg-transparent outline-none font-semibold tracking-[-0.04em]';
 const HERO_IDENTITY_LABEL_CLASS = 'text-[0.625rem] font-semibold uppercase tracking-[0.08em]';
+
+const getSeriesLeadLabel = (series) => {
+  if (QUICKSHIP_SERIES.includes(series)) return 'QS';
+  const entries = LEAD_TIMES_DATA.filter(d => d.series === series);
+  if (!entries.length) return null;
+  const min = Math.min(...entries.map(d => d.weeks));
+  return `${min}wk`;
+};
 
 const formatPercentLabel = (value) => `${Number(value).toFixed(1).replace(/\.0$/, '')}%`;
 const formatDiscountLabel = (value) => {
@@ -1063,10 +1072,17 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{(draft.products || []).length}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(draft.products || []).map(p => (
-                        <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
-                          style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>{p.series}<span className="opacity-40 text-[0.6875rem]">{'×'}</span></button>
-                      ))}
+                      {(draft.products || []).map(p => {
+                        const lead = getSeriesLeadLabel(p.series);
+                        return (
+                          <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
+                            style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>
+                            {p.series}
+                            {lead && <span className="opacity-40 text-[0.625rem] font-medium tabular-nums">{lead}</span>}
+                            <span className="opacity-40 text-[0.6875rem]">{'×'}</span>
+                          </button>
+                        );
+                      })}
                       <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
                     </div>
                   </div>

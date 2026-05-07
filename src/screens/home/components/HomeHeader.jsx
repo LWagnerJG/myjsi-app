@@ -10,7 +10,6 @@ import { STATUS_COLORS } from '../../orders/data.js';
 const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
 const DROPDOWN_ID = 'spotlight-listbox';
 
-
 const TYPE_LABEL = { order: 'Order', project: 'Project', product: 'Product' };
 
 export const HomeHeader = ({
@@ -27,15 +26,30 @@ export const HomeHeader = ({
     openChatFromQuery,
     isDark,
     onRfpFileDrop,
+    recentItems = [],
+    onRecordRecent,
 }) => {
     const [fileDragOver, setFileDragOver] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(null);
+    const [inputFocused, setInputFocused] = useState(false);
     const searchPillStyles = getHomeChromePillStyles(isDark);
 
-    const totalItems = spotlightResults.length + 1;
-    const isOpen = Boolean(searchQuery.trim());
+    const hasQuery = Boolean(searchQuery.trim());
+    const showRecents = inputFocused && !hasQuery && recentItems.length > 0;
+    const isOpen = hasQuery || showRecents;
+    // In recents mode we don't show the Elliott row
+    const displayResults = hasQuery ? spotlightResults : (showRecents ? recentItems : []);
+    const showElliott = hasQuery;
+    const totalItems = displayResults.length + (showElliott ? 1 : 0);
 
-    useEffect(() => { setFocusedIndex(null); }, [spotlightResults]);
+    useEffect(() => { setFocusedIndex(null); }, [displayResults]);
+
+    const handleSelectResult = useCallback((item) => {
+        onRecordRecent?.(item);
+        onNavigate?.(item.route);
+        setSearchQuery('');
+        setInputFocused(false);
+    }, [onRecordRecent, onNavigate, setSearchQuery]);
 
     const handleSearchKeyDown = useCallback((e) => {
         if (!isOpen) return;
@@ -51,24 +65,25 @@ export const HomeHeader = ({
             case 'Enter':
                 if (focusedIndex !== null) {
                     e.preventDefault();
-                    if (focusedIndex < spotlightResults.length) {
-                        onNavigate?.(spotlightResults[focusedIndex].route);
-                    } else {
+                    if (focusedIndex < displayResults.length) {
+                        handleSelectResult(displayResults[focusedIndex]);
+                    } else if (showElliott) {
                         openChatFromQuery(searchQuery);
+                        setSearchQuery('');
                     }
-                    setSearchQuery('');
                     setFocusedIndex(null);
                 }
                 break;
             case 'Escape':
                 e.preventDefault();
                 setSearchQuery('');
+                setInputFocused(false);
                 setFocusedIndex(null);
                 break;
             default:
                 break;
         }
-    }, [isOpen, focusedIndex, totalItems, spotlightResults, searchQuery, onNavigate, openChatFromQuery, setSearchQuery]);
+    }, [isOpen, focusedIndex, totalItems, displayResults, searchQuery, showElliott, handleSelectResult, openChatFromQuery, setSearchQuery]);
 
     const handleDragEnter = useCallback((e) => {
         if (e.dataTransfer?.types?.includes('Files')) { e.preventDefault(); setFileDragOver(true); }
@@ -118,6 +133,17 @@ export const HomeHeader = ({
         return <div className="text-xs truncate" style={{ color: colors.textSecondary }}>{item.subtitle}</div>;
     };
 
+    const dropdownStyle = {
+        borderRadius: 20,
+        backgroundColor: isDark ? 'rgba(42,42,42,0.85)' : 'rgba(255,255,255,0.55)',
+        backdropFilter: 'blur(24px) saturate(1.8)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+        border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.6)',
+        boxShadow: isDark
+            ? '0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)'
+            : '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)',
+    };
+
     return (
         <div className="flex flex-col gap-2.5">
             {/* Search row */}
@@ -152,6 +178,8 @@ export const HomeHeader = ({
                             onSubmit={handleSearchSubmit}
                             onVoiceClick={() => onVoiceActivate && onVoiceActivate('Voice search active')}
                             onKeyDown={handleSearchKeyDown}
+                            onFocus={() => setInputFocused(true)}
+                            onBlur={() => setInputFocused(false)}
                             ariaExpanded={isOpen}
                             ariaActiveDescendant={focusedIndex !== null ? `spotlight-opt-${focusedIndex}` : undefined}
                             ariaControls={isOpen ? DROPDOWN_ID : undefined}
@@ -162,28 +190,29 @@ export const HomeHeader = ({
                     </GlassCard>
                 </div>
 
-                {/* Spotlight dropdown */}
+                {/* Spotlight / Recents dropdown */}
                 {isOpen && (
                     <div className="absolute left-0 right-0 top-full mt-2 z-20">
                         <GlassCard
                             theme={theme}
                             className="p-2"
-                            style={{
-                                borderRadius: 20,
-                                backgroundColor: isDark ? 'rgba(42,42,42,0.85)' : 'rgba(255,255,255,0.55)',
-                                backdropFilter: 'blur(24px) saturate(1.8)',
-                                WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-                                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.6)',
-                                boxShadow: isDark
-                                    ? '0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)'
-                                    : '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)',
-                            }}
+                            style={dropdownStyle}
                             role="listbox"
                             id={DROPDOWN_ID}
-                            aria-label="Search results"
+                            aria-label={showRecents ? 'Recent searches' : 'Search results'}
                         >
                             <div className="space-y-0.5">
-                                {spotlightResults.map((item, index) => (
+                                {/* Section label for recents */}
+                                {showRecents && (
+                                    <div className="px-3 pb-1 pt-0.5">
+                                        <span className="text-[0.625rem] font-semibold uppercase tracking-widest"
+                                            style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                                            Recent
+                                        </span>
+                                    </div>
+                                )}
+
+                                {displayResults.map((item, index) => (
                                     <button
                                         key={`${item.type}-${item.route}-${index}`}
                                         id={`spotlight-opt-${index}`}
@@ -192,8 +221,7 @@ export const HomeHeader = ({
                                         aria-label={`Go to ${item.name}`}
                                         onMouseDown={(e) => {
                                             e.preventDefault();
-                                            onNavigate?.(item.route);
-                                            setSearchQuery('');
+                                            handleSelectResult(item);
                                         }}
                                         onMouseEnter={() => setFocusedIndex(index)}
                                         onMouseLeave={() => setFocusedIndex(null)}
@@ -219,45 +247,47 @@ export const HomeHeader = ({
                                     </button>
                                 ))}
 
-                                <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${colors.border}` }}>
-                                    <button
-                                        id={`spotlight-opt-${spotlightResults.length}`}
-                                        role="option"
-                                        aria-selected={focusedIndex === spotlightResults.length}
-                                        aria-label={`Ask Elliott about "${searchQuery}"`}
-                                        onMouseDown={(event) => {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                            openChatFromQuery(searchQuery);
-                                        }}
-                                        onMouseEnter={() => setFocusedIndex(spotlightResults.length)}
-                                        onMouseLeave={() => setFocusedIndex(null)}
-                                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-                                        style={{ backgroundColor: focusedIndex === spotlightResults.length ? focusedBg : 'transparent' }}
-                                    >
-                                        <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden"
-                                            style={{ background: 'linear-gradient(135deg, #E8D1C2 0%, #D3A891 100%)' }}>
-                                            <img src={ELLIOTT_AVATAR_URL} alt="Elliott" width={32} height={32}
-                                                className="w-full h-full object-cover" loading="lazy" />
-                                        </div>
-                                        <div className="text-left flex-1 min-w-0">
-                                            <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Ask Elliott</div>
-                                            <div className="text-xs truncate" style={{ color: colors.textSecondary }}>
-                                                Chat about &ldquo;{searchQuery}&rdquo;
+                                {/* Elliott row — only shown when there's a typed query */}
+                                {showElliott && (
+                                    <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${colors.border}` }}>
+                                        <button
+                                            id={`spotlight-opt-${displayResults.length}`}
+                                            role="option"
+                                            aria-selected={focusedIndex === displayResults.length}
+                                            aria-label={`Ask Elliott about "${searchQuery}"`}
+                                            onMouseDown={(event) => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                openChatFromQuery(searchQuery);
+                                            }}
+                                            onMouseEnter={() => setFocusedIndex(displayResults.length)}
+                                            onMouseLeave={() => setFocusedIndex(null)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
+                                            style={{ backgroundColor: focusedIndex === displayResults.length ? focusedBg : 'transparent' }}
+                                        >
+                                            <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden"
+                                                style={{ background: 'linear-gradient(135deg, #E8D1C2 0%, #D3A891 100%)' }}>
+                                                <img src={ELLIOTT_AVATAR_URL} alt="Elliott" width={32} height={32}
+                                                    className="w-full h-full object-cover" loading="lazy" />
                                             </div>
-                                        </div>
-                                        <div className="text-xs font-semibold tracking-wide px-2 py-0.5 rounded-full flex-shrink-0"
-                                            style={{ backgroundColor: `${colors.accent}0F`, color: colors.textSecondary }}>
-                                            Elliott Bot
-                                        </div>
-                                    </button>
-                                </div>
+                                            <div className="text-left flex-1 min-w-0">
+                                                <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>Ask Elliott</div>
+                                                <div className="text-xs truncate" style={{ color: colors.textSecondary }}>
+                                                    Chat about &ldquo;{searchQuery}&rdquo;
+                                                </div>
+                                            </div>
+                                            <div className="text-xs font-semibold tracking-wide px-2 py-0.5 rounded-full flex-shrink-0"
+                                                style={{ backgroundColor: `${colors.accent}0F`, color: colors.textSecondary }}>
+                                                Elliott Bot
+                                            </div>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </GlassCard>
                     </div>
                 )}
             </div>
-
         </div>
     );
 };

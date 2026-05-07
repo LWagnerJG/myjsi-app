@@ -83,6 +83,7 @@ export const HomeScreen = React.memo(({
 
     const [homeFeatureMode, setHomeFeatureMode] = usePersistentState('pref.homeFeatureMode.primary', 'activity');
     const [secondaryFeatureMode, setSecondaryFeatureMode] = usePersistentState('pref.homeFeatureMode.secondary', 'community');
+    const [recentSpotlightItems, setRecentSpotlightItems] = usePersistentState('home.spotlightRecents', []);
     const [leadTimeFavorites, setLeadTimeFavorites] = useState([]);
     const prevHomeResetKeyRef = useRef(homeResetKey);
 
@@ -328,6 +329,13 @@ export const HomeScreen = React.memo(({
         setSearchQuery('');
     }, [onNavigate, openChatFromQuery, spotlightResults]);
 
+    const recordRecentSpotlightItem = useCallback((item) => {
+        setRecentSpotlightItems(prev => {
+            const filtered = (prev || []).filter(r => r.route !== item.route);
+            return [item, ...filtered].slice(0, 5);
+        });
+    }, [setRecentSpotlightItems]);
+
     const handleRfpFileDrop = useCallback((file) => {
         setRfpDropFile(file);
         setShowRfpDropModal(true);
@@ -491,6 +499,8 @@ export const HomeScreen = React.memo(({
                     openChatFromQuery={openChatFromQuery}
                     isDark={isDark}
                     onRfpFileDrop={handleRfpFileDrop}
+                    recentItems={recentSpotlightItems}
+                    onRecordRecent={recordRecentSpotlightItem}
                 />
 
                 {/* App grid */}
