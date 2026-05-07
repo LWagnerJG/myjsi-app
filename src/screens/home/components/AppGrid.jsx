@@ -11,7 +11,7 @@ import {
     rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableAppTile } from './SortableAppTile.jsx';
-import { getAppBadge, APP_ICON_COLORS, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
+import { getAppBadge, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
 
 export const AppGrid = ({
     isEditMode,
@@ -39,7 +39,7 @@ export const AppGrid = ({
     if (isEditMode) {
         const editGridApps = currentApps.filter(a => a.route !== 'resources');
         const editResourcesApp = currentApps.find(a => a.route === 'resources');
-        const editResourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
+        const editResourcesIconColor = colors.accent;
         // Resources is excluded from dragging — only movable apps are sortable
         const sortableIds = safeHomeApps.filter(r => r !== 'resources');
 
@@ -111,9 +111,9 @@ export const AppGrid = ({
                             >
                                 <div
                                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
-                                    style={{ backgroundColor: `${(APP_ICON_COLORS[activeApp.route] || colors.accent)}10` }}
+                                    style={{ backgroundColor: `${colors.accent}10` }}
                                 >
-                                    <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: APP_ICON_COLORS[activeApp.route] || colors.accent }} />
+                                    <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.accent }} />
                                 </div>
                                 <span
                                     className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
@@ -132,7 +132,7 @@ export const AppGrid = ({
 
     const gridApps = currentApps.filter(a => a.route !== 'resources');
     const resourcesApp = currentApps.find(a => a.route === 'resources');
-    const resourcesIconColor = APP_ICON_COLORS['resources'] || colors.accent;
+    const resourcesIconColor = colors.accent;
 
     // Customize goes in the grid when it fills a row cleanly, or when total
     // would be exactly 4 (so we get a clean 2×2 instead of 3-wide with orphan).
@@ -149,7 +149,7 @@ export const AppGrid = ({
             <div className={`grid gap-2.5 sm:gap-3 ${gridColsClass}`}>
                 {gridApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
-                    const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
+                    const iconColor = colors.accent;
                     return (
                         <button
                             key={app.route}
