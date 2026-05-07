@@ -87,3 +87,27 @@ export const formatShortDate = (dateStr) =>
 export const formatLongDate = (dateStr) =>
   dateStr ? (formatDate(dateStr, { month: 'short', day: 'numeric', year: 'numeric' }) || '—') : '—';
 
+/**
+ * Format a date as a relative time string ("3d ago", "2w ago", "just now").
+ * Falls back to a short absolute date once older than 30 days.
+ * @param {string|Date} dateStr
+ * @returns {string}
+ */
+export const formatRelativeTime = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return 'just now';
+  const mins = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(diffMs / 86400000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return formatShortDate(dateStr);
+};
+
