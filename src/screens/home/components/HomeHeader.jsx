@@ -5,17 +5,11 @@ import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../../components/common/QuickActionDropdown.jsx';
 import { getHomeChromePillStyles } from '../../../design-system/homeChrome.js';
 import { formatCurrencyCompact } from '../../../utils/format.js';
+import { STATUS_COLORS } from '../../orders/data.js';
 
 const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
 const DROPDOWN_ID = 'spotlight-listbox';
 
-const STATUS_DOT_COLOR = {
-    'Order Entry': '#C4956A',
-    'Acknowledged': '#8B8685',
-    'In Production': '#5B7B8C',
-    'Shipping': '#5B7B8C',
-    'Delivered': '#4A7C59',
-};
 
 const TYPE_LABEL = { order: 'Order', project: 'Project', product: 'Product' };
 
@@ -33,7 +27,6 @@ export const HomeHeader = ({
     openChatFromQuery,
     isDark,
     onRfpFileDrop,
-    homeStats,
 }) => {
     const [fileDragOver, setFileDragOver] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(null);
@@ -118,7 +111,7 @@ export const HomeHeader = ({
                         {formatCurrencyCompact(item.net)}
                     </span>
                     <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: STATUS_DOT_COLOR[item.status] || colors.textSecondary }} />
+                        style={{ backgroundColor: STATUS_COLORS[item.status] || colors.textSecondary }} />
                 </div>
             );
         }
@@ -265,37 +258,6 @@ export const HomeHeader = ({
                 )}
             </div>
 
-            {/* Live stats strip */}
-            {homeStats && (
-                <div className="flex items-center gap-1.5 flex-wrap px-0.5">
-                    {homeStats.unacked > 0 && (
-                        <button
-                            onClick={() => onNavigate?.('orders')}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 hover:opacity-80"
-                            style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.12)' : 'rgba(196,149,106,0.12)', color: '#C4956A' }}
-                        >
-                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#C4956A' }} />
-                            {homeStats.unacked} need ACK
-                        </button>
-                    )}
-                    <button
-                        onClick={() => onNavigate?.('sales')}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 hover:opacity-80"
-                        style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.14)' : 'rgba(74,124,89,0.10)', color: '#4A7C59' }}
-                    >
-                        {formatCurrencyCompact(homeStats.ytd)} YTD
-                    </button>
-                    {homeStats.active > 0 && (
-                        <button
-                            onClick={() => onNavigate?.('projects')}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 hover:opacity-80"
-                            style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.14)' : 'rgba(91,123,140,0.10)', color: '#5B7B8C' }}
-                        >
-                            {homeStats.active} active projects
-                        </button>
-                    )}
-                </div>
-            )}
         </div>
     );
 };
