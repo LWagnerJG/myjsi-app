@@ -415,13 +415,6 @@ export const HomeScreen = React.memo(({
 
     const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
-    const homeStats = useMemo(() => {
-        const unacked = ORDER_DATA.filter(o => o.status === 'Order Entry').length;
-        const ytd = ORDER_DATA.reduce((s, o) => s + (o.net || 0), 0);
-        const active = allOpportunities.filter(o => o.stage !== 'Won' && o.stage !== 'Lost').length;
-        return { unacked, ytd, active };
-    }, [allOpportunities]);
-
     const replacementRequests = useMemo(() => REPLACEMENT_REQUESTS_DATA, []);
 
     // Always 3 cols on mobile; sm+ picks column count to avoid orphaned tiles
@@ -495,8 +488,6 @@ export const HomeScreen = React.memo(({
                     openChatFromQuery={openChatFromQuery}
                     isDark={isDark}
                     onRfpFileDrop={handleRfpFileDrop}
-                    homeStats={homeStats}
-                    formatCurrencyCompact={formatCurrencyCompact}
                 />
 
                 {/* App grid */}

@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ChevronRight, Package, DollarSign, Calendar, Zap, Megaphone, Clock, Users } from 'lucide-react';
 import { ANNOUNCEMENTS } from '../../community/data.js';
 import { MARKETPLACE_PRODUCTS, INITIAL_BALANCE, formatElliottBucks } from '../../marketplace/data.js';
 import { PRODUCTS_CATEGORIES_DATA, PRODUCT_DATA } from '../../products/data.js';
 import { getCommunityAuthorSafe, getCommunityTextSafe } from '../utils/homeUtils.js';
 import { smartTitleCase, formatRelativeTime } from '../../../utils/format.js';
+import { STATUS_COLORS } from '../../orders/data.js';
 
 // Shared row style — consistent across all content modes
 const ROW = 'w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl transition-colors';
 
-export const HomeFeatureContent = ({
+export const HomeFeatureContent = memo(({
     mode,
     colors,
     leadTimeFavoritesData,
@@ -247,18 +248,10 @@ export const HomeFeatureContent = ({
         return <EmptyState icon={Package} colors={colors} isDark={isDark} title="No recent orders" subtitle="Orders will appear here as they come in" />;
     }
 
-    const STATUS_COLOR = {
-        'Order Entry': '#6B7280',
-        'Acknowledged': '#8B8685',
-        'In Production': '#5B7B8C',
-        'Shipping': '#5B7B8C',
-        'Delivered': '#4A7C59',
-    };
-
     return (
         <div className="space-y-0.5 pt-1">
             {recentOrders.map((order, i) => {
-                const statusColor = STATUS_COLOR[order.status] || colors.textSecondary;
+                const statusColor = STATUS_COLORS[order.status] || colors.textSecondary;
                 return (
                     <button
                         key={order.orderNumber}
@@ -285,7 +278,7 @@ export const HomeFeatureContent = ({
             })}
         </div>
     );
-};
+});
 
 const EmptyState = ({ icon: Icon, colors, isDark, title, subtitle, children }) => (
     <div className="flex flex-col items-center justify-center py-6 text-center gap-1.5">
