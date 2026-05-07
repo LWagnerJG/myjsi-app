@@ -236,6 +236,10 @@ export const HomeScreen = React.memo(({
         );
     }, [safeHomeApps]);
 
+    const allOpportunities = useMemo(() => {
+        return opportunities.length > 0 ? opportunities : INITIAL_OPPORTUNITIES;
+    }, [opportunities]);
+
     // useDeferredValue so keystrokes feel instant even on slow devices
     const deferredSearchQuery = useDeferredValue(searchQuery);
     const spotlightResults = useMemo(() => {
@@ -399,13 +403,6 @@ export const HomeScreen = React.memo(({
         return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
     }, []);
 
-    const homeStats = useMemo(() => {
-        const unacked = ORDER_DATA.filter(o => o.status === 'Order Entry').length;
-        const ytd = ORDER_DATA.reduce((s, o) => s + (o.net || 0), 0);
-        const active = allOpportunities.filter(o => o.stage !== 'Won' && o.stage !== 'Lost').length;
-        return { unacked, ytd, active };
-    }, [allOpportunities]);
-
     const FEATURE_ROUTES = useMemo(() => ({
         community: 'community',
         'lead-times': 'resources/lead-times',
@@ -419,9 +416,12 @@ export const HomeScreen = React.memo(({
 
     const samplesCartCount = useMemo(() => Object.values(cart || {}).reduce((sum, qty) => sum + qty, 0), [cart]);
 
-    const allOpportunities = useMemo(() => {
-        return opportunities.length > 0 ? opportunities : INITIAL_OPPORTUNITIES;
-    }, [opportunities]);
+    const homeStats = useMemo(() => {
+        const unacked = ORDER_DATA.filter(o => o.status === 'Order Entry').length;
+        const ytd = ORDER_DATA.reduce((s, o) => s + (o.net || 0), 0);
+        const active = allOpportunities.filter(o => o.stage !== 'Won' && o.stage !== 'Lost').length;
+        return { unacked, ytd, active };
+    }, [allOpportunities]);
 
     const replacementRequests = useMemo(() => REPLACEMENT_REQUESTS_DATA, []);
 
