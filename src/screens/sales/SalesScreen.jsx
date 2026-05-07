@@ -25,6 +25,7 @@ const sortQuarterEntries = (entries) =>
 export const SalesScreen = ({ theme, onNavigate }) => {
   const [chartDataType, setChartDataType] = useState('bookings');
   const [showTableView, setShowTableView] = useState(false);
+  const [selectedVertical, setSelectedVertical] = useState(null);
   const isDark = isDarkTheme(theme);
 
   const colors = useMemo(() => ({
@@ -50,7 +51,15 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     return Math.min(100, goalPct);
   }, [chartDataType, totalBookings, totalSales]);
 
-  const recentOrders = useMemo(() => [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5), []);
+  const allOrdersSorted = useMemo(() => [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)), []);
+  const recentOrders = useMemo(() => {
+    if (!selectedVertical) return allOrdersSorted.slice(0, 5);
+    return allOrdersSorted.filter(o => o.vertical === selectedVertical);
+  }, [selectedVertical, allOrdersSorted]);
+  const verticalColor = useMemo(() => {
+    if (!selectedVertical) return null;
+    return SALES_VERTICALS_DATA.find(v => v.label === selectedVertical)?.color || null;
+  }, [selectedVertical]);
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const chartMax = useMemo(() => Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales)), [chartDataType]);
 
@@ -328,35 +337,57 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
         {/* ── Data sections ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
-          {/* Recent Activity */}
-          <button onClick={() => onNavigate('orders')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-5" variant="elevated">
-              <TileHeader title="Recent Activity" action />
-              <div className="divide-y" style={flatRowsDivider}>
-                {recentOrders.map((order) => {
-                  return (
-                    <div key={order.orderNumber} className={flatRowCls}>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold truncate">{formatCompanyName(order.company)}</p>
-                        <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
-                      </div>
-                      <div className="text-right shrink-0 ml-2">
-                        <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
-                        <p className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>
-                          {order.status}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* Recent Activity — filters when a vertical is selected */}
+          <GlassCard theme={theme} className="p-5" variant="elevated"
+            style={verticalColor ? { borderLeft: `3px solid ${verticalColor}` } : {}}>
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>
+                  {selectedVertical ? `${selectedVertical} Orders` : 'Recent Activity'}
+                </h3>
+                {selectedVertical && (
+                  <span className="text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: `${verticalColor}18`, color: verticalColor }}>
+                    {recentOrders.length}
+                  </span>
+                )}
               </div>
-            </GlassCard>
-          </button>
+              <button onClick={() => onNavigate('orders')}
+                className="flex items-center gap-1 shrink-0 hover:opacity-70 transition-opacity"
+                style={{ color: colors.textSecondary }}>
+                <span className="text-xs font-medium">All orders</span>
+                <ChevronRight className="w-3.5 h-3.5 opacity-45" />
+              </button>
+            </div>
+            <div className="divide-y" style={flatRowsDivider}>
+              {recentOrders.length > 0 ? recentOrders.map((order) => (
+                <div key={order.orderNumber} className={flatRowCls}>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">{formatCompanyName(order.company)}</p>
+                    <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
+                    <p className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>{order.status}</p>
+                  </div>
+                </div>
+              )) : (
+                <p className="text-sm py-4 text-center" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                  No orders tagged to {selectedVertical}
+                </p>
+              )}
+            </div>
+          </GlassCard>
 
           {/* Invoiced by Vertical */}
           <GlassCard theme={theme} className="p-5" variant="elevated">
             <TileHeader title="Invoiced by Vertical" />
-            <SalesByVerticalBreakdown theme={theme} data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))} />
+            <SalesByVerticalBreakdown
+              theme={theme}
+              data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))}
+              selectedVertical={selectedVertical}
+              onSelectVertical={setSelectedVertical}
+            />
           </GlassCard>
         </div>
 
