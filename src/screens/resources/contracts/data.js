@@ -183,7 +183,7 @@ export const CONTRACTS_DATA = {
                 repCommission: '5%',
             },
             {
-                label: 'Wellington & Walden only',
+                label: 'Wellington & Walden tier',
                 discount: '61.6%',
                 dealerCommission: '10%',
                 repCommission: '5%',

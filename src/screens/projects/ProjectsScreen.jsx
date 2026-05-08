@@ -760,6 +760,8 @@ export const ProjectsScreen = forwardRef(({
     return () => window.cancelAnimationFrame(frame);
   }, [projectsTab, projectsTabOptions, projectsToggleMode]);
 
+  const allProjects = useMemo(() => getAllProjectsWithMeta(customers), [customers]);
+
   if (selectedCustomer) return (
     <CustomerMicrositeScreen
       customer={selectedCustomer}
@@ -782,8 +784,6 @@ export const ProjectsScreen = forwardRef(({
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
     />
   );
-
-  const allProjects = getAllProjectsWithMeta();
 
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>

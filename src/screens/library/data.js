@@ -1,6 +1,9 @@
+import { CLOUDINARY_LIBRARY_ASSETS } from '../../data/cloudinary/installations.js';
+
 // Mock Asset data for Library feature (projects + uploads)
 // Shape matches spec Asset interface
 export const INITIAL_ASSETS = [
+  ...CLOUDINARY_LIBRARY_ASSETS,
   {
     id: 'asset-1',
     title: 'Vision Casegoods Install',

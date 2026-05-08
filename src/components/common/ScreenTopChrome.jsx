@@ -45,5 +45,3 @@ export const ScreenTopChrome = React.memo(({
 });
 
 ScreenTopChrome.displayName = 'ScreenTopChrome';
-
-export default ScreenTopChrome;

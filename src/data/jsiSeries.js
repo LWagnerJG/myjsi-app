@@ -21,7 +21,6 @@ export const JSI_SERIES = [
   'Brogan',
   'Bryn',
   'Caav',
-  'Class Act',
   'Collective Motion',
   'Connect',
   'Copilot',

@@ -39,7 +39,6 @@ const SERIES_THUMBNAILS = Object.freeze({
     'brogan': '/category-images/casegood-images/api_brogan.jpg',
     'bryn': '/category-images/guest-images/jsi_bryn_comp_00023.jpg',
     'caav': '/category-images/lounge-images/api_caav.jpg',
-    'class act': `${CLD}/jsi_classact_enviro_00001`,
     'collective motion': '/category-images/guest-images/jsi_collectivemotion_comp_00014.jpg',
     'connect': '/category-images/training-images/api_connect.jpg',
     'copilot': `${CLD}/jsi_copilot_enviro_00002_zrnojs`,

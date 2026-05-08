@@ -22,18 +22,14 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
     const [tick, setTick] = useState(0);
     const [prevText, setPrevText] = useState(null);
     const phrases = useMemo(() => [
-        'Search or ask Elliott...',
-        'What are lead times for Motif?',
-        'Compare Jasper vs Motif specs',
-        'Help me start a sample order',
-        'Show commission rates',
-        'Write an email to my customer',
-        'What finishes pair with Slate?',
-        'Draft an install checklist',
-        'Find dealers near Indianapolis',
-        'Summarize this contract',
-        'Ask Elliott about finishes...',
+        'Search apps or ask Elliott...',
+        'Lead times for Motif',
+        'Compare Jasper and Motif specs',
+        'Start a sample order',
+        'Check commission rates',
+        'Draft a customer email',
     ], []);
+    const HINT_OPACITY = 0.62;
     const DISPLAY_MS = 8200;
     const FADE_MS = 1500;
     const FADE_IN_DELAY = 360;
@@ -65,8 +61,8 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
             autoComplete="off"
         >
             <style>{`
-        @keyframes siFadeIn { from { opacity: 0 } to { opacity: .52 } }
-        @keyframes siFadeOut { from { opacity: .52 } to { opacity: 0 } }
+                @keyframes siFadeIn { from { opacity: 0 } to { opacity: .62 } }
+                @keyframes siFadeOut { from { opacity: .62 } to { opacity: 0 } }
       `}</style>
 
             <div className="flex items-center justify-center mr-3" style={{ width: 20, height: 20 }}>
@@ -111,7 +107,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                                 style={{
                                     zIndex: 0,
                                     color: theme.colors.textSecondary,
-                                    opacity: 0.52,
+                                    opacity: HINT_OPACITY,
                                     animation: `siFadeOut ${FADE_MS}ms ease both`,
                                     fontWeight: 400,
                                 }}
@@ -125,7 +121,7 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
                             style={{
                                 zIndex: 1,
                                 color: theme.colors.textSecondary,
-                                opacity: 0.52,
+                                opacity: HINT_OPACITY,
                                 animation: isInitialPhrase ? 'none' : `siFadeIn ${FADE_MS}ms ${FADE_IN_DELAY}ms ease both`,
                                 fontWeight: 400,
                             }}

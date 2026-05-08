@@ -53,5 +53,3 @@ export const TabContent = ({ activeKey, tabIndex = 0, className = '', style, chi
     </AnimatePresence>
   );
 };
-
-export default TabContent;

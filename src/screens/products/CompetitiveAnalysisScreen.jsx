@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { Check, ChevronDown, Package, Plus } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
@@ -6,6 +7,8 @@ import { Modal } from '../../components/common/Modal.jsx';
 import { PrimaryButton, SecondaryButton } from '../../components/common/JSIButtons.jsx';
 import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { STANDARD_DISCOUNT_OPTIONS } from '../../constants/discounts.js';
+import { isDarkTheme } from '../../design-system/tokens.js';
+import { persistCompetitiveDiscountRecord, submitCompetitiveDiscountRecord } from '../../utils/competitiveDiscountBank.js';
 
 const DEFAULT_DISCOUNT = '50/20 (60.00%)';
 
@@ -27,25 +30,99 @@ const parseNetMultiplier = (discountOption) => {
 const applyDiscount = (list, discountOption) =>
     Math.round(list * parseNetMultiplier(discountOption));
 
+const calculateCompetitiveDelta = (baselineNet, comparisonNet) => {
+    if (baselineNet <= 0) return 0;
+    return Math.round(((comparisonNet - baselineNet) / baselineNet) * 100);
+};
+
 const shortDiscount = (opt) => opt.replace(/\s*\(.*\)/, '');
 
 const formatCurrency = (value) => `$${value.toLocaleString()}`;
 
-const formatNetRate = (discountOption) => {
-    const netPercent = parseNetMultiplier(discountOption) * 100;
-    const rounded = Math.round(netPercent * 100) / 100;
-    return `${rounded.toFixed(Number.isInteger(rounded) ? 0 : 2)}% net`;
+const formatPercentValue = (value) => {
+    const rounded = Math.round(value * 100) / 100;
+    return `${rounded.toFixed(Number.isInteger(rounded) ? 0 : 2)}%`;
 };
 
-const PriceMetaLine = ({ discount, listPrice, theme, accent = false }) => (
-    <div className="mt-2 inline-flex flex-wrap items-center gap-1.5 text-[0.75rem] leading-none"
-        style={{ color: theme.colors.textSecondary, opacity: accent ? 0.88 : 0.8 }}>
-        <span className="inline-flex items-center gap-1 font-semibold" style={{ color: theme.colors.textPrimary }}>
-            {shortDiscount(discount)}
-            <ChevronDown className="h-3 w-3" style={{ color: theme.colors.textSecondary }} />
-        </span>
-        <span className="opacity-35">•</span>
+const getOffListPercent = (discountOption) => (1 - parseNetMultiplier(discountOption)) * 100;
+
+const normalizeDiscountSegment = (value) => {
+    const rounded = Math.round(value * 100) / 100;
+    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/\.0+$|0+$/, '').replace(/\.$/, '');
+};
+
+const buildDiscountOptionFromSegments = (segments) => {
+    const chain = segments.map(normalizeDiscountSegment).join('/');
+    const netMultiplier = segments.reduce((net, segment) => net * (1 - segment / 100), 1);
+    const offListPercent = (1 - netMultiplier) * 100;
+    return `${chain} (${offListPercent.toFixed(2)}%)`;
+};
+
+const parseCustomDiscountInput = (rawValue) => {
+    const value = String(rawValue || '').trim();
+    if (!value) {
+        return { error: 'Enter a discount like 50/20/5' };
+    }
+
+    const normalized = value.replace(/\s+/g, '').replace(/%/g, '');
+    if (!/^\d+(\.\d+)?(\/\d+(\.\d+)?)*$/.test(normalized)) {
+        return { error: 'Use numbers separated by /' };
+    }
+
+    const segments = normalized.split('/').map(Number);
+    if (segments.some((segment) => !Number.isFinite(segment) || segment <= 0 || segment >= 100)) {
+        return { error: 'Each number must be between 0 and 100' };
+    }
+
+    const option = buildDiscountOptionFromSegments(segments);
+    return {
+        option,
+        normalizedInput: segments.map(normalizeDiscountSegment).join('/'),
+        offListPercent: getOffListPercent(option),
+        netPercent: parseNetMultiplier(option) * 100,
+    };
+};
+
+const formatNetRate = (discountOption) => {
+    const netPercent = parseNetMultiplier(discountOption) * 100;
+    return `${formatPercentValue(netPercent)} net`;
+};
+
+const DiscountPill = ({ discount, theme, dark, accent = false, open = false, onClick }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.66rem] font-semibold transition-all active:scale-[0.97]"
+        style={{
+            backgroundColor: accent
+                ? (dark ? 'rgba(255,255,255,0.14)' : `${theme.colors.accent}12`)
+                : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)'),
+            color: theme.colors.textPrimary,
+        }}
+    >
+        <span style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>Discount</span>
+        <span className="tabular-nums">{shortDiscount(discount)}</span>
+        <ChevronDown
+            className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
+            style={{ color: theme.colors.textSecondary, opacity: 0.82 }}
+        />
+    </button>
+);
+
+const PriceMetaLine = ({ discount, listPrice, theme, dark, accent = false, open = false, onDiscountClick }) => (
+    <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[0.75rem] leading-none"
+        style={{ color: theme.colors.textSecondary, opacity: accent ? 0.9 : 0.88 }}>
         <span className="tabular-nums">{formatCurrency(listPrice)} list</span>
+        <DiscountPill
+            discount={discount}
+            theme={theme}
+            dark={dark}
+            accent={accent}
+            open={open}
+            onClick={onDiscountClick}
+        />
     </div>
 );
 
@@ -74,18 +151,224 @@ const AdvantageChip = ({ compPremium, theme }) => {
     );
 };
 
-const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
+const CompactDiscountMenu = ({ theme, anchorEl, open, value, onSelect, onClose }) => {
+    const dark = isDarkTheme(theme);
+    const menuRef = useRef(null);
+    const [position, setPosition] = useState(null);
+    const [dropUp, setDropUp] = useState(false);
+    const [customDiscount, setCustomDiscount] = useState('');
+    const [customError, setCustomError] = useState('');
+
+    useEffect(() => {
+        if (!open) return;
+        setCustomDiscount(STANDARD_DISCOUNT_OPTIONS.includes(value) ? '' : shortDiscount(value));
+        setCustomError('');
+    }, [open, value]);
+
+    const recalcPosition = useCallback(() => {
+        if (!anchorEl) return;
+
+        const rect = anchorEl.getBoundingClientRect();
+        const estimatedHeight = 344;
+        const menuWidth = Math.max(Math.min(rect.width + 52, 280), 236);
+        const viewportPad = 12;
+        const chrome = document.querySelector('[data-bottom-chrome]');
+        const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
+        const openAbove = window.innerHeight - rect.bottom - bottomOccupied < estimatedHeight && rect.top > estimatedHeight;
+
+        setDropUp(openAbove);
+        setPosition({
+            top: openAbove ? rect.top - 8 : rect.bottom + 8,
+            left: Math.min(Math.max(viewportPad, rect.left), window.innerWidth - menuWidth - viewportPad),
+            width: menuWidth,
+        });
+    }, [anchorEl]);
+
+    useEffect(() => {
+        if (!open || !anchorEl) return;
+
+        recalcPosition();
+
+        const handleOutside = (event) => {
+            if (anchorEl?.contains(event.target)) return;
+            if (menuRef.current?.contains(event.target)) return;
+            onClose?.();
+        };
+
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') onClose?.();
+        };
+
+        document.addEventListener('mousedown', handleOutside);
+        document.addEventListener('touchstart', handleOutside, { passive: true });
+        document.addEventListener('keydown', handleEscape);
+        window.addEventListener('resize', recalcPosition);
+        window.addEventListener('scroll', recalcPosition, true);
+
+        return () => {
+            document.removeEventListener('mousedown', handleOutside);
+            document.removeEventListener('touchstart', handleOutside);
+            document.removeEventListener('keydown', handleEscape);
+            window.removeEventListener('resize', recalcPosition);
+            window.removeEventListener('scroll', recalcPosition, true);
+        };
+    }, [open, anchorEl, onClose, recalcPosition]);
+
+    if (!open || !position) return null;
+
+    const customPreview = customDiscount.trim() ? parseCustomDiscountInput(customDiscount) : null;
+    const canApplyCustom = !!customPreview && !customPreview.error;
+
+    const handleCustomSubmit = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const parsed = parseCustomDiscountInput(customDiscount);
+        if (parsed.error) {
+            setCustomError(parsed.error);
+            return;
+        }
+
+        onSelect(parsed.option, {
+            source: 'custom',
+            rawInput: parsed.normalizedInput,
+            offListPercent: parsed.offListPercent,
+            netPercent: parsed.netPercent,
+        });
+    };
+
+    return createPortal(
+        <div
+            ref={menuRef}
+            style={{
+                position: 'fixed',
+                top: position.top,
+                left: position.left,
+                width: position.width,
+                zIndex: 1200,
+                transform: dropUp ? 'translateY(-100%)' : 'none',
+            }}
+        >
+            <div
+                className="overflow-hidden rounded-[20px]"
+                style={{
+                    backgroundColor: dark ? 'rgba(34,34,34,0.96)' : 'rgba(252,250,248,0.98)',
+                    boxShadow: dark ? '0 18px 44px rgba(0,0,0,0.42)' : '0 14px 34px rgba(53,53,53,0.12)',
+                    backdropFilter: 'blur(18px)',
+                    WebkitBackdropFilter: 'blur(18px)',
+                }}
+            >
+                <div className="max-h-[224px] overflow-y-auto scrollbar-hide py-1.5" role="listbox">
+                    {STANDARD_DISCOUNT_OPTIONS.map((option) => {
+                        const isSelected = option === value;
+
+                        return (
+                            <button
+                                key={option}
+                                type="button"
+                                onClick={() => onSelect(option, { source: 'standard' })}
+                                className="w-full px-3.5 py-2.5 text-left transition-colors active:scale-[0.99]"
+                                style={{
+                                    backgroundColor: isSelected
+                                        ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.06)')
+                                        : 'transparent',
+                                }}
+                            >
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-[0.875rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                            {shortDiscount(option)}
+                                        </p>
+                                        <p className="mt-0.5 text-[0.7rem]" style={{ color: theme.colors.textSecondary }}>
+                                            {formatNetRate(option)}
+                                        </p>
+                                    </div>
+                                    {isSelected ? <Check className="h-4 w-4 flex-shrink-0" style={{ color: theme.colors.accent }} /> : null}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div
+                    className="border-t px-3 py-3"
+                    style={{ borderColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.08)' }}
+                >
+                    <p
+                        className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                        style={{ color: theme.colors.textSecondary, opacity: 0.74 }}
+                    >
+                        Custom discount
+                    </p>
+                    <form onSubmit={handleCustomSubmit} className="mt-2.5 space-y-2">
+                        <input
+                            type="text"
+                            inputMode="decimal"
+                            value={customDiscount}
+                            onChange={(event) => {
+                                setCustomDiscount(event.target.value);
+                                if (customError) setCustomError('');
+                            }}
+                            placeholder="50/20/5"
+                            aria-label="Custom discount"
+                            className="w-full rounded-[14px] px-3 py-2 text-[0.8rem] font-medium outline-none"
+                            style={{
+                                backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.05)',
+                                color: theme.colors.textPrimary,
+                            }}
+                        />
+                        <div className="flex items-center justify-between gap-2">
+                            <p
+                                className="min-w-0 text-[0.67rem] leading-snug"
+                                style={{
+                                    color: customError
+                                        ? '#B85C5C'
+                                        : theme.colors.textSecondary,
+                                    opacity: customError ? 1 : 0.84,
+                                }}
+                            >
+                                {customError
+                                    ? customError
+                                    : canApplyCustom
+                                        ? `${formatPercentValue(customPreview.offListPercent)} off list • ${formatPercentValue(customPreview.netPercent)} net`
+                                        : 'Use slash-separated discounts like 50/20/5'}
+                            </p>
+                            <button
+                                type="submit"
+                                disabled={!canApplyCustom}
+                                className="flex-shrink-0 rounded-full px-3 py-1.5 text-[0.6875rem] font-semibold transition-opacity disabled:cursor-not-allowed"
+                                style={{
+                                    backgroundColor: dark ? 'rgba(255,255,255,0.14)' : `${theme.colors.accent}14`,
+                                    color: theme.colors.textPrimary,
+                                    opacity: canApplyCustom ? 1 : 0.48,
+                                }}
+                            >
+                                Apply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+const VersusList = ({ jsiProduct, competitors = [], theme, categoryId, categoryName }) => {
+    const dark = isDarkTheme(theme);
     const [jsiDiscount, setJsiDiscount] = useState(DEFAULT_DISCOUNT);
     const [compDiscounts, setCompDiscounts] = useState(() =>
         Object.fromEntries(competitors.map(c => [c.id, DEFAULT_DISCOUNT]))
     );
     const [discountTarget, setDiscountTarget] = useState(null);
+    const discountAnchorRef = useRef(null);
 
     const compKey = competitors.map(c => c.id).join(',');
     useEffect(() => {
         setCompDiscounts(Object.fromEntries(competitors.map(c => [c.id, DEFAULT_DISCOUNT])));
         setJsiDiscount(DEFAULT_DISCOUNT);
         setDiscountTarget(null);
+        discountAnchorRef.current = null;
     }, [compKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const jsiList = jsiProduct.price || 0;
@@ -93,104 +376,147 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
     const activeDiscountValue = discountTarget === 'jsi'
         ? jsiDiscount
         : (discountTarget ? (compDiscounts[discountTarget] ?? DEFAULT_DISCOUNT) : DEFAULT_DISCOUNT);
-    const activeDiscountName = discountTarget === 'jsi'
-        ? jsiProduct.name
-        : competitors.find((competitor) => competitor.id === discountTarget)?.name;
 
-    const handleDiscountSelect = (nextValue) => {
-        if (discountTarget === 'jsi') {
+    const handleDiscountSelect = (nextValue, meta = { source: 'standard' }) => {
+        const selectedTarget = discountTarget;
+
+        if (selectedTarget === 'jsi') {
             setJsiDiscount(nextValue);
-        } else if (discountTarget) {
-            setCompDiscounts((prev) => ({ ...prev, [discountTarget]: nextValue }));
+        } else if (selectedTarget) {
+            setCompDiscounts((prev) => ({ ...prev, [selectedTarget]: nextValue }));
         }
+
+        if (meta.source === 'custom' && selectedTarget) {
+            const competitor = competitors.find((item) => item.id === selectedTarget);
+            const targetIsJsi = selectedTarget === 'jsi';
+            const record = persistCompetitiveDiscountRecord({
+                source: 'competitive-analysis',
+                categoryId,
+                categoryName,
+                productId: jsiProduct.id,
+                productName: jsiProduct.name,
+                targetKind: targetIsJsi ? 'jsi' : 'competitor',
+                targetId: targetIsJsi ? jsiProduct.id : (competitor?.id || selectedTarget),
+                targetName: targetIsJsi ? jsiProduct.name : (competitor?.name || selectedTarget),
+                listPrice: targetIsJsi ? jsiList : parseListPrice(competitor?.laminate),
+                customDiscount: nextValue,
+                customDiscountInput: meta.rawInput || shortDiscount(nextValue),
+                offListPercent: Math.round((meta.offListPercent ?? getOffListPercent(nextValue)) * 100) / 100,
+                netPercent: Math.round((meta.netPercent ?? (parseNetMultiplier(nextValue) * 100)) * 100) / 100,
+            });
+
+            void submitCompetitiveDiscountRecord(record);
+        }
+
+        discountAnchorRef.current = null;
         setDiscountTarget(null);
     };
 
+    const closeDiscountMenu = useCallback(() => {
+        discountAnchorRef.current = null;
+        setDiscountTarget(null);
+    }, []);
+
+    const openDiscountMenu = useCallback((target, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        discountAnchorRef.current = event.currentTarget;
+        setDiscountTarget((prev) => prev === target ? null : target);
+    }, []);
+
+    const listSurface = dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.78)';
+    const benchmarkSurface = dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.94)';
+    const benchmarkPillSurface = dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.06)';
+    const rowSeparator = dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.07)';
+
     return (
         <>
-            <GlassCard theme={theme} className="overflow-hidden p-0">
-                <div className="px-5 pt-5 pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                        <h2
-                            className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em]"
-                            style={{ color: theme.colors.textSecondary, opacity: 0.88 }}
-                        >
-                            {title}
-                        </h2>
-                        <span
-                            className="pt-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
-                            style={{ color: theme.colors.textSecondary, opacity: 0.58 }}
-                        >
-                            % Δ on net
-                        </span>
-                    </div>
-                </div>
-
-                <div className="px-4 pb-5 space-y-2.5">
-                    <button
-                        type="button"
-                        onClick={() => setDiscountTarget('jsi')}
-                        className="w-full rounded-[24px] px-4 py-4 text-left transition-all active:scale-[0.99]"
+            <div className="px-1">
+                <div
+                    className="overflow-hidden rounded-[28px]"
+                    style={{ backgroundColor: listSurface }}
+                >
+                    <div
+                        className="px-4 py-4"
                         style={{
-                            background: `linear-gradient(180deg, ${theme.colors.accent}14 0%, ${theme.colors.accent}0D 100%)`,
+                            backgroundColor: benchmarkSurface,
                         }}
-                        aria-label={`Edit discount for ${jsiProduct.name}`}
                     >
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start justify-between gap-4">
                             <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: theme.colors.accent }} />
-                                    <span
-                                        className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
-                                        style={{ color: theme.colors.textSecondary, opacity: 0.78 }}
-                                    >
-                                        JSI benchmark
-                                    </span>
-                                </div>
-                                <p className="mt-2 text-[1rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                <span
+                                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                    style={{
+                                        backgroundColor: benchmarkPillSurface,
+                                        color: theme.colors.textSecondary,
+                                    }}
+                                >
+                                    JSI
+                                </span>
+                                <p className="mt-2 text-[1.08rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
                                     {jsiProduct.name}
                                 </p>
-                                <PriceMetaLine discount={jsiDiscount} listPrice={jsiList} theme={theme} accent />
+                                <PriceMetaLine
+                                    discount={jsiDiscount}
+                                    listPrice={jsiList}
+                                    theme={theme}
+                                    dark={dark}
+                                    open={discountTarget === 'jsi'}
+                                    onDiscountClick={(event) => openDiscountMenu('jsi', event)}
+                                />
                             </div>
 
-                            <div className="flex-shrink-0 text-right">
-                                <p className="text-[1.625rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
-                                    {formatCurrency(jsiNet)}
+                            <div className="min-w-[78px] flex-shrink-0 text-right">
+                                <p
+                                    className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                    style={{ color: theme.colors.textSecondary, opacity: 0.72 }}
+                                >
+                                    JSI net
                                 </p>
-                                <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.74 }}>
-                                    baseline
+                                <p className="mt-1.5 text-[1.75rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                    {formatCurrency(jsiNet)}
                                 </p>
                             </div>
                         </div>
-                    </button>
+                    </div>
 
-                    {competitors.length > 0 ? competitors.map((c) => {
+                    {competitors.length > 0 ? competitors.map((c, index) => {
                         const cList = parseListPrice(c.laminate);
                         const cDiscount = compDiscounts[c.id] ?? DEFAULT_DISCOUNT;
                         const cNet = applyDiscount(cList, cDiscount);
-                        const compPremium = jsiNet > 0 ? Math.round(((cNet - jsiNet) / jsiNet) * 100) : 0;
+                        const compPremium = calculateCompetitiveDelta(jsiNet, cNet);
 
                         return (
-                            <button
+                            <div
                                 key={c.id}
-                                type="button"
-                                onClick={() => setDiscountTarget(c.id)}
-                                className="w-full rounded-[22px] px-4 py-4 text-left transition-all active:scale-[0.99]"
+                                className="px-4 py-4"
                                 style={{
-                                    background: theme.colors.subtle,
+                                    borderTop: `${index === 0 ? 1 : 1}px solid ${rowSeparator}`,
                                 }}
-                                aria-label={`Edit discount for ${c.name}`}
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-[0.9375rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
+                                        <p className="text-[0.98rem] font-semibold leading-tight" style={{ color: theme.colors.textPrimary }}>
                                             {c.name}
                                         </p>
-                                        <PriceMetaLine discount={cDiscount} listPrice={cList} theme={theme} />
+                                        <PriceMetaLine
+                                            discount={cDiscount}
+                                            listPrice={cList}
+                                            theme={theme}
+                                            dark={dark}
+                                            open={discountTarget === c.id}
+                                            onDiscountClick={(event) => openDiscountMenu(c.id, event)}
+                                        />
                                     </div>
 
-                                    <div className="flex-shrink-0 text-right">
-                                        <p className="text-[1.25rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
+                                    <div className="min-w-[72px] flex-shrink-0 text-right">
+                                        <p
+                                            className="text-[0.625rem] font-semibold uppercase tracking-[0.12em]"
+                                            style={{ color: theme.colors.textSecondary, opacity: 0.62 }}
+                                        >
+                                            Net
+                                        </p>
+                                        <p className="mt-1.5 text-[1.25rem] font-bold tabular-nums leading-none" style={{ color: theme.colors.textPrimary }}>
                                             {formatCurrency(cNet)}
                                         </p>
                                         <div className="mt-2 flex justify-end">
@@ -198,7 +524,7 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                                         </div>
                                     </div>
                                 </div>
-                            </button>
+                            </div>
                         );
                     }) : (
                         <p className="px-1 pb-1 text-xs" style={{ color: theme.colors.textSecondary }}>
@@ -206,51 +532,16 @@ const VersusList = ({ jsiProduct, competitors = [], theme, title }) => {
                         </p>
                     )}
                 </div>
-            </GlassCard>
+            </div>
 
-            <Modal
-                show={!!discountTarget}
-                onClose={() => setDiscountTarget(null)}
-                title="Select Discount"
+            <CompactDiscountMenu
                 theme={theme}
-            >
-                <div className="space-y-3">
-                    <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                        {activeDiscountName || 'Series'}
-                    </p>
-
-                    <div className="max-h-[52vh] space-y-2 overflow-y-auto pr-1 scrollbar-hide">
-                        {STANDARD_DISCOUNT_OPTIONS.map((option) => {
-                            const isSelected = option === activeDiscountValue;
-
-                            return (
-                                <button
-                                    key={option}
-                                    type="button"
-                                    onClick={() => handleDiscountSelect(option)}
-                                    className="w-full rounded-[20px] px-4 py-3 text-left transition-all active:scale-[0.99]"
-                                    style={{
-                                        background: isSelected ? `${theme.colors.accent}10` : (theme.colors.surface || '#FFFFFF'),
-                                        border: `1px solid ${isSelected ? `${theme.colors.accent}2E` : theme.colors.border}`,
-                                    }}
-                                >
-                                    <div className="flex items-center justify-between gap-3">
-                                        <div className="min-w-0">
-                                            <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                                {shortDiscount(option)}
-                                            </p>
-                                            <p className="mt-1 text-[0.75rem]" style={{ color: theme.colors.textSecondary }}>
-                                                {formatNetRate(option)}
-                                            </p>
-                                        </div>
-                                        {isSelected ? <Check className="h-4 w-4 flex-shrink-0" style={{ color: theme.colors.accent }} /> : null}
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            </Modal>
+                open={!!discountTarget}
+                anchorEl={discountAnchorRef.current}
+                value={activeDiscountValue}
+                onSelect={handleDiscountSelect}
+                onClose={closeDiscountMenu}
+            />
         </>
     );
 };
@@ -306,7 +597,8 @@ export const CompetitiveAnalysisScreen = ({ categoryId, productId, theme }) => {
                         jsiProduct={product}
                         competitors={perProductList.length ? perProductList : categoryCompetitors}
                         theme={theme}
-                        title={perProductList.length ? 'Versus Competitors' : 'Versus Competitors (Category)'}
+                        categoryId={categoryId}
+                        categoryName={categoryData.name || categoryId}
                     />
                 </div>
             </div>

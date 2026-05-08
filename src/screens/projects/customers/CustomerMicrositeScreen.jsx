@@ -510,19 +510,27 @@ export const CustomerMicrositeScreen = ({ customer, theme, onUpdateCustomer }) =
             {(customer.documents || []).length > 0 && (
               <Sect title="Documents" icon={FileText} theme={theme} noPad>
                 <div className="px-5 pt-1">
-                  {customer.documents.map((d, idx) => (
-                    <React.Fragment key={d.id}>
-                      {idx > 0 && <Divider dark={dark} />}
-                      <div className="flex items-center gap-3 py-3.5">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-                          <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.6 }} />
-                        </div>
-                        <span className="text-[0.8125rem] font-medium flex-1 truncate" style={{ color: c.textPrimary }}>{d.name}</span>
-                        <Download className="w-4 h-4 shrink-0 opacity-30" style={{ color: c.textSecondary }} />
-                      </div>
-                    </React.Fragment>
-                  ))}
+                  {customer.documents.map((d, idx) => {
+                    const RowTag = d.url && d.url !== '#' ? 'a' : 'div';
+                    return (
+                      <React.Fragment key={d.id}>
+                        {idx > 0 && <Divider dark={dark} />}
+                        <RowTag
+                          href={RowTag === 'a' ? d.url : undefined}
+                          target={RowTag === 'a' ? '_blank' : undefined}
+                          rel={RowTag === 'a' ? 'noreferrer' : undefined}
+                          className="flex items-center gap-3 py-3.5"
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
+                            <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.6 }} />
+                          </div>
+                          <span className="text-[0.8125rem] font-medium flex-1 truncate" style={{ color: c.textPrimary }}>{d.name}</span>
+                          <Download className="w-4 h-4 shrink-0 opacity-30" style={{ color: c.textSecondary }} />
+                        </RowTag>
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
                 <div className="pb-2" />
               </Sect>

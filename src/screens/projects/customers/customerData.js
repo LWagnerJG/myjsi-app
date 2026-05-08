@@ -2,7 +2,10 @@
    CUSTOMER MOCK DATA
    ═══════════════════════════════════════════════════════════════ */
 
+import { CLOUDINARY_INSTALLATION_CUSTOMERS } from '../../../data/cloudinary/installations.js';
+
 export const MOCK_CUSTOMERS = [
+  ...CLOUDINARY_INSTALLATION_CUSTOMERS,
   {
     id: 'cust-1',
     type: 'end-user',
@@ -498,8 +501,8 @@ export const getAllInstalls = (customer) =>
     (p.installs || []).map(i => ({ ...i, projectId: p.id, projectName: p.name }))
   );
 
-export const getAllProjectsWithMeta = () =>
-  MOCK_CUSTOMERS.flatMap(c =>
+export const getAllProjectsWithMeta = (customers = MOCK_CUSTOMERS) =>
+  customers.flatMap(c =>
     (c.projects || []).map(p => ({
       ...p,
       customerId: c.id, customerName: c.name, customerImage: c.image, vertical: c.vertical,

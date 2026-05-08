@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Send, Share2 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
-import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { useToast } from '../../components/common/ToastHost.jsx';
 import { cardSurface, fieldTileSurface, isDarkTheme } from '../../design-system/tokens.js';
@@ -146,11 +145,6 @@ export const CustomsScreen = ({ theme }) => {
         CUSTOMS_CATEGORIES.map((category) => [category.id, category.label])
     ), []);
 
-    const categoryOptions = useMemo(() => CUSTOMS_CATEGORIES.map((category) => ({
-        value: category.id,
-        label: category.label,
-    })), []);
-
     const allItems = useMemo(() => CUSTOM_OPPORTUNITIES.map((item) => ({
         ...item,
         priceTier: getPriceTier(item.priceLabel),
@@ -199,23 +193,15 @@ export const CustomsScreen = ({ theme }) => {
             style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}
         >
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <ScreenTopChrome theme={theme} fade={false} contentClassName="pt-3 pb-2">
-                    <div className="space-y-3">
-                        <div className="flex items-end justify-between gap-3">
-                            <div className="min-w-0">
-                                <h1 className="text-[1.5rem] sm:text-[1.75rem] font-semibold tracking-[-0.02em] leading-tight">
-                                    Customs
-                                </h1>
-                                <p className="mt-1 text-[0.8rem] sm:text-[0.84rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>
-                                    Search concepts and tap a card to open the full brief.
-                                </p>
-                            </div>
+                <ScreenTopChrome theme={theme} fade={false} contentClassName="pt-2.5 pb-1.5">
+                    <div className="space-y-2.5">
+                        <div className="flex items-baseline justify-between gap-3">
+                            <h1 className="text-[1.45rem] sm:text-[1.65rem] font-semibold tracking-[-0.02em] leading-tight">
+                                Customs
+                            </h1>
                             <span
-                                className="rounded-full px-2.5 py-1 text-[0.72rem] font-semibold whitespace-nowrap"
-                                style={{
-                                    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-                                    color: theme.colors.textSecondary,
-                                }}
+                                className="text-[0.75rem] font-semibold whitespace-nowrap"
+                                style={{ color: theme.colors.textSecondary, opacity: 0.72 }}
                             >
                                 {items.length} shown
                             </span>
@@ -224,19 +210,39 @@ export const CustomsScreen = ({ theme }) => {
                         <StandardSearchBar
                             value={searchTerm}
                             onChange={setSearchTerm}
-                            placeholder="Search concepts, categories, or keywords..."
+                            placeholder="Search concepts or keywords"
                             theme={theme}
+                            style={{
+                                height: 52,
+                                boxShadow: 'none',
+                                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.04)',
+                                backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.62)',
+                            }}
+                            inputClassName="text-[0.95rem]"
                         />
 
                         <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
-                            <div className="min-w-max pr-1">
-                                <SegmentedToggle
-                                    value={activeCategory}
-                                    onChange={setActiveCategory}
-                                    options={categoryOptions}
-                                    theme={theme}
-                                    size="smDense"
-                                />
+                            <div className="flex min-w-max gap-1.5 pr-1">
+                                {CUSTOMS_CATEGORIES.map((category) => {
+                                    const isActive = activeCategory === category.id;
+                                    return (
+                                        <button
+                                            key={category.id}
+                                            type="button"
+                                            onClick={() => setActiveCategory(category.id)}
+                                            className="px-3.5 py-1.5 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95"
+                                            style={{
+                                                backgroundColor: isActive
+                                                    ? (dark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
+                                                    : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                                                color: isActive ? '#FFFFFF' : theme.colors.textSecondary,
+                                                opacity: isActive ? 1 : 0.9,
+                                            }}
+                                        >
+                                            {category.label}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

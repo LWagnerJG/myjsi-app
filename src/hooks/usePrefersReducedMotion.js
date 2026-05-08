@@ -22,5 +22,3 @@ export const usePrefersReducedMotion = () => {
 
   return prefersReducedMotion;
 };
-
-export default usePrefersReducedMotion;

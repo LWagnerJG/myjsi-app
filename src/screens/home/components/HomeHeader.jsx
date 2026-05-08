@@ -107,7 +107,7 @@ export const HomeHeader = ({
             <div className="flex items-center gap-4">
                 <div className="shrink-0 hidden sm:block min-w-[120px]">
                     <h2 className="text-[1.625rem] font-bold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                    <div className="text-xs font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{todayLabel}</div>
+                    <div className="text-xs font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.58 }}>{todayLabel}</div>
                 </div>
 
                 <GlassCard

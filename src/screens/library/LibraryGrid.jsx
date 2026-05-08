@@ -95,7 +95,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
               {/* Hero image */}
               <div className="w-full bg-black/10 flex items-center justify-center" style={{ maxHeight: '55vw' }}>
                 <img
-                  src={selected.src}
+                  src={selected.detailSrc || selected.src}
                   alt={selected.alt || selected.title}
                   className="w-full object-contain"
                   style={{ maxHeight: '55vw' }}
@@ -145,7 +145,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                     Share
                   </JSIWebButton>
                   <JSIWebButton
-                    onClick={() => { navigator.clipboard.writeText(selected.src); }}
+                    onClick={() => { navigator.clipboard.writeText(selected.sourceUrl || selected.detailSrc || selected.src); }}
                     theme={theme}
                     variant="soft"
                     size="medium"
@@ -155,7 +155,7 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                   </JSIWebButton>
                   <JSIWebButton
                     as="a"
-                    href={selected.src}
+                    href={selected.sourceUrl || selected.detailSrc || selected.src}
                     download
                     target="_blank"
                     rel="noreferrer"

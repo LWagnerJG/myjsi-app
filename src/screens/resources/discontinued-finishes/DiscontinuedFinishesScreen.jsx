@@ -1,28 +1,51 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
-import { ShoppingCart, Palette } from 'lucide-react';
+import { ShoppingCart, Palette, CalendarDays } from 'lucide-react';
 import { EmptyState } from '../../../components/common/EmptyState.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-import { DISCONTINUED_FINISHES } from './data.js';
 import { SAMPLE_PRODUCTS } from '../../samples/data.js';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
+import { getDiscontinuedFinishesSeed, loadDiscontinuedFinishes } from './repository.js';
+
+const MetaChip = ({ icon: Icon, children, theme, isDark }) => (
+    <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.6875rem] font-semibold"
+        style={{
+            color: theme.colors.textSecondary,
+            opacity: 0.82,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.76)',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+        }}
+    >
+        {Icon ? <Icon className="w-3 h-3" /> : null}
+        <span>{children}</span>
+    </span>
+);
 
 export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFinish, setSelectedFinish] = useState(null);
+    const [dataset, setDataset] = useState(() => getDiscontinuedFinishesSeed());
     const isDark = isDarkTheme(theme);
     const text = theme.colors.textPrimary;
     const sub = theme.colors.textSecondary;
     const accent = theme.colors.accent;
 
-    const fmtDate = (d) => {
-        if (!d) return '';
-        const [y, m] = d.split('-');
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return `${months[parseInt(m, 10) - 1]} ${y}`;
-    };
+    useEffect(() => {
+        let isCancelled = false;
+
+        loadDiscontinuedFinishes().then((nextDataset) => {
+            if (!isCancelled) {
+                setDataset(nextDataset);
+            }
+        });
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
 
     const LongArrow = () => (
         <svg width="28" height="12" viewBox="0 0 28 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,26 +53,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             <polyline points="20,2 26,6 20,10" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
-
-    const finishes = useMemo(() =>
-        DISCONTINUED_FINISHES.map((f) => ({
-            id: f.id,
-            oldName: f.oldName,
-            newName: f.newName,
-            category: f.category,
-            lab: f.lab || null,
-            discontinuedDate: f.discontinuedDate || '',
-            newImage: f.newImage || '',
-        })),
-    []);
-
-    const getImg = (name) => {
-        if (!name) return '';
-        const d = DISCONTINUED_FINISHES.find(f => f.oldName === name || f.newName === name);
-        return d?.newImage || '';
-    };
-
-    const fmt = (name) => !name ? '' : name.split(' ').map((w, i) => i === 0 ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()).join(' ');
+    const finishes = dataset.records;
 
     const grouped = useMemo(() => {
         const q = searchTerm.toLowerCase().trim();
@@ -57,25 +61,28 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
             f.oldName.toLowerCase().includes(q) ||
             f.newName.toLowerCase().includes(q) ||
             f.category.toLowerCase().includes(q) ||
-            (f.lab || '').toLowerCase().includes(q)
+            (f.labReference || '').toLowerCase().includes(q) ||
+            (f.discontinuedLabel || '').toLowerCase().includes(q) ||
+            (f.sourceSummary || '').toLowerCase().includes(q)
         );
-        const order = ['Wood Veneer', 'Laminate', 'Metal'];
         const g = filtered.reduce((acc, f) => {
             (acc[f.category] = acc[f.category] || []).push(f);
             return acc;
         }, {});
-        return order.filter(c => g[c]).map(c => [c, g[c]]);
-    }, [searchTerm, finishes]);
+        return dataset.categoryOrder.filter(c => g[c]).map(c => [c, g[c]]);
+    }, [searchTerm, finishes, dataset.categoryOrder]);
 
     const handleOrderClick = () => {
         if (!selectedFinish) return;
         const targetName = (selectedFinish.newName || '').toLowerCase();
-        const sampleMatch = SAMPLE_PRODUCTS.find(p => (p.name || '').toLowerCase() === targetName);
+        const sampleMatch = selectedFinish.replacementSampleId
+            ? SAMPLE_PRODUCTS.find((product) => product.id === selectedFinish.replacementSampleId)
+            : SAMPLE_PRODUCTS.find((product) => (product.name || '').toLowerCase() === targetName);
         const newItem = sampleMatch || {
             id: `sample-${targetName.replace(/\s+/g, '-')}`,
-            name: fmt(selectedFinish.newName),
+            name: selectedFinish.newName,
             category: 'finishes',
-            image: getImg(selectedFinish.newName),
+            image: selectedFinish.replacementImage,
         };
         if (onUpdateCart) onUpdateCart(newItem, 1);
         setSelectedFinish(null);
@@ -83,7 +90,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     };
 
     /* ── Swatch ── */
-    const Swatch = ({ image, alt, size = 40, color }) => (
+    const Swatch = ({ image, alt, size = 40, tone }) => (
         <div
             className="flex-shrink-0 overflow-hidden"
             style={{
@@ -91,7 +98,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                 height: size,
                 borderRadius: 12,
                 border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
-                backgroundColor: color || (isDark ? '#3C3C3C' : theme.colors.subtle),
+                backgroundColor: tone || (isDark ? '#3C3C3C' : theme.colors.subtle),
             }}
         >
             {image ? (
@@ -106,53 +113,52 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
     /* ── Single row ── */
     const FinishRow = ({ finish, isLast }) => {
-        const oldImg = getImg(finish.oldName);
-        const newImg = getImg(finish.newName);
         return (
             <button
+                type="button"
                 onClick={() => setSelectedFinish(finish)}
-                className="w-full text-left focus:outline-none active:scale-[0.995] transition-transform"
+                className="w-full text-left focus:outline-none transition-colors active:scale-[0.995] transition-transform"
             >
                 <div
-                    className="items-center px-4 py-3"
+                    className="items-center px-4 py-3.5"
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: '46% 28px 1fr',
+                        gridTemplateColumns: 'minmax(0,1fr) 40px minmax(0,1fr)',
                         gap: 0,
                         alignItems: 'center',
                     }}
                 >
-                    {/* Old finish — fixed 38% column keeps arrow in a consistent spot */}
                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                        <Swatch image={oldImg} alt={finish.oldName} />
+                        <Swatch image="" alt={finish.oldName} tone={finish.legacySwatchTone} />
                         <div className="min-w-0">
                             <p className="font-semibold text-[0.8125rem] leading-tight truncate" style={{ color: text }}>
-                                {fmt(finish.oldName)}
+                                {finish.oldName}
                             </p>
-                            <p className="text-[0.625rem] font-medium mt-0.5" style={{ color: sub }}>
-                                {finish.discontinuedDate && (
-                                    <span style={{ opacity: 0.7 }}>Disc. {fmtDate(finish.discontinuedDate)}</span>
+                            <p className="text-[0.625rem] font-medium mt-0.75 flex flex-wrap gap-x-1.5 gap-y-0.5" style={{ color: sub }}>
+                                {finish.discontinuedLabel && (
+                                    <span style={{ opacity: 0.74 }}>Disc. {finish.discontinuedLabel}</span>
                                 )}
-                                {finish.lab && (
-                                    <span style={{ opacity: 0.45 }}>{finish.discontinuedDate ? '  ·  ' : ''}Lab {finish.lab}</span>
+                                {finish.labReference && (
+                                    <span style={{ opacity: 0.52 }}>Lab {finish.labReference}</span>
+                                )}
+                                {finish.sourceCodesSummary && (
+                                    <span style={{ opacity: 0.52 }}>Codes {finish.sourceCodesSummary}</span>
                                 )}
                             </p>
                         </div>
                     </div>
 
-                    {/* Arrow — always at the 38% mark, never shifts */}
-                    <div className="flex items-center justify-center" style={{ color: accent, opacity: 0.5 }}>
+                    <div className="flex items-center justify-center" style={{ color: accent, opacity: 0.46 }}>
                         <LongArrow />
                     </div>
 
-                    {/* New finish — takes all remaining space */}
-                    <div className="flex items-center gap-2.5 min-w-0 pl-7">
-                        <Swatch image={newImg} alt={finish.newName} />
+                    <div className="flex items-center gap-2.5 min-w-0 pl-2">
+                        <Swatch image={finish.replacementImage} alt={finish.newName} tone={finish.legacySwatchTone} />
                         <div className="min-w-0">
                             <p className="font-semibold text-[0.8125rem] leading-tight truncate" style={{ color: text }}>
-                                {fmt(finish.newName)}
+                                {finish.newName}
                             </p>
-                            <p className="text-[0.625rem] font-medium mt-0.5" style={{ color: accent, opacity: 0.55 }}>
+                            <p className="text-[0.625rem] font-medium mt-0.75" style={{ color: accent, opacity: 0.62 }}>
                                 Replacement
                             </p>
                         </div>
@@ -169,7 +175,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
 
     return (
         <div className="h-full flex flex-col app-header-offset">
-            {/* Title + search */}
             <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-3">
                 <StandardSearchBar
                     value={searchTerm}
@@ -185,12 +190,17 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     <div className="space-y-5 mt-1">
                         {grouped.map(([category, items]) => (
                             <section key={category}>
-                                <h2
-                                    className="text-[0.6875rem] font-bold uppercase tracking-[0.1em] mb-2 px-0.5"
-                                    style={{ color: sub, opacity: 0.55 }}
-                                >
-                                    {category}
-                                </h2>
+                                <div className="flex items-center justify-between gap-3 mb-2 px-0.5">
+                                    <h2
+                                        className="text-[0.6875rem] font-bold uppercase tracking-[0.1em]"
+                                        style={{ color: sub, opacity: 0.55 }}
+                                    >
+                                        {category}
+                                    </h2>
+                                    <span className="text-[0.6875rem] font-semibold" style={{ color: sub, opacity: 0.6 }}>
+                                        {items.length} finishes
+                                    </span>
+                                </div>
                                 <GlassCard theme={theme} className="overflow-hidden" style={{ padding: 0 }}>
                                     {items.map((finish, index) => (
                                         <FinishRow
@@ -220,9 +230,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                     <div className="space-y-5">
                         <div className="flex items-center justify-center gap-6 py-4">
                             <div className="flex flex-col items-center gap-2">
-                                <Swatch image={getImg(selectedFinish.oldName)} alt={selectedFinish.oldName} size={52} />
+                                <Swatch image="" alt={selectedFinish.oldName} size={52} tone={selectedFinish.legacySwatchTone} />
                                 <div className="text-center">
-                                    <p className="text-xs font-semibold" style={{ color: sub }}>{fmt(selectedFinish.oldName)}</p>
+                                    <p className="text-xs font-semibold" style={{ color: sub }}>{selectedFinish.oldName}</p>
                                     <p className="text-[0.625rem] mt-0.5 font-medium" style={{ color: sub, opacity: 0.5 }}>Discontinued</p>
                                 </div>
                             </div>
@@ -230,20 +240,49 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                 <LongArrow />
                             </div>
                             <div className="flex flex-col items-center gap-2">
-                                <Swatch image={getImg(selectedFinish.newName)} alt={selectedFinish.newName} size={52} />
+                                <Swatch image={selectedFinish.replacementImage} alt={selectedFinish.newName} size={52} tone={selectedFinish.legacySwatchTone} />
                                 <div className="text-center">
-                                    <p className="text-xs font-semibold" style={{ color: text }}>{fmt(selectedFinish.newName)}</p>
+                                    <p className="text-xs font-semibold" style={{ color: text }}>{selectedFinish.newName}</p>
                                     <p className="text-[0.625rem] mt-0.5 font-medium" style={{ color: accent }}>Replacement</p>
                                 </div>
                             </div>
                         </div>
 
+                        <div className="flex flex-wrap justify-center gap-2">
+                            {selectedFinish.discontinuedLabel && (
+                                <MetaChip icon={CalendarDays} theme={theme} isDark={isDark}>
+                                    {`Disc. ${selectedFinish.discontinuedLabel}`}
+                                </MetaChip>
+                            )}
+                            {selectedFinish.labReference && (
+                                <MetaChip theme={theme} isDark={isDark}>
+                                    {`Lab ${selectedFinish.labReference}`}
+                                </MetaChip>
+                            )}
+                            {selectedFinish.sourceCodesSummary && (
+                                <MetaChip theme={theme} isDark={isDark}>
+                                    {`Codes ${selectedFinish.sourceCodesSummary}`}
+                                </MetaChip>
+                            )}
+                            {selectedFinish.sourceSection && (
+                                <MetaChip theme={theme} isDark={isDark}>
+                                    {selectedFinish.sourceSection}
+                                </MetaChip>
+                            )}
+                            {selectedFinish.sourceSummary && (
+                                <MetaChip theme={theme} isDark={isDark}>
+                                    {selectedFinish.sourceSummary}
+                                </MetaChip>
+                            )}
+                        </div>
+
                         <p className="text-[0.8125rem] text-center leading-relaxed" style={{ color: sub }}>
-                            Add a sample of <span className="font-semibold" style={{ color: text }}>{fmt(selectedFinish.newName)}</span> to your cart?
+                            Add a sample of <span className="font-semibold" style={{ color: text }}>{selectedFinish.newName}</span> to your cart?
                         </p>
 
                         <div className="flex gap-3 pt-1">
                             <button
+                                type="button"
                                 onClick={() => setSelectedFinish(null)}
                                 className="flex-1 font-semibold py-2.5 rounded-full text-[0.8125rem] motion-tap active:scale-[0.98] transition-all"
                                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : theme.colors.subtle, color: text }}
@@ -251,6 +290,7 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                 Cancel
                             </button>
                             <button
+                                type="button"
                                 onClick={handleOrderClick}
                                 className="flex-1 font-semibold py-2.5 rounded-full text-[0.8125rem] flex items-center justify-center gap-2 motion-tap active:scale-[0.98] transition-all"
                                 style={{ backgroundColor: accent, color: theme.colors.accentText }}

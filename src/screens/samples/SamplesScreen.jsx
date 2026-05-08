@@ -153,7 +153,7 @@ const ProductTile = memo(({ product, qty, theme, isDark, onAdd, onRemove }) => {
 });
 ProductTile.displayName = 'ProductTile';
 
-export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, sampleOrders = [], onSubmitSampleOrder, initialCartOpen = false }) => {
+export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart: onUpdateCartProp, userSettings, dealerDirectory, designFirms, onSubmitSampleOrder, initialCartOpen = false }) => {
     const [cartInternal, setCartInternal] = useState({});
     const cart = cartProp ?? cartInternal;
     const isDark = isDarkTheme(theme);
@@ -205,56 +205,44 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
     const categoryItemLabel = isFinishCategory ? 'finishes' : 'samples';
 
     const totalFinishCount = FINISH_SAMPLES.length;
-    const activeOrderCount = useMemo(
-        () => (Array.isArray(sampleOrders) ? sampleOrders.filter((order) => order.status !== 'delivered').length : 0),
-        [sampleOrders]
-    );
     const hasCartShortcut = totalCartItems > 0;
 
     const chipFadeProfile = hasCartShortcut
         ? {
-            leftWidth: 58,
-            rightWidth: 96,
+            leftWidth: 56,
+            rightWidth: 94,
             leftGradient: `linear-gradient(to right,
-                rgba(${bgRgb},0.88) 0%,
-                rgba(${bgRgb},0.78) 22%,
-                rgba(${bgRgb},0.54) 48%,
-                rgba(${bgRgb},0.28) 72%,
-                rgba(${bgRgb},0.10) 88%,
+                rgba(${bgRgb},0.80) 0%,
+                rgba(${bgRgb},0.66) 22%,
+                rgba(${bgRgb},0.42) 50%,
+                rgba(${bgRgb},0.20) 74%,
+                rgba(${bgRgb},0.08) 88%,
+                rgba(${bgRgb},0) 100%)`,
+            rightGradient: `linear-gradient(to left,
+                rgba(${bgRgb},0.80) 0%,
+                rgba(${bgRgb},0.66) 18%,
+                rgba(${bgRgb},0.42) 44%,
+                rgba(${bgRgb},0.20) 68%,
+                rgba(${bgRgb},0.08) 86%,
+                rgba(${bgRgb},0) 100%)`,
+        }
+        : {
+            leftWidth: 50,
+            rightWidth: 76,
+            leftGradient: `linear-gradient(to right,
+                rgba(${bgRgb},0.84) 0%,
+                rgba(${bgRgb},0.70) 24%,
+                rgba(${bgRgb},0.44) 54%,
+                rgba(${bgRgb},0.20) 78%,
+                rgba(${bgRgb},0.07) 90%,
                 rgba(${bgRgb},0) 100%)`,
             rightGradient: `linear-gradient(to left,
                 rgba(${bgRgb},0.86) 0%,
-                rgba(${bgRgb},0.76) 16%,
-                rgba(${bgRgb},0.54) 40%,
-                rgba(${bgRgb},0.31) 64%,
-                rgba(${bgRgb},0.12) 84%,
+                rgba(${bgRgb},0.74) 20%,
+                rgba(${bgRgb},0.48) 46%,
+                rgba(${bgRgb},0.24) 70%,
+                rgba(${bgRgb},0.09) 88%,
                 rgba(${bgRgb},0) 100%)`,
-            leftBlur: 'blur(8px) saturate(1.06)',
-            rightBlur: 'blur(13px) saturate(1.06)',
-            leftMask: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 26%, rgba(0,0,0,0.62) 58%, rgba(0,0,0,0.26) 82%, rgba(0,0,0,0) 100%)',
-            rightMask: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 20%, rgba(0,0,0,0.62) 54%, rgba(0,0,0,0.24) 82%, rgba(0,0,0,0) 100%)',
-        }
-        : {
-            leftWidth: 52,
-            rightWidth: 78,
-            leftGradient: `linear-gradient(to right,
-                rgba(${bgRgb},0.92) 0%,
-                rgba(${bgRgb},0.82) 24%,
-                rgba(${bgRgb},0.54) 52%,
-                rgba(${bgRgb},0.24) 76%,
-                rgba(${bgRgb},0.06) 90%,
-                rgba(${bgRgb},0) 100%)`,
-            rightGradient: `linear-gradient(to left,
-                rgba(${bgRgb},0.94) 0%,
-                rgba(${bgRgb},0.86) 18%,
-                rgba(${bgRgb},0.62) 44%,
-                rgba(${bgRgb},0.34) 68%,
-                rgba(${bgRgb},0.13) 86%,
-                rgba(${bgRgb},0) 100%)`,
-            leftBlur: 'blur(7px) saturate(1.06)',
-            rightBlur: 'blur(10px) saturate(1.06)',
-            leftMask: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 24%, rgba(0,0,0,0.66) 56%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0) 100%)',
-            rightMask: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.66) 52%, rgba(0,0,0,0.28) 80%, rgba(0,0,0,0) 100%)',
         };
 
     const updateChipEdgeFade = useCallback(() => {
@@ -271,6 +259,49 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             return { left: leftVisible, right: rightVisible };
         });
     }, []);
+
+    const alignSelectedCategoryChip = useCallback(() => {
+        const viewport = categoryScrollRef.current;
+        if (!viewport) return;
+
+        const activeButton = viewport.querySelector(`[data-category-chip="${selectedCategory}"]`);
+        if (!(activeButton instanceof HTMLElement)) return;
+
+        const maxScrollLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+        if (maxScrollLeft <= 0) return;
+
+        const viewportRect = viewport.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+        const buttonLeft = buttonRect.left - viewportRect.left;
+        const buttonRight = buttonRect.right - viewportRect.left;
+        const buttonCenter = buttonLeft + (buttonRect.width / 2);
+
+        const leftComfort = Math.min(Math.max(18, chipFadeProfile.leftWidth * 0.52), viewport.clientWidth * 0.22);
+        const rightComfort = Math.min(Math.max(28, chipFadeProfile.rightWidth * 0.58), viewport.clientWidth * 0.34);
+        const needsAdjustment = buttonLeft < leftComfort || buttonRight > viewport.clientWidth - rightComfort;
+
+        if (!needsAdjustment) return;
+
+        const desiredCenter = Math.min(
+            viewport.clientWidth - rightComfort - (buttonRect.width / 2),
+            Math.max(leftComfort + (buttonRect.width / 2), viewport.clientWidth * 0.34)
+        );
+
+        const nextScrollLeft = Math.min(
+            maxScrollLeft,
+            Math.max(0, viewport.scrollLeft + buttonCenter - desiredCenter)
+        );
+
+        if (Math.abs(nextScrollLeft - viewport.scrollLeft) < 2) return;
+
+        const prefersReducedMotion = typeof window !== 'undefined'
+            && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+        viewport.scrollTo({
+            left: nextScrollLeft,
+            behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        });
+    }, [selectedCategory, chipFadeProfile.leftWidth, chipFadeProfile.rightWidth]);
 
     useEffect(() => {
         const viewport = categoryScrollRef.current;
@@ -296,6 +327,16 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
             window.removeEventListener('resize', updateChipEdgeFade);
         };
     }, [updateChipEdgeFade, totalCartItems]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return undefined;
+
+        const frameId = window.requestAnimationFrame(() => {
+            alignSelectedCategoryChip();
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [alignSelectedCategoryChip, selectedCategory, totalCartItems]);
 
     /* Full JSI Set — lives above the grid, always visible regardless of category */
     const fullId = idOf('full-jsi-set');
@@ -388,6 +429,8 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                                     <button
                                         key={cat.id}
                                         onClick={() => setSelectedCategory(cat.id)}
+                                        data-category-chip={cat.id}
+                                        aria-pressed={isActive}
                                         className="px-3.5 py-2 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95 flex-shrink-0"
                                         style={{
                                             backgroundColor: isActive
@@ -410,14 +453,11 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-y-0 left-0"
                             style={{
-                                width: `${chipFadeProfile.leftWidth}px`,
+                                width: `${chipFadeProfile.leftWidth + 2}px`,
                                 opacity: chipEdgeFade.left ? 1 : 0,
+                                transform: 'translateX(-1px)',
                                 transition: 'opacity 220ms ease, width 240ms ease',
                                 background: chipFadeProfile.leftGradient,
-                                backdropFilter: chipFadeProfile.leftBlur,
-                                WebkitBackdropFilter: chipFadeProfile.leftBlur,
-                                maskImage: chipFadeProfile.leftMask,
-                                WebkitMaskImage: chipFadeProfile.leftMask,
                             }}
                         />
 
@@ -426,14 +466,11 @@ export const SamplesScreen = ({ theme, onNavigate, cart: cartProp, onUpdateCart:
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-y-0 right-0"
                             style={{
-                                width: `${chipFadeProfile.rightWidth}px`,
+                                width: `${chipFadeProfile.rightWidth + 2}px`,
                                 opacity: chipEdgeFade.right ? 1 : 0,
+                                transform: 'translateX(1px)',
                                 transition: 'opacity 220ms ease, width 240ms ease',
                                 background: chipFadeProfile.rightGradient,
-                                backdropFilter: chipFadeProfile.rightBlur,
-                                WebkitBackdropFilter: chipFadeProfile.rightBlur,
-                                maskImage: chipFadeProfile.rightMask,
-                                WebkitMaskImage: chipFadeProfile.rightMask,
                             }}
                         />
                     </div>

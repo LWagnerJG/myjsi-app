@@ -12,14 +12,23 @@ import {
 
 describe('homeUtils', () => {
     describe('getAppBadge', () => {
-        it('returns open order count for orders route', () => {
+        it('returns shipping order count for orders route', () => {
             const orders = [
                 { status: 'In Production', net: 100 },
                 { status: 'Delivered', net: 200 },
                 { status: 'Shipping', net: 300 },
             ];
             const badge = getAppBadge('orders', orders, [], [], 0);
-            expect(badge).toEqual({ value: '2', label: 'Open', color: '#5B7B8C' });
+            expect(badge).toEqual({ value: '1', label: 'Shipping', color: '#5B7B8C', kind: 'count' });
+        });
+
+        it('prioritizes order entry acknowledgements for orders route', () => {
+            const orders = [
+                { status: 'Order Entry', net: 100 },
+                { status: 'Shipping', net: 300 },
+            ];
+            const badge = getAppBadge('orders', orders, [], [], 0);
+            expect(badge).toEqual({ value: '1', label: 'To Ack', color: '#C4956A', kind: 'count' });
         });
 
         it('returns null for orders when all delivered', () => {
@@ -33,24 +42,29 @@ describe('homeUtils', () => {
                 { net: 700000 },
             ];
             const badge = getAppBadge('sales', orders, [], [], 0);
-            expect(badge).toEqual({ value: '$1.2M', label: 'YTD', color: '#4A7C59' });
+            expect(badge).toEqual({ value: '$1.2M', label: 'YTD', color: '#4A7C59', kind: 'currency' });
         });
 
         it('returns K format for smaller sales amounts', () => {
             const orders = [{ net: 75000 }];
             const badge = getAppBadge('sales', orders, [], [], 0);
-            expect(badge).toEqual({ value: '$75K', label: 'YTD', color: '#4A7C59' });
+            expect(badge).toEqual({ value: '$75K', label: 'YTD', color: '#4A7C59', kind: 'currency' });
         });
 
-        it('returns post count for community route', () => {
-            const posts = [{}, {}, {}];
+        it('returns recent post count for community route', () => {
+            const now = Date.now();
+            const posts = [
+                { createdAt: now },
+                { createdAt: now - 24 * 60 * 60 * 1000 },
+                { createdAt: now - 72 * 60 * 60 * 1000 },
+            ];
             const badge = getAppBadge('community', [], posts, [], 0);
-            expect(badge).toEqual({ value: '3', label: 'Posts', color: '#C4956A' });
+            expect(badge).toEqual({ value: '2', label: 'New', color: '#C4956A', kind: 'count' });
         });
 
         it('returns cart count for samples route', () => {
             const badge = getAppBadge('samples', [], [], [], 5);
-            expect(badge).toEqual({ value: '5', label: 'In Cart', color: '#C4956A' });
+            expect(badge).toEqual({ value: '5', label: 'In Cart', color: '#C4956A', kind: 'count' });
         });
 
         it('returns null for samples with empty cart', () => {

@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { isDarkTheme, fieldTileSurface } from '../../../design-system/tokens.js';
-import { ExternalLink, Link2, Share2, FileText, ChevronDown, Check, X } from 'lucide-react';
+import { ExternalLink, Link2, Share2, FileText, ChevronDown, Check } from 'lucide-react';
 import { CONTRACTS_DATA } from './data.js';
 import { SegmentedToggle } from '../../../components/common/GroupedToggle.jsx';
 import { TabContent } from '../../../components/common/TabContent.jsx';
@@ -14,7 +14,7 @@ const TABS = [
     { label: 'TIPS',    value: 'tips'    },
     { label: 'Premier', value: 'premier' },
     { label: 'GSA',     value: 'gsa'     },
-    { label: 'State',   value: 'state'   },
+    { label: 'State',   value: 'state', iconAfter: ChevronDown },
 ];
 
 const DOC_VERSIONS = [
@@ -41,70 +41,94 @@ const IconBtn = ({ icon: Icon, title, onClick, theme, dark }) => (
     </button>
 );
 
-/* ── state picker bottom sheet ───────────────────────── */
-const StatePicker = ({ entries, selected, onSelect, onClose, theme, dark, isOpen }) => {
-    const surface = dark ? 'rgba(28,26,24,0.99)' : 'rgba(252,251,249,0.99)';
+/* ── state picker attached to tab bubble ───────────────── */
+const StateTabDropdown = ({ entries, selected, onSelect, onClose, theme, dark, isOpen, anchorRect }) => {
+    if (!isOpen || !anchorRect) return null;
+
     const rowBorder = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)';
+    const surface = dark ? 'rgba(28,26,24,0.98)' : 'rgba(252,251,249,0.98)';
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 360;
+    const menuWidth = Math.min(340, Math.max(248, viewportWidth - 24));
+    const anchorCenter = anchorRect.left + (anchorRect.width / 2);
+    const minLeft = 12;
+    const maxLeft = Math.max(minLeft, viewportWidth - menuWidth - 12);
+    const left = Math.min(maxLeft, Math.max(minLeft, anchorCenter - (menuWidth / 2)));
+    const caretLeft = Math.min(menuWidth - 14, Math.max(10, anchorCenter - left - 6));
+
     return ReactDOM.createPortal(
         <AnimatePresence>
-            {isOpen && (
-                <>
-                    <motion.div
-                        key="sp-bd"
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="fixed inset-0"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: UNIFIED_MODAL_Z }}
-                        onClick={onClose}
+            <>
+                <motion.button
+                    key="state-drop-overlay"
+                    type="button"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.16 }}
+                    className="fixed inset-0"
+                    style={{ backgroundColor: 'transparent', zIndex: UNIFIED_MODAL_Z }}
+                    onClick={onClose}
+                    aria-label="Close state picker"
+                />
+                <motion.div
+                    key="state-drop-menu"
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
+                    className="fixed rounded-[16px] overflow-hidden"
+                    style={{
+                        top: anchorRect.bottom + 8,
+                        left,
+                        width: menuWidth,
+                        backgroundColor: surface,
+                        border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
+                        boxShadow: dark ? '0 14px 32px rgba(0,0,0,0.38)' : '0 14px 32px rgba(0,0,0,0.14)',
+                        zIndex: UNIFIED_MODAL_Z + 1,
+                    }}
+                >
+                    <div
+                        className="absolute w-3 h-3 rotate-45"
+                        style={{
+                            top: -6,
+                            left: caretLeft,
+                            backgroundColor: surface,
+                            borderTop: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
+                            borderLeft: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)',
+                        }}
                     />
-                    <motion.div
-                        key="sp-sheet"
-                        initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-                        transition={{ type: 'spring', damping: 32, stiffness: 320, mass: 0.85 }}
-                        className="fixed bottom-0 left-0 right-0 flex flex-col rounded-t-[28px] overflow-hidden"
-                        style={{ backgroundColor: surface, zIndex: UNIFIED_MODAL_Z + 1, maxHeight: '72vh' }}
-                    >
-                        <div className="flex justify-center pt-3 pb-1 shrink-0">
-                            <div className="w-9 h-1 rounded-full" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.13)' }} />
-                        </div>
-                        <div className="flex items-center justify-between px-5 pt-1 pb-3 shrink-0">
-                            <span className="text-base font-bold" style={{ color: theme.colors.textPrimary }}>Select a state</span>
-                            <button type="button" onClick={onClose}
-                                className="w-8 h-8 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }}
-                            >
-                                <X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} />
-                            </button>
-                        </div>
-                        <div className="overflow-y-auto pb-10 scrollbar-hide">
-                            {entries.map((entry, idx) => {
-                                const isSel = selected === entry.state;
-                                return (
-                                    <button
-                                        key={entry.state}
-                                        type="button"
-                                        onClick={() => { onSelect(entry.state); onClose(); }}
-                                        className="w-full flex items-center px-5 text-left transition-colors"
-                                        style={{
-                                            paddingTop: 14, paddingBottom: 14,
-                                            borderBottom: idx < entries.length - 1 ? `1px solid ${rowBorder}` : 'none',
-                                            backgroundColor: isSel ? (dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)') : 'transparent',
-                                        }}
-                                    >
-                                        <span className="flex-1 text-sm font-medium" style={{ color: theme.colors.textPrimary }}>{entry.state}</span>
-                                        <span className="text-[0.6875rem] mr-3" style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
-                                            {entry.contracts.length === 1 ? '1 contract' : `${entry.contracts.length} contracts`}
-                                        </span>
-                                        {isSel
-                                            ? <Check className="w-4 h-4 shrink-0" style={{ color: theme.colors.accent }} />
-                                            : <div className="w-4 h-4 shrink-0" />}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </motion.div>
-                </>
-            )}
+
+                    <div className="max-h-[52vh] overflow-y-auto py-1.5 scrollbar-hide">
+                        {entries.map((entry, idx) => {
+                            const isSel = selected === entry.state;
+                            return (
+                                <button
+                                    key={entry.state}
+                                    type="button"
+                                    onClick={() => { onSelect(entry.state); onClose(); }}
+                                    className="w-full flex items-center px-4 text-left transition-colors"
+                                    style={{
+                                        paddingTop: 11,
+                                        paddingBottom: 11,
+                                        borderBottom: idx < entries.length - 1 ? `1px solid ${rowBorder}` : 'none',
+                                        backgroundColor: isSel ? (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)') : 'transparent',
+                                    }}
+                                >
+                                    <span className="flex-1 text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
+                                        {entry.state}
+                                    </span>
+                                    <span className="text-[0.6875rem] mr-2.5" style={{ color: theme.colors.textSecondary, opacity: 0.52 }}>
+                                        {entry.contracts.length === 1 ? '1 contract' : `${entry.contracts.length} contracts`}
+                                    </span>
+                                    {isSel
+                                        ? <Check className="w-4 h-4 shrink-0" style={{ color: theme.colors.accent }} />
+                                        : <div className="w-4 h-4 shrink-0" />}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </motion.div>
+            </>
         </AnimatePresence>,
         document.body
     );
@@ -151,7 +175,9 @@ const MetricHeaderLabel = ({ shortLabel, longLabel, theme }) => {
 export const ContractsScreen = ({ theme, setSuccessMessage }) => {
     const [active, setActive] = useState('omnia');
     const [selectedState, setSelectedState] = useState('');
-    const [statePickerOpen, setStatePickerOpen] = useState(false);
+    const [stateDropdownOpen, setStateDropdownOpen] = useState(false);
+    const [stateTabAnchor, setStateTabAnchor] = useState(null);
+    const tabBarRef = useRef(null);
     const dark = isDarkTheme(theme);
     const contract = CONTRACTS_DATA[active];
     const isState = active === 'state';
@@ -166,10 +192,64 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
         ? 'grid grid-cols-[52px_52px_56px] md:grid-cols-[118px_118px_108px] items-center gap-2 shrink-0'
         : 'grid grid-cols-[52px_52px] md:grid-cols-[118px_118px] items-center gap-2 shrink-0';
 
-    // Auto-open picker when switching to the State tab
+    const updateStateTabAnchor = useCallback(() => {
+        const rootEl = tabBarRef.current;
+        if (!rootEl) {
+            setStateTabAnchor(null);
+            return;
+        }
+
+        const stateButton = Array
+            .from(rootEl.querySelectorAll('button[data-toggle-btn]'))
+            .find((btn) => (btn.textContent || '').replace(/\s+/g, ' ').trim().startsWith('State'));
+
+        if (!stateButton) {
+            setStateTabAnchor(null);
+            return;
+        }
+
+        const rect = stateButton.getBoundingClientRect();
+        setStateTabAnchor({
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+        });
+    }, []);
+
+    const openStateDropdown = useCallback(() => {
+        setStateDropdownOpen(true);
+        requestAnimationFrame(() => {
+            updateStateTabAnchor();
+        });
+    }, [updateStateTabAnchor]);
+
     useEffect(() => {
-        if (active === 'state') setStatePickerOpen(true);
-    }, [active]);
+        if (!stateDropdownOpen || active !== 'state') return;
+
+        const syncAnchor = () => updateStateTabAnchor();
+        window.addEventListener('resize', syncAnchor);
+        window.addEventListener('scroll', syncAnchor, true);
+
+        return () => {
+            window.removeEventListener('resize', syncAnchor);
+            window.removeEventListener('scroll', syncAnchor, true);
+        };
+    }, [active, stateDropdownOpen, updateStateTabAnchor]);
+
+    const handleTabChange = useCallback((val) => {
+        if (val === 'state') {
+            setActive('state');
+            openStateDropdown();
+            return;
+        }
+
+        setActive(val);
+        setSelectedState('');
+        setStateDropdownOpen(false);
+    }, [openStateDropdown]);
     const documentEntries = Array.isArray(contract.documentEntries)
         ? contract.documentEntries
         : DOC_VERSIONS.map((ver) => ({
@@ -209,10 +289,10 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
         <div className="flex h-full flex-col app-header-offset" style={{ backgroundColor: theme.colors.background }}>
 
             {/* ── Tab bar ── */}
-            <div className="px-4 pt-3 pb-3 overflow-x-auto scrollbar-hide">
+            <div ref={tabBarRef} className="px-4 pt-3 pb-3 overflow-x-auto scrollbar-hide">
                 <SegmentedToggle
                     value={active}
-                    onChange={(val) => { setActive(val); setSelectedState(''); }}
+                    onChange={handleTabChange}
                     options={TABS}
                     size="sm"
                     theme={theme}
@@ -250,30 +330,12 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                     Active Contracts
                                 </CardHeader>
 
-                                {/* State trigger row */}
-                                <button
-                                    type="button"
-                                    onClick={() => setStatePickerOpen(true)}
-                                    className="w-full flex items-center px-5 transition-all active:opacity-60"
-                                    style={{
-                                        paddingTop: 13,
-                                        paddingBottom: 13,
-                                        borderBottom: selectedState ? `1px solid ${subtleBorder}` : 'none',
-                                    }}
-                                >
-                                    <span
-                                        className="flex-1 text-sm font-medium text-left"
-                                        style={{ color: selectedState ? theme.colors.textPrimary : theme.colors.textSecondary, opacity: selectedState ? 1 : 0.55 }}
-                                    >
-                                        {selectedState || 'Select a state…'}
-                                    </span>
-                                    <ChevronDown className="w-4 h-4 shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.45 }} />
-                                </button>
+                                {/* Selected state contracts */}
+                                {selectedState ? (() => {
+                                    const entry = contract.entries.find((e) => e.state === selectedState);
+                                    if (!entry) return null;
 
-                                {/* Selected state’s contracts */}
-                                {selectedState && (() => {
-                                    const entry = contract.entries.find(e => e.state === selectedState);
-                                    return entry ? entry.contracts.map((c, ci) => (
+                                    return entry.contracts.map((c, ci) => (
                                         <motion.div
                                             key={ci}
                                             initial={{ opacity: 0, y: 4 }}
@@ -306,8 +368,14 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                                                 <IconBtn icon={Share2} title="Share" onClick={() => shareContract(c.number, c.label || selectedState)} theme={theme} dark={dark} />
                                             </div>
                                         </motion.div>
-                                    )) : null;
-                                })()}
+                                    ));
+                                })() : (
+                                    <div className="px-5 py-4">
+                                        <p className="text-sm" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
+                                            Choose a state from the State tab above.
+                                        </p>
+                                    </div>
+                                )}
                             </GlassCard>
                         ) : (
                             <>
@@ -494,15 +562,16 @@ export const ContractsScreen = ({ theme, setSuccessMessage }) => {
                 </TabContent>
             </div>
 
-            {/* ── State picker sheet (portal) ── */}
-            <StatePicker
-                entries={isState ? contract.entries : []}
+            {/* ── State picker attached to tab bubble ── */}
+            <StateTabDropdown
+                entries={CONTRACTS_DATA.state.entries}
                 selected={selectedState}
                 onSelect={setSelectedState}
-                onClose={() => setStatePickerOpen(false)}
+                onClose={() => setStateDropdownOpen(false)}
                 theme={theme}
                 dark={dark}
-                isOpen={statePickerOpen && isState}
+                isOpen={stateDropdownOpen && isState}
+                anchorRect={stateTabAnchor}
             />
         </div>
     );

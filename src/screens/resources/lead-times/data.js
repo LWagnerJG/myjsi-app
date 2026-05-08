@@ -37,8 +37,6 @@ export const LEAD_TIMES_DATA = [
     { series: 'Bryn', type: 'Upholstery', weeks: 6, image: '/series-images/jsi_bryn_comp_0004.jpg' },
     { series: 'Caav', type: 'Seating', weeks: 8, image: '/series-images/jsi_caav_comp_0005.jpg' },
     { series: 'Caav', type: 'Tables', weeks: 8, image: '/series-images/jsi_caav_comp_0005.jpg' },
-    { series: 'Class Act', type: 'Wood Seating', weeks: 4, image: '/series-images/jsi_class-act_comp_00001.jpg' },
-    { series: 'Class Act', type: 'Upholstery', weeks: 7, image: '/series-images/jsi_class-act_comp_00001.jpg' },
     { series: 'Connect', type: 'Seating', weeks: 6, image: '/series-images/jsi_connect_comp_00001.jpg' },
     { series: 'Copilot', type: 'Casegoods', weeks: 6, image: '/series-images/jsi_copilot_config_00001.jpg' },
     { series: 'Cosgrove', type: 'Seating', weeks: 5, image: '/series-images/jsi_cosgrove_comp_00001.jpg' },

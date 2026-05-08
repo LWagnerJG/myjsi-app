@@ -89,4 +89,4 @@ export const darkTheme = {
 };
 
 
-export const logoLight = 'https://i.imgur.com/qskYhB0.png';
+export const logoLight = '/myjsi-logo.png';

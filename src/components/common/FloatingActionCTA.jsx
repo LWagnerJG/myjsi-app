@@ -31,5 +31,3 @@ export const FloatingActionCTA = React.memo(({
     />
 ));
 FloatingActionCTA.displayName = 'FloatingActionCTA';
-
-export default FloatingActionCTA;

@@ -6,7 +6,7 @@ const jsiImg = (publicId, size = 'medium') => {
   return `https://res.cloudinary.com/jasper-jsi-furniture/image/upload/${t}/f_auto/q_auto/v1/${publicId}`;
 };
 
-const comp = (name, laminate, advantage) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-'), name, laminate, adv: advantage });
+const comp = (name, laminate) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-'), name, laminate });
 
 export const PRODUCT_DATA = {
     'benches': {

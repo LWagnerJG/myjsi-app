@@ -217,7 +217,7 @@ export const INITIAL_SAMPLE_ORDERS = [
             { name: 'Clay', code: 'CLY', qty: 2 },
             { name: 'Mesa', code: 'MES', qty: 2 },
             { name: 'Outback', code: 'OBK', qty: 1 },
-            { name: 'Brickdust', code: 'BRD', qty: 1 },
+            { name: 'Brickdust', code: 'BRK', qty: 1 },
         ],
     },
 ];

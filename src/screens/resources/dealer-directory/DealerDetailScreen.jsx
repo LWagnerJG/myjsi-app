@@ -6,33 +6,124 @@ import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect
 import { Modal } from '../../../components/common/Modal.jsx';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-import { formatCurrency, formatCurrencyCompact, formatLongDate } from '../../../utils/format.js';
+import { formatCurrencyCompact, formatLongDate } from '../../../utils/format.js';
 import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG } from './data.js';
 import {
-    Phone, MapPin, Building2,
+    Building2,
     MoreVertical, UserPlus, CheckCircle, Trash2,
-    ChevronDown, Info, Target,
+    ChevronDown,
 } from 'lucide-react';
 import { HBar, DonutChart, SparkBars } from './components/DealerDetailComponents.jsx';
-
-const fmt  = formatCurrency;
 
 const goalTone  = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C5C';
 const initials  = (name) => (name || '').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
 /* ── Card section header ─────────────────────────────── */
-const CardHeader = ({ children, right, dark, colors }) => (
-    <div
-        className="flex items-center justify-between px-5 py-3.5"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
-    >
+const CardHeader = ({ children, right, colors }) => (
+    <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2.5">
         <span
-            className="text-xs font-bold uppercase tracking-[0.07em] truncate"
-            style={{ color: colors.textSecondary, opacity: 0.64 }}
+            className="text-[0.75rem] font-semibold tracking-[0.08em] uppercase truncate"
+            style={{ color: colors.textSecondary, opacity: 0.62 }}
         >
             {children}
         </span>
         {right && <div className="shrink-0" style={{ color: colors.textSecondary }}>{right}</div>}
+    </div>
+);
+
+const HeaderMeta = ({ children, colors }) => (
+    <span className="text-[0.6875rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.7 }}>
+        {children}
+    </span>
+);
+
+const InfoPill = ({ children, href, colors, isDark }) => {
+    const sharedProps = {
+        className: 'inline-flex items-center rounded-full px-3 py-1.5 text-[0.6875rem] font-semibold transition-opacity',
+        style: {
+            color: colors.textSecondary,
+            opacity: 0.82,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.72)',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+        },
+    };
+
+    if (href) {
+        return (
+            <a href={href} {...sharedProps}>
+                {children}
+            </a>
+        );
+    }
+
+    return <span {...sharedProps}>{children}</span>;
+};
+
+const SummaryTile = ({ label, value, colors, isDark, accent = false, onClick, trailing }) => {
+    const Component = onClick ? 'button' : 'div';
+
+    return (
+        <Component
+            type={onClick ? 'button' : undefined}
+            onClick={onClick}
+            className={`rounded-[18px] px-3.5 py-3 text-left ${onClick ? 'transition-all active:scale-[0.98]' : ''}`}
+            style={{
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.76)',
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+                boxShadow: isDark ? 'none' : '0 10px 24px rgba(53,53,53,0.035)',
+            }}
+        >
+            <p
+                className="text-[0.625rem] font-semibold uppercase tracking-[0.08em]"
+                style={{ color: colors.textSecondary, opacity: 0.56 }}
+            >
+                {label}
+            </p>
+            <div className="mt-1.5 flex items-center gap-1.5">
+                <span
+                    className="text-[1.125rem] font-black tracking-tight leading-none"
+                    style={{ color: accent ? colors.accent : colors.textPrimary }}
+                >
+                    {value}
+                </span>
+                {trailing}
+            </div>
+        </Component>
+    );
+};
+
+const ProgressBlock = ({ label, percent, tone, currentValue, goalValue, colors, isDark }) => (
+    <div
+        className="rounded-[20px] px-4 py-3.5"
+        style={{
+            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.62)',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+        }}
+    >
+        <div className="flex items-center justify-between gap-3 mb-2">
+            <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.82 }}>
+                {label}
+            </span>
+            <span
+                className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.75rem] font-black tabular-nums"
+                style={{ color: tone, backgroundColor: `${tone}14` }}
+            >
+                {percent}%
+            </span>
+        </div>
+        <div
+            className="w-full rounded-full overflow-hidden"
+            style={{ height: 7, backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.055)' }}
+        >
+            <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: tone }}
+            />
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-3 text-[0.6875rem] font-semibold">
+            <span style={{ color: colors.textSecondary, opacity: 0.58 }}>{currentValue}</span>
+            <span style={{ color: colors.textSecondary, opacity: 0.58 }}>{goalValue}</span>
+        </div>
     </div>
 );
 
@@ -66,9 +157,6 @@ export const DealerDetailScreen = ({
         setSuccessMessage?.('Discount updated');
         setTimeout(() => setSuccessMessage?.(''), 1500);
     };
-
-    /* ── Rebatable info toggle ── */
-    const [showRebateInfo, setShowRebateInfo] = useState(false);
 
     /* ── Staff management ── */
     const [showAddPerson, setShowAddPerson] = useState(false);
@@ -176,230 +264,145 @@ export const DealerDetailScreen = ({
     const totalVert     = dealer.verticalSales?.reduce((s, v) => s + v.value, 0) || 0;
     const discountShort = dealer.dailyDiscount?.split(' ')?.[0] || dealer.dailyDiscount || '—';
     const subtleBorder  = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
+    const topMetricChevron = <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.accent, opacity: 0.42 }} />;
+    const latestMonth = dealer.monthlySales?.[dealer.monthlySales.length - 1];
+    const teamSections  = [
+        { title: 'Sales',   key: 'salespeople' },
+        { title: 'Design',  key: 'designers' },
+        { title: 'Admin',   key: 'administration' },
+        { title: 'Install', key: 'installers' },
+    ].map(section => ({ ...section, members: dealer?.[section.key] || [] })).filter(section => section.members.length > 0);
+    const totalTeamMembers = teamSections.reduce((sum, section) => sum + section.members.length, 0);
+    const rewardByName = (() => {
+        const out = new Map();
+        (dealer?.repRewards || []).forEach((reward) => {
+            if (!reward?.name) return;
+            out.set(reward.name.trim().toLowerCase(), reward);
+        });
+        return out;
+    })();
 
     return (
         <div
             className="flex flex-col h-full app-header-offset"
-            style={{
-                background: isDark
-                    ? colors.background
-                    : `linear-gradient(180deg, ${colors.background} 0%, ${colors.surface || '#FFFFFF'} 100%)`,
-            }}
+            style={{ backgroundColor: colors.background }}
         >
 
             {/* ─── Header ─── */}
-            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-3">
-                <GlassCard theme={theme} className="rounded-[24px] p-4 sm:p-5">
-                    <div className="flex items-start gap-3.5">
-                        <div
-                            className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center border"
-                            style={{
-                                backgroundColor: colors.accent,
-                                borderColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.64)',
-                                boxShadow: isDark ? '0 10px 24px rgba(0,0,0,0.35)' : '0 10px 24px rgba(53,53,53,0.12)',
-                            }}
-                        >
-                            <span className="text-[0.9375rem] font-black" style={{ color: colors.accentText }}>
-                                {initials(dealer.name)}
-                            </span>
-                        </div>
-                        <div className="flex-1 min-w-0 pt-0.5">
-                            {dealer.territory && (
-                                <p
-                                    className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-1"
-                                    style={{ color: colors.textSecondary, opacity: 0.52 }}
-                                >
-                                    {dealer.territory}
-                                </p>
-                            )}
-
-                            <h1
-                                className="text-[1.5rem] font-black tracking-tight leading-tight truncate"
-                                style={{ color: colors.textPrimary }}
+            <ScreenTopChrome theme={theme} contentClassName="pt-1 pb-2" fade={false}>
+                <GlassCard theme={theme} className="rounded-[26px] overflow-hidden p-0">
+                    <div className="px-5 pt-4 pb-4">
+                        <div className="flex items-start gap-3 min-w-0">
+                            <div
+                                className="w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center"
+                                style={{
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : `${colors.accent}10`,
+                                    color: isDark ? '#F4F1EC' : colors.accent,
+                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.05)'}`,
+                                }}
                             >
-                                {dealer.name}
-                            </h1>
+                                <span className="text-[0.75rem] font-black">
+                                    {initials(dealer.name)}
+                                </span>
+                            </div>
 
-                            {dealer.address && (
-                                <p className="mt-1.5 flex items-center gap-1.5 text-xs min-w-0" style={{ color: colors.textSecondary, opacity: 0.76 }}>
-                                    <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.65 }} />
-                                    <span className="truncate">{dealer.address}</span>
-                                </p>
-                            )}
-
-                            {dealer.phone && (
-                                <a
-                                    href={`tel:${dealer.phone}`}
-                                    className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-opacity hover:opacity-85"
-                                    style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${colors.accent}10`,
-                                        color: colors.accent,
-                                    }}
+                            <div className="min-w-0 flex-1">
+                                <h1
+                                    className="text-[1.375rem] font-black tracking-tight leading-tight"
+                                    style={{ color: colors.textPrimary }}
                                 >
-                                    <Phone className="w-3 h-3" />
-                                    {dealer.phone}
-                                </a>
-                            )}
+                                    {dealer.name}
+                                </h1>
+
+                                {dealer.address && (
+                                    <p
+                                        className="mt-1 text-[0.8125rem] leading-snug"
+                                        style={{ color: colors.textSecondary, opacity: 0.76 }}
+                                    >
+                                        {dealer.address}
+                                    </p>
+                                )}
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {dealer.territory && (
+                                        <InfoPill colors={colors} isDark={isDark}>{dealer.territory}</InfoPill>
+                                    )}
+                                    {dealer.phone && (
+                                        <InfoPill href={`tel:${dealer.phone}`} colors={colors} isDark={isDark}>{dealer.phone}</InfoPill>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2.5 mt-4">
+                            <SummaryTile
+                                label="YTD Sales"
+                                value={formatCurrencyCompact(dealer.sales)}
+                                colors={colors}
+                                isDark={isDark}
+                            />
+                            <SummaryTile
+                                label="Bookings"
+                                value={formatCurrencyCompact(dealer.bookings)}
+                                colors={colors}
+                                isDark={isDark}
+                            />
+                            <SummaryTile
+                                label="Discount"
+                                value={discountShort}
+                                colors={colors}
+                                isDark={isDark}
+                                accent
+                                onClick={() => setShowDiscountPicker(true)}
+                                trailing={topMetricChevron}
+                            />
                         </div>
                     </div>
                 </GlassCard>
             </ScreenTopChrome>
 
             {/* ─── Scrollable content ─── */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-24 space-y-4 max-w-content mx-auto w-full">
-
-                {/* ── Scorecard: Sales · Bookings · Discount ── */}
-                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                    <div className="flex">
-                        {/* YTD Sales */}
-                        <div
-                            className="flex-1 px-4 py-4 text-center"
-                            style={{ borderRight: `1px solid ${subtleBorder}` }}
-                        >
-                            <p
-                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em]"
-                                style={{ color: colors.textSecondary, opacity: 0.56 }}
-                            >
-                                YTD Sales
-                            </p>
-                            <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
-                                {formatCurrencyCompact(dealer.sales)}
-                            </p>
-                        </div>
-
-                        {/* Bookings */}
-                        <div
-                            className="flex-1 px-4 py-4 text-center"
-                            style={{ borderRight: `1px solid ${subtleBorder}` }}
-                        >
-                            <p
-                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em]"
-                                style={{ color: colors.textSecondary, opacity: 0.56 }}
-                            >
-                                Bookings
-                            </p>
-                            <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.textPrimary }}>
-                                {formatCurrencyCompact(dealer.bookings)}
-                            </p>
-                        </div>
-
-                        {/* Discount (tappable) */}
-                        <button
-                            className="flex-1 px-4 py-4 text-center transition-all active:scale-[0.97]"
-                            onClick={() => setShowDiscountPicker(true)}
-                        >
-                            <p
-                                className="text-[0.625rem] font-bold uppercase tracking-[0.07em]"
-                                style={{ color: colors.textSecondary, opacity: 0.56 }}
-                            >
-                                Discount
-                            </p>
-                            <div className="inline-flex items-center gap-1 mt-0.5">
-                                <p className="text-[1.375rem] font-black tracking-tight leading-none" style={{ color: colors.accent }}>
-                                    {discountShort}
-                                </p>
-                                <ChevronDown className="w-3.5 h-3.5 flex-shrink-0 mt-1" style={{ color: colors.accent, opacity: 0.45 }} />
-                            </div>
-                        </button>
-                    </div>
-                </GlassCard>
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-16 space-y-4 max-w-content mx-auto w-full">
 
                 {/* ── Goal Progress ── */}
-                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                    <CardHeader dark={isDark} colors={colors} right={
-                        <span className="text-xs font-semibold">
-                            {fmt(dealer.sales)} of {fmt(dealer.ytdGoal)}
-                        </span>
-                    }>
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <CardHeader colors={colors}>
                         Goal Progress
                     </CardHeader>
-                    <div className="px-5 pt-4 pb-5">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-1.5">
-                                <Target className="w-4 h-4" style={{ color: gColor }} />
-                                <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
-                                    YTD Sales
-                                </span>
-                            </div>
-                            <span
-                                className="text-lg font-black tabular-nums px-3 py-0.5 rounded-full"
-                                style={{ backgroundColor: gColor + '1A', color: gColor }}
-                            >
-                                {goalPct}%
-                            </span>
-                        </div>
-                        <div
-                            className="w-full rounded-full overflow-hidden"
-                            style={{ height: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)' }}
-                        >
-                            <div
-                                className="h-full rounded-full transition-all duration-700"
-                                style={{ width: `${Math.min(goalPct, 100)}%`, backgroundColor: gColor }}
-                            />
-                        </div>
+                    <div className="px-5 pb-5 space-y-3">
+                        <ProgressBlock
+                            label="Annual goal"
+                            percent={goalPct}
+                            tone={gColor}
+                            currentValue={`${formatCurrencyCompact(dealer.sales)} sales`}
+                            goalValue={`${formatCurrencyCompact(dealer.ytdGoal)} goal`}
+                            colors={colors}
+                            isDark={isDark}
+                        />
 
                         {dealer.rebatableGoal > 0 && (
-                            <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${subtleBorder}` }}>
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-xs font-semibold" style={{ color: colors.textSecondary, opacity: 0.65 }}>
-                                            Rebatable
-                                        </span>
-                                        <button
-                                            onClick={() => setShowRebateInfo(v => !v)}
-                                            style={{ color: colors.textSecondary, opacity: 0.4 }}
-                                        >
-                                            <Info className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
-                                    <span className="text-sm font-black tabular-nums" style={{ color: rColor }}>
-                                        {rebatePct}%
-                                    </span>
-                                </div>
-                                {showRebateInfo && (
-                                    <p
-                                        className="text-xs leading-relaxed mb-3 px-3 py-2.5 rounded-xl"
-                                        style={{
-                                            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(91,123,140,0.05)',
-                                            color: colors.textSecondary,
-                                        }}
-                                    >
-                                        Rebatable sales include only projects at this dealer's standard daily discount.
-                                    </p>
-                                )}
-                                <div
-                                    className="w-full rounded-full overflow-hidden"
-                                    style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.04)' }}
-                                >
-                                    <div
-                                        className="h-full rounded-full transition-all duration-700"
-                                        style={{ width: `${Math.min(rebatePct, 100)}%`, backgroundColor: rColor, opacity: 0.65 }}
-                                    />
-                                </div>
-                                <div className="flex justify-between mt-1.5">
-                                    <span className="text-[0.6875rem]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                                        {formatCurrencyCompact(dealer.rebatableSales)} sales
-                                    </span>
-                                    <span className="text-[0.6875rem]" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                                        {formatCurrencyCompact(dealer.rebatableGoal)} goal
-                                    </span>
-                                </div>
-                            </div>
+                            <ProgressBlock
+                                label="Rebatable goal"
+                                percent={rebatePct}
+                                tone={rColor}
+                                currentValue={`${formatCurrencyCompact(dealer.rebatableSales)} sales`}
+                                goalValue={`${formatCurrencyCompact(dealer.rebatableGoal)} goal`}
+                                colors={colors}
+                                isDark={isDark}
+                            />
                         )}
                     </div>
                 </GlassCard>
 
                 {/* ── Monthly Trend ── */}
                 {dealer.monthlySales?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                        <CardHeader dark={isDark} colors={colors} right={
-                            <span className="text-xs font-bold" style={{ color: colors.accent }}>
-                                {formatCurrencyCompact(dealer.monthlySales[dealer.monthlySales.length - 1]?.amount || 0)} last mo
-                            </span>
+                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                        <CardHeader colors={colors} right={
+                            <HeaderMeta colors={colors}>{`${latestMonth?.month || ''} ${formatCurrencyCompact(latestMonth?.amount || 0)}`.trim()}</HeaderMeta>
                         }>
                             Monthly Trend
                         </CardHeader>
-                        <div className="px-4 pt-3 pb-4">
+                        <div className="px-5 pb-5">
                             <SparkBars data={dealer.monthlySales} colors={colors} isDark={isDark} />
                         </div>
                     </GlassCard>
@@ -408,9 +411,11 @@ export const DealerDetailScreen = ({
                 {/* ── Sales Breakdown ── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {dealer.verticalSales?.length > 0 && (
-                        <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                            <CardHeader dark={isDark} colors={colors}>By Vertical</CardHeader>
-                            <div className="px-4 pt-3 pb-4 flex items-center gap-4">
+                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                            <CardHeader colors={colors} right={<HeaderMeta colors={colors}>{formatCurrencyCompact(totalVert)} total</HeaderMeta>}>
+                                By Vertical
+                            </CardHeader>
+                            <div className="px-5 pb-5 flex items-center gap-4">
                                 <DonutChart data={dealer.verticalSales} size={92} strokeWidth={14} colors={colors} />
                                 <div className="flex-1 space-y-2">
                                     {dealer.verticalSales.map(v => {
@@ -429,15 +434,13 @@ export const DealerDetailScreen = ({
                     )}
 
                     {dealer.seriesSales?.length > 0 && (
-                        <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                            <CardHeader dark={isDark} colors={colors} right={
-                                <span className="text-[0.6875rem] font-bold" style={{ opacity: 0.45 }}>
-                                    {dealer.seriesSales.length} series
-                                </span>
+                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                            <CardHeader colors={colors} right={
+                                <HeaderMeta colors={colors}>{dealer.seriesSales.length} series</HeaderMeta>
                             }>
                                 By Series
                             </CardHeader>
-                            <div className="px-4 pt-1 pb-2">
+                            <div className="px-5 pb-4">
                                 {dealer.seriesSales.map((s, i) => (
                                     <HBar
                                         key={s.series}
@@ -457,8 +460,10 @@ export const DealerDetailScreen = ({
 
                 {/* ── Recent Projects ── */}
                 {dealer.recentProjects?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                        <CardHeader dark={isDark} colors={colors}>Recent Projects</CardHeader>
+                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                        <CardHeader colors={colors} right={<HeaderMeta colors={colors}>{dealer.recentProjects.length} active</HeaderMeta>}>
+                            Recent Projects
+                        </CardHeader>
                         {dealer.recentProjects.map((proj, i) => {
                             const statusCfg = PROJECT_STATUS_CONFIG[proj.status] || {};
                             return (
@@ -496,80 +501,55 @@ export const DealerDetailScreen = ({
                     </GlassCard>
                 )}
 
-                {/* ── Rewards ── */}
-                {dealer.repRewards?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                        <CardHeader dark={isDark} colors={colors}>Rewards</CardHeader>
-                        {dealer.repRewards.map((rep, i) => (
-                            <div
-                                key={rep.name}
-                                className="flex items-center gap-3 px-5"
-                                style={{
-                                    paddingTop: 13,
-                                    paddingBottom: 13,
-                                    borderBottom: i < dealer.repRewards.length - 1 ? `1px solid ${subtleBorder}` : 'none',
-                                }}
+                {/* ── Team + Rewards ── */}
+                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <CardHeader colors={colors} right={
+                        <div className="flex items-center gap-2">
+                            <HeaderMeta colors={colors}>{totalTeamMembers} people</HeaderMeta>
+                            <button
+                                type="button"
+                                onClick={() => setShowAddPerson(true)}
+                                className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-[0.93]"
+                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${colors.accent}10` }}
+                                aria-label="Add person"
                             >
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
-                                        {rep.name}
-                                    </p>
-                                </div>
-                                <span
-                                    className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold uppercase tracking-wide flex-shrink-0"
-                                    style={{
-                                        color: rep.type === 'sales' ? '#4A7C59' : '#5B7B8C',
-                                        backgroundColor: rep.type === 'sales' ? 'rgba(74,124,89,0.12)' : 'rgba(91,123,140,0.12)',
-                                    }}
-                                >
-                                    {rep.type}
-                                </span>
-                                <span className="text-[0.9375rem] font-black flex-shrink-0 tabular-nums" style={{ color: colors.accent }}>
-                                    {fmt(rep.ytd)}
-                                </span>
-                            </div>
-                        ))}
-                    </GlassCard>
-                )}
-
-                {/* ── Staff / Team ── */}
-                <GlassCard theme={theme} className="rounded-[24px] overflow-hidden p-0">
-                    <CardHeader dark={isDark} colors={colors} right={
-                        <button
-                            onClick={() => setShowAddPerson(true)}
-                            className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-[0.93]"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : `${colors.accent}10` }}
-                            aria-label="Add person"
-                        >
-                            <UserPlus className="w-[13px] h-[13px]" style={{ color: colors.accent }} />
-                        </button>
+                                <UserPlus className="w-[13px] h-[13px]" style={{ color: colors.accent }} />
+                            </button>
+                        </div>
                     }>
                         Team
                     </CardHeader>
 
                     <div ref={staffRef} className="relative px-5 py-2">
-                        {[
-                            { title: 'Sales',   key: 'salespeople'   },
-                            { title: 'Design',  key: 'designers'     },
-                            { title: 'Admin',   key: 'administration' },
-                            { title: 'Install', key: 'installers'    },
-                        ].map(section => {
-                            const members = dealer[section.key] || [];
-                            if (members.length === 0) return null;
+                        {teamSections.length === 0 ? (
+                            <div className="py-3">
+                                <p className="text-sm" style={{ color: colors.textSecondary, opacity: 0.75 }}>
+                                    No team members yet.
+                                </p>
+                            </div>
+                        ) : teamSections.map((section, sectionIndex) => {
                             return (
-                                <div key={section.key} className="mt-3 first:mt-1">
-                                    <p
-                                        className="text-[0.625rem] font-bold uppercase tracking-[0.08em] mb-2"
-                                        style={{ color: colors.textSecondary, opacity: 0.4 }}
-                                    >
-                                        {section.title}
-                                    </p>
-                                    {members.map((m, mi) => (
+                                <div
+                                    key={section.key}
+                                    className={sectionIndex > 0 ? 'mt-3.5' : 'pt-0.5'}
+                                >
+                                    <div className="mb-1.5">
+                                        <p
+                                            className="text-[0.625rem] font-bold uppercase tracking-[0.08em]"
+                                            style={{ color: colors.textSecondary, opacity: 0.5 }}
+                                        >
+                                            {section.title}
+                                        </p>
+                                    </div>
+
+                                    {section.members.map((m, mi) => {
+                                        const reward = rewardByName.get((m.name || '').trim().toLowerCase());
+                                        return (
                                         <div
                                             key={m.name}
-                                            className="flex items-center gap-3 py-[10px]"
+                                            className="flex items-center gap-3 py-2.5"
                                             style={{
-                                                borderBottom: mi < members.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                                borderBottom: mi < section.members.length - 1 ? `1px solid ${subtleBorder}` : 'none',
                                             }}
                                         >
                                             {/* Avatar */}
@@ -590,22 +570,35 @@ export const DealerDetailScreen = ({
                                                 <p className="text-sm font-semibold truncate leading-snug" style={{ color: colors.textPrimary }}>
                                                     {m.name}
                                                 </p>
-                                                {m.status === 'pending' ? (
-                                                    <span
-                                                        className="inline-block text-[0.625rem] font-bold px-1.5 py-0.5 rounded-md mt-0.5"
-                                                        style={{ backgroundColor: 'rgba(196,149,106,0.12)', color: '#C4956A' }}
-                                                    >
-                                                        Pending invite
-                                                    </span>
-                                                ) : (
-                                                    <p className="text-xs truncate leading-snug mt-0.5" style={{ color: colors.textSecondary, opacity: 0.6 }}>
-                                                        {m.email}
-                                                    </p>
-                                                )}
+
+                                                <div className="mt-0.5 flex items-center justify-between gap-2">
+                                                    {m.status === 'pending' ? (
+                                                        <span
+                                                            className="inline-block text-[0.625rem] font-bold px-1.5 py-0.5 rounded-md"
+                                                            style={{ backgroundColor: 'rgba(196,149,106,0.12)', color: '#C4956A' }}
+                                                        >
+                                                            Pending invite
+                                                        </span>
+                                                    ) : (
+                                                        <p className="text-xs truncate leading-snug" style={{ color: colors.textSecondary, opacity: 0.6 }}>
+                                                            {m.email}
+                                                        </p>
+                                                    )}
+
+                                                    {reward && m.status !== 'pending' && (
+                                                        <span
+                                                            className="text-[0.6875rem] font-semibold tabular-nums whitespace-nowrap"
+                                                            style={{ color: colors.textSecondary, opacity: 0.72 }}
+                                                        >
+                                                            {formatCurrencyCompact(reward.ytd)}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* Menu button */}
                                             <button
+                                                type="button"
                                                 onClick={(e) => handleMenuOpen(e, m)}
                                                 className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
                                                 style={{ color: colors.textSecondary, opacity: 0.35 }}
@@ -613,7 +606,7 @@ export const DealerDetailScreen = ({
                                                 <MoreVertical className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
-                                    ))}
+                                    )})}
                                 </div>
                             );
                         })}
@@ -636,6 +629,7 @@ export const DealerDetailScreen = ({
                                         {ROLE_OPTIONS.map(opt => (
                                             <button
                                                 key={opt.value}
+                                                type="button"
                                                 onClick={() => handleUpdatePersonRole(menuState.person, opt.value)}
                                                 className="w-full flex justify-between items-center text-left py-2 px-2 text-[0.8125rem] font-semibold rounded-xl transition-colors"
                                                 style={{ color: menuState.person?.roleLabel === opt.value ? colors.accent : colors.textPrimary }}
@@ -648,6 +642,7 @@ export const DealerDetailScreen = ({
                                         ))}
                                         <div className="border-t my-1 mx-1" style={{ borderColor: subtleBorder }} />
                                         <button
+                                            type="button"
                                             onClick={() => handleRemovePerson(menuState.person?.name)}
                                             className="w-full flex items-center gap-2 text-left py-2 px-2 text-[0.8125rem] font-semibold rounded-xl"
                                             style={{ color: theme.colors.error }}

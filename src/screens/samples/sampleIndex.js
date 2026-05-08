@@ -9,6 +9,3 @@ const finishMap = new Map();
 FINISH_SAMPLES.forEach(f => finishMap.set(String(f.id), f));
 
 export const getSampleProduct = (id) => productMap.get(String(id));
-export const getFinishSample = (id) => finishMap.get(String(id));
-export const SAMPLE_PRODUCT_MAP = productMap; // if iteration needed
-export const FINISH_SAMPLE_MAP = finishMap;

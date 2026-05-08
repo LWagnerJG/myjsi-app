@@ -1,16 +1,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { PageTitle } from '../../../components/common/PageTitle.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { motion } from 'framer-motion';
-import { ChevronRight, Building2, UserPlus, ChevronDown, Check } from 'lucide-react';
+import { ChevronRight, Building2, UserPlus, Check } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA } from './data.js';
 import { DAILY_DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
-import { isDarkTheme, subtleBg, DESIGN_TOKENS } from '../../../design-system/tokens.js';
+import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
 import { formatCurrency } from '../../../utils/format.js';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
-import { UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
 
 const stagger = (i) => ({
     initial: { opacity: 0, y: 6 },
@@ -78,31 +76,36 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
         .sort((a, b) => a.name.localeCompare(b.name)),
     [dealers, searchTerm]);
 
-    const totalSales = useMemo(() => dealers.reduce((s, d) => s + (d.sales || 0), 0), [dealers]);
     const rowBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
-            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-3">
-                <PageTitle
-                    title="Dealers"
-                    subtitle={`${dealers.length} accounts \u00B7 ${formatCurrency(totalSales)}`}
-                    theme={theme}
-                    className="px-0 pt-0 pb-0"
-                    titleClassName="text-[1.625rem] font-black tracking-[-0.03em]"
-                    subtitleClassName="text-[0.8125rem] mt-0.5"
-                >
+            <ScreenTopChrome theme={theme} contentClassName="pt-2 pb-3 space-y-2.5">
+                <div className="flex items-start justify-between gap-3 px-0 pt-1">
+                    <div className="min-w-0">
+                        <h1
+                            className="text-[1.625rem] font-black tracking-[-0.03em] leading-tight"
+                            style={{ color: colors.textPrimary }}
+                        >
+                            Dealers
+                        </h1>
+                    </div>
+
                     <button
                         type="button"
                         onClick={() => setShowAddModal(true)}
                         className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] flex-shrink-0"
-                        style={{ backgroundColor: colors.accent, color: colors.accentText }}
+                        style={{
+                            backgroundColor: colors.accent,
+                            color: colors.accentText,
+                            boxShadow: isDark ? 'none' : '0 6px 14px rgba(53,53,53,0.16)',
+                        }}
                     >
                         <UserPlus className="w-3.5 h-3.5" />
                         Add
                     </button>
-                </PageTitle>
+                </div>
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={setSearchTerm}
@@ -113,30 +116,25 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
             </ScreenTopChrome>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-10">
-                <div className="max-w-content mx-auto w-full">
+            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-8">
+                <div className="max-w-content mx-auto w-full pt-1">
                 {sorted.length > 0 ? (
-                    <div
-                        className="rounded-[20px] overflow-hidden"
-                        style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.surface,
-                            boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.04)',
-                        }}
-                    >
+                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
                         {sorted.map((d, i) => {
                             const pct = d.ytdGoal ? Math.round((d.sales / d.ytdGoal) * 100) : null;
                             const gColor = pct !== null ? goalTone(pct) : null;
                             const initials = d.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+                            const secondaryLine = d.territory || d.dailyDiscount || 'No territory assigned';
 
                             return (
                                 <motion.button
                                     key={d.id}
                                     {...stagger(i)}
                                     onClick={() => onNavigate?.(`resources/dealer-directory/${d.id}`)}
-                                    className="w-full text-left flex items-center gap-3 px-4 transition-colors active:bg-black/[0.02]"
+                                    className="w-full text-left flex items-center gap-3.5 px-4 transition-colors active:opacity-75"
                                     style={{
-                                        paddingTop: 13,
-                                        paddingBottom: 13,
+                                        paddingTop: 12,
+                                        paddingBottom: 12,
                                         borderBottom: i < sorted.length - 1 ? `1px solid ${rowBorder}` : 'none',
                                     }}
                                 >
@@ -154,38 +152,30 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                                             {d.name}
                                         </p>
                                         <p className="text-[0.6875rem] truncate mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.65 }}>
-                                            {d.territory || d.address || d.dailyDiscount || ''}
+                                            {secondaryLine}
                                         </p>
                                     </div>
 
-                                    {/* Sales + goal bar */}
-                                    <div className="flex flex-col items-end flex-shrink-0 gap-1">
+                                    {/* Sales + goal */}
+                                    <div className="flex flex-col items-end flex-shrink-0">
                                         <span className="text-[0.8125rem] font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
                                             {formatCurrency(d.sales)}
                                         </span>
                                         {pct !== null && (
-                                            <div className="flex items-center gap-1.5">
-                                                <div
-                                                    className="w-12 rounded-full overflow-hidden"
-                                                    style={{ height: 3, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
-                                                >
-                                                    <div
-                                                        className="h-full rounded-full"
-                                                        style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: gColor }}
-                                                    />
-                                                </div>
-                                                <span className="text-[0.625rem] font-bold tabular-nums" style={{ color: gColor, minWidth: 26, textAlign: 'right' }}>
-                                                    {pct}%
-                                                </span>
-                                            </div>
+                                            <span
+                                                className="text-[0.625rem] font-bold tabular-nums mt-1 px-1.5 py-[1px] rounded-full"
+                                                style={{ color: gColor, backgroundColor: `${gColor}1A` }}
+                                            >
+                                                {pct}%
+                                            </span>
                                         )}
                                     </div>
 
-                                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.18 }} />
+                                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.22 }} />
                                 </motion.button>
                             );
                         })}
-                    </div>
+                    </GlassCard>
                 ) : (
                     <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
                         <div

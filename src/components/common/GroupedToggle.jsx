@@ -111,6 +111,7 @@ export const SegmentedToggle = ({
       {options.map((opt) => {
         const isSelected = opt.value === value;
         const Icon = opt.icon;
+        const IconAfter = opt.iconAfter;
         const badge = opt.badge;
 
         return (
@@ -128,6 +129,7 @@ export const SegmentedToggle = ({
             >
               {Icon && <Icon className={s.iconSize} />}
               {opt.label}
+              {IconAfter && <IconAfter className={s.iconSize} />}
               {badge != null && badge > 0 && (
                 <span 
                   className={`${s.badgeSize} rounded-full flex items-center justify-center font-bold ml-1`}
