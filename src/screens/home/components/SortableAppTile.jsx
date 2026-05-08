@@ -3,8 +3,6 @@ import React from 'react';
 import { useSortable, defaultAnimateLayoutChanges } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, X, Lock } from 'lucide-react';
-import { APP_ICON_COLORS } from '../utils/homeUtils.js';
-
 export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id,
@@ -32,7 +30,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
         minHeight: 88
     };
 
-    const iconColor = APP_ICON_COLORS[app.route] || colors.accent;
+    const iconColor = colors.accent;
 
     return (
         <div

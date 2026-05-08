@@ -109,14 +109,9 @@ export const AppGrid = ({
                             >
                                 <div
                                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
-                                    style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.035)',
-                                    }}
+                                    style={{ backgroundColor: `${colors.accent}10` }}
                                 >
-                                    <activeApp.icon
-                                        className="w-[18px] h-[18px] sm:w-5 sm:h-5"
-                                        style={{ color: isDark ? 'rgba(255,255,255,0.82)' : 'rgba(53,53,53,0.72)' }}
-                                    />
+                                    <activeApp.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.accent }} />
                                 </div>
                                 <span
                                     className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 w-full px-0.5"
@@ -135,10 +130,7 @@ export const AppGrid = ({
 
     const gridApps = currentApps.filter(a => a.route !== 'resources');
     const resourcesApp = currentApps.find(a => a.route === 'resources');
-    const neutralIconBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.035)';
-    const neutralIconColor = isDark ? 'rgba(255,255,255,0.82)' : 'rgba(53,53,53,0.72)';
-    const neutralBadgeBg = isDark ? 'rgba(255,255,255,0.16)' : 'rgba(53,53,53,0.10)';
-    const neutralBadgeText = isDark ? 'rgba(255,255,255,0.88)' : 'rgba(53,53,53,0.74)';
+    const resourcesIconColor = colors.accent;
 
     // Customize goes in the grid when it fills a row cleanly, or when total
     // would be exactly 4 (so we get a clean 2×2 instead of 3-wide with orphan).
@@ -156,6 +148,7 @@ export const AppGrid = ({
                 {gridApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
                     const isCurrencyBadge = badge?.kind === 'currency';
+                    const iconColor = colors.accent;
                     return (
                         <button
                             key={app.route}
@@ -169,9 +162,9 @@ export const AppGrid = ({
                         >
                             <div
                                 className="rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10"
-                                style={{ backgroundColor: neutralIconBg }}
+                                style={{ backgroundColor: `${iconColor}10` }}
                             >
-                                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: neutralIconColor }} />
+                                <app.icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: iconColor }} />
                             </div>
                             <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                 {app.name}
@@ -182,8 +175,9 @@ export const AppGrid = ({
                                         className="absolute top-1.5 right-1.5 h-[18px] px-1.5 flex items-center justify-center rounded-md font-semibold tabular-nums"
                                         style={{
                                             fontSize: '0.625rem',
-                                            backgroundColor: neutralBadgeBg,
-                                            color: neutralBadgeText,
+                                            backgroundColor: `${badge.color}18`,
+                                            color: badge.color,
+                                            border: `1px solid ${badge.color}25`,
                                         }}
                                     >
                                         {badge.value}
@@ -193,8 +187,9 @@ export const AppGrid = ({
                                         className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full font-bold tabular-nums"
                                         style={{
                                             fontSize: '0.625rem',
-                                            backgroundColor: neutralBadgeBg,
-                                            color: neutralBadgeText,
+                                            backgroundColor: `${badge.color}20`,
+                                            color: badge.color,
+                                            border: `1px solid ${badge.color}35`,
                                         }}
                                     >
                                         {badge.value}
@@ -242,9 +237,9 @@ export const AppGrid = ({
                 >
                     <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                        style={{ backgroundColor: neutralIconBg }}
+                        style={{ backgroundColor: `${resourcesIconColor}12` }}
                     >
-                        <resourcesApp.icon className="w-[18px] h-[18px]" style={{ color: neutralIconColor }} />
+                        <resourcesApp.icon className="w-[18px] h-[18px]" style={{ color: resourcesIconColor }} />
                     </div>
                     <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textPrimary }}>Resources</span>
                     <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
