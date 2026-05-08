@@ -12,7 +12,7 @@ import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 import { CreateOnePagerModal } from '../studio/CreateOnePagerModal.jsx';
-import { useToast } from '../../components/common/ToastHost.jsx';
+import { useToast } from '../../components/common/toastContext.js';
 
 const buildCommunityTabOptions = (hasBoardContent, compact = false) => {
   const base = [

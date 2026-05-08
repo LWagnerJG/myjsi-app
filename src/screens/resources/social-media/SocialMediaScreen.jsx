@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Check, ChevronDown, Copy, Instagram, Linkedin } from 'lucide-react';
 import { PillButton } from '../../../components/common/JSIButtons.jsx';
-import { useToast } from '../../../components/common/ToastHost.jsx';
+import { useToast } from '../../../components/common/toastContext.js';
 import { fieldTileSurface, modalCardSurface, isDarkTheme } from '../../../design-system/tokens.js';
 import {
     DEFAULT_SOCIAL_VERTICAL,

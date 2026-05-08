@@ -1,11 +1,6 @@
-import { validateWebhookUrl } from './secureWebhook.js';
+import { postJsonToWebhook } from './secureWebhook.js';
 
 const COMPETITIVE_DISCOUNT_STORAGE_KEY = 'myjsi.competitive-discount-records';
-
-const COMPETITIVE_DISCOUNT_URL = validateWebhookUrl(
-    import.meta.env.VITE_COMPETITIVE_DISCOUNT_POWER_AUTOMATE_URL,
-    'VITE_COMPETITIVE_DISCOUNT_POWER_AUTOMATE_URL'
-);
 
 const safeParse = (value) => {
     try {
@@ -85,18 +80,12 @@ const flattenCompetitiveDiscountRecord = (record) => ({
 });
 
 export async function submitCompetitiveDiscountRecord(record) {
-    if (!COMPETITIVE_DISCOUNT_URL) return false;
-
-    try {
-        const res = await fetch(COMPETITIVE_DISCOUNT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(flattenCompetitiveDiscountRecord(record)),
-        });
-
-        return [200, 201, 202].includes(res.status);
-    } catch (err) {
-        console.error('[submitCompetitiveDiscountRecord] Network error:', err);
-        return false;
-    }
+    return postJsonToWebhook(
+        import.meta.env.VITE_COMPETITIVE_DISCOUNT_POWER_AUTOMATE_URL,
+        flattenCompetitiveDiscountRecord(record),
+        {
+            envKey: 'VITE_COMPETITIVE_DISCOUNT_POWER_AUTOMATE_URL',
+            context: 'submitCompetitiveDiscountRecord',
+        }
+    );
 }

@@ -1,35 +1,5 @@
-/**
- * Submit a new lead to a shared Microsoft Excel spreadsheet
- * via a Power Automate HTTP-trigger flow.
- *
- * Power Automate setup (one-time):
- *   1. Create a new Instant cloud flow → trigger = "When an HTTP request is received"
- *   2. Add action: "Add a row into a table" (Excel Online / OneDrive / SharePoint)
- *   3. Map each JSON field below to a column in your Excel table
- *   4. Save → copy the generated HTTP POST URL
- *   5. Paste that URL as VITE_LEADS_POWER_AUTOMATE_URL in your .env / Vercel env vars
- *
- * The Excel table should have these columns (order doesn't matter):
- *   Submitted At | Project Name | Stage | Vertical | Install Date | Location |
- *   Estimated List | Win Probability | Discount | Sales Reward | Designer Reward |
- *   PO Timeframe | Contract | Dealers | A&D Firms | End User |
- *   Bid | Competition | Competitors | JSI Quote # | Quote Needed |
- *   Products | Notes
- */
+import { postJsonToWebhook } from './secureWebhook.js';
 
-import { validateWebhookUrl } from './secureWebhook.js';
-
-const LEADS_URL = validateWebhookUrl(
-    import.meta.env.VITE_LEADS_POWER_AUTOMATE_URL,
-    'VITE_LEADS_POWER_AUTOMATE_URL'
-);
-
-/**
- * Flatten the lead object into a simple key→string map
- * suitable for a single Excel row.
- * @param {{ project?: string, projectStatus?: string, vertical?: string, otherVertical?: string, expectedInstallDate?: string, installationLocation?: string, estimatedList?: string, winProbability?: number, discount?: string, salesReward?: boolean, designerReward?: boolean, poTimeframe?: string, contractType?: string, dealers?: string[], designFirms?: string[], endUser?: string, isBid?: boolean, competitionPresent?: boolean, competitors?: string[], jsiQuoteNumber?: string, quoteNeeded?: boolean, products?: Array<{ series: string }>, notes?: string }} lead
- * @returns {Object}
- */
 const flattenLead = (lead) => ({
   submittedAt:      new Date().toISOString(),
   projectName:      lead.project || '',
@@ -58,32 +28,13 @@ const flattenLead = (lead) => ({
   notes:            lead.notes || '',
 });
 
-/**
- * Fire-and-forget POST to Power Automate.
- * Returns true on success, false on failure (never throws).
- * @param {{ project?: string, projectStatus?: string, vertical?: string, otherVertical?: string, expectedInstallDate?: string, installationLocation?: string, estimatedList?: string, winProbability?: number, discount?: string, salesReward?: boolean, designerReward?: boolean, poTimeframe?: string, contractType?: string, dealers?: string[], designFirms?: string[], endUser?: string, isBid?: boolean, competitionPresent?: boolean, competitors?: string[], jsiQuoteNumber?: string, quoteNeeded?: boolean, products?: Array<{ series: string }>, notes?: string }} lead
- * @returns {Promise<boolean>}
- */
 export async function submitLeadToExcel(lead) {
-  if (!LEADS_URL) {
-    console.warn('[submitLeadToExcel] VITE_LEADS_POWER_AUTOMATE_URL is not configured — skipping.');
-    return false;
-  }
-
-  try {
-    const res = await fetch(LEADS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(flattenLead(lead)),
-    });
-    if ([200, 201, 202].includes(res.status)) {
-      if (import.meta.env.DEV) console.log('[submitLeadToExcel] Lead sent to Excel successfully.');
-      return true;
+  return postJsonToWebhook(
+    import.meta.env.VITE_LEADS_POWER_AUTOMATE_URL,
+    flattenLead(lead),
+    {
+      envKey: 'VITE_LEADS_POWER_AUTOMATE_URL',
+      context: 'submitLeadToExcel',
     }
-    console.error('[submitLeadToExcel] Unexpected status:', res.status);
-    return false;
-  } catch (err) {
-    console.error('[submitLeadToExcel] Network error:', err);
-    return false;
-  }
+  );
 }

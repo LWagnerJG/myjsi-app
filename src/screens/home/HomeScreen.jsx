@@ -12,7 +12,7 @@ import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { INITIAL_OPPORTUNITIES } from '../projects/data.js';
 import { REPLACEMENT_REQUESTS_DATA } from '../replacements/data.js';
 import { PRODUCTS_CATEGORIES_DATA } from '../products/data.js';
-import { smartTitleCase, formatCurrencyCompact } from '../../utils/format.js';
+import { smartTitleCase } from '../../utils/format.js';
 import {
     PointerSensor,
     KeyboardSensor,
@@ -24,7 +24,6 @@ import {
     sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 
-// Extracted modules
 import { HomeHeader } from './components/HomeHeader.jsx';
 import { AppGrid } from './components/AppGrid.jsx';
 import { HomeFeatureCards } from './components/HomeFeatureCards.jsx';

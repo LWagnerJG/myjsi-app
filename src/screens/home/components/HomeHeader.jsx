@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Package, Briefcase, LayoutGrid } from 'lucide-react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
@@ -37,8 +37,10 @@ export const HomeHeader = ({
     const hasQuery = Boolean(searchQuery.trim());
     const showRecents = inputFocused && !hasQuery && recentItems.length > 0;
     const isOpen = hasQuery || showRecents;
-    // In recents mode we don't show the Elliott row
-    const displayResults = hasQuery ? spotlightResults : (showRecents ? recentItems : []);
+    const displayResults = useMemo(
+        () => hasQuery ? spotlightResults : (showRecents ? recentItems : []),
+        [hasQuery, showRecents, spotlightResults, recentItems]
+    );
     const showElliott = hasQuery;
     const totalItems = displayResults.length + (showElliott ? 1 : 0);
 

@@ -23,7 +23,6 @@ const CONTACT_TYPES = [
 export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, designFirms, open, onOpenChange, initialOpen = false, onNavigate, onSubmitOrder }) => {
     const [isExpanded, setIsExpanded] = useState(open ?? initialOpen);
 
-    // Sync with external open signal from parent
     useEffect(() => {
         if (open !== undefined) setIsExpanded(open);
     }, [open]);
@@ -51,7 +50,6 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
     const safeSetAddress1 = (v) => setAddress1(v ?? '');
     const safeSetAddress2 = (v) => setAddress2(v ?? '');
 
-    // Directory items (inline)
     const dirItems = useMemo(() => {
         const normalize = (x, idx, type) => ({
             key: `${x?.id ?? x?.name ?? 'item'}-${idx}`,
@@ -104,7 +102,7 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
         setJustSubmitted(true);
         Object.entries(cart).forEach(([id, qty]) => { if (qty > 0) onUpdateCart({ id }, -qty); });
         setTimeout(() => { onNavigate && onNavigate('home'); }, prefersReduced ? 1600 : 2600);
-    }, [shipToName, address1, cartItems, cart, onUpdateCart, onNavigate, onSubmitOrder, address2, shipToType, prefersReduced]);
+    }, [shipToName, address1, cartItems, cart, onUpdateCart, onNavigate, onSubmitOrder, address2, shipToType, prefersReduced, setExpanded]);
 
     const handleCreateNew = useCallback((type) => {
         setNewContactType(type);

@@ -1,11 +1,8 @@
-import React, { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getToastMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
-
-const ToastContext = createContext(null);
-
-export const useToast = () => useContext(ToastContext);
+import { ToastContext } from './toastContext.js';
 
 let idCounter = 0;
 

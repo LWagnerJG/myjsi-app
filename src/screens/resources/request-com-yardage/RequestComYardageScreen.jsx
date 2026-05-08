@@ -7,7 +7,7 @@ import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.
 import { X, Plus, Minus, Trash2, Scissors } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 import { hapticSuccess } from '../../../utils/haptics.js';
-import { validateWebhookUrl } from '../../../utils/secureWebhook.js';
+import { postJsonToWebhook } from '../../../utils/secureWebhook.js';
 import { cardSurface, subtleBorder, isDarkTheme } from '../../../design-system/tokens.js';
 
 /* Inline editable qty — tap the number to type directly (opens numpad on mobile) */
@@ -78,22 +78,32 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
 
     const handleFinalSubmit = async () => {
         setIsSubmitting(true);
-        const url = validateWebhookUrl(import.meta.env.VITE_POWER_AUTOMATE_URL, 'VITE_POWER_AUTOMATE_URL');
-        if (!url) { showAlert('Not configured.'); setIsSubmitting(false); return; }
         const payload = {
             requester: userSettings?.email || 'unknown@example.com',
             models: selectedItems.map(i => ({ name: i.modelName, modelId: i.modelId, quantity: i.quantity, fabric: i.fabric }))
         };
         try {
-            const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if ([200, 201, 202].includes(res.status)) {
+            const submitted = await postJsonToWebhook(
+                import.meta.env.VITE_POWER_AUTOMATE_URL,
+                payload,
+                {
+                    envKey: 'VITE_POWER_AUTOMATE_URL',
+                    context: 'RequestComYardageScreen',
+                }
+            );
+
+            if (submitted) {
                 hapticSuccess();
                 showAlert('Submitted successfully.');
                 setSelectedItems([]);
                 setShowConfirm(false);
                 onNavigate('resources');
-            } else showAlert('Server error submitting.');
-        } catch { showAlert('Network error.'); } finally { setIsSubmitting(false); }
+            } else {
+                showAlert('Unable to submit request.');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const itemCount = selectedItems.length;

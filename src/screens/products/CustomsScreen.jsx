@@ -3,7 +3,7 @@ import { Send, Share2 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
-import { useToast } from '../../components/common/ToastHost.jsx';
+import { useToast } from '../../components/common/toastContext.js';
 import { cardSurface, fieldTileSurface, isDarkTheme } from '../../design-system/tokens.js';
 import { CUSTOMS_CATEGORIES, CUSTOM_OPPORTUNITIES } from './data.js';
 
