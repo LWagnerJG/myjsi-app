@@ -22,7 +22,7 @@ const sortQuarterEntries = (entries) =>
   });
 
 
-export const SalesScreen = ({ theme, onNavigate }) => {
+export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
   const [chartDataType, setChartDataType] = useState('bookings');
   const [showTableView, setShowTableView] = useState(false);
   const [selectedVertical, setSelectedVertical] = useState(null);
@@ -60,6 +60,16 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     if (!selectedVertical) return null;
     return SALES_VERTICALS_DATA.find(v => v.label === selectedVertical)?.color || null;
   }, [selectedVertical]);
+  const wonPipeline = useMemo(() => {
+    if (!Array.isArray(opportunities)) return { total: 0, count: 0 };
+    const won = opportunities.filter(o => o.stage === 'Won');
+    const total = won.reduce((sum, o) => {
+      const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : (o.value || 0);
+      return sum + (parseFloat(raw) || 0);
+    }, 0);
+    return { total, count: won.length };
+  }, [opportunities]);
+
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const chartMax = useMemo(() => Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales)), [chartDataType]);
 
@@ -335,6 +345,29 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </div>
         </div>
 
+        {/* ── Won Pipeline KPI ── */}
+        {wonPipeline.count > 0 && (
+          <button onClick={() => onNavigate('projects', { tab: 'pipeline', stage: 'Won' })} className="w-full text-left group">
+            <GlassCard theme={theme} className="p-5" variant="elevated">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[0.6875rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.5 }}>Won Pipeline</p>
+                  <p className="text-2xl font-black tabular-nums tracking-tight leading-tight mt-0.5" style={{ color: colors.textPrimary }}>
+                    {formatCurrencyCompact(wonPipeline.total)}
+                  </p>
+                  <p className="text-xs font-medium mt-0.5" style={{ color: colors.textSecondary, opacity: 0.55 }}>
+                    {wonPipeline.count} {wonPipeline.count === 1 ? 'project' : 'projects'} closed
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5" style={{ color: colors.textSecondary, opacity: 0.4 }}>
+                  <span className="text-xs font-semibold">View pipeline</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </GlassCard>
+          </button>
+        )}
+
         {/* ── Data sections ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
           {/* Recent Activity — filters when a vertical is selected */}
@@ -352,9 +385,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                   </span>
                 )}
               </div>
-              <button onClick={() => onNavigate('orders')}
+              <button onClick={() => onNavigate('orders', selectedVertical ? { vertical: selectedVertical } : {})}
                 className="flex items-center gap-1 shrink-0 hover:opacity-70 transition-opacity"
-                style={{ color: colors.textSecondary }}>
+                style={{ color: selectedVertical ? (verticalColor || colors.textSecondary) : colors.textSecondary }}>
                 <span className="text-xs font-medium">All orders</span>
                 <ChevronRight className="w-3.5 h-3.5 opacity-45" />
               </button>
