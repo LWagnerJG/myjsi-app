@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
-import { ORDER_DATA } from '../orders/data.js';
+import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { CountUp } from '../../components/common/CountUp.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
@@ -368,61 +369,136 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
           </button>
         )}
 
-        {/* ── Data sections ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
-          {/* Recent Activity — filters when a vertical is selected */}
-          <GlassCard theme={theme} className="p-5" variant="elevated"
-            style={verticalColor ? { borderLeft: `3px solid ${verticalColor}` } : {}}>
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>
-                  {selectedVertical ? `${selectedVertical} Orders` : 'Recent Activity'}
-                </h3>
-                {selectedVertical && (
-                  <span className="text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: `${verticalColor}18`, color: verticalColor }}>
-                    {recentOrders.length}
-                  </span>
-                )}
-              </div>
-              <button onClick={() => onNavigate('orders', selectedVertical ? { vertical: selectedVertical } : {})}
-                className="flex items-center gap-1 shrink-0 hover:opacity-70 transition-opacity"
-                style={{ color: selectedVertical ? (verticalColor || colors.textSecondary) : colors.textSecondary }}>
-                <span className="text-xs font-medium">All orders</span>
-                <ChevronRight className="w-3.5 h-3.5 opacity-45" />
-              </button>
-            </div>
-            <div className="divide-y" style={flatRowsDivider}>
-              {recentOrders.length > 0 ? recentOrders.map((order) => (
-                <div key={order.orderNumber} className={flatRowCls}>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate">{formatCompanyName(order.company)}</p>
-                    <p className="text-xs opacity-40 tabular-nums">{new Date(order.date).toLocaleDateString()}</p>
-                  </div>
-                  <div className="text-right shrink-0 ml-2">
-                    <p className="text-sm font-bold tabular-nums">${order.net.toLocaleString()}</p>
-                    <p className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary }}>{order.status}</p>
-                  </div>
-                </div>
-              )) : (
-                <p className="text-sm py-4 text-center" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                  No orders tagged to {selectedVertical}
-                </p>
-              )}
-            </div>
-          </GlassCard>
+        {/* ── Vertical Breakdown + Live Orders ── unified interactive card ── */}
+        <GlassCard theme={theme} className="overflow-hidden" variant="elevated"
+          style={{
+            borderLeft: `4px solid ${verticalColor || 'transparent'}`,
+            transition: 'border-color 400ms cubic-bezier(0.4, 0, 0.2, 1)',
+          }}>
 
-          {/* Invoiced by Vertical */}
-          <GlassCard theme={theme} className="p-5" variant="elevated">
-            <TileHeader title="Invoiced by Vertical" />
+          {/* Donut section */}
+          <div className="px-5 pt-5 pb-4">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-widest mb-4"
+              style={{ color: colors.textSecondary, opacity: 0.45 }}>
+              Invoiced by Vertical
+            </p>
             <SalesByVerticalBreakdown
               theme={theme}
               data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))}
               selectedVertical={selectedVertical}
               onSelectVertical={setSelectedVertical}
             />
-          </GlassCard>
-        </div>
+          </div>
+
+          {/* Divider */}
+          <div className="mx-5" style={{ borderTop: `1px solid ${subtleBg(theme, 1.6)}` }} />
+
+          {/* Orders section — animates when vertical changes */}
+          <div className="px-5 pt-4 pb-5">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.h3
+                    key={selectedVertical || 'activity'}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                    className="text-[0.9375rem] font-bold truncate"
+                    style={{ color: selectedVertical ? verticalColor : colors.textPrimary }}
+                  >
+                    {selectedVertical ? `${selectedVertical} Orders` : 'Recent Activity'}
+                  </motion.h3>
+                </AnimatePresence>
+
+                <AnimatePresence>
+                  {selectedVertical && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.6 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.6 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      className="text-[0.625rem] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: `${verticalColor}1A`, color: verticalColor }}
+                    >
+                      {recentOrders.length}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <button
+                onClick={() => onNavigate('orders', selectedVertical ? { vertical: selectedVertical } : {})}
+                className="flex items-center gap-1 shrink-0 transition-opacity hover:opacity-60 active:opacity-40"
+                style={{ color: selectedVertical ? (verticalColor || colors.textSecondary) : colors.textSecondary }}
+              >
+                <span className="text-xs font-semibold">All orders</span>
+                <ChevronRight className="w-3.5 h-3.5" style={{ opacity: 0.5 }} />
+              </button>
+            </div>
+
+            {/* Order rows — keyed by vertical so they re-mount and stagger in */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedVertical || 'all'}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.12 }}
+              >
+                {recentOrders.length > 0 ? (
+                  <div className="space-y-0 divide-y" style={flatRowsDivider}>
+                    {recentOrders.map((order, i) => {
+                      const sc = STATUS_COLORS[order.status] || '#8B8680';
+                      return (
+                        <motion.div
+                          key={order.orderNumber}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            delay: i * 0.045,
+                            duration: 0.28,
+                            ease: [0.34, 1.2, 0.64, 1],
+                          }}
+                          className={flatRowCls}
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: colors.textPrimary }}>
+                              {formatCompanyName(order.company)}
+                            </p>
+                            <p className="text-xs mt-0.5 tabular-nums" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                              {order.details} · {new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0 ml-3">
+                            <p className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                              ${order.net.toLocaleString()}
+                            </p>
+                            <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                              <span className="text-[0.625rem] font-semibold" style={{ color: sc }}>{order.status}</span>
+                              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-sm py-5 text-center"
+                    style={{ color: colors.textSecondary, opacity: 0.45 }}
+                  >
+                    No orders tagged to {selectedVertical}
+                  </motion.p>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </GlassCard>
 
         {/* ── Commissions Preview ── */}
         {commissionsSnapshot && (
