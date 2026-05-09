@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Calendar, List, Building2, Package, X, Layers, MapPin, CheckCircle2, Clock, Truck } from 'lucide-react';
+import { Calendar, List, Building2, Package, X, Layers, MapPin, CheckCircle2, Clock, Truck, ChevronRight } from 'lucide-react';
+import { VERTICAL_COLORS } from '../../constants/verticals.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
@@ -230,7 +231,7 @@ const SampleOrdersView = ({ theme, dark, searchTerm }) => {
 };
 
 /* ---- Main Screen ---- */
-export const OrdersScreen = ({ theme, onNavigate }) => {
+export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
     const dark = isDarkTheme(theme);
     const bgRgb = dark ? '26,26,26' : '240,237,232';
     const [searchTerm, setSearchTerm] = useState('');
@@ -238,9 +239,14 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
     const [viewMode, setViewMode] = useState('list');
     const [dealerMenuOpen, setDealerMenuOpen] = useState(false);
     const [selectedDealer, setSelectedDealer] = useState('All Dealers');
+    const [selectedVertical, setSelectedVertical] = useState(screenParams?.vertical || null);
     const scrollRef = useRef(null);
     const dealerRef = useRef(null);
     const controlTile = fieldTileSurface(theme);
+
+    useEffect(() => {
+        if (screenParams?.vertical) setSelectedVertical(screenParams.vertical);
+    }, [screenParams?.vertical]);
 
     const dealers = useMemo(() => ['All Dealers', ...Array.from(new Set(ORDER_DATA.map((o) => o.company))).sort((a, b) => a.localeCompare(b))], []);
 
@@ -254,13 +260,14 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
         const term = searchTerm.toLowerCase();
         return ORDER_DATA.filter((o) => {
             if (selectedDealer !== 'All Dealers' && o.company !== selectedDealer) return false;
+            if (selectedVertical && o.vertical !== selectedVertical) return false;
             return (
                 (o.company?.toLowerCase() || '').includes(term) ||
                 (o.details?.toLowerCase() || '').includes(term) ||
                 (o.orderNumber?.toLowerCase() || '').includes(term)
             );
         });
-    }, [searchTerm, selectedDealer]);
+    }, [searchTerm, selectedDealer, selectedVertical]);
 
     const grouped = useMemo(() => {
         return filtered.reduce((acc, o) => {
@@ -333,6 +340,35 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             </div>
                         </div>
                     </div>
+                    {/* Active filter chips row */}
+                    {(selectedVertical || selectedDealer !== 'All Dealers') && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {selectedVertical && (() => {
+                                const vColor = VERTICAL_COLORS[selectedVertical] || '#8B8680';
+                                return (
+                                    <button
+                                        onClick={() => setSelectedVertical(null)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                                        style={{ backgroundColor: `${vColor}18`, color: vColor, border: `1px solid ${vColor}30` }}
+                                    >
+                                        {selectedVertical}
+                                        <X className="w-3 h-3" style={{ opacity: 0.7 }} />
+                                    </button>
+                                );
+                            })()}
+                            {selectedDealer !== 'All Dealers' && (
+                                <button
+                                    onClick={() => onNavigate('projects', { tab: 'pipeline', company: selectedDealer })}
+                                    className="inline-flex items-center gap-1 text-xs font-medium ml-auto transition-opacity hover:opacity-70"
+                                    style={{ color: theme.colors.textSecondary }}
+                                >
+                                    See pipeline
+                                    <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+                                </button>
+                            )}
+                        </div>
+                    )}
+
                     <div
                         aria-hidden="true"
                         className="pointer-events-none h-2"
@@ -371,13 +407,13 @@ export const OrdersScreen = ({ theme, onNavigate }) => {
                             <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
                                 <Package className="w-10 h-10 mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
                                 <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                    {searchTerm || selectedDealer !== 'All Dealers' ? 'No matching orders' : 'No orders'}
+                                    {searchTerm || selectedDealer !== 'All Dealers' || selectedVertical ? 'No matching orders' : 'No orders'}
                                 </p>
                                 <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {searchTerm || selectedDealer !== 'All Dealers' ? 'Try adjusting your filters' : 'Orders will appear here'}
+                                    {searchTerm || selectedDealer !== 'All Dealers' || selectedVertical ? 'Try adjusting your filters' : 'Orders will appear here'}
                                 </p>
-                                {(searchTerm || selectedDealer !== 'All Dealers') && (
-                                    <button onClick={() => { setSearchTerm(''); setSelectedDealer('All Dealers'); }}
+                                {(searchTerm || selectedDealer !== 'All Dealers' || selectedVertical) && (
+                                    <button onClick={() => { setSearchTerm(''); setSelectedDealer('All Dealers'); setSelectedVertical(null); }}
                                         className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold transition active:scale-95"
                                         style={{ backgroundColor: `${theme.colors.accent}15`, color: theme.colors.accent }}>
                                         <X className="w-3 h-3" /> Clear filters

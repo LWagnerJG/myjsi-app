@@ -1,14 +1,15 @@
 import React, { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { formatCurrencyCompact } from '../../../utils/format.js';
 
 const R = 72;
 const CX = 100;
 const CY = 100;
-const STROKE = 30;
+const STROKE = 28;
 const STROKE_SELECTED = 36;
 const CIRC = 2 * Math.PI * R;
-const GAP = (3 / 360) * CIRC;
+const GAP = (2.5 / 360) * CIRC;
 
 const BASE_PALETTE = ['#4A7C59', '#5B7B8C', '#C4956A', '#B85C5C', '#7A8C6E', '#8B8680'];
 function hashColor(name = '', override) {
@@ -59,17 +60,23 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette, selectedVe
     onSelectVertical?.(selectedVertical === name ? null : name);
   };
 
+  const SPRING = { type: 'spring', stiffness: 420, damping: 32 };
+  const FADE = { duration: 0.18, ease: [0.4, 0, 0.2, 1] };
+
   return (
     <div className="w-full" aria-label={`Sales by vertical, total ${formatCurrencyCompact(grandTotal)}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
 
         {/* Donut */}
-        <div className="self-center flex-shrink-0 w-[140px] h-[140px] sm:w-[160px] sm:h-[160px] relative">
-          <svg width="100%" height="100%" viewBox="0 0 200 200"
-            style={{ transform: 'rotate(-90deg)' }} aria-hidden="true"
+        <div className="self-center flex-shrink-0 w-[148px] h-[148px] sm:w-[164px] sm:h-[164px] relative">
+          <svg
+            width="100%" height="100%" viewBox="0 0 200 200"
+            style={{ transform: 'rotate(-90deg)' }}
+            aria-hidden="true"
           >
+            {/* Track ring */}
             <circle cx={CX} cy={CY} r={R} fill="none"
-              stroke={dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+              stroke={dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.055)'}
               strokeWidth={STROKE}
             />
             {segments.map(seg => {
@@ -84,81 +91,129 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette, selectedVe
                   strokeDasharray={seg.dashArray}
                   strokeDashoffset={seg.dashOffset}
                   strokeLinecap="butt"
+                  onClick={() => handleToggle(seg.name)}
                   style={{
-                    opacity: dimmed ? 0.25 : 1,
-                    transition: 'opacity 200ms ease, stroke-width 200ms ease',
+                    opacity: dimmed ? 0.16 : 1,
+                    transition: [
+                      'opacity 380ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      'stroke-width 300ms cubic-bezier(0.34, 1.4, 0.64, 1)',
+                    ].join(', '),
                     cursor: onSelectVertical ? 'pointer' : 'default',
+                    filter: isSelected ? `drop-shadow(0 0 6px ${seg.color}60)` : 'none',
+                    transformOrigin: `${CX}px ${CY}px`,
                   }}
                 />
               );
             })}
           </svg>
 
-          {/* Center — shows selected vertical name or grand total */}
+          {/* Center — crossfades between selection state and total */}
           <button
-            className="absolute inset-0 flex flex-col items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center"
             style={{ cursor: hasSelection ? 'pointer' : 'default', pointerEvents: hasSelection ? 'auto' : 'none' }}
             onClick={() => onSelectVertical?.(null)}
             aria-label={hasSelection ? 'Clear vertical filter' : undefined}
           >
-            {hasSelection ? (
-              <>
-                <span className="text-[0.625rem] font-bold uppercase tracking-widest text-center px-2 leading-snug"
-                  style={{ color: prepared.find(p => p.name === selectedVertical)?.color }}>
-                  {selectedVertical}
-                </span>
-                <span className="text-[0.5625rem] mt-1 font-medium"
-                  style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
-                  tap to clear
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="text-base sm:text-lg font-black tabular-nums leading-tight"
-                  style={{ color: theme.colors.textPrimary }}>
-                  {formatCurrencyCompact(grandTotal)}
-                </span>
-                <span className="text-[0.5625rem] font-semibold uppercase tracking-widest mt-0.5"
-                  style={{ color: theme.colors.textSecondary, opacity: 0.45 }}>
-                  Total
-                </span>
-              </>
-            )}
+            <AnimatePresence mode="wait">
+              {hasSelection ? (
+                <motion.div
+                  key={selectedVertical}
+                  initial={{ opacity: 0, scale: 0.82 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.82 }}
+                  transition={SPRING}
+                  className="flex flex-col items-center gap-0.5 px-2"
+                >
+                  <span
+                    className="text-[0.6875rem] font-black uppercase tracking-widest text-center leading-tight"
+                    style={{ color: prepared.find(p => p.name === selectedVertical)?.color }}
+                  >
+                    {selectedVertical}
+                  </span>
+                  <span
+                    className="text-[0.5rem] font-semibold uppercase tracking-wider"
+                    style={{ color: theme.colors.textSecondary, opacity: 0.45 }}
+                  >
+                    tap to clear
+                  </span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="total"
+                  initial={{ opacity: 0, scale: 0.82 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.82 }}
+                  transition={SPRING}
+                  className="flex flex-col items-center gap-0.5"
+                >
+                  <span
+                    className="text-base sm:text-lg font-black tabular-nums leading-tight"
+                    style={{ color: theme.colors.textPrimary }}
+                  >
+                    {formatCurrencyCompact(grandTotal)}
+                  </span>
+                  <span
+                    className="text-[0.5rem] font-semibold uppercase tracking-widest"
+                    style={{ color: theme.colors.textSecondary, opacity: 0.4 }}
+                  >
+                    Total
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
         </div>
 
         {/* Legend */}
         <div className="flex-1 grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-0">
-          {prepared.map(row => {
+          {prepared.map((row, i) => {
             const isSelected = row.name === selectedVertical;
             const dimmed = hasSelection && !isSelected;
             return (
-              <button
+              <motion.button
                 key={row.name}
                 onClick={() => handleToggle(row.name)}
-                className="flex items-center gap-2 py-[5px] rounded-lg px-1 -mx-1 transition-all active:scale-[0.98]"
-                style={{
-                  opacity: dimmed ? 0.35 : 1,
-                  transition: 'opacity 200ms ease',
-                  cursor: onSelectVertical ? 'pointer' : 'default',
-                  backgroundColor: isSelected ? `${row.color}12` : 'transparent',
+                className="flex items-center gap-2 py-[5px] rounded-xl px-1.5 -mx-1.5"
+                animate={{
+                  opacity: dimmed ? 0.28 : 1,
+                  backgroundColor: isSelected ? `${row.color}12` : 'rgba(0,0,0,0)',
                 }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                style={{ cursor: onSelectVertical ? 'pointer' : 'default' }}
+                whileTap={{ scale: 0.97 }}
               >
-                <div className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: row.color, transform: isSelected ? 'scale(1.35)' : 'scale(1)', transition: 'transform 200ms ease' }} />
-                <span className="text-xs flex-1 font-medium truncate text-left"
-                  style={{ color: isSelected ? row.color : theme.colors.textPrimary, fontWeight: isSelected ? 700 : 500, transition: 'color 200ms ease' }}>
+                <motion.div
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  animate={{ scale: isSelected ? 1.45 : 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                  style={{ backgroundColor: row.color }}
+                />
+                <span
+                  className="text-xs flex-1 font-medium truncate text-left"
+                  style={{
+                    color: isSelected ? row.color : theme.colors.textPrimary,
+                    fontWeight: isSelected ? 700 : 500,
+                    transition: 'color 220ms ease',
+                  }}
+                >
                   {row.name}
                 </span>
-                <span className="hidden sm:block text-[0.625rem] tabular-nums flex-shrink-0"
-                  style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+                <span
+                  className="hidden sm:block text-[0.625rem] tabular-nums flex-shrink-0"
+                  style={{ color: theme.colors.textSecondary, opacity: 0.45 }}
+                >
                   {row.pct.toFixed(0)}%
                 </span>
-                <span className="text-xs font-semibold tabular-nums flex-shrink-0 ml-1"
-                  style={{ color: isSelected ? row.color : theme.colors.textPrimary }}>
+                <span
+                  className="text-xs font-semibold tabular-nums flex-shrink-0 ml-1"
+                  style={{
+                    color: isSelected ? row.color : theme.colors.textPrimary,
+                    transition: 'color 220ms ease',
+                  }}
+                >
                   {formatCurrencyCompact(row.value)}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>

@@ -1,8 +1,9 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { ArrowUpRight, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Mail, MapPin, Package, Phone, Truck } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
+import { ORDER_DATA, STATUS_COLORS } from '../../../orders/data.js';
 import { JSI_SERIES } from '../../../products/data.js';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from '../../../resources/lead-times/data.js';
 import { PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
@@ -589,6 +590,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       .sort((a, b) => new Date(b.date) - new Date(a.date)),
     [draft, sampleOrders, opportunities],
   );
+
+  const relatedOrders = useMemo(() => {
+    const normalize = s => (s || '').replace(/[^a-z]/gi, '').toLowerCase();
+    const dealerKeys = (draft.dealers || []).map(normalize).filter(k => k.length >= 8);
+    if (!dealerKeys.length) return [];
+    return ORDER_DATA.filter(o => {
+      const orderKey = normalize(o.company);
+      return dealerKeys.some(dk => orderKey.includes(dk.slice(0, 10)));
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [draft.dealers]);
   const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   const { customer: linkedCustomer, source: customerLinkSource } = useMemo(
     () => resolveOpportunityCustomerLink(draft, customers),
@@ -875,7 +886,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               <Section title="Project Profile" subtitle="Scope, schedule, and install intent" theme={theme}>
                 <div className="grid gap-3.5 xl:grid-cols-2">
                   <Row label="Vertical" theme={theme}>
-                    <PillSelect options={VERTICALS.filter(v => v !== 'Other (Please specify)')} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
+                    <PillSelect options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
                   </Row>
                   <Row label="PO Timeframe" theme={theme}>
                     <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
@@ -1018,6 +1029,21 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                     onClick={() => setHubModal('documents')}
                     theme={theme}
                   />
+                  {relatedOrders.length > 0 && (
+                    <DetailHubCard
+                      icon={ShoppingBag}
+                      title="Related Orders"
+                      count={relatedOrders.length}
+                      summary={(() => {
+                        const latest = relatedOrders[0];
+                        const sc = STATUS_COLORS[latest.status] || '#8B8680';
+                        return `${latest.status} · ${new Date(latest.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                      })()}
+                      onClick={() => setHubModal('related-orders')}
+                      theme={theme}
+                      accentColor={STATUS_COLORS[relatedOrders[0]?.status] || undefined}
+                    />
+                  )}
                 </div>
               </Section>
             </div>
@@ -1242,6 +1268,33 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
         ) : (
           <p className="text-[0.75rem]" style={{ color: c.textSecondary, opacity: 0.7 }}>No sample orders linked to this project.</p>
         )}
+      </Modal>
+
+      {/* RELATED ORDERS HUB MODAL */}
+      <Modal show={hubModal === 'related-orders'} onClose={() => setHubModal(null)} title="Related Orders" theme={theme} maxWidth="max-w-lg">
+        <div className="space-y-2">
+          {relatedOrders.map((order) => {
+            const sc = STATUS_COLORS[order.status] || '#8B8680';
+            return (
+              <div key={order.orderNumber} className="flex items-center gap-3 px-3.5 py-3 rounded-[24px]"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT }}>
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>{order.details}</p>
+                  <p className="mt-0.5 text-[0.6875rem]" style={{ color: c.textSecondary }}>
+                    {order.orderNumber} · {new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-[0.8125rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>
+                    ${order.net.toLocaleString()}
+                  </p>
+                  <p className="text-[0.625rem] font-semibold mt-0.5" style={{ color: sc }}>{order.status}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Modal>
 
       {/* DOCUMENTS HUB MODAL */}

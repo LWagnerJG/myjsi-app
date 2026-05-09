@@ -11,6 +11,7 @@ import { TabContent } from '../../components/common/TabContent.jsx';
 import { isDarkTheme, JSI_COLORS, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
+import { formatCompanyName } from '../../utils/format.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
@@ -523,6 +524,7 @@ export const ProjectsScreen = forwardRef(({
   projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
   setBackHandler, onAddInstall, sampleOrders,
+  screenParams,
 }, ref) => {
   const isDark = isDarkTheme(theme);
   const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
@@ -533,6 +535,12 @@ export const ProjectsScreen = forwardRef(({
   const [customerType, setCustomerType] = usePersistentState('pref.projects.customerType', 'end-users');
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [showAddInstall, setShowAddInstall] = useState(false);
+  const [companyFilter, setCompanyFilter] = useState(screenParams?.company || null);
+  const screenParamsCompany = screenParams?.company || null;
+  useEffect(() => {
+    setCompanyFilter(screenParamsCompany);
+  }, [screenParamsCompany]);
+
   const stagesScrollRef = useRef(null);
   const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
   const [showStageFadeRight, setShowStageFadeRight] = useState(false);
@@ -636,10 +644,17 @@ export const ProjectsScreen = forwardRef(({
     };
   }, [projectsTab, updateStageFade]);
 
-  const filteredOpportunities = useMemo(
-    () => (opportunities || []).filter(o => o.stage === selectedPipelineStage),
-    [selectedPipelineStage, opportunities],
-  );
+  const filteredOpportunities = useMemo(() => {
+    const normalize = s => (s || '').replace(/[^a-z]/gi, '').toLowerCase();
+    return (opportunities || []).filter(o => {
+      if (o.stage !== selectedPipelineStage) return false;
+      if (!companyFilter) return true;
+      const cf = normalize(companyFilter);
+      const dealerMatch = (o.dealers || []).some(d => normalize(d).includes(cf.slice(0, 10)) || cf.includes(normalize(d).slice(0, 10)));
+      const companyMatch = normalize(o.company).includes(cf.slice(0, 10));
+      return dealerMatch || companyMatch;
+    });
+  }, [selectedPipelineStage, opportunities, companyFilter]);
 
   const presentedOpportunities = useMemo(
     () => filteredOpportunities.map((opportunity) => {
@@ -839,6 +854,23 @@ export const ProjectsScreen = forwardRef(({
         {projectsTab === 'customers' && (
           <div className="px-4 sm:px-6 lg:px-8 pb-1 max-w-content mx-auto w-full">
             <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
+          </div>
+        )}
+
+        {projectsTab === 'pipeline' && companyFilter && (
+          <div className="px-4 sm:px-6 lg:px-8 pb-2 max-w-content mx-auto w-full">
+            <button
+              onClick={() => setCompanyFilter(null)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+              style={{
+                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.07)',
+                color: theme.colors.textPrimary,
+              }}
+            >
+              <Building2 className="w-3 h-3" style={{ opacity: 0.6 }} />
+              {formatCompanyName(companyFilter)}
+              <X className="w-3 h-3" style={{ opacity: 0.5 }} />
+            </button>
           </div>
         )}
 

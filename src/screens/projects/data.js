@@ -29,7 +29,7 @@ export const URGENCY_LEVELS = ['Low', 'Medium', 'High'];
 export const PO_TIMEFRAMES = ['Unknown', 'Within 30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
 export const COMPETITORS = ['None', 'Kimball', 'OFS', 'Indiana', 'National', 'Haworth', 'HNI', 'MillerKnoll', 'Steelcase', 'Versteel', 'Krug', 'Lazyboy', 'DarRan', 'Hightower', 'Allsteel'];
 export { DISCOUNT_OPTIONS, DAILY_DISCOUNT_OPTIONS, DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
-export const VERTICALS = ['Corporate', 'Education', 'Government', 'Healthcare', 'Hospitality', 'Other (Please specify)'];
+export { VERTICALS, VERTICAL_COLORS } from '../../constants/verticals.js';
 export const WIN_PROBABILITY_OPTIONS = ['20%', '40%', '60%', '80%', '100%'];
 export const INITIAL_DESIGN_FIRMS = ['N/A', 'Undecided', 'McGee Designhouse', 'Ratio', 'CSO', 'IDO', 'Studio M'];
 export const INITIAL_DEALERS = ['Undecided', 'Business Furniture', 'COE', 'OfficeWorks', 'RJE'];

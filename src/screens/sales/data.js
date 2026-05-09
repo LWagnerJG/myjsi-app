@@ -1,4 +1,6 @@
 // Sales feature specific data
+import { VERTICAL_COLORS } from '../../constants/verticals.js';
+
 export const YTD_SALES_DATA = [
     { label: 'Total Sales', current: 3666132, previous: 2900104, goal: 7000000 }, 
     { label: 'Education', current: 1250000, previous: 1045589, goal: 2500000 }, 
@@ -17,12 +19,12 @@ export const MONTHLY_SALES_DATA = [
 ];
 
 export const SALES_VERTICALS_DATA = [
-    { label: 'Healthcare', value: 2900104, color: '#4A7C59' },
-    { label: 'Education', value: 1045589, color: '#5B7B8C' },
-    { label: 'Hospitality', value: 1045589, color: '#C4956A' },
-    { label: 'Corporate', value: 1045589, color: '#8B7355' },
-    { label: 'Government', value: 1045589, color: '#7A8B6F' },
-    { label: 'Other', value: 500000, color: '#A09890' }
+    { label: 'Healthcare',  value: 2900104, color: VERTICAL_COLORS.Healthcare  },
+    { label: 'Education',   value: 1045589, color: VERTICAL_COLORS.Education   },
+    { label: 'Hospitality', value: 1045589, color: VERTICAL_COLORS.Hospitality },
+    { label: 'Corporate',   value: 1045589, color: VERTICAL_COLORS.Corporate   },
+    { label: 'Government',  value: 1045589, color: VERTICAL_COLORS.Government  },
+    { label: 'Other',       value:  500000, color: VERTICAL_COLORS.Other       },
 ];
 
 export const CUSTOMER_RANK_DATA = [
