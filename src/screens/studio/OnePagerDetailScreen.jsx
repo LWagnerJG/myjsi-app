@@ -3,6 +3,7 @@ import { ChevronLeft, Download, Share2, Eye, Calendar, Tag } from 'lucide-react'
 import { isDarkTheme, JSI_COLORS as _JSI_COLORS } from '../../design-system/tokens.js';
 import { ONE_PAGERS, SCOPES } from './data.js';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
+import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
 
 const formatDate = (ts) => {
   try { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
@@ -106,18 +107,24 @@ export const OnePagerDetailScreen = ({ theme, screenParams, onNavigate, handleBa
                 <p className="text-sm leading-relaxed mt-3" style={{ color: theme.colors.textSecondary }}>{resource.summary}</p>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <a href={resource.pdfUrl} download
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-95"
-                  style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
-                  <Download className="w-3.5 h-3.5" /> Download PDF
-                </a>
-                <button onClick={onShare}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-95"
-                  style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: theme.colors.textPrimary }}>
-                  <Share2 className="w-3.5 h-3.5" /> {shareNote || 'Share'}
-                </button>
-              </div>
+              <JSIActionButtonGroup wrap>
+                <JSIActionButton
+                  as="a"
+                  href={resource.pdfUrl}
+                  download
+                  theme={theme}
+                  icon={<Download className="w-3.5 h-3.5" />}
+                >
+                  Download PDF
+                </JSIActionButton>
+                <JSIActionButton
+                  onClick={onShare}
+                  theme={theme}
+                  icon={<Share2 className="w-3.5 h-3.5" />}
+                >
+                  {shareNote || 'Share'}
+                </JSIActionButton>
+              </JSIActionButtonGroup>
 
               <div className="rounded-2xl p-4 space-y-3" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : '#FFFFFF', border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}` }}>
                 <div className="flex items-center justify-between">

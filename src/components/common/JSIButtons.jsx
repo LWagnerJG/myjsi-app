@@ -116,6 +116,49 @@ export const JSIWebButton = ({
         </Tag>
     );
 };
+
+export const JSIActionButton = ({
+    children,
+    className = '',
+    grow = true,
+    icon = null,
+    size = 'medium',
+    theme,
+    variant = 'soft',
+    ...props
+}) => (
+    <JSIWebButton
+        theme={theme}
+        variant={variant}
+        size={size}
+        icon={icon}
+        className={`${grow ? 'jsi-web-btn--auto' : ''} ${className}`}
+        {...props}
+    >
+        {children}
+    </JSIWebButton>
+);
+
+export const JSIActionButtonGroup = ({
+    children,
+    className = '',
+    compact = false,
+    justify = 'start',
+    wrap = false,
+}) => {
+    const justifyClass = {
+        start: 'justify-start',
+        end: 'justify-end',
+        center: 'justify-center',
+        between: 'justify-between',
+    }[justify] || 'justify-start';
+
+    return (
+        <div className={`flex items-center ${justifyClass} ${wrap ? 'flex-wrap' : ''} ${compact ? 'gap-1.5' : 'gap-2.5'} ${className}`}>
+            {children}
+        </div>
+    );
+};
 const FROST_SIZES = {
     compact: 'px-4 py-2.5 text-xs gap-2',
     default: 'px-5 py-3 text-sm gap-2.5',

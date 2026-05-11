@@ -166,7 +166,7 @@ export const SalesByVerticalBreakdown = ({ data = [], theme, palette, selectedVe
 
         {/* Legend */}
         <div className="flex-1 grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-0">
-          {prepared.map((row, i) => {
+          {prepared.map((row) => {
             const isSelected = row.name === selectedVertical;
             const dimmed = hasSelection && !isSelected;
             return (

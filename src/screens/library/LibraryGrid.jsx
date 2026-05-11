@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { INITIAL_ASSETS } from './data.js';
 import { X, Download, Share2, Copy, Heart } from 'lucide-react';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../components/common/modalUtils.js';
-import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
+import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
 
 // Simple in-memory library grid with mock data
 export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [], onToggleSaveImage, assetsOverride }) => {
@@ -119,54 +119,46 @@ export const LibraryGrid = ({ theme, query, parentHeaderRef, savedImageIds = [],
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-2 pb-2">
+                <JSIActionButtonGroup wrap className="pb-2">
                   {onToggleSaveImage && (() => {
                     const isSaved = savedImageIds.includes(selected.id);
                     return (
-                      <JSIWebButton
+                      <JSIActionButton
                         onClick={() => onToggleSaveImage(selected.id)}
                         theme={theme}
-                        variant="soft"
-                        size="medium"
                         icon={<Heart className="w-3.5 h-3.5" fill={isSaved ? '#dc2626' : 'none'} />}
                         style={isSaved ? { backgroundColor: '#fee2e2', borderColor: '#fca5a5', color: '#dc2626' } : undefined}
                       >
                         {isSaved ? 'Saved' : 'Save'}
-                      </JSIWebButton>
+                      </JSIActionButton>
                     );
                   })()}
-                  <JSIWebButton
+                  <JSIActionButton
                     onClick={() => { navigator.clipboard.writeText(window.location.origin + '/library#' + selected.id); }}
                     theme={theme}
-                    variant="soft"
-                    size="medium"
                     icon={<Share2 className="w-3.5 h-3.5" />}
                   >
                     Share
-                  </JSIWebButton>
-                  <JSIWebButton
+                  </JSIActionButton>
+                  <JSIActionButton
                     onClick={() => { navigator.clipboard.writeText(selected.sourceUrl || selected.detailSrc || selected.src); }}
                     theme={theme}
-                    variant="soft"
-                    size="medium"
                     icon={<Copy className="w-3.5 h-3.5" />}
                   >
                     Copy URL
-                  </JSIWebButton>
-                  <JSIWebButton
+                  </JSIActionButton>
+                  <JSIActionButton
                     as="a"
                     href={selected.sourceUrl || selected.detailSrc || selected.src}
                     download
                     target="_blank"
                     rel="noreferrer"
                     theme={theme}
-                    variant="filled"
-                    size="medium"
                     icon={<Download className="w-3.5 h-3.5" />}
                   >
                     Download
-                  </JSIWebButton>
-                </div>
+                  </JSIActionButton>
+                </JSIActionButtonGroup>
               </div>
             </div>
           </div>

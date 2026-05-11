@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, LayoutGrid, File, Loader2, Check, Download, FolderOpen } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { BUILDER_PROMPT_SUGGESTIONS, BUILDER_EXPORT_FORMATS, MOCK_PRESENTATION_PDF_BASE64 } from '../data.js';
+import { JSIActionButton, JSIActionButtonGroup } from '../../../../components/common/JSIButtons.jsx';
 
 const CARD_SHADOW = '0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)';
 
@@ -196,18 +197,22 @@ export const PresentationBuilder = ({ theme, onDeckGenerated }) => {
                                     </div>
                                     <p className="text-xs mt-1.5 line-clamp-2 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{generatedDeck.prompt}</p>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={handleDownload}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.97]"
-                                        style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}>
-                                        <Download className="w-3.5 h-3.5" /> Download {generatedDeck.format.toUpperCase()}
-                                    </button>
-                                    <button onClick={handleSaveToMyDecks}
-                                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.97]"
-                                        style={{ border: `1.5px solid ${borderColor}`, color: theme.colors.textPrimary }}>
-                                        <FolderOpen className="w-3.5 h-3.5" /> Save
-                                    </button>
-                                </div>
+                                <JSIActionButtonGroup>
+                                    <JSIActionButton
+                                        onClick={handleDownload}
+                                        theme={theme}
+                                        icon={<Download className="w-3.5 h-3.5" />}
+                                    >
+                                        Download {generatedDeck.format.toUpperCase()}
+                                    </JSIActionButton>
+                                    <JSIActionButton
+                                        onClick={handleSaveToMyDecks}
+                                        theme={theme}
+                                        icon={<FolderOpen className="w-3.5 h-3.5" />}
+                                    >
+                                        Save
+                                    </JSIActionButton>
+                                </JSIActionButtonGroup>
                             </div>
                         </div>
 

@@ -6,6 +6,7 @@ import { SpecCheckRequestModal } from '../../components/common/SpecCheckRequestM
 import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT, HOME_SURFACE_LIGHT, HOME_SURFACE_DARK } from '../../design-system/homeChrome.js';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
+import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 import { MessageSquarePlus } from 'lucide-react';
 import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
@@ -61,6 +62,8 @@ export const HomeScreen = React.memo(({
     currentUserId,
     setSuccessMessage,
 }) => {
+    const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
+    const { data: leadTimesData } = useCompanyResource('lead-times', LEAD_TIMES_DATA);
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeDragId, setActiveDragId] = useState(null);
@@ -402,13 +405,13 @@ export const HomeScreen = React.memo(({
 
     const leadTimeFavoritesData = useMemo(() => {
         if (!leadTimeFavorites.length) return [];
-        return LEAD_TIMES_DATA.filter(item => leadTimeFavorites.includes(item.series))
+        return leadTimesData.filter(item => leadTimeFavorites.includes(item.series))
             .slice(0, 6);
-    }, [leadTimeFavorites]);
+    }, [leadTimeFavorites, leadTimesData]);
 
     const recentOrders = useMemo(() => {
-        return [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
-    }, []);
+        return [...ordersData].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
+    }, [ordersData]);
 
     const FEATURE_ROUTES = useMemo(() => ({
         community: 'community',

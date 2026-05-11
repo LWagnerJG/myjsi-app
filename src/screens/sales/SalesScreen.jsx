@@ -9,6 +9,7 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName, formatCurrencyCompact } from '../../utils/format.js';
+import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
 
 const parseQuarterKey = (key = '') => {
@@ -24,6 +25,7 @@ const sortQuarterEntries = (entries) =>
 
 
 export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
+  const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [chartDataType, setChartDataType] = useState('bookings');
   const [showTableView, setShowTableView] = useState(false);
   const [selectedVertical, setSelectedVertical] = useState(null);
@@ -52,7 +54,7 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
     return Math.min(100, goalPct);
   }, [chartDataType, totalBookings, totalSales]);
 
-  const allOrdersSorted = useMemo(() => [...ORDER_DATA].sort((a, b) => new Date(b.date) - new Date(a.date)), []);
+  const allOrdersSorted = useMemo(() => [...ordersData].sort((a, b) => new Date(b.date) - new Date(a.date)), [ordersData]);
   const recentOrders = useMemo(() => {
     if (!selectedVertical) return allOrdersSorted.slice(0, 5);
     return allOrdersSorted.filter(o => o.vertical === selectedVertical);

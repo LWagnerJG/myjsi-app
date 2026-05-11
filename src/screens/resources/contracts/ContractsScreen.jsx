@@ -8,6 +8,7 @@ import { CONTRACTS_DATA } from './data.js';
 import { SegmentedToggle } from '../../../components/common/GroupedToggle.jsx';
 import { TabContent } from '../../../components/common/TabContent.jsx';
 import { UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
+import { useCompanyResource } from '../../../hooks/useCompanyResource.js';
 
 const TABS = [
     { label: 'Omnia',   value: 'omnia'   },
@@ -173,13 +174,14 @@ const MetricHeaderLabel = ({ shortLabel, longLabel, theme }) => {
 
 /* ── main screen ──────────────────────────────────────── */
 export const ContractsScreen = ({ theme, setSuccessMessage }) => {
+    const { data: contractsData } = useCompanyResource('contracts', CONTRACTS_DATA);
     const [active, setActive] = useState('omnia');
     const [selectedState, setSelectedState] = useState('');
     const [stateDropdownOpen, setStateDropdownOpen] = useState(false);
     const [stateTabAnchor, setStateTabAnchor] = useState(null);
     const tabBarRef = useRef(null);
     const dark = isDarkTheme(theme);
-    const contract = CONTRACTS_DATA[active];
+    const contract = contractsData?.[active] || CONTRACTS_DATA[active];
     const isState = active === 'state';
     const usesTierChartLayout = contract.discountLayout === 'tier-chart';
     const hasMargins = !isState && !usesTierChartLayout && contract.discounts?.some(r => r.margin);

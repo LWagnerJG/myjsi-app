@@ -10,6 +10,7 @@ import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface } from '..
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
 import { formatCurrency, formatCompanyName, formatRelativeTime } from '../../utils/format.js';
+import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
 /* ---------------------- Calendar View ---------------------- */
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
@@ -230,10 +231,136 @@ const SampleOrdersView = ({ theme, dark, searchTerm }) => {
     );
 };
 
+const filterRailSurface = (theme) => {
+    const dark = isDarkTheme(theme);
+    return {
+        backdropFilter: 'blur(18px) saturate(1.35)',
+        WebkitBackdropFilter: 'blur(18px) saturate(1.35)',
+        backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.58)',
+        border: dark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.82)',
+        boxShadow: dark ? 'none' : '0 1px 8px rgba(53,53,53,0.045)'
+    };
+};
+
+const filterButtonSurface = (theme, active = false) => {
+    const dark = isDarkTheme(theme);
+    if (!active) {
+        return {
+            backgroundColor: 'transparent',
+            border: '1px solid transparent',
+            boxShadow: 'none',
+            color: theme.colors.textPrimary
+        };
+    }
+
+    return {
+        backgroundColor: dark ? 'rgba(255,255,255,0.12)' : '#FFFFFF',
+        border: dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.96)',
+        boxShadow: dark ? 'none' : '0 1px 5px rgba(53,53,53,0.06)',
+        color: theme.colors.textPrimary
+    };
+};
+
+const OrdersFilterRail = ({
+    theme,
+    dark,
+    selectedDealer,
+    dealers,
+    dealerMenuOpen,
+    setDealerMenuOpen,
+    setSelectedDealer,
+    dealerRef,
+    viewMode,
+    setViewMode
+}) => {
+    const controlTile = fieldTileSurface(theme);
+    const dealerActive = selectedDealer !== 'All Dealers';
+    const viewActive = viewMode === 'calendar';
+    const dealerLabel = dealerActive ? formatCompanyName(selectedDealer) : 'All Dealers';
+
+    return (
+        <div
+            className="flex w-full min-[420px]:w-auto items-center gap-1 rounded-full p-1"
+            style={filterRailSurface(theme)}
+        >
+            <div ref={dealerRef} className="relative min-w-0 flex-1 min-[420px]:flex-none">
+                <button
+                    type="button"
+                    onClick={() => setDealerMenuOpen((open) => !open)}
+                    className="w-full min-[420px]:w-auto min-w-0 rounded-full flex items-center justify-start active:scale-95 transition px-2.5 gap-1.5"
+                    style={{
+                        ...filterButtonSurface(theme, dealerActive),
+                        height: 'calc(var(--jsi-ctrl-h) - 8px)'
+                    }}
+                    title={selectedDealer}
+                    aria-haspopup="listbox"
+                    aria-expanded={dealerMenuOpen}
+                >
+                    <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textPrimary, opacity: dealerActive ? 1 : 0.82 }} />
+                    <span className="min-w-0 truncate text-[0.75rem] font-semibold max-w-[min(8rem,32vw)] min-[420px]:max-w-[4.85rem] sm:max-w-[8rem]" style={{ color: theme.colors.textPrimary }}>
+                        {dealerLabel}
+                    </span>
+                </button>
+                {dealerMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute right-0 left-0 min-[420px]:left-auto mt-2 w-full min-[420px]:w-60 max-h-72 overflow-y-auto p-2 z-20"
+                        style={{ ...modalCardSurface(theme), transformOrigin: 'top right' }}
+                        role="listbox"
+                        aria-label="Dealer filter"
+                    >
+                        {dealers.map((dealer) => {
+                            const active = dealer === selectedDealer;
+                            return (
+                                <button
+                                    key={dealer}
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedDealer(dealer);
+                                        setDealerMenuOpen(false);
+                                    }}
+                                    className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`}
+                                    style={{
+                                        backgroundColor: active ? controlTile.backgroundColor : 'transparent',
+                                        color: theme.colors.textPrimary
+                                    }}
+                                    role="option"
+                                    aria-selected={active}
+                                >
+                                    {formatCompanyName(dealer)}
+                                </button>
+                            );
+                        })}
+                    </motion.div>
+                )}
+            </div>
+
+            <button
+                type="button"
+                onClick={() => setViewMode((mode) => mode === 'list' ? 'calendar' : 'list')}
+                className="rounded-full flex items-center justify-center active:scale-95 transition w-9 flex-shrink-0"
+                style={{
+                    ...filterButtonSurface(theme, viewActive),
+                    height: 'calc(var(--jsi-ctrl-h) - 8px)'
+                }}
+                title={viewMode === 'list' ? 'Calendar view' : 'List view'}
+                aria-label={viewMode === 'list' ? 'Show calendar view' : 'Show list view'}
+                aria-pressed={viewActive}
+            >
+                {viewMode === 'list'
+                    ? <Calendar className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />
+                    : <List className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />}
+            </button>
+        </div>
+    );
+};
+
 /* ---- Main Screen ---- */
 export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
+    const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
     const dark = isDarkTheme(theme);
-    const bgRgb = dark ? '26,26,26' : '240,237,232';
     const [searchTerm, setSearchTerm] = useState('');
     const [dateType, setDateType] = useState('shipDate');
     const [viewMode, setViewMode] = useState('list');
@@ -242,13 +369,12 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
     const [selectedVertical, setSelectedVertical] = useState(screenParams?.vertical || null);
     const scrollRef = useRef(null);
     const dealerRef = useRef(null);
-    const controlTile = fieldTileSurface(theme);
 
     useEffect(() => {
         if (screenParams?.vertical) setSelectedVertical(screenParams.vertical);
     }, [screenParams?.vertical]);
 
-    const dealers = useMemo(() => ['All Dealers', ...Array.from(new Set(ORDER_DATA.map((o) => o.company))).sort((a, b) => a.localeCompare(b))], []);
+    const dealers = useMemo(() => ['All Dealers', ...Array.from(new Set(ordersData.map((o) => o.company))).sort((a, b) => a.localeCompare(b))], [ordersData]);
 
     useEffect(() => {
         const click = (e) => { if (dealerRef.current && !dealerRef.current.contains(e.target)) setDealerMenuOpen(false); };
@@ -258,7 +384,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
 
     const filtered = useMemo(() => {
         const term = searchTerm.toLowerCase();
-        return ORDER_DATA.filter((o) => {
+        return ordersData.filter((o) => {
             if (selectedDealer !== 'All Dealers' && o.company !== selectedDealer) return false;
             if (selectedVertical && o.vertical !== selectedVertical) return false;
             return (
@@ -267,7 +393,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                 (o.orderNumber?.toLowerCase() || '').includes(term)
             );
         });
-    }, [searchTerm, selectedDealer, selectedVertical]);
+    }, [ordersData, searchTerm, selectedDealer, selectedVertical]);
 
     const grouped = useMemo(() => {
         return filtered.reduce((acc, o) => {
@@ -286,10 +412,10 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             {/* Controls */}
             <div className="flex-shrink-0 max-w-content mx-auto w-full">
-                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-col gap-2.5">
-                    <div className="space-y-3">
+                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-1.5 flex flex-col gap-2">
+                    <div className="space-y-2">
                         <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
-                        <div className="flex items-center gap-2.5">
+                        <div className={`grid grid-cols-1 ${dateType === 'samples' ? '' : 'min-[420px]:grid-cols-[minmax(0,1fr)_auto]'} items-center gap-2`}>
                             <div className="min-w-0 flex-1">
                                 <SegmentedToggle
                                     value={dateType}
@@ -300,44 +426,24 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                                         { value: 'samples', label: 'Samples' },
                                     ]}
                                     theme={theme}
-                                    size="sm"
+                                    size="smDense"
+                                    fullWidth
                                 />
                             </div>
-                            <div
-                                className="ml-auto flex items-center gap-1.5 rounded-full p-1"
-                                style={{
-                                    display: dateType === 'samples' ? 'none' : undefined,
-                                    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.035)',
-                                }}
-                            >
-                                <div ref={dealerRef} className="relative flex-shrink-0" style={{ display: dateType === 'samples' ? 'none' : undefined }}>
-                                    <button onClick={() => setDealerMenuOpen(o => !o)} className="rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-2 min-w-[7rem] sm:min-w-[7.75rem] md:w-auto md:px-4" style={{ ...controlTile, borderRadius: '999px', height: 'var(--jsi-ctrl-h)', backgroundColor: selectedDealer !== 'All Dealers' ? `${theme.colors.accent}12` : 'transparent', border: selectedDealer !== 'All Dealers' ? `1px solid ${theme.colors.accent}24` : '1px solid transparent', boxShadow: 'none' }} title={selectedDealer}>
-                                        <Building2 className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />
-                                        <span className="text-[0.75rem] sm:text-[0.8125rem] font-medium whitespace-nowrap truncate" style={{ color: theme.colors.textPrimary, maxWidth: '5.1rem' }}>
-                                            {selectedDealer === 'All Dealers' ? 'All Dealers' : formatCompanyName(selectedDealer)}
-                                        </span>
-                                    </button>
-                                    {dealerMenuOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                                            className="absolute right-0 mt-2 w-56 max-h-72 overflow-y-auto p-2 z-20"
-                                            style={{ ...modalCardSurface(theme), transformOrigin: 'top right' }}>
-                                            {dealers.map(d => {
-                                                const active = d === selectedDealer;
-                                                return <button key={d} onClick={() => { setSelectedDealer(d); setDealerMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-xl text-sm transition motion-tap active:scale-[0.98] ${active ? 'font-semibold' : (dark ? 'hover:bg-white/[0.06]' : 'hover:bg-black/[0.04]')}`} style={{ backgroundColor: active ? controlTile.backgroundColor : 'transparent', color: theme.colors.textPrimary }}>{formatCompanyName(d)}</button>;
-                                            })}
-                                        </motion.div>
-                                    )}
-                                </div>
-                                <button onClick={() => setViewMode(v => v === 'list' ? 'calendar' : 'list')} className="rounded-full flex items-center justify-center active:scale-95 transition w-[var(--jsi-ctrl-h)] md:w-auto md:px-4 md:gap-2" style={{ ...controlTile, borderRadius: '999px', height: 'var(--jsi-ctrl-h)', backgroundColor: viewMode === 'calendar' ? `${theme.colors.accent}12` : 'transparent', border: viewMode === 'calendar' ? `1px solid ${theme.colors.accent}24` : '1px solid transparent', boxShadow: 'none', display: dateType === 'samples' ? 'none' : undefined }} title={viewMode === 'list' ? 'Calendar View' : 'List View'}>
-                                    {viewMode === 'list' ? <Calendar className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} /> : <List className="w-[18px] h-[18px] flex-shrink-0" style={{ color: theme.colors.textPrimary }} />}
-                                    <span className="hidden md:inline text-[0.8125rem] font-medium whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>
-                                        {viewMode === 'list' ? 'Calendar' : 'List'}
-                                    </span>
-                                </button>
-                            </div>
+                            {dateType !== 'samples' && (
+                                <OrdersFilterRail
+                                    theme={theme}
+                                    dark={dark}
+                                    selectedDealer={selectedDealer}
+                                    dealers={dealers}
+                                    dealerMenuOpen={dealerMenuOpen}
+                                    setDealerMenuOpen={setDealerMenuOpen}
+                                    setSelectedDealer={setSelectedDealer}
+                                    dealerRef={dealerRef}
+                                    viewMode={viewMode}
+                                    setViewMode={setViewMode}
+                                />
+                            )}
                         </div>
                     </div>
                     {/* Active filter chips row */}
@@ -369,25 +475,12 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                         </div>
                     )}
 
-                    <div
-                        aria-hidden="true"
-                        className="pointer-events-none h-2"
-                        style={{
-                            backdropFilter: 'blur(4px) saturate(1.05)',
-                            WebkitBackdropFilter: 'blur(4px) saturate(1.05)',
-                            background: `linear-gradient(to bottom,
-                                rgba(${bgRgb},0.42) 0%,
-                                rgba(${bgRgb},0.18) 58%,
-                                rgba(${bgRgb},0.04) 84%,
-                                rgba(${bgRgb},0) 100%)`,
-                        }}
-                    />
                 </div>
             </div>
 
             {/* Content */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-24 max-w-content mx-auto w-full">
+                <div className="px-4 sm:px-6 lg:px-8 pt-1.5 pb-24 max-w-content mx-auto w-full">
                     <AnimatePresence mode="wait">
                       {dateType === 'samples' ? (
                         <motion.div key="samples" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>

@@ -4,9 +4,10 @@ import {
   Truck, PackageCheck, ClipboardCheck,
 } from 'lucide-react';
 import { isDarkTheme } from '../../design-system/tokens.js';
-import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
+import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { useFadeUp, tc, fmt$, fd, fs, Stage, LineItem, AckModal, ClipsModal } from './OrderDetailScreenComponents.jsx';
+import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
 /* ── timeline stages ─────────────────────────────────────────── */
 const STAGES = [
@@ -21,11 +22,12 @@ const IDX = { 'Order Entry': 1, 'Acknowledged': 2, 'In Production': 3, 'Shipping
 const PCT = { 1: 20, 2: 35, 3: 60, 4: 85, 5: 100 };
 
 export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
+  const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [xLine, setXLine]   = useState(null);
   const [modal, setModal]   = useState(null); // 'ack' | 'clips' | null
 
   const orderId = currentScreen.split('/')[1];
-  const order   = useMemo(() => ORDER_DATA.find(o => o.orderNumber === orderId), [orderId]);
+  const order   = useMemo(() => ordersData.find(o => o.orderNumber === orderId), [ordersData, orderId]);
   const toggle  = useCallback(id => setXLine(p => p === id ? null : id), []);
 
   const dark        = isDarkTheme(theme);
@@ -121,21 +123,18 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
             </div>
 
             {/* actions — JSI web buttons below the card */}
-            <div className="flex items-center gap-2.5 mt-3">
+            <JSIActionButtonGroup className="mt-3">
               {actions.map(({ label, Icon, onClick }) => (
-                <JSIWebButton
+                <JSIActionButton
                   key={label}
                   onClick={onClick}
                   theme={theme}
-                  variant="soft"
-                  size="medium"
-                  className="jsi-web-btn--auto"
                   icon={<Icon size={16} strokeWidth={2} />}
                 >
                   {label}
-                </JSIWebButton>
+                </JSIActionButton>
               ))}
-            </div>
+            </JSIActionButtonGroup>
           </div>
 
           {/* ── order progress ── */}

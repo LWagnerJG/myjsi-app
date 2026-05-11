@@ -4,6 +4,7 @@ import { Modal } from '../../components/common/Modal.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { useToast } from '../../components/common/toastContext.js';
+import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
 import { cardSurface, fieldTileSurface, isDarkTheme } from '../../design-system/tokens.js';
 import { CUSTOMS_CATEGORIES, CUSTOM_OPPORTUNITIES } from './data.js';
 
@@ -326,32 +327,26 @@ export const CustomsScreen = ({ theme }) => {
                             {selected.details}
                         </p>
 
-                        <div className="flex items-center justify-end gap-2 pt-1">
-                            <button
+                        <JSIActionButtonGroup justify="end" className="pt-1">
+                            <JSIActionButton
                                 type="button"
                                 onClick={() => handleShare(selected)}
-                                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[0.82rem] font-semibold"
-                                style={{
-                                    backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-                                    color: theme.colors.textPrimary,
-                                }}
+                                theme={theme}
+                                grow={false}
+                                icon={<Share2 className="w-3.5 h-3.5" />}
                             >
-                                <Share2 className="w-3.5 h-3.5" />
                                 Share
-                            </button>
-                            <button
+                            </JSIActionButton>
+                            <JSIActionButton
                                 type="button"
                                 onClick={() => { setInquireFor(selected); setSelected(null); }}
-                                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[0.82rem] font-semibold"
-                                style={{
-                                    backgroundColor: theme.colors.textPrimary,
-                                    color: dark ? '#111111' : '#FFFFFF',
-                                }}
+                                theme={theme}
+                                grow={false}
+                                icon={<Send className="w-3.5 h-3.5" />}
                             >
-                                <Send className="w-3.5 h-3.5" />
                                 Inquire
-                            </button>
-                        </div>
+                            </JSIActionButton>
+                        </JSIActionButtonGroup>
                     </div>
                 ) : null}
             </Modal>

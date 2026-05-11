@@ -1,15 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ArrowRight,
+    Building2,
+    CalendarDays,
     Check,
     ChevronDown,
+    Clock3,
     Info,
     MapPin,
     Plus,
     Send,
+    Sparkles,
+    UserRound,
+    Users,
     X,
 } from 'lucide-react';
 import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.jsx';
+import { JSIActionButton, JSIActionButtonGroup } from '../../../components/common/JSIButtons.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
@@ -39,6 +46,34 @@ const buildDefaultExperienceSelections = () =>
 const fieldSurf = (dark) => dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)';
 const bdr       = (dark) => dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
 const eyebrow   = (c) => ({ fontSize: "0.625rem", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: c.textSecondary, opacity: 0.55 });
+const cardChrome = (theme) => {
+    const dark = isDarkTheme(theme);
+    return {
+        backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.84)',
+        border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.05)'}`,
+        boxShadow: dark ? 'none' : '0 14px 34px rgba(53,53,53,0.055)',
+    };
+};
+const panelChrome = (theme) => {
+    const dark = isDarkTheme(theme);
+    return {
+        backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.025)',
+        border: `1px solid ${dark ? 'rgba(255,255,255,0.11)' : 'rgba(53,53,53,0.045)'}`,
+    };
+};
+const iconTileChrome = (theme, active = false) => {
+    const dark = isDarkTheme(theme);
+    return {
+        backgroundColor: active ? `${theme.colors.accent}14` : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.88)'),
+        color: active ? theme.colors.accent : theme.colors.textSecondary,
+        border: `1px solid ${active ? `${theme.colors.accent}22` : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.05)')}`,
+    };
+};
+const chipChrome = (theme, active = false) => ({
+    backgroundColor: active ? `${theme.colors.accent}12` : fieldSurf(isDarkTheme(theme)),
+    color: active ? theme.colors.accent : theme.colors.textSecondary,
+    border: `1px solid ${active ? `${theme.colors.accent}22` : bdr(isDarkTheme(theme))}`,
+});
 
 const isRepAttendee = (guest) => guest.isSelf || Boolean(guest.linkedMemberId);
 
@@ -206,11 +241,28 @@ const TourVisitSelectField = ({ label, value, onChange, options, placeholder, th
     );
 };
 
-const CardHeader = ({ title, right, theme }) => {
+const CardHeader = ({ title, subtitle, right, icon: Icon, theme }) => {
     const dark = isDarkTheme(theme);
     return (
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${bdr(dark)}` }}>
-            <span style={eyebrow(theme.colors)}>{title}</span>
+        <div className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5" style={{ borderBottom: `1px solid ${bdr(dark)}` }}>
+            <div className="flex min-w-0 items-center gap-3">
+                {Icon ? (
+                    <span
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                        style={iconTileChrome(theme)}
+                    >
+                        <Icon className="h-4 w-4" />
+                    </span>
+                ) : null}
+                <div className="min-w-0">
+                    <span style={eyebrow(theme.colors)}>{title}</span>
+                    {subtitle ? (
+                        <p className="mt-1 truncate text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
+                            {subtitle}
+                        </p>
+                    ) : null}
+                </div>
+            </div>
             {right || null}
         </div>
     );
@@ -300,10 +352,10 @@ const DateRangeDropdown = ({
                     });
                     setOpen((current) => !current);
                 }}
-                className={`w-full text-left ${compact ? 'rounded-none px-0.5 py-0.5' : 'rounded-[16px] px-3.5 py-2.5'}`}
+                className={`w-full text-left transition-colors ${compact ? 'rounded-none px-0.5 py-0.5' : 'rounded-[16px] px-3.5 py-2.5'}`}
                 style={{
-                    backgroundColor: compact ? 'transparent' : fieldSurf(dark),
-                    border: 'none',
+                    backgroundColor: compact ? 'transparent' : panelChrome(theme).backgroundColor,
+                    border: compact ? 'none' : panelChrome(theme).border,
                     color: theme.colors.textPrimary,
                 }}
             >
@@ -330,7 +382,7 @@ const DateRangeDropdown = ({
                     className="absolute left-0 right-0 top-[calc(100%+8px)] z-20 rounded-[18px] p-3"
                     style={{
                         backgroundColor: theme.colors.surface,
-                        border: 'none',
+                        border: `1px solid ${bdr(dark)}`,
                         boxShadow: '0 18px 45px rgba(0, 0, 0, 0.12)',
                     }}
                 >
@@ -400,7 +452,7 @@ const DateRangeDropdown = ({
                     </div>
 
                     {startDate && endDate ? (
-                        <div className="mt-3 flex justify-end border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.06)' }}>
+                        <div className="mt-3 flex justify-end border-t pt-3" style={{ borderColor: bdr(dark) }}>
                             <button
                                 type="button"
                                 onClick={() => setOpen(false)}
@@ -427,33 +479,56 @@ const FacilityOption = ({ facility, selected, onClick, theme, isInList = false, 
     <button
         type="button"
         onClick={onClick}
-        className={`w-full px-4 py-3.5 text-left transition-all motion-card ${isInList ? '' : 'rounded-[16px]'}`}
+        className={`w-full px-3.5 py-3.5 text-left transition-all motion-card sm:px-4 ${isInList ? '' : 'rounded-[18px]'}`}
         style={{
-            backgroundColor: isInList ? 'transparent' : fieldSurf(dark),
-            border: selected ? `1px solid ${theme.colors.accent}55` : 'none',
+            backgroundColor: selected ? `${theme.colors.accent}0f` : (isInList ? 'transparent' : panelChrome(theme).backgroundColor),
+            border: selected ? `1px solid ${theme.colors.accent}44` : (isInList ? 'none' : panelChrome(theme).border),
             borderTop: isInList && showTopDivider ? `1px solid ${bdr(dark)}` : undefined,
             color: theme.colors.textPrimary,
-            boxShadow: 'none',
+            boxShadow: selected && !dark ? '0 10px 28px rgba(53,53,53,0.07)' : 'none',
         }}
     >
-        <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0">
-                <h3 className="text-[0.9375rem] font-semibold leading-5">{facility.name}</h3>
-                <div className="mt-1 flex items-center gap-2 text-sm" style={{ color: theme.colors.textSecondary }}>
-                    <MapPin className="h-4 w-4 shrink-0" />
+        <div className="flex items-start gap-3">
+            <span
+                className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                style={iconTileChrome(theme, selected)}
+            >
+                <Building2 className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <p style={eyebrow(theme.colors)}>{facility.eyebrow}</p>
+                        <h3 className="mt-1 text-[0.9375rem] font-semibold leading-5">{facility.name}</h3>
+                    </div>
+                    <span
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                        style={iconTileChrome(theme, selected)}
+                    >
+                        {selected ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+                    </span>
+                </div>
+                <div className="mt-2 flex items-center gap-1.5 text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
                     <span>{facility.location}</span>
                 </div>
+                {!isInList ? (
+                    <p className="mt-2 text-xs leading-5" style={{ color: theme.colors.textSecondary }}>
+                        {facility.blurb}
+                    </p>
+                ) : null}
+                <div className={`${isInList ? 'mt-2' : 'mt-3'} flex flex-wrap gap-1.5`}>
+                    {(isInList ? facility.details.slice(0, 1) : facility.details).map((detail) => (
+                        <span
+                            key={detail}
+                            className="rounded-full px-2 py-1 text-[0.625rem] font-semibold"
+                            style={chipChrome(theme)}
+                        >
+                            {detail}
+                        </span>
+                    ))}
+                </div>
             </div>
-            <span
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                style={{
-                    backgroundColor: theme.colors.surface,
-                    color: selected ? theme.colors.accentText : theme.colors.textSecondary,
-                    border: 'none',
-                }}
-            >
-                {selected ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-            </span>
         </div>
     </button>
     );
@@ -508,8 +583,13 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
     const dark = isDarkTheme(theme);
     const border = bdr(dark);
     return (
-    <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
-        <CardHeader title="Upcoming Trips" theme={theme} />
+    <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
+        <CardHeader
+            title="Upcoming Trips"
+            subtitle={`${visits.length} active visit${visits.length === 1 ? '' : 's'}`}
+            icon={CalendarDays}
+            theme={theme}
+        />
 
         <div>
             {visits.map((visit, visitIndex) => {
@@ -528,16 +608,42 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                         <button
                             type="button"
                             onClick={() => onToggleVisit(visit.id)}
-                            className="flex w-full items-center justify-between gap-3 px-3.5 py-3.5 text-left transition-all"
+                            className="flex w-full items-start gap-3 px-4 py-4 text-left transition-all"
                         >
-                            <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <h3 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                            <span
+                                className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                                style={iconTileChrome(theme, isExpanded)}
+                            >
+                                <CalendarDays className="h-4 w-4" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                    <h3 className="min-w-0 text-sm font-semibold leading-5" style={{ color: theme.colors.textPrimary }}>
                                         {visit.companyName}
                                     </h3>
+                                    <ChevronDown
+                                        className="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200"
+                                        style={{
+                                            color: theme.colors.textSecondary,
+                                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                        }}
+                                    />
+                                </div>
+                                <div className="hidden" aria-hidden="true">
+                                    {visit.dateLabel} / {visit.facilityName}
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-1.5">
+                                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme)}>
+                                        <Clock3 className="h-3 w-3" />
+                                        {visit.dateLabel}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme)}>
+                                        <MapPin className="h-3 w-3" />
+                                        {visit.facilityName}
+                                    </span>
                                     {isPendingApproval ? (
                                         <span
-                                            className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.1em]"
+                                            className="inline-flex items-center rounded-full px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.08em]"
                                             style={{
                                                 color: theme.colors.warning,
                                                 backgroundColor: theme.colors.warningLight,
@@ -548,56 +654,57 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                         </span>
                                     ) : null}
                                 </div>
-                                <p className="mt-1 text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {visit.dateLabel} · {visit.facilityName}
-                                </p>
                                 {isPendingApproval ? (
                                     <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: theme.colors.warning }}>
                                         {visit.approvalLabel || 'Awaiting JSI approval'}
                                     </p>
                                 ) : null}
                             </div>
-                            <ChevronDown
-                                className="h-4 w-4 shrink-0 transition-transform duration-200"
-                                style={{
-                                    color: theme.colors.textSecondary,
-                                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                }}
-                            />
                         </button>
 
                         {isExpanded ? (
-                            <div className="px-3.5 pb-3.5 pt-1.5">
-                                <p className="text-xs" style={{ color: theme.colors.textSecondary }}>
-                                    {visit.overnightLabel} · {visit.attendees}
-                                </p>
+                            <div className="px-4 pb-4 pt-0">
+                                <div className="hidden" aria-hidden="true">
+                                    {visit.overnightLabel} / {visit.attendees}
+                                </div>
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    <div className="rounded-[14px] px-3 py-2.5" style={panelChrome(theme)}>
+                                        <p style={eyebrow(theme.colors)}>Length</p>
+                                        <p className="mt-1 text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                            {visit.overnightLabel}
+                                        </p>
+                                    </div>
+                                    <div className="rounded-[14px] px-3 py-2.5" style={panelChrome(theme)}>
+                                        <p style={eyebrow(theme.colors)}>Attendees</p>
+                                        <p className="mt-1 text-sm font-semibold leading-5" style={{ color: theme.colors.textPrimary }}>
+                                            {visit.attendees}
+                                        </p>
+                                    </div>
+                                </div>
                                 {visit.agendaLabel ? (
                                     <div
-                                        className="mt-2 rounded-[14px] px-3 py-2 text-[0.6875rem] font-medium"
+                                        className="mt-2.5 rounded-[14px] px-3 py-2.5 text-[0.6875rem] font-semibold leading-4"
                                         style={{
                                             color: isPendingApproval ? theme.colors.warning : theme.colors.textSecondary,
-                                            backgroundColor: isPendingApproval ? theme.colors.warningLight : 'rgba(0, 0, 0, 0.03)',
-                                            border: `1px solid ${isPendingApproval ? `${theme.colors.warning}22` : 'rgba(0, 0, 0, 0.05)'}`,
+                                            backgroundColor: isPendingApproval ? theme.colors.warningLight : fieldSurf(dark),
+                                            border: `1px solid ${isPendingApproval ? `${theme.colors.warning}22` : border}`,
                                         }}
                                     >
                                         {visit.agendaLabel}
                                     </div>
                                 ) : null}
-                                <div className="mt-3 space-y-3">
+                                <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
                                     {visit.agenda.map((day) => (
                                         <div
                                             key={`${visit.id}-${day.dayLabel}`}
-                                            className="rounded-[14px] px-3.5 py-3"
-                                            style={{
-                                                backgroundColor: fieldSurf(dark),
-                                                border: 'none',
-                                            }}
+                                            className="rounded-[16px] px-3.5 py-3"
+                                            style={panelChrome(theme)}
                                         >
                                             <div className="flex items-center justify-between gap-3">
                                                 <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary }}>
                                                     {day.dayLabel}
                                                 </p>
-                                                <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
+                                                <span className="rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme)}>
                                                     {day.sessions.length} stops
                                                 </span>
                                             </div>
@@ -607,8 +714,8 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                                     const isLastSession = sessionIndex === day.sessions.length - 1;
 
                                                     return (
-                                                        <div key={`${visit.id}-${day.dayLabel}-${session}`} className="grid grid-cols-[72px_1fr] gap-3">
-                                                            <div className="pt-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary }}>
+                                                        <div key={`${visit.id}-${day.dayLabel}-${session}`} className="grid grid-cols-[66px_1fr] gap-3">
+                                                            <div className="pt-1 text-[0.625rem] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary }}>
                                                                 {time || `Stop ${sessionIndex + 1}`}
                                                             </div>
                                                             <div className="flex gap-3">
@@ -622,7 +729,7 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                                                             className="absolute left-1/2 top-4 w-px -translate-x-1/2"
                                                                             style={{
                                                                                 bottom: '-18px',
-                                                                                backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                                                                                backgroundColor: border,
                                                                             }}
                                                                         />
                                                                     ) : null}
@@ -631,10 +738,10 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
                                                                     className="flex-1 rounded-[12px] px-3 py-2.5"
                                                                     style={{
                                                                         backgroundColor: theme.colors.surface,
-                                                                        border: 'none',
+                                                                        border: `1px solid ${border}`,
                                                                     }}
                                                                 >
-                                                                    <p className="text-sm leading-5" style={{ color: theme.colors.textPrimary }}>
+                                                                    <p className="text-xs font-medium leading-5" style={{ color: theme.colors.textPrimary }}>
                                                                         {detail}
                                                                     </p>
                                                                 </div>
@@ -659,11 +766,14 @@ const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme 
 const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpanded, onToggleOption, onOpenInfo, theme }) => {
     const dark = isDarkTheme(theme);
     return (
-    <div className="rounded-[16px] px-4 py-3.5" style={{
-        backgroundColor: fieldSurf(dark),
-        border: `1px solid ${bdr(dark)}`,
-    }}>
+    <div className="rounded-[18px] px-3.5 py-3.5" style={panelChrome(theme)}>
         <div className="flex items-start gap-3">
+            <span
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                style={iconTileChrome(theme, selectedOptions.length > 0)}
+            >
+                <Sparkles className="h-4 w-4" />
+            </span>
             <button
                 type="button"
                 onClick={() => onToggleExpanded(track.id)}
@@ -673,9 +783,14 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
             >
                 <div className="min-w-0">
                     <h4 className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>{track.title}</h4>
-                    <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>
-                        {selectedOptions.length ? `${selectedOptions.length} selected` : 'Click to choose'}
+                    <p className="mt-1 text-xs font-medium leading-5" style={{ color: theme.colors.textSecondary }}>
+                        {track.description}
                     </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                        <span className="rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme, selectedOptions.length > 0)}>
+                            {selectedOptions.length ? `${selectedOptions.length} selected` : 'Choose options'}
+                        </span>
+                    </div>
                 </div>
                 <ChevronDown
                     className="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200"
@@ -692,18 +807,14 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
                     onOpenInfo(track.id);
                 }}
                 aria-label={`More information about ${track.title}`}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-                style={{
-                    color: theme.colors.textSecondary,
-                    backgroundColor: theme.colors.surface,
-                    border: '1px solid rgba(0, 0, 0, 0.06)',
-                }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+                style={iconTileChrome(theme)}
             >
                 <Info className="h-3.5 w-3.5" />
             </button>
         </div>
         {expanded ? (
-            <div id={`experience-track-${track.id}`} className="mt-3 flex flex-wrap gap-1.5">
+            <div id={`experience-track-${track.id}`} className="mt-3 space-y-2">
                 {track.options.map((option) => {
                     const optionLabel = getExperienceOptionLabel(option);
                     const optionDesc = getExperienceOptionDescription(option);
@@ -714,16 +825,31 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
                             type="button"
                             onClick={() => onToggleOption(track.id, optionLabel)}
                             title={optionDesc || undefined}
-                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold transition-all"
+                            className="flex w-full items-start gap-2.5 rounded-[14px] px-3 py-2.5 text-left transition-all"
                             style={{
-                                color: isSelected ? theme.colors.accentText : theme.colors.textPrimary,
-                                backgroundColor: isSelected ? theme.colors.accent : theme.colors.surface,
-                                border: isSelected ? `1px solid ${theme.colors.accent}` : '1px solid rgba(0, 0, 0, 0.08)',
-                                boxShadow: 'none',
+                                color: theme.colors.textPrimary,
+                                backgroundColor: isSelected ? `${theme.colors.accent}10` : theme.colors.surface,
+                                border: isSelected ? `1px solid ${theme.colors.accent}44` : `1px solid ${bdr(dark)}`,
                             }}
                         >
-                            {isSelected ? <Check className="h-3 w-3" /> : null}
-                            {optionLabel}
+                            <span
+                                className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                                style={{
+                                    backgroundColor: isSelected ? theme.colors.accent : fieldSurf(dark),
+                                    color: isSelected ? theme.colors.accentText : theme.colors.textSecondary,
+                                    border: `1px solid ${isSelected ? theme.colors.accent : bdr(dark)}`,
+                                }}
+                            >
+                                {isSelected ? <Check className="h-3 w-3" /> : null}
+                            </span>
+                            <span className="min-w-0">
+                                <span className="block text-xs font-semibold leading-5">{optionLabel}</span>
+                                {optionDesc ? (
+                                    <span className="mt-0.5 block text-[0.6875rem] font-medium leading-4" style={{ color: theme.colors.textSecondary }}>
+                                        {optionDesc}
+                                    </span>
+                                ) : null}
+                            </span>
                         </button>
                     );
                 })}
@@ -766,7 +892,7 @@ const GuestPanel = ({
 
     return (
         <div
-            className={`rounded-[18px] px-3 py-2.5 ${embedded && !isFirst ? 'pt-3' : ''}`}
+            className={`rounded-[18px] px-3 py-3 ${embedded && !isFirst ? 'pt-3.5' : ''}`}
             style={{
                 backgroundColor: embedded ? 'transparent' : theme.colors.surface,
                 borderTop: embedded && !isFirst ? `1px solid ${border}` : undefined,
@@ -778,9 +904,15 @@ const GuestPanel = ({
                 tabIndex={0}
                 onClick={handleToggle}
                 onKeyDown={handleHeaderKeyDown}
-                className="flex w-full items-start justify-between gap-4 text-left cursor-pointer"
+                className="flex w-full cursor-pointer items-start justify-between gap-4 text-left"
             >
-                <div className="min-w-0 flex flex-1 items-center gap-2">
+                <div className="min-w-0 flex flex-1 items-center gap-3">
+                    <span
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                        style={iconTileChrome(theme, expanded)}
+                    >
+                        <UserRound className="h-4 w-4" />
+                    </span>
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <span
                             className="text-[0.6875rem] font-medium leading-none"
@@ -850,8 +982,8 @@ const GuestPanel = ({
                             pointerEvents: expanded ? 'auto' : 'none',
                         }}
                     >
-                    <div className="rounded-[14px] p-2.5" style={{ backgroundColor: fieldSurf(dark) }}>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-[16px] p-3" style={panelChrome(theme)}>
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         <FormInput
                             label="First Name"
                             value={guest.legalFirstName}
@@ -938,7 +1070,7 @@ const GuestPanel = ({
                     ) : null}
 
                     {!repAttendee ? (
-                        <div className="mt-2 grid grid-cols-2 gap-2">
+                        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <TourVisitBooleanField
                                     label="Dietary Restrictions"
@@ -1005,7 +1137,7 @@ const GuestPanel = ({
                             />
 
                             {guest.hasDietaryRestrictions && (guest.dietaryRestrictions || []).includes('Other') ? (
-                                <div className="col-span-2">
+                                <div className="sm:col-span-2">
                                     <FormInput
                                         label="Other Dietary Notes"
                                         type="textarea"
@@ -1068,7 +1200,7 @@ const TourVisitSuccessOverlay = ({ theme, facilityName, customerName }) => (
             </p>
             <p className="mt-2 text-sm" style={{ color: theme.colors.textSecondary }}>
                 {customerName
-                    ? `${customerName} · ${facilityName || 'Awaiting JSI approval'}`
+                    ? `${customerName} / ${facilityName || 'Awaiting JSI approval'}`
                     : (facilityName ? `${facilityName} is awaiting JSI approval.` : 'Your customer experience trip is awaiting JSI approval.')}
             </p>
         </div>
@@ -1153,7 +1285,6 @@ const AddAttendeeActions = ({
     onOpenRepPicker,
     onSelectRep,
 }) => {
-    const dark = isDarkTheme(theme);
     const repPickerRef = useRef(null);
 
     useEffect(() => {
@@ -1187,41 +1318,27 @@ const AddAttendeeActions = ({
     }
 
     return (
-        <div
-            className="grid overflow-hidden rounded-[16px]"
-            style={{
-                gridTemplateColumns: availableTeamMembers.length ? '1fr 1fr' : '1fr',
-                backgroundColor: fieldSurf(dark),
-                border: `1px solid ${bdr(dark)}`,
-            }}
-        >
-            <button
-                type="button"
+        <JSIActionButtonGroup compact wrap className="w-full">
+            <JSIActionButton
+                theme={theme}
+                size="small"
+                icon={<Plus className="h-3.5 w-3.5" />}
                 onClick={onAddGuest}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors"
-                style={{
-                    color: theme.colors.textSecondary,
-                }}
             >
-                <Plus className="h-4 w-4" />
                 Add guest
-            </button>
+            </JSIActionButton>
 
             {availableTeamMembers.length ? (
-                <button
-                    type="button"
+                <JSIActionButton
+                    theme={theme}
+                    size="small"
+                    icon={<Plus className="h-3.5 w-3.5" />}
                     onClick={onOpenRepPicker}
-                    className="flex items-center justify-center gap-2 border-l px-4 py-2.5 text-sm font-medium transition-colors"
-                    style={{
-                        color: theme.colors.textSecondary,
-                        borderColor: 'rgba(0, 0, 0, 0.03)',
-                    }}
                 >
-                    <Plus className="h-4 w-4" />
                     Add rep
-                </button>
+                </JSIActionButton>
             ) : null}
-        </div>
+        </JSIActionButtonGroup>
     );
 };
 
@@ -1702,10 +1819,15 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                     <div className="mx-auto w-full max-w-[760px] space-y-3">
                         {entryMode === 'home' ? (
                             <>
-                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
-                                    <CardHeader title="Schedule Trip" theme={theme} />
+                                <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
+                                    <CardHeader
+                                        title="Schedule Trip"
+                                        subtitle="Start from the right hosted location"
+                                        icon={Building2}
+                                        theme={theme}
+                                    />
                                     <div className="p-3">
-                                        <div className="overflow-hidden rounded-[14px]" style={{ backgroundColor: fieldSurf(dark) }}>
+                                        <div className="overflow-hidden rounded-[16px]" style={panelChrome(theme)}>
                                             {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
                                                 <FacilityOption
                                                     key={facility.id}
@@ -1738,30 +1860,44 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                     onToggleVisit={toggleUpcomingVisit}
                                     theme={theme}
                                 />
-                                <button
-                                    type="button"
+                                <JSIActionButton
+                                    theme={theme}
+                                    variant="filled"
+                                    size="medium"
+                                    icon={<ArrowRight className="h-4 w-4" />}
                                     onClick={openNewTourFlow}
-                                    className="w-full rounded-full px-5 py-3 text-sm font-semibold transition-all motion-tap"
-                                    style={{
-                                        color: theme.colors.accentText,
-                                        backgroundColor: theme.colors.accent,
-                                        border: `1px solid ${theme.colors.accent}`,
-                                    }}
                                 >
                                     Schedule new trip
-                                </button>
+                                </JSIActionButton>
                             </>
                         ) : null}
 
                         {entryMode === 'new' ? (
                             <>
                                 <div ref={topSectionRef}>
-                                    <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+                                    <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
+                                    <CardHeader
+                                        title="Trip Request"
+                                        subtitle={selectedFacility ? selectedFacility.name : 'Choose a hosted location'}
+                                        icon={CalendarDays}
+                                        theme={theme}
+                                        right={selectedFacility ? (
+                                            <JSIActionButton
+                                                theme={theme}
+                                                size="small"
+                                                icon={<Send className="h-3.5 w-3.5" />}
+                                                grow={false}
+                                                onClick={handleNativeShare}
+                                            >
+                                                Share
+                                            </JSIActionButton>
+                                        ) : null}
+                                    />
                                     {selectedFacility && !showFacilityOptions ? (
                                         <div>
                                             <div className="px-5 pt-4 pb-3">
                                                 <p style={eyebrow(theme.colors)}>Customer</p>
-                                                <div className="mt-2">
+                                                <div className="mt-2 rounded-[16px] px-3 py-2.5" style={panelChrome(theme)}>
                                                     <SearchableSelect
                                                         value={selectedCustomerId}
                                                         onChange={handleCustomerSelection}
@@ -1802,7 +1938,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
                                             <div className="px-5 py-3" style={{ borderTop: `1px solid ${border}` }}>
                                                 <p style={eyebrow(theme.colors)}>Dates</p>
-                                                <div className="mt-2">
+                                                <div className="mt-2 rounded-[16px] px-3 py-2.5" style={panelChrome(theme)}>
                                                     <DateRangeDropdown
                                                         theme={theme}
                                                         startDate={preferredDateStart}
@@ -1823,34 +1959,36 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                     className="w-full text-left"
                                                 >
                                                     <p style={eyebrow(theme.colors)}>Location</p>
-                                                    <div className="mt-2 flex items-center justify-between gap-4">
-                                                        <p className="text-sm font-medium" style={{ color: theme.colors.textPrimary }}>
-                                                            {selectedFacility.name}
-                                                        </p>
-                                                        <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
+                                                    <div className="mt-2 flex items-center justify-between gap-4 rounded-[16px] px-3 py-2.5" style={panelChrome(theme)}>
+                                                        <div className="flex min-w-0 items-center gap-2.5">
+                                                            <span
+                                                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                                                                style={iconTileChrome(theme, true)}
+                                                            >
+                                                                <MapPin className="h-4 w-4" />
+                                                            </span>
+                                                            <span className="min-w-0">
+                                                                <span className="block text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                                                                    {selectedFacility.name}
+                                                                </span>
+                                                                <span className="block text-xs font-medium" style={{ color: theme.colors.textSecondary }}>
+                                                                    {selectedFacility.location}
+                                                                </span>
+                                                            </span>
+                                                        </div>
+                                                        <span className="shrink-0 text-[0.6875rem] font-semibold" style={{ color: theme.colors.textSecondary }}>
                                                             Change
                                                         </span>
                                                     </div>
                                                 </button>
                                             </div>
 
-                                            <div className="px-5 py-3" style={{ borderTop: `1px solid ${border}` }}>
-                                                <button
-                                                    type="button"
-                                                    onClick={handleNativeShare}
-                                                    className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium transition-opacity hover:opacity-100"
-                                                    style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
-                                                >
-                                                    <Send className="h-3 w-3" />
-                                                    Share form
-                                                </button>
-                                            </div>
                                         </div>
                                     ) : (
                                         <>
                                             <div className="p-4">
                                                 <p style={eyebrow(theme.colors)}>Location</p>
-                                                <div className="mt-2.5 overflow-hidden rounded-[14px]" style={{ backgroundColor: fieldSurf(dark) }}>
+                                                <div className="mt-2.5 overflow-hidden rounded-[16px]" style={panelChrome(theme)}>
                                                     {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
                                                         <FacilityOption
                                                             key={facility.id}
@@ -1865,9 +2003,9 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="mt-3 pt-2" style={{ borderTop: `1px solid ${border}` }}>
+                                            <div className="px-4 pb-4 pt-3" style={{ borderTop: `1px solid ${border}` }}>
                                                 <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: fieldSurf(dark) }}>
+                                                    <div className="rounded-[16px] px-3 py-2.5" style={panelChrome(theme)}>
                                                         <p style={eyebrow(theme.colors)}>Customer</p>
                                                         <div className="mt-1">
                                                             <SearchableSelect
@@ -1908,7 +2046,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                         </div>
                                                     </div>
 
-                                                    <div className="rounded-[14px] px-3 py-2" style={{ backgroundColor: fieldSurf(dark) }}>
+                                                    <div className="rounded-[16px] px-3 py-2.5" style={panelChrome(theme)}>
                                                         <p style={eyebrow(theme.colors)}>Dates</p>
                                                         <div className="mt-1">
                                                             <DateRangeDropdown
@@ -1923,17 +2061,6 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                                 </div>
                                             </div>
 
-                                            <div className="mt-2 flex items-center justify-between pt-2" style={{ borderTop: `1px solid ${border}` }}>
-                                                <button
-                                                    type="button"
-                                                    onClick={handleNativeShare}
-                                                    className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium transition-opacity hover:opacity-100"
-                                                    style={{ color: theme.colors.textSecondary, opacity: 0.65 }}
-                                                >
-                                                    <Send className="h-3 w-3" />
-                                                    Share form
-                                                </button>
-                                            </div>
                                         </>
                                     )}
                                     </div>
@@ -1943,12 +2070,17 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
                         {entryMode === 'new' && selectedFacility ? (
                             <div className="space-y-2.5 animate-fade-in">
-                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
-                                    <CardHeader title="Attendees" theme={theme} />
+                                <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
+                                    <CardHeader
+                                        title="Attendees"
+                                        subtitle={`${guests.length} traveler${guests.length === 1 ? '' : 's'} in this request`}
+                                        icon={Users}
+                                        theme={theme}
+                                    />
                                     <div className="p-3">
                                     <div
                                         className="overflow-hidden rounded-[16px]"
-                                        style={{ backgroundColor: fieldSurf(dark) }}
+                                        style={panelChrome(theme)}
                                     >
                                         {guests.map((guest, index) => {
                                             const isLastGuest = index === guests.length - 1;
@@ -1986,12 +2118,14 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                     </div>
                                 </div>
 
-                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
+                                <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
                                     <CardHeader
                                         title="Experience Plan"
+                                        subtitle="Build the agenda around hosted conversations"
+                                        icon={Sparkles}
                                         theme={theme}
                                         right={
-                                            <span className="rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold" style={{ color: theme.colors.textSecondary, backgroundColor: fieldSurf(dark) }}>
+                                            <span className="whitespace-nowrap rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold" style={chipChrome(theme, selectedExperienceCount > 0)}>
                                                 {selectedExperienceCount} selected
                                             </span>
                                         }
@@ -2025,8 +2159,8 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                     ) : null}
                                 </div>
 
-                                <div className="rounded-[22px] overflow-hidden" style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}>
-                                    <CardHeader title="Summary" theme={theme} />
+                                <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
+                                    <CardHeader title="Summary" subtitle="Review before submission" icon={Check} theme={theme} />
                                     <div className="flex flex-col gap-3 p-5">
 
                                         <div className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-2 md:hidden">
@@ -2045,7 +2179,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                         <div className="hidden md:flex md:flex-wrap md:items-center md:gap-x-2 md:gap-y-2">
                                             {summaryRows.map((item, index) => (
                                                 <React.Fragment key={item.label}>
-                                                    {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.28 }}>•</span> : null}
+                                                    {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.28 }}>/</span> : null}
                                                     <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
                                                         {item.label}
                                                     </span>
@@ -2056,10 +2190,10 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             ))}
                                         </div>
 
-                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t pt-3" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t pt-3" style={{ borderColor: bdr(dark) }}>
                                             {summaryStats.map((item, index) => (
                                                 <React.Fragment key={item.label}>
-                                                    {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.24 }}>•</span> : null}
+                                                    {index > 0 ? <span style={{ color: theme.colors.textSecondary, opacity: 0.24 }}>/</span> : null}
                                                     <span className="text-[0.6875rem]" style={{ color: theme.colors.textSecondary }}>
                                                         {item.label}
                                                     </span>

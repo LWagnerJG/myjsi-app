@@ -6,7 +6,7 @@ export const WEIGHT_RATINGS_ROUTE = 'resources/weight-ratings';
 export const WEIGHT_RATINGS_TYPES = ['Seating', 'Upholstery', 'Wood Seating'];
 export const WEIGHT_RATINGS_FALLBACK_IMAGE = '/myjsi-icon.png';
 
-const toSlug = (value) => (
+export const toWeightRatingSlug = (value) => (
     value
         .toLowerCase()
         .replace(/&/g, ' and ')
@@ -14,42 +14,51 @@ const toSlug = (value) => (
         .replace(/^-+|-+$/g, '')
 );
 
-const seatingSeriesMap = new Map();
+export function createWeightRatingsSeries(leadTimesData = LEAD_TIMES_DATA) {
+    const seatingSeriesMap = new Map();
 
-LEAD_TIMES_DATA.forEach(({ series, type, image }) => {
-    if (!WEIGHT_RATINGS_TYPES.includes(type)) return;
-    const key = series.trim();
-    if (!seatingSeriesMap.has(key)) {
-        seatingSeriesMap.set(key, {
-            series: key,
-            slug: toSlug(key),
-            image: image || WEIGHT_RATINGS_FALLBACK_IMAGE,
-            supportedTypes: new Set([type]),
-            weightLimit: WEIGHT_LIMIT_LBS
-        });
-        return;
-    }
+    leadTimesData.forEach(({ series, type, image, cloudinaryPublicId }) => {
+        if (!WEIGHT_RATINGS_TYPES.includes(type)) return;
+        const key = String(series || '').trim();
+        if (!key) return;
 
-    const existing = seatingSeriesMap.get(key);
-    existing.supportedTypes.add(type);
-    if (!existing.image && image) existing.image = image;
-});
+        if (!seatingSeriesMap.has(key)) {
+            seatingSeriesMap.set(key, {
+                series: key,
+                slug: toWeightRatingSlug(key),
+                image: image || '',
+                cloudinaryPublicId: cloudinaryPublicId || '',
+                supportedTypes: new Set([type]),
+                weightLimit: WEIGHT_LIMIT_LBS,
+                failureTestLbs: WEIGHT_FAILURE_TEST_LBS
+            });
+            return;
+        }
 
-export const WEIGHT_RATINGS_SERIES = Array
-    .from(seatingSeriesMap.values())
-    .map((item) => ({
-        ...item,
-        supportedTypes: Array.from(item.supportedTypes).sort()
-    }))
-    .sort((a, b) => a.series.localeCompare(b.series));
+        const existing = seatingSeriesMap.get(key);
+        existing.supportedTypes.add(type);
+        if (!existing.image && image) existing.image = image;
+        if (!existing.cloudinaryPublicId && cloudinaryPublicId) existing.cloudinaryPublicId = cloudinaryPublicId;
+    });
+
+    return Array
+        .from(seatingSeriesMap.values())
+        .map((item) => ({
+            ...item,
+            supportedTypes: Array.from(item.supportedTypes).sort()
+        }))
+        .sort((a, b) => a.series.localeCompare(b.series));
+}
+
+export const WEIGHT_RATINGS_SERIES = createWeightRatingsSeries();
 
 export const WEIGHT_RATINGS_BIFMA_POINTS = [
-    'Seat and back static load checks',
-    'Durability cycle testing for repeated daily use',
-    'Stability checks to reduce tip-over risk'
+    'Static load testing on seat and back structures',
+    'Durability cycles for repeated commercial use',
+    'Stability checks for tip resistance'
 ];
 
-export const WEIGHT_RATINGS_CERTIFICATION_NOTE = `JSI certifies these seating models to applicable ANSI/BIFMA commercial standards at ${WEIGHT_LIMIT_LBS} lbs, then continues internal load testing through failure beyond ${WEIGHT_FAILURE_TEST_LBS} lbs to understand structural reserve above the certification threshold.`;
+export const WEIGHT_RATINGS_CERTIFICATION_NOTE = `Rated to ${WEIGHT_LIMIT_LBS} lbs for applicable ANSI/BIFMA commercial seating standards. Internal validation continues beyond ${WEIGHT_FAILURE_TEST_LBS} lbs to confirm structural reserve above the published rating.`;
 
 export const WEIGHT_RATINGS_SOURCE_LINKS = [
     {

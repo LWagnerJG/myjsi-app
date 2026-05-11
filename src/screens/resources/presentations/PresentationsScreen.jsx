@@ -9,6 +9,7 @@ import {
     PRESENTATIONS_DATA, PRESENTATION_CATEGORIES, MOCK_PRESENTATION_PDF_BASE64,
     INITIAL_MY_DECKS
 } from './data.js';
+import { useCompanyResource } from '../../../hooks/useCompanyResource.js';
 
 import { PresentationCard } from './components/PresentationCard.jsx';
 import { MyDeckCard } from './components/MyDeckCard.jsx';
@@ -23,6 +24,7 @@ const TAB_CONFIG = [
 
 export const PresentationsScreen = ({ theme, screenParams }) => {
     const isDark = isDarkTheme(theme);
+    const { data: presentationsData } = useCompanyResource('presentations', PRESENTATIONS_DATA);
 
     const initialTab = screenParams?.openBuilder ? 'builder' : 'browse';
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -32,12 +34,17 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
     const [myDecks, setMyDecks] = useState(INITIAL_MY_DECKS);
 
     const myDeckIds = useMemo(() => new Set(myDecks.map(d => String(d.id))), [myDecks]);
-    const categories = useMemo(() => ['all', ...PRESENTATION_CATEGORIES], []);
+    const categories = useMemo(() => {
+        const liveCategories = presentationsData
+            .map((presentation) => presentation.category)
+            .filter(Boolean);
+        return ['all', ...new Set([...PRESENTATION_CATEGORIES, ...liveCategories])];
+    }, [presentationsData]);
 
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase();
 
-        return PRESENTATIONS_DATA.filter(p => {
+        return presentationsData.filter(p => {
             const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
             if (!matchesCategory) return false;
             if (!query) return true;
@@ -46,11 +53,11 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                 || p.description.toLowerCase().includes(query)
                 || p.category.toLowerCase().includes(query);
         });
-    }, [selectedCategory, search]);
+    }, [presentationsData, selectedCategory, search]);
 
     const downloadMock = useCallback((p) => {
         const a = document.createElement('a');
-        a.href = MOCK_PRESENTATION_PDF_BASE64;
+        a.href = p.downloadUrl && p.downloadUrl !== '#' ? p.downloadUrl : MOCK_PRESENTATION_PDF_BASE64;
         a.download = `${(p.title || 'presentation').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.pdf`;
         document.body.appendChild(a);
         a.click();

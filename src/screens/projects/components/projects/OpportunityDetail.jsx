@@ -6,7 +6,7 @@ import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIA
 import { ORDER_DATA, STATUS_COLORS } from '../../../orders/data.js';
 import { JSI_SERIES } from '../../../products/data.js';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from '../../../resources/lead-times/data.js';
-import { PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
+import { JSIActionButton, JSIActionButtonGroup, PrimaryButton } from '../../../../components/common/JSIButtons.jsx';
 import { Modal } from '../../../../components/common/Modal.jsx';
 import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlider.jsx';
 import { RequestQuoteModal } from '../../../../components/common/RequestQuoteModal.jsx';
@@ -294,17 +294,17 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
               </div>
             </div>
           </div>
-          <div className="flex gap-1.5 px-2.5 pb-2.5 pt-0.5">
-            <button className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[0.625rem] font-semibold rounded-full transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.55)' }}>
-              <Eye className="w-3 h-3" /> View
-            </button>
-            <button className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[0.625rem] font-semibold rounded-full transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.55)' }}>
-              <Share2 className="w-3 h-3" /> Share
-            </button>
-            <button className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[0.625rem] font-semibold rounded-full transition-colors hover:bg-black/[0.03] active:scale-[0.98]" style={{ color: c.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.55)' }}>
-              <Download className="w-3 h-3" /> Save
-            </button>
-          </div>
+          <JSIActionButtonGroup compact className="px-2.5 pb-2.5 pt-0.5">
+            <JSIActionButton theme={theme} size="small" icon={<Eye className="w-3 h-3" />}>
+              View
+            </JSIActionButton>
+            <JSIActionButton theme={theme} size="small" icon={<Share2 className="w-3 h-3" />}>
+              Share
+            </JSIActionButton>
+            <JSIActionButton theme={theme} size="small" icon={<Download className="w-3 h-3" />}>
+              Save
+            </JSIActionButton>
+          </JSIActionButtonGroup>
         </div>
       )})}
 
@@ -1036,7 +1036,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       count={relatedOrders.length}
                       summary={(() => {
                         const latest = relatedOrders[0];
-                        const sc = STATUS_COLORS[latest.status] || '#8B8680';
                         return `${latest.status} · ${new Date(latest.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
                       })()}
                       onClick={() => setHubModal('related-orders')}

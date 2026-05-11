@@ -1,11 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { Timer, ListOrdered, Zap, X, ExternalLink } from 'lucide-react';
+import { Timer, ListOrdered, Zap, X, ExternalLink, Package } from 'lucide-react';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from './data.js';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../components/common/modalUtils.js';
+import { useCompanyResource } from '../../../hooks/useCompanyResource.js';
+import { getLeadTimeImageSources } from './cloudinaryImages.js';
 
 // Fallback colors if theme tokens missing
 const ensureTheme = (theme) => ({
@@ -104,9 +106,62 @@ const QuickShipBadge = ({ onClick, isDark }) => (
     </button>
 );
 
+const LVLabel = ({ label, theme }) => (
+    <span className="text-[0.6875rem] font-bold" style={{ color: theme.colors.textSecondary }}>{label}</span>
+);
+
+const LeadTimeInfo = ({ typeData, series, label, theme, isDark }) => {
+    const imageSources = useMemo(() => getLeadTimeImageSources(typeData, series), [typeData, series]);
+    const sourceKey = imageSources.join('|');
+    const [imageIndex, setImageIndex] = useState(0);
+
+    useEffect(() => {
+        setImageIndex(0);
+    }, [sourceKey]);
+
+    const imageSrc = imageSources[imageIndex];
+    const handleImageError = () => {
+        setImageIndex((index) => index + 1);
+    };
+
+    return (
+        <div className={`relative ${label ? 'text-center' : ''}`}>
+            {label && <LVLabel label={label} theme={theme} />}
+            <div
+                className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
+                style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
+            >
+                {imageSrc ? (
+                    <img
+                        src={imageSrc}
+                        alt={label || `${series} ${typeData.type || 'lead time'}`}
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        onError={handleImageError}
+                        style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
+                    />
+                ) : (
+                    <Package className="w-7 h-7 opacity-30" style={{ color: theme.colors.textSecondary }} aria-hidden="true" />
+                )}
+            </div>
+            <div
+                className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
+                style={{
+                    backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : theme.colors.subtle,
+                    border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
+                    boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
+                }}
+            >
+                <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : theme.colors.textSecondary }}>{typeData.weeks}</span>
+            </div>
+        </div>
+    );
+};
+
 export const LeadTimesScreen = ({ theme = {} }) => {
     const safeTheme = ensureTheme(theme);
     const isDark = isDarkTheme(theme);
+    const { data: leadTimesData } = useCompanyResource('lead-times', LEAD_TIMES_DATA);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [sortFastest, setSortFastest] = useState(false);
@@ -122,9 +177,10 @@ export const LeadTimesScreen = ({ theme = {} }) => {
 
     const rows = useMemo(() => {
         const map = {};
-        LEAD_TIMES_DATA.forEach(({ series, type, weeks, image }) => {
-            if (!map[series]) map[series] = { types: {}, isQuickShip: QUICKSHIP_SERIES.includes(series) };
-            map[series].types[type] = { weeks, image };
+        leadTimesData.forEach(({ series, type, weeks, image, cloudinaryPublicId, quickShip }) => {
+            if (!map[series]) map[series] = { types: {}, isQuickShip: QUICKSHIP_SERIES.includes(series) || Boolean(quickShip) };
+            if (quickShip) map[series].isQuickShip = true;
+            map[series].types[type] = { type, weeks, image, cloudinaryPublicId };
         });
         let list = Object.entries(map).map(([series, data]) => ({ 
             series, 
@@ -152,37 +208,7 @@ export const LeadTimesScreen = ({ theme = {} }) => {
             list.sort((a, b) => a.series.localeCompare(b.series));
         }
         return list;
-    }, [searchTerm, sortFastest]);
-
-    const LVLabel = ({ label }) => (
-        <span className="text-[0.6875rem] font-bold" style={{ color: safeTheme.colors.textSecondary }}>{label}</span>
-    );
-
-    const LeadTimeInfo = ({ typeData }) => (
-        <div className="relative">
-            <div
-                className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
-                style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
-            >
-                <img
-                    src={typeData.image}
-                    alt=""
-                    className="w-full h-full object-contain"
-                    style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
-                />
-            </div>
-            <div
-                className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
-                style={{
-                    backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : safeTheme.colors.subtle,
-                    border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
-                    boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
-                }}
-            >
-                <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : safeTheme.colors.textSecondary }}>{typeData.weeks}</span>
-            </div>
-        </div>
-    );
+    }, [leadTimesData, searchTerm, sortFastest]);
 
     return (
     <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: safeTheme.colors.background }}>
@@ -233,67 +259,13 @@ export const LeadTimesScreen = ({ theme = {} }) => {
                             )}
                         </div>
                         <div className="flex items-center justify-end space-x-3">
-                            {types['Upholstery'] && <LeadTimeInfo typeData={types['Upholstery']} />}
-                            {types['Seating'] && <LeadTimeInfo typeData={types['Seating']} />}
-                            {types['Wood Seating'] && <LeadTimeInfo typeData={types['Wood Seating']} />}
-                            {types['Casegoods'] && <LeadTimeInfo typeData={types['Casegoods']} />}
-                            {types['Tables'] && <LeadTimeInfo typeData={types['Tables']} />}
-                            {types['Laminate'] && (
-                                <div className="relative text-center">
-                                    <LVLabel label="Laminate" />
-                                    <div
-                                        className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
-                                        style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
-                                    >
-                                        <img
-                                            src={types['Laminate'].image}
-                                            alt="Laminate"
-                                            className="w-full h-full object-contain"
-                                            style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
-                                        />
-                                    </div>
-                                    <div
-                                        className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
-                                        style={{
-                                            backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : safeTheme.colors.subtle,
-                                            border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
-                                            boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
-                                        }}
-                                    >
-                                        <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : safeTheme.colors.textSecondary }}>
-                                            {types['Laminate'].weeks}
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-                            {types['Veneer'] && (
-                                <div className="relative text-center">
-                                    <LVLabel label="Veneer" />
-                                    <div
-                                        className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center"
-                                        style={isDark ? { backgroundColor: 'rgba(255,255,255,0.08)' } : undefined}
-                                    >
-                                        <img
-                                            src={types['Veneer'].image}
-                                            alt="Veneer"
-                                            className="w-full h-full object-contain"
-                                            style={isDark ? { filter: 'brightness(0.9) contrast(1.05)' } : undefined}
-                                        />
-                                    </div>
-                                    <div
-                                        className="absolute -bottom-1 -right-1 h-7 w-7 flex items-center justify-center rounded-full"
-                                        style={{
-                                            backgroundColor: isDark ? 'rgba(42,42,42,0.9)' : safeTheme.colors.subtle,
-                                            border: isDark ? '2px solid rgba(255,255,255,0.1)' : '2px solid rgba(255,255,255,0.8)',
-                                            boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.4)' : '0 1px 3px rgba(0,0,0,0.1)',
-                                        }}
-                                    >
-                                        <span className="text-xs font-bold" style={{ color: isDark ? '#E8DDD0' : safeTheme.colors.textSecondary }}>
-                                            {types['Veneer'].weeks}
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
+                            {types['Upholstery'] && <LeadTimeInfo typeData={types['Upholstery']} series={series} theme={safeTheme} isDark={isDark} />}
+                            {types['Seating'] && <LeadTimeInfo typeData={types['Seating']} series={series} theme={safeTheme} isDark={isDark} />}
+                            {types['Wood Seating'] && <LeadTimeInfo typeData={types['Wood Seating']} series={series} theme={safeTheme} isDark={isDark} />}
+                            {types['Casegoods'] && <LeadTimeInfo typeData={types['Casegoods']} series={series} theme={safeTheme} isDark={isDark} />}
+                            {types['Tables'] && <LeadTimeInfo typeData={types['Tables']} series={series} theme={safeTheme} isDark={isDark} />}
+                            {types['Laminate'] && <LeadTimeInfo typeData={types['Laminate']} series={series} label="Laminate" theme={safeTheme} isDark={isDark} />}
+                            {types['Veneer'] && <LeadTimeInfo typeData={types['Veneer']} series={series} label="Veneer" theme={safeTheme} isDark={isDark} />}
                         </div>
                     </GlassCard>
                 ))}

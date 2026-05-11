@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { X, Download, Share2 } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z } from '../../../../components/common/modalUtils.js';
+import { JSIActionButton, JSIActionButtonGroup } from '../../../../components/common/JSIButtons.jsx';
 
 export const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare }) => {
     const isDark = isDarkTheme(theme);
@@ -29,17 +30,23 @@ export const SlidePreviewModal = ({ preview, theme, onClose, onDownload, onShare
                         </div>
                     ))}
                 </div>
-                <div className="px-5 py-4 flex gap-3" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
-                    <button onClick={onDownload}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
-                        style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}>
-                        <Download className="w-4 h-4" /> Download PDF
-                    </button>
-                    <button onClick={onShare}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
-                        style={{ border: `1.5px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
-                        <Share2 className="w-4 h-4" /> Share
-                    </button>
+                <div className="px-5 py-4" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
+                    <JSIActionButtonGroup>
+                        <JSIActionButton
+                            onClick={onDownload}
+                            theme={theme}
+                            icon={<Download className="w-4 h-4" />}
+                        >
+                            Download PDF
+                        </JSIActionButton>
+                        <JSIActionButton
+                            onClick={onShare}
+                            theme={theme}
+                            icon={<Share2 className="w-4 h-4" />}
+                        >
+                            Share
+                        </JSIActionButton>
+                    </JSIActionButtonGroup>
                 </div>
             </motion.div>
         </div>,

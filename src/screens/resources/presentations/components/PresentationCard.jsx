@@ -3,6 +3,7 @@ import { Download, Share2, Check, Plus } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { formatLongDate } from '../../../../utils/format.js';
 import { SlideCarousel } from './SlideCarousel.jsx';
+import { JSIActionButton, JSIActionButtonGroup } from '../../../../components/common/JSIButtons.jsx';
 
 const CARD_SHADOW = '0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05)';
 
@@ -25,24 +26,30 @@ export const PresentationCard = ({ p, theme, onAddToMyDecks, myDeckIds, onDownlo
                     </div>
                     <p className="text-[0.8125rem] leading-relaxed" style={{ color: theme.colors.textSecondary }}>{p.description}</p>
                 </div>
-                <div className="flex gap-2 pt-1">
-                    <button onClick={onDownload}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
-                        style={{ background: theme.colors.accent, color: theme.colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF') }}>
-                        <Download className="w-4 h-4" /> Download
-                    </button>
-                    <button onClick={onShare}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
-                        style={{ border: `1.5px solid ${theme.colors.border}`, color: theme.colors.textPrimary }}>
-                        <Share2 className="w-4 h-4" /> Share
-                    </button>
-                    <button onClick={() => onAddToMyDecks(p)}
+                <JSIActionButtonGroup className="pt-1">
+                    <JSIActionButton
+                        onClick={onDownload}
+                        theme={theme}
+                        icon={<Download className="w-4 h-4" />}
+                    >
+                        Download
+                    </JSIActionButton>
+                    <JSIActionButton
+                        onClick={onShare}
+                        theme={theme}
+                        icon={<Share2 className="w-4 h-4" />}
+                    >
+                        Share
+                    </JSIActionButton>
+                    <JSIActionButton
+                        onClick={() => onAddToMyDecks(p)}
                         title={inMyDecks ? 'In My Decks' : 'Save to My Decks'}
-                        className="flex items-center justify-center w-10 rounded-full transition-all active:scale-[0.97]"
-                        style={{ border: `1.5px solid ${inMyDecks ? theme.colors.accent : theme.colors.border}`, color: inMyDecks ? theme.colors.accent : theme.colors.textSecondary, background: inMyDecks ? `${theme.colors.accent}12` : 'transparent' }}>
-                        {inMyDecks ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    </button>
-                </div>
+                        theme={theme}
+                        icon={inMyDecks ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    >
+                        {inMyDecks ? 'Saved' : 'Save'}
+                    </JSIActionButton>
+                </JSIActionButtonGroup>
             </div>
         </div>
     );

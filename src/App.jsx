@@ -17,6 +17,7 @@ import { Modal } from './components/common/Modal.jsx';
 import { INITIAL_ASSETS } from './screens/library/data.js';
 import { AnimatedScreenWrapper } from './components/common/AnimatedScreenWrapper.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
+import { useCompanyResource } from './hooks/useCompanyResource.js';
 import { ToastHost } from './components/common/ToastHost.jsx';
 import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 import { ScreenSkeleton } from './components/common/ScreenSkeleton.jsx';
@@ -351,12 +352,20 @@ function App() {
     const [savedImageIds, setSavedImageIds] = usePersistentState('library.saved', []);
     const [postUpvotes, setPostUpvotes] = useState({});
 
+    const liveDealerDirectory = useCompanyResource('dealer-directory', DEALER_DIRECTORY_DATA);
     const [dealerDirectory, setDealerDirectory] = useState(DEALER_DIRECTORY_DATA);
     const [designFirms, setDesignFirms] = useState(INITIAL_DESIGN_FIRMS);
     const [dealers, setDealers] = useState(INITIAL_DEALERS);
     const [newLeadData, setNewLeadData] = usePersistentState('draft.newLead', EMPTY_LEAD);
 
     const projectsScreenRef = useRef(null);
+    const liveDealerDirectoryHydratedRef = useRef(false);
+
+    useEffect(() => {
+        if (liveDealerDirectoryHydratedRef.current || !liveDealerDirectory.isLive || !Array.isArray(liveDealerDirectory.data)) return;
+        setDealerDirectory((prev) => (prev === DEALER_DIRECTORY_DATA ? liveDealerDirectory.data : prev));
+        liveDealerDirectoryHydratedRef.current = true;
+    }, [liveDealerDirectory.data, liveDealerDirectory.isLive]);
 
     const currentTheme = useMemo(() => (isDarkMode ? darkTheme : lightTheme), [isDarkMode]);
 
