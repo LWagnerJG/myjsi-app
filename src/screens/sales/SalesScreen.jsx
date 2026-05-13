@@ -5,7 +5,6 @@ import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
-import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName, formatCurrencyCompact } from '../../utils/format.js';
@@ -122,20 +121,11 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
     }))
   ), [chartDataType]);
 
-  const tableRows = useMemo(() => {
-    const half = Math.ceil(monthlyRows.length / 2);
-    const left = monthlyRows.slice(0, half);
-    const right = monthlyRows.slice(half);
-    return left.map((item, index) => ({
-      left: item,
-      right: right[index] || null,
-    }));
-  }, [monthlyRows]);
-
-
-
   const topSalesLeader = rewardsSnapshot?.topSales?.[0] || null;
   const topDesignLeader = rewardsSnapshot?.topDesigners?.[0] || null;
+  const monthlyGridStyle = useMemo(() => ({
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 152px), 1fr))',
+  }), []);
 
   /* ── animation gate — wait for screen slide-in ── */
 
@@ -172,28 +162,44 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
           {/* Main KPI card */}
           <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
             <div className="h-full flex flex-col gap-4">
-              {/* Metric row — value + delta badge */}
-              <div className="flex items-baseline gap-2.5">
-                <div className="text-4xl sm:text-[2.6rem] font-black tracking-tight leading-none">
-                  {formatCurrency(activeTotal)}
+              {/* KPI header */}
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[2.15rem] sm:text-[2.6rem] font-black tracking-tight leading-none">
+                    {formatCurrency(activeTotal)}
+                  </div>
                 </div>
-              </div>
-
-              {/* Controls + Progress */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <SegmentedToggle
-                    value={chartDataType}
-                    onChange={setChartDataType}
-                    options={toggleOpts}
-                    size="smDense"
-                    theme={theme}
-                    className="shrink-0"
-                  />
+                <div className="ml-auto flex items-center gap-2">
+                  <div
+                    className="inline-flex h-8 shrink-0 items-center rounded-full p-[3px] sm:h-9 sm:p-1"
+                    style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : '#E6E8E3' }}
+                    role="group"
+                    aria-label="Sales metric"
+                  >
+                    {toggleOpts.map((opt) => {
+                      const selected = chartDataType === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setChartDataType(opt.value)}
+                          className="h-[26px] rounded-full px-2.5 text-[0.75rem] font-semibold transition-all sm:h-7 sm:px-3 sm:text-[0.8125rem]"
+                          aria-pressed={selected}
+                          style={{
+                            backgroundColor: selected ? colors.accent : 'transparent',
+                            color: selected ? (theme?.colors?.accentText || '#FFFFFF') : colors.textSecondary,
+                            boxShadow: selected && !isDark ? '0 4px 12px rgba(53,53,53,0.18)' : 'none',
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <button
                     type="button"
                     onClick={() => setShowTableView((current) => !current)}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition active:scale-95"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-95 sm:h-9 sm:w-9"
                     style={{
                       backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.surface,
                       borderColor: isDark ? 'rgba(255,255,255,0.12)' : colors.border,
@@ -203,12 +209,16 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
                     title={showTableView ? 'Switch to chart view' : 'Switch to table view'}
                   >
                     {showTableView ? (
-                      <BarChart3 className="h-4 w-4" />
+                      <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     ) : (
-                      <Table2 className="h-4 w-4" />
+                      <Table2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     )}
                   </button>
                 </div>
+              </div>
+
+              {/* Progress */}
+              <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
                     <div
@@ -228,52 +238,43 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
 
               {/* Monthly detail */}
               {showTableView ? (
-                <div className="pt-1">
-                  <div className="sm:hidden divide-y" style={{ borderColor: subtleBg(theme, 1.35) }}>
-                    {monthlyRows.map((row) => (
-                      <div key={`mobile-table-row-${row.month}`} className="flex items-center justify-between gap-4 py-2">
-                        <span className="text-[0.75rem] font-medium" style={{ color: colors.textSecondary }}>
-                          {row.month}
-                        </span>
-                        <span className="text-[0.75rem] font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                          {formatCurrency(row.value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <table className="hidden w-full table-fixed text-[0.75rem] sm:table">
-                    <tbody>
-                      {tableRows.map((row, index) => (
-                        <tr
-                          key={`table-row-${row.left.month}`}
-                          className={index < tableRows.length - 1 ? 'border-b' : ''}
-                          style={{ borderColor: subtleBg(theme, 1.35) }}
+                <div className="grid gap-2 pt-1" style={monthlyGridStyle}>
+                  {monthlyRows.map((row) => {
+                    const pct = chartMax ? Math.max(5, (row.value / chartMax) * 100) : 0;
+                    return (
+                      <div
+                        key={`monthly-row-${row.month}`}
+                        className="rounded-[14px] border px-3 py-2.5"
+                        style={{
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.72)',
+                          borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.045)',
+                        }}
+                      >
+                        <div className="flex items-baseline justify-between gap-3">
+                          <span className="text-[0.75rem] font-bold" style={{ color: colors.textSecondary }}>
+                            {row.month}
+                          </span>
+                          <span className="text-[0.75rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                            {formatCurrency(row.value)}
+                          </span>
+                        </div>
+                        <div
+                          className="mt-2 h-1.5 overflow-hidden rounded-full"
+                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : 'rgba(53,53,53,0.08)' }}
                         >
-                          <td className="py-2 pr-3 font-medium" style={{ color: colors.textSecondary }}>
-                            {row.left.month}
-                          </td>
-                          <td className="py-2 pr-6 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                            {formatCurrency(row.left.value)}
-                          </td>
-                          {row.right ? (
-                            <>
-                              <td className="py-2 pr-3 font-medium" style={{ color: colors.textSecondary }}>
-                                {row.right.month}
-                              </td>
-                              <td className="py-2 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                                {formatCurrency(row.right.value)}
-                              </td>
-                            </>
-                          ) : (
-                            <>
-                              <td className="py-2" />
-                              <td className="py-2" />
-                            </>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: ready ? `${pct}%` : '0%',
+                              backgroundColor: chartDataType === 'bookings' ? colors.accent : colors.textSecondary,
+                              opacity: chartDataType === 'bookings' && !isDark ? 0.92 : 0.76,
+                              transition: 'width 0.45s ease-out',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex-1 flex items-end gap-2 min-h-[110px] pt-1">
