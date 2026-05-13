@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { BarChart3, ChevronRight, Table2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONTHLY_SALES_DATA, SALES_VERTICALS_DATA, CUSTOMER_RANK_DATA, INCENTIVE_REWARDS_DATA } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
-import { CountUp } from '../../components/common/CountUp.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
 import { formatCurrency, formatCompanyName, formatCurrencyCompact } from '../../utils/format.js';
@@ -27,7 +27,7 @@ const sortQuarterEntries = (entries) =>
 export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
   const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [chartDataType, setChartDataType] = useState('bookings');
-  const [showTableView, setShowTableView] = useState(false);
+  const [showTableView, setShowTableView] = useState(true);
   const [selectedVertical, setSelectedVertical] = useState(null);
   const isDark = isDarkTheme(theme);
 
@@ -115,24 +115,22 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
     { value: 'sales', label: 'Sales' },
   ], []);
 
-  const viewModeOpts = useMemo(() => [
-    { value: 'chart', label: 'Chart' },
-    { value: 'table', label: 'Table' },
-  ], []);
-
-  const tableRows = useMemo(() => {
-    const points = MONTHLY_SALES_DATA.map((entry) => ({
+  const monthlyRows = useMemo(() => (
+    MONTHLY_SALES_DATA.map((entry) => ({
       month: entry.month,
       value: chartDataType === 'bookings' ? entry.bookings : entry.sales,
-    }));
-    const half = Math.ceil(points.length / 2);
-    const left = points.slice(0, half);
-    const right = points.slice(half);
+    }))
+  ), [chartDataType]);
+
+  const tableRows = useMemo(() => {
+    const half = Math.ceil(monthlyRows.length / 2);
+    const left = monthlyRows.slice(0, half);
+    const right = monthlyRows.slice(half);
     return left.map((item, index) => ({
       left: item,
       right: right[index] || null,
     }));
-  }, [chartDataType]);
+  }, [monthlyRows]);
 
 
 
@@ -176,45 +174,40 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
             <div className="h-full flex flex-col gap-4">
               {/* Metric row — value + delta badge */}
               <div className="flex items-baseline gap-2.5">
-                <div className="text-4xl sm:text-[2.6rem] font-black tracking-tight leading-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.4s ease' }}>
-                  {ready ? (
-                    <CountUp value={activeTotal} prefix="$" duration={0.6} format={(v) => `$${Math.round(v).toLocaleString()}`} />
-                  ) : (
-                    <span style={{ color: 'transparent' }}>$0</span>
-                  )}
+                <div className="text-4xl sm:text-[2.6rem] font-black tracking-tight leading-none">
+                  {formatCurrency(activeTotal)}
                 </div>
               </div>
 
               {/* Controls + Progress */}
               <div className="space-y-2">
-                <div className="flex items-center gap-3 text-[0.8125rem] font-semibold">
-                  {toggleOpts.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setChartDataType(opt.value)}
-                      className="transition-opacity"
-                      style={{
-                        color: colors.textPrimary,
-                        opacity: chartDataType === opt.value ? 1 : 0.32,
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                  <span style={{ color: colors.border }}>|</span>
-                  {viewModeOpts.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setShowTableView(opt.value === 'table')}
-                      className="transition-opacity"
-                      style={{
-                        color: colors.textPrimary,
-                        opacity: (showTableView ? 'table' : 'chart') === opt.value ? 1 : 0.32,
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between gap-3">
+                  <SegmentedToggle
+                    value={chartDataType}
+                    onChange={setChartDataType}
+                    options={toggleOpts}
+                    size="smDense"
+                    theme={theme}
+                    className="shrink-0"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowTableView((current) => !current)}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition active:scale-95"
+                    style={{
+                      backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.surface,
+                      borderColor: isDark ? 'rgba(255,255,255,0.12)' : colors.border,
+                      color: colors.textPrimary,
+                    }}
+                    aria-label={showTableView ? 'Switch to chart view' : 'Switch to table view'}
+                    title={showTableView ? 'Switch to chart view' : 'Switch to table view'}
+                  >
+                    {showTableView ? (
+                      <BarChart3 className="h-4 w-4" />
+                    ) : (
+                      <Table2 className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
@@ -233,10 +226,22 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
                 </div>
               </div>
 
-              {/* Sparkline */}
+              {/* Monthly detail */}
               {showTableView ? (
                 <div className="pt-1">
-                  <table className="w-full text-[0.75rem]">
+                  <div className="sm:hidden divide-y" style={{ borderColor: subtleBg(theme, 1.35) }}>
+                    {monthlyRows.map((row) => (
+                      <div key={`mobile-table-row-${row.month}`} className="flex items-center justify-between gap-4 py-2">
+                        <span className="text-[0.75rem] font-medium" style={{ color: colors.textSecondary }}>
+                          {row.month}
+                        </span>
+                        <span className="text-[0.75rem] font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
+                          {formatCurrency(row.value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <table className="hidden w-full table-fixed text-[0.75rem] sm:table">
                     <tbody>
                       {tableRows.map((row, index) => (
                         <tr
@@ -248,7 +253,7 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
                             {row.left.month}
                           </td>
                           <td className="py-2 pr-6 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                            {formatCurrencyCompact(row.left.value)}
+                            {formatCurrency(row.left.value)}
                           </td>
                           {row.right ? (
                             <>
@@ -256,7 +261,7 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
                                 {row.right.month}
                               </td>
                               <td className="py-2 text-right font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
-                                {formatCurrencyCompact(row.right.value)}
+                                {formatCurrency(row.right.value)}
                               </td>
                             </>
                           ) : (
