@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) => {
+export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true, showValueBubble = true, compact = false }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef(null);
 
@@ -48,12 +48,14 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true }) 
                     Win Probability
                 </label>
             )}
-            <div className="relative pt-4 pb-2 px-2" style={{ touchAction: 'none' }} onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
-                <div ref={sliderRef} className="relative h-2 rounded-full" style={{ backgroundColor: theme.colors.border }}>
+            <div className={`relative ${compact ? 'px-0 py-1.5' : 'pt-4 pb-2 px-2'}`} style={{ touchAction: 'none' }} onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
+                <div ref={sliderRef} className={`relative rounded-full ${compact ? 'h-1.5' : 'h-2'}`} style={{ backgroundColor: theme.colors.border }}>
                     <div className="absolute top-0 left-0 h-full rounded-full" style={{ backgroundColor: theme.colors.accent, width: `${safeValue}%` }} />
-                    <div className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ left: `${safeValue}%` }}>
-                        <div className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border" style={{ backgroundColor: theme.colors.surface || '#fff', color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{safeValue}%</div>
-                    </div>
+                    {showValueBubble && (
+                        <div className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ left: `${safeValue}%` }}>
+                            <div className="px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap shadow-lg border" style={{ backgroundColor: theme.colors.surface || '#fff', color: theme.colors.textPrimary, borderColor: theme.colors.border }}>{safeValue}%</div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

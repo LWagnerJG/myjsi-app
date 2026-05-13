@@ -123,9 +123,6 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
 
   const topSalesLeader = rewardsSnapshot?.topSales?.[0] || null;
   const topDesignLeader = rewardsSnapshot?.topDesigners?.[0] || null;
-  const monthlyGridStyle = useMemo(() => ({
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 152px), 1fr))',
-  }), []);
 
   /* ── animation gate — wait for screen slide-in ── */
 
@@ -238,40 +235,38 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
 
               {/* Monthly detail */}
               {showTableView ? (
-                <div className="grid gap-2 pt-1" style={monthlyGridStyle}>
-                  {monthlyRows.map((row) => {
-                    const pct = chartMax ? Math.max(5, (row.value / chartMax) * 100) : 0;
+                <div className="pt-1">
+                  {[0, 2, 4, 6].map((i) => {
+                    const left = monthlyRows[i];
+                    const right = monthlyRows[i + 1];
+                    const isLast = i + 2 >= monthlyRows.length;
                     return (
                       <div
-                        key={`monthly-row-${row.month}`}
-                        className="rounded-[14px] border px-3 py-2.5"
-                        style={{
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.72)',
-                          borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.045)',
-                        }}
+                        key={left.month}
+                        className="grid grid-cols-2 py-2.5"
+                        style={{ borderBottom: isLast ? 'none' : `1px solid ${subtleBg(theme, 1.35)}` }}
                       >
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-[0.75rem] font-bold" style={{ color: colors.textSecondary }}>
-                            {row.month}
+                        <div className="flex items-center justify-between gap-2 pr-5">
+                          <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
+                            {left.month}
                           </span>
-                          <span className="text-[0.75rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
-                            {formatCurrency(row.value)}
+                          <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                            {formatCurrency(left.value)}
                           </span>
                         </div>
-                        <div
-                          className="mt-2 h-1.5 overflow-hidden rounded-full"
-                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : 'rgba(53,53,53,0.08)' }}
-                        >
+                        {right && (
                           <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: ready ? `${pct}%` : '0%',
-                              backgroundColor: chartDataType === 'bookings' ? colors.accent : colors.textSecondary,
-                              opacity: chartDataType === 'bookings' && !isDark ? 0.92 : 0.76,
-                              transition: 'width 0.45s ease-out',
-                            }}
-                          />
-                        </div>
+                            className="flex items-center justify-between gap-2 pl-5"
+                            style={{ borderLeft: `1px solid ${subtleBg(theme, 1.35)}` }}
+                          >
+                            <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
+                              {right.month}
+                            </span>
+                            <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                              {formatCurrency(right.value)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

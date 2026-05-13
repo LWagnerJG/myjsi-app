@@ -25,15 +25,15 @@ const parseCurrency = (raw) => {
 const SPIFF_502010_MIN_LIST = 10000;
 const REWARD_AUTO_OFF_NET_LIMIT = 150000;
 const REWARD_AUTO_OFF_DISCOUNT_MIN = 0.64;
-const FIELD_BG_LIGHT = 'rgba(240,237,232,0.88)';
+const FIELD_BG_LIGHT = 'rgba(240,237,232,0.48)';
 const FIELD_BG_DARK = 'rgba(255,255,255,0.065)';
-const CHIP_BG_LIGHT = 'rgba(240,237,232,0.96)';
+const CHIP_BG_LIGHT = 'rgba(240,237,232,0.62)';
 const CHIP_BG_DARK = 'rgba(255,255,255,0.08)';
-const SECTION_RADIUS = '28px';
-const CONTROL_RADIUS = '24px';
+const SECTION_RADIUS = '24px';
+const CONTROL_RADIUS = '16px';
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
-const DETAIL_SECTION_TITLE_CLASS = 'text-[1.05rem] sm:text-[1.125rem] font-semibold tracking-[-0.02em] leading-none';
-const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1.5 text-[0.75rem] leading-snug';
+const DETAIL_SECTION_TITLE_CLASS = 'text-[0.98rem] sm:text-[1.05rem] font-semibold tracking-[-0.02em] leading-none';
+const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
 const HERO_TITLE_INPUT_CLASS = 'project-display-title w-full bg-transparent outline-none font-semibold tracking-[-0.04em]';
 const HERO_IDENTITY_LABEL_CLASS = 'text-[0.625rem] font-semibold uppercase tracking-[0.08em]';
 
@@ -81,10 +81,20 @@ const formatSampleOrderDate = (value) => {
 
 /* ---- section primitives ---- */
 const Section = ({ title, subtitle, children, theme, right }) => {
+  const isDark = isDarkTheme(theme);
+  const surface = sectionCardSurface(theme);
   return (
-    <div className="overflow-hidden" style={{ ...sectionCardSurface(theme), padding: '18px', borderRadius: SECTION_RADIUS }}>
+    <div
+      className="overflow-hidden"
+      style={{
+        ...surface,
+        padding: '16px',
+        borderRadius: SECTION_RADIUS,
+        boxShadow: isDark ? surface.boxShadow : '0 6px 16px rgba(53,53,53,0.035)',
+      }}
+    >
       {title && (
-        <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start justify-between gap-3 mb-3">
           <div className="min-w-0">
             <h2 className={DETAIL_SECTION_TITLE_CLASS} style={{ color: theme.colors.textPrimary }}>{title}</h2>
             {subtitle ? (
@@ -103,27 +113,31 @@ const Section = ({ title, subtitle, children, theme, right }) => {
 
 const Row = ({ label, children, theme, className = '' }) => {
   return (
-    <div className={`space-y-2 ${className}`}>
-      {label && <label className="block text-[0.75rem] font-semibold tracking-[-0.01em]" style={{ color: theme.colors.textSecondary, opacity: 0.9 }}>{label}</label>}
+    <div className={`space-y-1.5 ${className}`}>
+      {label && <label className={`${FIELD_LABEL_CLASS} block`} style={{ color: theme.colors.textSecondary, opacity: 0.78 }}>{label}</label>}
       <div className="flex-1 min-w-0 w-full">{children}</div>
     </div>
   );
 };
 
-const PillSelect = ({ options, value, onChange, theme }) => {
+const CompactSelect = ({ options, value, onChange, theme, compact = false }) => {
   const isDark = isDarkTheme(theme);
-  const chipBg = isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT;
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map(opt => {
-        const active = opt === value;
-        return (
-          <button key={opt} onClick={() => onChange(opt)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97]"
-            style={{ backgroundColor: active ? theme.colors.accent : chipBg, color: active ? theme.colors.accentText : theme.colors.textSecondary, boxShadow: active ? (isDark ? '0 10px 20px rgba(0,0,0,0.16)' : '0 10px 18px rgba(53,53,53,0.08)') : 'none' }}>
-            {opt}
-          </button>
-        );
-      })}
+    <div className="relative">
+      <select
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        className={`w-full appearance-none bg-transparent outline-none ${compact ? 'min-h-[34px] px-2.5 pr-7 text-[0.8125rem]' : 'min-h-[44px] px-3.5 pr-9 text-[0.875rem]'} font-semibold`}
+        style={{
+          backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT,
+          borderRadius: CONTROL_RADIUS,
+          color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
+        }}
+      >
+        <option value="" disabled>Select</option>
+        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+      </select>
+      <ChevronDown className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${compact ? 'right-2 h-3 w-3' : 'right-3 h-3.5 w-3.5'}`} style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
     </div>
   );
 };
@@ -132,12 +146,12 @@ const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
   const isDark = isDarkTheme(theme);
   const chipBg = isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT;
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {options.map(opt => {
         const active = value.includes(opt);
         return (
-          <button key={opt} onClick={() => onToggle(opt)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97]"
-            style={{ backgroundColor: active ? theme.colors.accent : chipBg, color: active ? theme.colors.accentText : theme.colors.textSecondary, boxShadow: active ? (isDark ? '0 10px 20px rgba(0,0,0,0.16)' : '0 10px 18px rgba(53,53,53,0.08)') : 'none' }}>
+          <button key={opt} type="button" onClick={() => onToggle(opt)} className="px-3 py-1.5 rounded-full text-[0.72rem] font-semibold transition-all active:scale-[0.97]"
+            style={{ backgroundColor: active ? theme.colors.accent : chipBg, color: active ? theme.colors.accentText : theme.colors.textSecondary, boxShadow: active ? (isDark ? '0 7px 14px rgba(0,0,0,0.14)' : '0 7px 14px rgba(53,53,53,0.07)') : 'none' }}>
             {opt}
           </button>
         );
@@ -437,27 +451,28 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all hover:-translate-y-px active:scale-[0.99]"
+      className="w-full flex items-center gap-3 px-1.5 py-2.5 text-left transition-all active:scale-[0.99]"
       style={{
-        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT,
-        borderRadius: CONTROL_RADIUS,
+        backgroundColor: 'transparent',
+        borderRadius: '14px',
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'}`,
       }}
     >
-      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accent}16`, color: accent }}>
-        <Icon className="w-4 h-4" />
+      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.055)' : 'rgba(53,53,53,0.045)', color: accent }}>
+        <Icon className="w-3.5 h-3.5" strokeWidth={1.9} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[0.875rem] font-semibold tracking-[-0.01em] truncate" style={{ color: c.textPrimary }}>{title}</span>
+          <span className="text-[0.8125rem] font-semibold tracking-[-0.01em] truncate" style={{ color: c.textPrimary }}>{title}</span>
           {count != null ? (
-            <span className="text-[0.625rem] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: `${accent}16`, color: accent }}>{count}</span>
+            <span className="text-[0.625rem] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)', color: c.textSecondary }}>{count}</span>
           ) : null}
         </div>
         {summary ? (
-          <p className="mt-0.5 text-[0.6875rem] truncate" style={{ color: c.textSecondary }}>{summary}</p>
+          <p className="mt-0.5 text-[0.6675rem] truncate" style={{ color: c.textSecondary, opacity: 0.78 }}>{summary}</p>
         ) : null}
       </div>
-      <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+      <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.35 }} />
     </button>
   );
 };
@@ -554,7 +569,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const designerRewardEnabled = rewardAutoManagedRef.current.designerReward ? rewardDefaultValue : draft.designerReward !== false;
   const rewardsOn = salesRewardEnabled || designerRewardEnabled;
   const showSpiffWarning = isDiscount502010 && rewardsOn && rawNumeric > 0 && rawNumeric < SPIFF_502010_MIN_LIST;
-  const outcomeStages = ['Won', 'Lost'];
   const currentProbability = draft.winProbability || 0;
 
   useEffect(() => {
@@ -600,7 +614,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       return dealerKeys.some(dk => orderKey.includes(dk.slice(0, 10)));
     }).sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [draft.dealers]);
-  const divider = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   const { customer: linkedCustomer, source: customerLinkSource } = useMemo(
     () => resolveOpportunityCustomerLink(draft, customers),
     [customers, draft],
@@ -612,22 +625,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   const customerLocationLabel = linkedCustomer?.location
     ? [linkedCustomer.location.city, linkedCustomer.location.state].filter(Boolean).join(', ')
     : '';
-  const customerLinkStatus = draft.customerId
-    ? 'Linked customer profile'
-    : customerLinkSource === 'inferred'
-      ? 'Matched from project account'
-      : 'No customer profile linked yet';
   const openLinkedCustomer = useCallback(() => {
     if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
   }, [linkedCustomer, onOpenCustomer]);
-  const heroInsetStyle = {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.78)',
-    borderRadius: '28px',
-    border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}`,
-  };
   const heroDealers = (draft.dealers || []).filter(Boolean);
-  const heroDealerPreview = heroDealers.slice(0, 3);
-  const heroDealerOverflowCount = Math.max(heroDealers.length - heroDealerPreview.length, 0);
+  const heroDealerLabel = heroDealers.length > 1 ? `${heroDealers[0]} +${heroDealers.length - 1}` : (heroDealers[0] || 'Not assigned');
   const heroMetaLabel = [draft.vertical, draft.poTimeframe].filter(Boolean).join(' · ');
   const discountSummaryLabel = discountCode || 'Select discount';
   const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
@@ -646,293 +648,242 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     : customerLinkSource === 'inferred'
       ? 'Matched'
       : 'Open';
-  const relationshipPillBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.62)';
-  const relationshipPillBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(227,224,216,0.95)';
+  const relationshipPillBg = isDark ? 'rgba(255,255,255,0.055)' : 'rgba(240,237,232,0.46)';
+  const relationshipPillBorder = '1px solid transparent';
+  const softRule = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.055)';
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-3.5">
 
           {/* HERO */}
-          <div className="rounded-[32px] p-4 sm:p-6 space-y-3.5" style={{ ...sectionCardSurface(theme), borderRadius: '32px' }}>
-            <div className="space-y-4">
-              {heroMetaLabel ? (
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                  <span className="text-[0.75rem] font-medium" style={{ color: c.textSecondary }}>
+          <div className="p-4 sm:p-5" style={{ ...sectionCardSurface(theme), borderRadius: '24px' }}>
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(520px,0.74fr)] lg:items-end">
+              <div className="min-w-0">
+                {heroMetaLabel ? (
+                  <p className="mb-2 text-[0.75rem] font-semibold" style={{ color: c.textSecondary }}>
                     {heroMetaLabel}
-                  </span>
-                </div>
-              ) : null}
-
-              <div className="space-y-1.5">
-                <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Project</span>
-                <input value={draft.name || ''} onChange={e => update('name', e.target.value)}
-                  className={HERO_TITLE_INPUT_CLASS} style={{ color: c.textPrimary }} placeholder="Project name" />
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-                <div className="space-y-1.5 min-w-0">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Customer</span>
-                    {linkedCustomer ? (
-                      <button
-                        type="button"
-                        onClick={openLinkedCustomer}
-                        className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold flex-shrink-0 transition-all active:scale-[0.98]"
-                        style={{ color: c.textSecondary }}
-                      >
-                        Open profile
-                        <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.58 }} />
-                      </button>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.accent, opacity: 0.5 }} />
-                    <input value={draft.company || ''} onChange={e => update('company', e.target.value)}
-                      className="bg-transparent outline-none text-[0.9375rem] font-medium flex-1 min-w-0" style={{ color: c.textSecondary }} placeholder="Customer account / End user" />
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                  </p>
+                ) : null}
+                <input
+                  value={draft.name || ''}
+                  onChange={e => update('name', e.target.value)}
+                  aria-label="Project name"
+                  className={`${HERO_TITLE_INPUT_CLASS} text-[1.5rem] sm:text-[1.8rem] leading-tight`}
+                  style={{ color: c.textPrimary }}
+                  placeholder="Project name"
+                />
+                <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <input
+                    value={draft.company || ''}
+                    onChange={e => update('company', e.target.value)}
+                    aria-label="Customer account"
+                    className="min-w-[190px] max-w-full bg-transparent outline-none text-[0.95rem] font-semibold"
+                    style={{ color: c.textSecondary }}
+                    placeholder="Customer account"
+                  />
+                  {customerConnectionLabel !== 'Open' ? (
                     <span
                       className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold"
                       style={{
-                        backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'),
+                        backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'),
                         color: draft.customerId ? c.accent : c.textSecondary,
                       }}
                     >
-                      Account {customerConnectionLabel}
+                      {customerConnectionLabel}
                     </span>
-                    <span className="text-[0.6875rem] font-medium leading-tight" style={{ color: c.textSecondary, opacity: 0.76 }}>
-                      {customerLocationLabel || customerLinkStatus}
+                  ) : null}
+                  {customerLocationLabel ? (
+                    <span className="text-[0.6875rem] font-medium leading-tight" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                      {customerLocationLabel}
                     </span>
+                  ) : null}
+                  {linkedCustomer ? (
+                    <button
+                      type="button"
+                      onClick={openLinkedCustomer}
+                      className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold transition-all active:scale-[0.98]"
+                      style={{ color: c.textSecondary }}
+                    >
+                      Open profile
+                      <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.55 }} />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-[minmax(140px,0.72fr)_minmax(150px,0.88fr)_minmax(180px,1fr)]">
+                <div className="min-w-0">
+                  <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Stage</span>
+                  <CompactSelect options={STAGES} value={draft.stage} onChange={v => update('stage', v)} theme={theme} compact />
+                </div>
+                <div className="min-w-0">
+                  <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer</span>
+                  <div className="flex min-h-[34px] items-center rounded-[16px] px-2.5 text-[0.8125rem] font-semibold" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, color: heroDealers.length ? c.textPrimary : c.textSecondary }}>
+                    <span className="truncate">{heroDealerLabel}</span>
                   </div>
                 </div>
-
-                <div className="space-y-1.5 min-w-0">
-                  <span className={HERO_IDENTITY_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.72 }}>Dealerships</span>
-                  {heroDealerPreview.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {heroDealerPreview.map((dealer) => (
-                        <span
-                          key={dealer}
-                          className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
-                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(240,237,232,0.96)', color: c.textPrimary }}
-                        >
-                          {dealer}
-                        </span>
-                      ))}
-                      {heroDealerOverflowCount > 0 ? (
-                        <span
-                          className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold"
-                          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.06)', color: c.textSecondary }}
-                        >
-                          +{heroDealerOverflowCount} more
-                        </span>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <p className="text-[0.8125rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                      No dealerships linked yet
-                    </p>
-                  )}
+                <div className="min-w-0">
+                  <div className="mb-1.5 flex items-center justify-between gap-3">
+                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Win</span>
+                    <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{currentProbability}%</span>
+                  </div>
+                  <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} showValueBubble={false} compact />
                 </div>
-              </div>
-            </div>
-
-            <div className="w-full px-4 py-3.5 space-y-3" style={heroInsetStyle}>
-              <div className="flex flex-wrap gap-1.5">
-                {STAGES.map(stage => {
-                  const active = draft.stage === stage;
-                  const isOutcome = outcomeStages.includes(stage);
-                  return (
-                    <button key={stage} type="button" onClick={() => update('stage', stage)}
-                      className="px-3 py-1.5 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97]"
-                      style={{
-                        backgroundColor: active ? c.accent : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.06)'),
-                        color: active ? c.accentText : (isOutcome ? c.textSecondary : c.textSecondary),
-                        opacity: isOutcome && !active ? 0.6 : 1,
-                      }}>
-                      {stage}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex items-center gap-3">
-                <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} />
-                <span className="text-[0.8125rem] font-bold tabular-nums flex-shrink-0" style={{ color: c.textPrimary }}>{currentProbability}%</span>
               </div>
             </div>
           </div>
 
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
             <div className="space-y-3.5 min-w-0">
-              <Section title="Commercial" subtitle="Pricing basis, discounting, and reward settings" theme={theme}>
-            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="px-4 py-4 sm:col-span-2 lg:col-span-2 space-y-4" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <div className="grid gap-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(200px,0.82fr)] sm:items-start">
-                  <div className="space-y-1.5 min-w-0">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>List Price</span>
-                    <div
-                      className="px-4 py-3.5"
-                      style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)',
-                        borderRadius: '22px',
-                        boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)',
-                      }}
-                    >
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-[1.125rem] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.28 }}>$</span>
-                        <input inputMode="numeric"
-                          value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
-                          onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                          className="bg-transparent outline-none text-[1.9rem] sm:text-[2.05rem] font-semibold tracking-[-0.04em] w-full leading-none"
-                          style={{ color: c.textPrimary }}
-                          placeholder="0"
-                        />
+              <Section title="Commercial" theme={theme}>
+                <div className="space-y-3.5">
+                  <div className="overflow-hidden rounded-[18px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : 'rgba(240,237,232,0.34)' }}>
+                    <div className="grid sm:grid-cols-[minmax(0,0.95fr)_minmax(0,0.82fr)_minmax(0,1fr)]">
+                      <div className="min-w-0 border-b px-3.5 py-3.5 sm:border-b-0 sm:border-r" style={{ borderColor: softRule }}>
+                        <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>List Price</span>
+                        <div className="mt-2 flex items-baseline gap-2">
+                          <span className="text-[1rem] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.32 }}>$</span>
+                          <input inputMode="numeric"
+                            value={(() => { const raw = ('' + (draft.value || '')).replace(/[^0-9]/g, ''); return raw ? parseInt(raw, 10).toLocaleString() : ''; })()}
+                            onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                            className="bg-transparent outline-none text-[1.25rem] font-semibold tracking-[-0.03em] w-full leading-none"
+                            style={{ color: c.textPrimary }}
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="min-w-0 border-b px-3.5 py-3.5 text-left transition-all active:scale-[0.99] sm:border-b-0 sm:border-r"
+                        style={{
+                          borderColor: softRule,
+                          outline: discountOpen ? `1px solid ${c.accent}` : 'none',
+                          outlineOffset: '-1px',
+                          borderRadius: '12px',
+                        }}
+                        onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
+                        ref={discBtn}
+                      >
+                        <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Discount</span>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="text-[1rem] font-semibold tracking-[-0.02em] truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary }}>
+                            {discountSummaryLabel}
+                          </span>
+                          <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                        </div>
+                        <p className="mt-1 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.74 }}>
+                          {discountDetailLabel}
+                        </p>
+                      </button>
+
+                      <div className="min-w-0 px-3.5 py-3.5 sm:text-right">
+                        <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Net</span>
+                        <p className="mt-2 text-[1.4rem] font-bold tracking-[-0.035em] leading-none" style={{ color: c.textPrimary }}>
+                          {netValueLabel}
+                        </p>
+                        <p className="mt-1 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.68 }}>
+                          {netValueDetailLabel}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 min-w-0">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Discount</span>
-                    <button
-                      type="button"
-                      className="w-full min-h-[84px] px-4 py-3.5 text-left transition-all active:scale-[0.99]"
-                      style={{
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)',
-                        borderRadius: '22px',
-                        boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)',
-                        border: `1px solid ${discountOpen ? c.accent : 'transparent'}`,
-                      }}
-                      onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
-                      ref={discBtn}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[1rem] font-semibold tracking-[-0.02em] truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary }}>
-                          {discountSummaryLabel}
-                        </span>
-                        <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
+                      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold whitespace-nowrap"
+                        style={{ backgroundColor: rewardDefaultOff ? `${theme.colors.warning}18` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'), color: rewardDefaultOff ? theme.colors.warning : c.textSecondary }}>
+                        {rewardsStatusLabel}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      <div className="inline-flex items-center gap-3 rounded-full py-1.5 pl-3 pr-1.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.045)' : 'rgba(240,237,232,0.42)' }}>
+                        <div className="min-w-0">
+                          <span className="block text-[0.75rem] font-semibold leading-none" style={{ color: c.textPrimary }}>Sales</span>
+                          <span className="mt-1 block text-[0.625rem] font-medium leading-none" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                            {salesRewardEnabled ? '3%' : 'Off'}
+                          </span>
+                        </div>
+                        <ToggleSwitch checked={salesRewardEnabled} onChange={e => setRewardEnabled('salesReward', e.target.checked)} theme={theme} />
                       </div>
-                      <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                        {discountDetailLabel}
-                      </p>
-                    </button>
-                  </div>
-                </div>
 
-                <div className="pt-3.5" style={{ borderTop: `1px solid ${divider}` }}>
-                  <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Net</span>
-                  <span className="mt-1.5 block text-[1.45rem] sm:text-[1.65rem] font-bold tracking-[-0.03em] leading-none" style={{ color: c.textPrimary }}>
-                    {netValueLabel}
-                  </span>
-                  <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                    {netValueDetailLabel}
+                      <div className="inline-flex items-center gap-3 rounded-full py-1.5 pl-3 pr-1.5" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.045)' : 'rgba(240,237,232,0.42)' }}>
+                        <div className="min-w-0">
+                          <span className="block text-[0.75rem] font-semibold leading-none" style={{ color: c.textPrimary }}>Designer</span>
+                          <span className="mt-1 block text-[0.625rem] font-medium leading-none" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                            {designerRewardEnabled ? 'On' : 'Off'}
+                          </span>
+                        </div>
+                        <ToggleSwitch checked={designerRewardEnabled} onChange={e => setRewardEnabled('designerReward', e.target.checked)} theme={theme} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[0.6875rem] font-medium leading-snug" style={{ color: rewardDefaultOff ? theme.colors.warning : c.textSecondary, opacity: rewardDefaultOff ? 1 : 0.66 }}>
+                    {rewardDefaultOff ? rewardsDetailLabel : 'Defaults on; override either payout independently.'}
                   </p>
                 </div>
-              </div>
-
-              <div className="px-4 py-4 sm:col-span-2 lg:col-span-2 space-y-4" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.84 }}>Rewards</span>
-                    <p className="mt-1 text-[0.75rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.82 }}>
-                      Sales and designer rewards live together here, but each toggle still controls its own payout path.
-                    </p>
+                {showSpiffWarning && (
+                  <div className="flex items-center gap-2 px-3.5 py-2.5 mt-3" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)', borderRadius: '18px' }}>
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.warning }} />
+                    <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
                   </div>
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold whitespace-nowrap"
-                    style={{ backgroundColor: rewardDefaultOff ? `${theme.colors.warning}18` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'), color: rewardDefaultOff ? theme.colors.warning : c.textSecondary }}>
-                    {rewardsStatusLabel}
-                  </span>
-                </div>
-
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <div className="px-4 py-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)', borderRadius: '22px', boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)' }}>
-                    <div className="min-w-0">
-                      <span className="block text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Sales Reward</span>
-                      <span className="mt-1 block text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                        {salesRewardEnabled ? 'Enabled · 3% reward' : 'Off · Sales payout disabled'}
-                      </span>
-                    </div>
-                    <ToggleSwitch checked={salesRewardEnabled} onChange={e => setRewardEnabled('salesReward', e.target.checked)} theme={theme} />
-                  </div>
-
-                  <div className="px-4 py-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.82)', borderRadius: '22px', boxShadow: isDark ? 'none' : 'inset 0 0 0 1px rgba(53,53,53,0.04)' }}>
-                    <div className="min-w-0">
-                      <span className="block text-[0.875rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Designer Reward</span>
-                      <span className="mt-1 block text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-                        {designerRewardEnabled ? 'Enabled · Designer payout active' : 'Off · Designer payout disabled'}
-                      </span>
-                    </div>
-                    <ToggleSwitch checked={designerRewardEnabled} onChange={e => setRewardEnabled('designerReward', e.target.checked)} theme={theme} />
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2.5 px-3.5 py-3" style={{ backgroundColor: rewardDefaultOff ? (isDark ? 'rgba(196,149,106,0.12)' : 'rgba(196,149,106,0.08)') : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)'), borderRadius: '20px' }}>
-                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: rewardDefaultOff ? theme.colors.warning : c.textSecondary, opacity: rewardDefaultOff ? 1 : 0.75 }} />
-                  <p className="text-[0.6875rem] font-medium leading-snug" style={{ color: rewardDefaultOff ? theme.colors.warning : c.textSecondary, opacity: rewardDefaultOff ? 1 : 0.82 }}>
-                    {rewardsDetailLabel} You can still override either reward independently.
-                  </p>
-                </div>
-              </div>
-
-            </div>
-            {showSpiffWarning && (
-              <div className="flex items-center gap-2 px-3.5 py-2.5 mt-2" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)', borderRadius: '22px' }}>
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: theme.colors.warning }} />
-                <span className="text-[0.6875rem] font-medium" style={{ color: theme.colors.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
-              </div>
-            )}
+                )}
               </Section>
 
-              <Section title="Project Profile" subtitle="Scope, schedule, and install intent" theme={theme}>
-                <div className="grid gap-3.5 xl:grid-cols-2">
+              <Section title="Project Profile" theme={theme}>
+                <div className="grid gap-3 xl:grid-cols-2">
                   <Row label="Vertical" theme={theme}>
-                    <PillSelect options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
+                    <CompactSelect options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
                   </Row>
                   <Row label="PO Timeframe" theme={theme}>
-                    <PillSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
+                    <CompactSelect options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />
                   </Row>
                   <Row label="Install Date" theme={theme}>
                     <input type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} />
+                      className="w-full min-h-[46px] px-3.5 py-3 bg-transparent outline-none text-[0.875rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} />
                   </Row>
                   <Row label="Location" theme={theme}>
                     <input value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
-                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
+                      className="w-full min-h-[46px] px-3.5 py-3 bg-transparent outline-none text-[0.875rem] font-medium" style={{ color: c.textPrimary, backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }} placeholder="City, State" />
                   </Row>
                   <Row label="Bid Path" theme={theme}>
-                    <div className="w-full px-4 py-3.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
-                      <span className="text-[0.875rem] font-medium" style={{ color: c.textPrimary }}>Include in bid process</span>
+                    <div className="w-full min-h-[46px] px-3.5 py-2.5 flex items-center justify-between" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT, borderRadius: CONTROL_RADIUS }}>
+                      <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>Bid process</span>
                       <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} />
                     </div>
                   </Row>
                 </div>
               </Section>
 
-              <Section title="Project Team" subtitle="Core contacts, dealer partners, and A&D firms" theme={theme}>
-                <div className="grid gap-3.5 xl:grid-cols-2">
+              <Section title="Project Team" theme={theme}>
+                <div className="grid gap-3 xl:grid-cols-2">
                   <Row label="Primary Contact" theme={theme}>
                     <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
                   </Row>
                   <Row label="Customer Account" theme={theme}>
                     <input value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
-                      className="w-full px-4 py-3.5 bg-transparent outline-none text-[0.9375rem] font-medium border"
+                      className="w-full min-h-[46px] px-3.5 py-3 bg-transparent outline-none text-[0.875rem] font-medium border"
                       style={{ color: c.textPrimary, backgroundColor: relationshipPillBg, border: relationshipPillBorder, borderRadius: CONTROL_RADIUS }}
                       placeholder="Customer account name" />
                   </Row>
                   <Row label="Dealer Partners" theme={theme}>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {(draft.dealers || []).map(f => (
-                        <button key={f} onClick={() => removeFrom('dealers', f)} className="min-h-11 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold border flex items-center gap-1.5 transition-all active:scale-[0.97]"
-                          style={{ backgroundColor: relationshipPillBg, border: relationshipPillBorder, color: c.textPrimary }}>{f}<span className="opacity-35 text-[0.75rem]">{'×'}</span></button>
+                        <button key={f} type="button" onClick={() => removeFrom('dealers', f)} className="min-h-10 px-3 py-2 rounded-full text-[0.75rem] font-semibold border flex items-center gap-1.5 transition-all active:scale-[0.97]"
+                          style={{ backgroundColor: relationshipPillBg, border: relationshipPillBorder, color: c.textPrimary }}>{f}<span className="opacity-35 text-[0.75rem]">x</span></button>
                       ))}
                       <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
                     </div>
                   </Row>
                   <Row label="A&D Firms" theme={theme}>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {(draft.designFirms || []).map(f => (
-                        <button key={f} onClick={() => removeFrom('designFirms', f)} className="min-h-11 px-4 py-2.5 rounded-full text-[0.8125rem] font-semibold border flex items-center gap-1.5 transition-all active:scale-[0.97]"
-                          style={{ backgroundColor: relationshipPillBg, border: relationshipPillBorder, color: c.textPrimary }}>{f}<span className="opacity-35 text-[0.75rem]">{'×'}</span></button>
+                        <button key={f} type="button" onClick={() => removeFrom('designFirms', f)} className="min-h-10 px-3 py-2 rounded-full text-[0.75rem] font-semibold border flex items-center gap-1.5 transition-all active:scale-[0.97]"
+                          style={{ backgroundColor: relationshipPillBg, border: relationshipPillBorder, color: c.textPrimary }}>{f}<span className="opacity-35 text-[0.75rem]">x</span></button>
                       ))}
                       <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
                     </div>
@@ -940,31 +891,31 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
               </Section>
 
-              <Section title="Specs & Competition" subtitle="Series in consideration and competitive pressure" theme={theme}>
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="space-y-2.5">
+              <Section title="Specs & Competition" theme={theme}>
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[0.75rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Specified Series</span>
-                      <span className="text-[0.625rem] font-semibold" style={{ color: c.textSecondary }}>{(draft.products || []).length}</span>
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Specified Series</span>
+                      <span className="text-[0.625rem] font-semibold rounded-full px-2 py-0.5" style={{ color: c.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.055)' : 'rgba(53,53,53,0.055)' }}>{(draft.products || []).length}</span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {(draft.products || []).map(p => {
                         const lead = getSeriesLeadLabel(p.series);
                         return (
-                          <button key={p.series} onClick={() => removeProductSeries(p.series)} className="px-3.5 py-2 rounded-full text-[0.75rem] font-semibold flex items-center gap-1.5 transition-all"
+                          <button key={p.series} type="button" onClick={() => removeProductSeries(p.series)} className="px-3 py-1.5 rounded-full text-[0.72rem] font-semibold flex items-center gap-1.5 transition-all"
                             style={{ background: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}>
                             {p.series}
                             {lead && <span className="opacity-40 text-[0.625rem] font-medium tabular-nums">{lead}</span>}
-                            <span className="opacity-40 text-[0.6875rem]">{'×'}</span>
+                            <span className="opacity-40 text-[0.6875rem]">x</span>
                           </button>
                         );
                       })}
                       <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
                     </div>
                   </div>
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[0.75rem] font-semibold tracking-[-0.01em]" style={{ color: c.textPrimary }}>Competition</span>
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Competition</span>
                       <ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} />
                     </div>
                     {draft.competitionPresent !== false ? (
@@ -976,17 +927,17 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 </div>
               </Section>
 
-              <Section title="Notes" subtitle="Working context, constraints, and next steps" theme={theme}>
-                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
+              <Section title="Notes" theme={theme}>
+                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
                   className="w-full resize-none p-3.5 text-[0.75rem] leading-relaxed outline-none"
                   style={{ background: isDark ? 'rgba(255,255,255,0.06)' : FIELD_BG_LIGHT, color: c.textPrimary, borderRadius: CONTROL_RADIUS }}
-                  placeholder="Add project notes, context, or special instructions..." />
+                  placeholder="Notes, constraints, next steps..." />
               </Section>
             </div>
 
             <div className="space-y-3.5 min-w-0">
               <Section title="Project Hub" theme={theme}>
-                <div className="space-y-2">
+                <div className="-mt-1">
                   <DetailHubCard
                     icon={Users}
                     title="Contacts"

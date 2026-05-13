@@ -26,28 +26,29 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => 
     setOpen(false);
   };
 
-  const fieldBg = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.62)';
-  const fieldBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.95)';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.055)' : 'rgba(240,237,232,0.46)';
+  const fieldBorder = 'transparent';
 
   return (
-    <div className="relative" ref={ref} style={{ minWidth: 184 }}>
+    <div className="relative" ref={ref} style={{ minWidth: 144 }}>
       <input
         value={q}
         onChange={e => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onKeyDown={e => { if (e.key === 'Enter') { commit(q.trim()); } if (e.key === 'Escape') { setOpen(false); } }}
         placeholder={placeholder}
-        className="h-11 px-4 text-[0.9375rem] font-medium outline-none border w-full"
-        style={{ backgroundColor: fieldBg, borderColor: fieldBorder, color: theme.colors.textPrimary, borderRadius: '24px' }}
+        className="h-10 px-3.5 text-[0.8125rem] font-semibold outline-none border w-full"
+        style={{ backgroundColor: fieldBg, borderColor: fieldBorder, color: theme.colors.textPrimary, borderRadius: '16px' }}
       />
       {open && filtered.length > 0 && (
-        <div ref={menu} className="absolute z-50 mt-1.5 border shadow-lg overflow-hidden" style={{ background: theme.colors.surface, borderColor: fieldBorder, maxHeight: 220, width: '100%', borderRadius: '24px' }}>
+        <div ref={menu} className="absolute z-50 mt-1.5 border shadow-lg overflow-hidden" style={{ background: theme.colors.surface, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.9)', maxHeight: 220, width: '100%', borderRadius: '16px' }}>
           <div className="overflow-y-auto p-1.5" style={{ maxHeight: 220 }}>
             {filtered.map(s => (
               <button
                 key={s}
+                type="button"
                 onClick={() => commit(s)}
-                className="w-full text-left px-4 py-3 text-[0.8125rem] transition-colors rounded-[18px]"
+                className="w-full text-left px-3 py-2.5 text-[0.8125rem] transition-colors rounded-[14px]"
                 style={{ color: theme.colors.textPrimary }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = theme.colors.subtle}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
