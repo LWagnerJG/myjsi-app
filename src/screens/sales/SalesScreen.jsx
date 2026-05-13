@@ -7,7 +7,7 @@ import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
-import { formatCurrency, formatCompanyName, formatCurrencyCompact } from '../../utils/format.js';
+import { formatCurrency, formatCompanyName } from '../../utils/format.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
 
@@ -23,7 +23,7 @@ const sortQuarterEntries = (entries) =>
   });
 
 
-export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
+export const SalesScreen = ({ theme, onNavigate }) => {
   const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [chartDataType, setChartDataType] = useState('bookings');
   const [showTableView, setShowTableView] = useState(true);
@@ -62,15 +62,6 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
     if (!selectedVertical) return null;
     return SALES_VERTICALS_DATA.find(v => v.label === selectedVertical)?.color || null;
   }, [selectedVertical]);
-  const wonPipeline = useMemo(() => {
-    if (!Array.isArray(opportunities)) return { total: 0, count: 0 };
-    const won = opportunities.filter(o => o.stage === 'Won');
-    const total = won.reduce((sum, o) => {
-      const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : (o.value || 0);
-      return sum + (parseFloat(raw) || 0);
-    }, 0);
-    return { total, count: won.length };
-  }, [opportunities]);
 
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const chartMax = useMemo(() => Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales)), [chartDataType]);
@@ -120,6 +111,15 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
       value: chartDataType === 'bookings' ? entry.bookings : entry.sales,
     }))
   ), [chartDataType]);
+
+  const monthlyColumns = useMemo(() => {
+    const columnCount = monthlyRows.length > 6 ? 2 : 1;
+    const itemsPerColumn = Math.ceil(monthlyRows.length / columnCount);
+
+    return Array.from({ length: columnCount }, (_, index) => (
+      monthlyRows.slice(index * itemsPerColumn, (index + 1) * itemsPerColumn)
+    )).filter((column) => column.length > 0);
+  }, [monthlyRows]);
 
   const topSalesLeader = rewardsSnapshot?.topSales?.[0] || null;
   const topDesignLeader = rewardsSnapshot?.topDesigners?.[0] || null;
@@ -235,41 +235,40 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
 
               {/* Monthly detail */}
               {showTableView ? (
-                <div className="pt-1">
-                  {[0, 2, 4, 6].map((i) => {
-                    const left = monthlyRows[i];
-                    const right = monthlyRows[i + 1];
-                    const isLast = i + 2 >= monthlyRows.length;
-                    return (
+                <div className="flex-1 min-h-0 pt-1">
+                  <div className={`grid h-full min-h-0 ${monthlyColumns.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                    {monthlyColumns.map((column, columnIndex) => (
                       <div
-                        key={left.month}
-                        className="grid grid-cols-2 py-2.5"
-                        style={{ borderBottom: isLast ? 'none' : `1px solid ${subtleBg(theme, 1.35)}` }}
+                        key={`monthly-column-${columnIndex}`}
+                        className={`flex h-full min-h-0 flex-col ${monthlyColumns.length > 1 && columnIndex > 0 ? 'sm:border-l' : ''}`}
+                        style={monthlyColumns.length > 1 && columnIndex > 0 ? { borderColor: subtleBg(theme, 1.35) } : undefined}
                       >
-                        <div className="flex items-center justify-between gap-2 pr-5">
-                          <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
-                            {left.month}
-                          </span>
-                          <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
-                            {formatCurrency(left.value)}
-                          </span>
-                        </div>
-                        {right && (
-                          <div
-                            className="flex items-center justify-between gap-2 pl-5"
-                            style={{ borderLeft: `1px solid ${subtleBg(theme, 1.35)}` }}
-                          >
-                            <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
-                              {right.month}
-                            </span>
-                            <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
-                              {formatCurrency(right.value)}
-                            </span>
-                          </div>
-                        )}
+                        {column.map((row, rowIndex) => {
+                          const isLast = rowIndex === column.length - 1;
+                          const rowPadding = monthlyColumns.length > 1
+                            ? columnIndex === 0
+                              ? 'sm:pr-5'
+                              : 'sm:pl-5'
+                            : '';
+
+                          return (
+                            <div
+                              key={row.month}
+                              className={`flex min-h-[3.125rem] flex-1 items-center justify-between gap-3 ${rowPadding}`}
+                              style={{ borderBottom: isLast ? 'none' : `1px solid ${subtleBg(theme, 1.35)}` }}
+                            >
+                              <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>
+                                {row.month}
+                              </span>
+                              <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                                {formatCurrency(row.value)}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="flex-1 flex items-end gap-2 min-h-[110px] pt-1">
@@ -348,30 +347,6 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
             </button>
           </div>
         </div>
-
-        {/* ── Won Pipeline KPI ── */}
-        {wonPipeline.count > 0 && (
-          <button onClick={() => onNavigate('projects', { tab: 'pipeline', stage: 'Won' })} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-5" variant="elevated">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[0.6875rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.5 }}>Won Pipeline</p>
-                  <p className="text-2xl font-black tabular-nums tracking-tight leading-tight mt-0.5" style={{ color: colors.textPrimary }}>
-                    {formatCurrencyCompact(wonPipeline.total)}
-                  </p>
-                  <p className="text-xs font-medium mt-0.5" style={{ color: colors.textSecondary, opacity: 0.55 }}>
-                    {wonPipeline.count} {wonPipeline.count === 1 ? 'project' : 'projects'} closed
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5" style={{ color: colors.textSecondary, opacity: 0.4 }}>
-                  <span className="text-xs font-semibold">View pipeline</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            </GlassCard>
-          </button>
-        )}
-
         {/* ── Vertical Breakdown + Live Orders ── unified interactive card ── */}
         <GlassCard theme={theme} className="overflow-hidden" variant="elevated"
           style={{
@@ -505,16 +480,21 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
 
         {/* ── Commissions Preview ── */}
         {commissionsSnapshot && (
-          <button onClick={() => onNavigate('commissions')} className="w-full text-left group">
+          <button onClick={() => onNavigate('sales/commissions')} className="w-full text-left group">
             <GlassCard theme={theme} className="p-5" variant="elevated">
               <TileHeader title="Commissions" action detail={formatCurrency(commissionsSnapshot.ytdTotal)} />
-              <div className="divide-y" style={flatRowsDivider}>
-                {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                  <div key={name} className={flatRowCls}>
-                    <span className="text-sm font-semibold truncate">{name}</span>
-                    <span className="text-sm font-bold tabular-nums ml-2">{formatCurrency(amount)}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[0.6875rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                    {commissionsSnapshot.year} YTD
+                  </p>
+                  <p className="text-sm font-medium mt-1" style={{ color: colors.textSecondary, opacity: 0.7 }}>
+                    View monthly commission payouts
+                  </p>
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                  Open
+                </span>
               </div>
             </GlassCard>
           </button>

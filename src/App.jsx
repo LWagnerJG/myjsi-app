@@ -136,6 +136,13 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     if (screenKey === 'samples/orders') return lazyWrap(SampleOrdersScreen);
     if (base === 'samples') return lazyWrap(SamplesScreen);
 
+    if (base === 'sales' && parts[1]) {
+        const salesDetailKey = parts.slice(1).join('/');
+        if (salesDetailKey === 'customer-rank' || salesDetailKey === 'incentive-rewards' || salesDetailKey === 'commissions') {
+            return lazyWrap(SCREEN_MAP[salesDetailKey]);
+        }
+    }
+
     if (base === 'new-trip') {
         return lazyWrap(TourVisitScreen);
     }
