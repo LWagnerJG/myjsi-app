@@ -12,7 +12,9 @@ import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
 import { formatCurrency, formatCompanyName, formatRelativeTime } from '../../utils/format.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
-/* ---------------------- Calendar View ---------------------- */
+const ORDERS_SHELL_CLASS = 'w-full max-w-[1120px] mx-auto';
+const ORDERS_EDGE_PADDING = 'px-4 sm:px-6 lg:px-8 xl:px-6';
+
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -62,27 +64,31 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                     {selectedOrders.map((o) => {
                         const sc = STATUS_COLORS[o.status] || '#8B8680';
                         return (
-                            <div key={o.orderNumber} className="rounded-[24px] overflow-hidden cursor-pointer active:scale-[0.99] transition"
+                            <button
+                                key={o.orderNumber}
+                                type="button"
+                                className="w-full rounded-[24px] overflow-hidden text-left cursor-pointer active:scale-[0.99] transition"
                                 style={{ ...cardSurface(theme) }}
-                                onClick={() => onOrderClick(o)}>
-                                            <div className="px-5 py-3.5">
-                                <div className="flex items-center justify-between gap-4">
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
-                                        <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                            {formatCompanyName(o.company)}
-                                        </p>
-                                    </div>
-                                    <div className="flex-shrink-0 text-right">
-                                        <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
-                                        <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
-                                            <span>{o.orderNumber}</span>
-                                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
-                                        </p>
+                                onClick={() => onOrderClick(o)}
+                            >
+                                <div className="px-5 py-3.5">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
+                                            <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                                {formatCompanyName(o.company)}
+                                            </p>
+                                        </div>
+                                        <div className="flex-shrink-0 text-right">
+                                            <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
+                                            <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                                                <span>{o.orderNumber}</span>
+                                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
@@ -91,37 +97,42 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
     );
 };
 
-/* ---- Order Row ---- */
 const OrderRow = ({ order, theme, onNavigate, isLast }) => {
     const dark = isDarkTheme(theme);
     const statusColor = STATUS_COLORS[order.status] || '#8B8680';
     return (
         <button
+            type="button"
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
-            className={`w-full text-left transition active:scale-[0.98] ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.02]'}`}
+            className={`group/order-row w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.025]'}`}
         >
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 sm:px-6">
                 <div className="flex-1 min-w-0">
-                    <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
-                    <p className="text-[0.8125rem] mt-0.5 flex items-center gap-1.5" style={{ color: theme.colors.textSecondary }}>
+                    <p className="text-[0.9375rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
+                    <p className="text-[0.8125rem] mt-1 flex items-center gap-1.5" style={{ color: theme.colors.textSecondary }}>
                         <span className="truncate">{formatCompanyName(order.company)}</span>
                         <span className="text-[0.75rem] flex-shrink-0" style={{ opacity: 0.5 }}>{formatRelativeTime(order.date)}</span>
                     </p>
                 </div>
-                <div className="flex-shrink-0 text-right">
-                    <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
-                    <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
-                        <span style={{ opacity: 0.6 }}>{order.orderNumber}</span>
-                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
-                    </p>
+                <div className="flex flex-shrink-0 items-center justify-end gap-3 text-right">
+                    <div>
+                        <p className="text-[0.9375rem] font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
+                        <p className="text-[0.6875rem] mt-1 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                            <span style={{ opacity: 0.58 }}>{order.orderNumber}</span>
+                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                        </p>
+                    </div>
+                    <ChevronRight
+                        className="hidden h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity sm:block group-hover/order-row:opacity-50"
+                        style={{ color: theme.colors.textSecondary }}
+                    />
                 </div>
             </div>
-            {!isLast && <div className="mx-5" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />}
+            {!isLast && <div className="mx-5 sm:mx-6" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />}
         </button>
     );
 };
 
-/* ---- Date Group ---- */
 const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     const dark = isDarkTheme(theme);
     const date = new Date(dateKey);
@@ -132,11 +143,11 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
 
     return (
         <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
-            <div className="flex items-center justify-between gap-3 px-5 pt-3 pb-2">
-                <p className="text-[0.6875rem] font-semibold tracking-[0.08em]" style={{ color: metaColor }}>{label}</p>
-                <p className="text-[0.6875rem] font-semibold tabular-nums" style={{ color: metaColor }}>{formatCurrency(group.total)}</p>
+            <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2 sm:px-6">
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: metaColor }}>{label}</p>
+                <p className="text-[0.6875rem] font-bold tabular-nums" style={{ color: metaColor }}>{formatCurrency(group.total)}</p>
             </div>
-            <div className="mx-5" style={{ borderTop: `1px solid ${headerDivider}` }} />
+            <div className="mx-5 sm:mx-6" style={{ borderTop: `1px solid ${headerDivider}` }} />
             {group.orders.map((o, idx) => (
                 <OrderRow key={o.orderNumber} order={o} theme={theme} onNavigate={onNavigate} isLast={idx === group.orders.length - 1} />
             ))}
@@ -144,7 +155,6 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     );
 };
 
-/* ---- Sample Order Status ---- */
 const SAMPLE_STATUS_CONFIG = {
     'processing':  { label: 'Processing', icon: Clock,          color: '#B8860B' },
     'in-transit':  { label: 'In Transit', icon: Truck,          color: '#2E75B6' },
@@ -234,9 +244,9 @@ const SampleOrdersView = ({ theme, dark, searchTerm }) => {
 const filterRailSurface = (theme) => {
     const dark = isDarkTheme(theme);
     return {
-        backdropFilter: 'blur(18px) saturate(1.35)',
-        WebkitBackdropFilter: 'blur(18px) saturate(1.35)',
-        backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.58)',
+        backdropFilter: 'blur(18px) saturate(1.28)',
+        WebkitBackdropFilter: 'blur(18px) saturate(1.28)',
+        backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.68)',
         border: dark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.82)',
         boxShadow: dark ? 'none' : '0 1px 8px rgba(53,53,53,0.045)'
     };
@@ -287,7 +297,7 @@ const OrdersFilterRail = ({
                 <button
                     type="button"
                     onClick={() => setDealerMenuOpen((open) => !open)}
-                    className="w-full min-[420px]:w-auto min-w-0 rounded-full flex items-center justify-start active:scale-95 transition px-2.5 gap-1.5"
+                    className="w-full min-[420px]:w-auto min-w-0 rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-1.5"
                     style={{
                         ...filterButtonSurface(theme, dealerActive),
                         height: 'calc(var(--jsi-ctrl-h) - 8px)'
@@ -297,7 +307,7 @@ const OrdersFilterRail = ({
                     aria-expanded={dealerMenuOpen}
                 >
                     <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textPrimary, opacity: dealerActive ? 1 : 0.82 }} />
-                    <span className="min-w-0 truncate text-[0.75rem] font-semibold max-w-[min(8rem,32vw)] min-[420px]:max-w-[4.85rem] sm:max-w-[8rem]" style={{ color: theme.colors.textPrimary }}>
+                    <span className="min-w-0 truncate text-[0.75rem] font-semibold max-w-[min(8rem,32vw)] min-[420px]:max-w-[6.5rem] sm:max-w-[8rem]" style={{ color: theme.colors.textPrimary }}>
                         {dealerLabel}
                     </span>
                 </button>
@@ -357,7 +367,6 @@ const OrdersFilterRail = ({
     );
 };
 
-/* ---- Main Screen ---- */
 export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
     const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
     const dark = isDarkTheme(theme);
@@ -410,12 +419,13 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            {/* Controls */}
-            <div className="flex-shrink-0 max-w-content mx-auto w-full">
-                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-1.5 flex flex-col gap-2">
-                    <div className="space-y-2">
-                        <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
-                        <div className={`grid grid-cols-1 ${dateType === 'samples' ? '' : 'min-[420px]:grid-cols-[minmax(0,1fr)_auto]'} items-center gap-2`}>
+            <div className="flex-shrink-0 w-full">
+                <div className={`${ORDERS_EDGE_PADDING} ${ORDERS_SHELL_CLASS} pt-4 pb-2.5 flex flex-col gap-2.5`}>
+                    <div className="space-y-2.5">
+                        <div>
+                            <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
+                        </div>
+                        <div className={`grid grid-cols-1 ${dateType === 'samples' ? '' : 'min-[420px]:grid-cols-[minmax(0,1fr)_auto]'} items-center gap-2.5`}>
                             <div className="min-w-0 flex-1">
                                 <SegmentedToggle
                                     value={dateType}
@@ -446,13 +456,13 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                             )}
                         </div>
                     </div>
-                    {/* Active filter chips row */}
                     {(selectedVertical || selectedDealer !== 'All Dealers') && (
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap pt-0.5">
                             {selectedVertical && (() => {
                                 const vColor = VERTICAL_COLORS[selectedVertical] || '#8B8680';
                                 return (
                                     <button
+                                        type="button"
                                         onClick={() => setSelectedVertical(null)}
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
                                         style={{ backgroundColor: `${vColor}18`, color: vColor, border: `1px solid ${vColor}30` }}
@@ -464,6 +474,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                             })()}
                             {selectedDealer !== 'All Dealers' && (
                                 <button
+                                    type="button"
                                     onClick={() => onNavigate('projects', { tab: 'pipeline', company: selectedDealer })}
                                     className="inline-flex items-center gap-1 text-xs font-medium ml-auto transition-opacity hover:opacity-70"
                                     style={{ color: theme.colors.textSecondary }}
@@ -478,9 +489,8 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                 </div>
             </div>
 
-            {/* Content */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
-                <div className="px-4 sm:px-6 lg:px-8 pt-1.5 pb-24 max-w-content mx-auto w-full">
+                <div className={`${ORDERS_EDGE_PADDING} ${ORDERS_SHELL_CLASS} pt-2 pb-24`}>
                     <AnimatePresence mode="wait">
                       {dateType === 'samples' ? (
                         <motion.div key="samples" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
@@ -489,12 +499,12 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                       ) : viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
-                                                        <div className="space-y-3">
-                                {groupKeys.map((k) => (
-                                  <div key={k}>
-                                    <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
-                                  </div>
-                                ))}
+                            <div className="space-y-3.5">
+                              {groupKeys.map((k) => (
+                                <div key={k}>
+                                  <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
+                                </div>
+                              ))}
                             </div>
                           ) : (
                             <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
@@ -506,7 +516,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                                     {searchTerm || selectedDealer !== 'All Dealers' || selectedVertical ? 'Try adjusting your filters' : 'Orders will appear here'}
                                 </p>
                                 {(searchTerm || selectedDealer !== 'All Dealers' || selectedVertical) && (
-                                    <button onClick={() => { setSearchTerm(''); setSelectedDealer('All Dealers'); setSelectedVertical(null); }}
+                                    <button type="button" onClick={() => { setSearchTerm(''); setSelectedDealer('All Dealers'); setSelectedVertical(null); }}
                                         className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-xs font-semibold transition active:scale-95"
                                         style={{ backgroundColor: `${theme.colors.accent}15`, color: theme.colors.accent }}>
                                         <X className="w-3 h-3" /> Clear filters

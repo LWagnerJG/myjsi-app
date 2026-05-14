@@ -66,8 +66,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const topLeaders = useMemo(() => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3), []);
   const chartMax = useMemo(() => Math.max(...MONTHLY_SALES_DATA.map(d => chartDataType === 'bookings' ? d.bookings : d.sales)), [chartDataType]);
 
-  /* ── rewards snapshot (latest quarter) ── */
-
   const rewardsSnapshot = useMemo(() => {
     const entries = Object.entries(INCENTIVE_REWARDS_DATA || {});
     if (!entries.length) return null;
@@ -80,24 +78,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     const totalSalesR = sales.reduce((s, r) => s + (r.amount || 0), 0);
     const totalDesignR = designers.reduce((s, r) => s + (r.amount || 0), 0);
     return { key, topSales, topDesigners, totalSalesR, totalDesignR, totalAll: totalSalesR + totalDesignR, salesCount: sales.length, designersCount: designers.length };
-  }, []);
-
-  /* ── commissions snapshot (latest available year with data) ── */
-
-  const commissionsSnapshot = useMemo(() => {
-    const entries = Object.entries(INCENTIVE_REWARDS_DATA || {});
-    if (!entries.length) return null;
-    // Find the latest year that actually has data
-    const years = [...new Set(entries.map(([k]) => k.split('-Q')[0]))].sort().reverse();
-    const targetYear = years[0];
-    if (!targetYear) return null;
-    const yearEntries = entries.filter(([k]) => k.startsWith(targetYear));
-    const allSales = yearEntries.flatMap(([, d]) => d?.sales || []);
-    const byPerson = {};
-    allSales.forEach(s => { byPerson[s.name] = (byPerson[s.name] || 0) + s.amount; });
-    const sorted = Object.entries(byPerson).sort((a, b) => b[1] - a[1]);
-    const ytdTotal = sorted.reduce((s, [, v]) => s + v, 0);
-    return { ytdTotal, topEarners: sorted.slice(0, 3), quartersReported: yearEntries.length, year: targetYear };
   }, []);
 
   const toggleOpts = useMemo(() => [
@@ -124,51 +104,46 @@ export const SalesScreen = ({ theme, onNavigate }) => {
   const topSalesLeader = rewardsSnapshot?.topSales?.[0] || null;
   const topDesignLeader = rewardsSnapshot?.topDesigners?.[0] || null;
 
-  /* ── animation gate — wait for screen slide-in ── */
-
   const [ready, setReady] = useState(false);
   useEffect(() => { const t = setTimeout(() => setReady(true), 300); return () => clearTimeout(t); }, []);
 
-
-  /* shared tile header */
-  const TileHeader = ({ title, action, detail }) => (
-    <div className="flex items-center justify-between gap-3 mb-3">
-      <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>{title}</h3>
-      <div className="flex items-center gap-2 shrink-0">
-        {detail && (
-          <span className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>{detail}</span>
-        )}
-        {action && (
-          <ChevronRight className="w-3.5 h-3.5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+  const TileHeader = ({ title, action, detail }) => {
+    const hasMeta = Boolean(action || detail);
+    return (
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>{title}</h3>
+        {hasMeta && (
+          <div className="flex items-center gap-2 shrink-0">
+            {detail && (
+              <span className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>{detail}</span>
+            )}
+            {action && (
+              <ChevronRight className="w-3.5 h-3.5" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+            )}
+          </div>
         )}
       </div>
-    </div>
-  );
+    );
+  };
 
-  /* shared content row */
   const flatRowCls = "flex items-center justify-between gap-3 py-2.5";
   const flatRowsDivider = { borderColor: subtleBg(theme, 1.35) };
 
   return (
-    <div className="min-h-full app-header-offset" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-6 space-y-5 max-w-content mx-auto w-full">
-
-        {/* ── Hero KPI + sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[5fr_3fr] gap-5">
-
-          {/* Main KPI card */}
-          <GlassCard theme={theme} className="p-5 h-full" variant="elevated">
+    <div className="min-h-full app-header-offset overflow-x-hidden" style={{ backgroundColor: colors.background, color: colors.textPrimary }}>
+      <div className="min-w-0 px-4 sm:px-6 lg:px-8 pt-5 pb-6 space-y-5 max-w-content mx-auto w-full">
+        <div className="grid min-w-0 grid-cols-1 lg:grid-cols-[5fr_3fr] gap-5">
+          <GlassCard theme={theme} className="min-w-0 p-4 sm:p-5 h-full" variant="elevated">
             <div className="h-full flex flex-col gap-4">
-              {/* KPI header */}
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3 max-[420px]:flex-col max-[420px]:items-stretch">
                 <div className="min-w-0">
-                  <div className="text-[2.15rem] sm:text-[2.6rem] font-black tracking-tight leading-none">
+                  <div className="text-[2rem] sm:text-[2.6rem] font-black leading-none">
                     {formatCurrency(activeTotal)}
                   </div>
                 </div>
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex items-center gap-2 max-[420px]:ml-0 max-[420px]:w-full max-[420px]:justify-between">
                   <div
-                    className="inline-flex h-8 shrink-0 items-center rounded-full p-[3px] sm:h-9 sm:p-1"
+                    className="inline-flex h-8 shrink-0 items-center rounded-full p-[3px] sm:h-9 sm:p-1 max-[420px]:flex-1"
                     style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : '#E6E8E3' }}
                     role="group"
                     aria-label="Sales metric"
@@ -180,7 +155,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                           key={opt.value}
                           type="button"
                           onClick={() => setChartDataType(opt.value)}
-                          className="h-[26px] rounded-full px-2.5 text-[0.75rem] font-semibold transition-all sm:h-7 sm:px-3 sm:text-[0.8125rem]"
+                          className="inline-flex h-[26px] items-center justify-center rounded-full px-2.5 text-[0.75rem] font-semibold transition-all sm:h-7 sm:px-3 sm:text-[0.8125rem] max-[420px]:flex-1"
                           aria-pressed={selected}
                           style={{
                             backgroundColor: selected ? colors.accent : 'transparent',
@@ -214,7 +189,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
               </div>
 
-              {/* Progress */}
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1 h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: subtleBg(theme, 1.5) }}>
@@ -233,7 +207,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
                 </div>
               </div>
 
-              {/* Monthly detail */}
               {showTableView ? (
                 <div className="flex-1 min-h-0 pt-1">
                   <div className={`grid h-full min-h-0 ${monthlyColumns.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
@@ -298,10 +271,8 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             </div>
           </GlassCard>
 
-          {/* Sidebar cards */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-rows-2">
-            {/* Leaderboard */}
-            <button onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
+          <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-rows-2">
+            <button type="button" onClick={() => onNavigate('customer-rank')} className="w-full h-full text-left group">
               <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
                 <TileHeader title="Leaderboard" action />
                 <div className="flex-1 divide-y" style={flatRowsDivider}>
@@ -315,8 +286,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </GlassCard>
             </button>
 
-            {/* Dealer Rewards */}
-            <button onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left group">
+            <button type="button" onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left group">
               <GlassCard theme={theme} className="p-5 h-full flex flex-col" variant="elevated">
                 <TileHeader title="Dealer Rewards" action />
                 {rewardsSnapshot ? (
@@ -347,19 +317,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             </button>
           </div>
         </div>
-        {/* ── Vertical Breakdown + Live Orders ── unified interactive card ── */}
-        <GlassCard theme={theme} className="overflow-hidden" variant="elevated"
+        <GlassCard theme={theme} className="min-w-0 overflow-hidden" variant="elevated"
           style={{
             borderLeft: `4px solid ${verticalColor || 'transparent'}`,
             transition: 'border-color 400ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}>
 
-          {/* Donut section */}
           <div className="px-5 pt-5 pb-4">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-widest mb-4"
-              style={{ color: colors.textSecondary, opacity: 0.45 }}>
-              Invoiced by Vertical
-            </p>
+            <TileHeader title="Invoiced by Vertical" />
             <SalesByVerticalBreakdown
               theme={theme}
               data={SALES_VERTICALS_DATA.map(v => ({ name: v.label, value: v.value, color: v.color }))}
@@ -368,12 +333,9 @@ export const SalesScreen = ({ theme, onNavigate }) => {
             />
           </div>
 
-          {/* Divider */}
           <div className="mx-5" style={{ borderTop: `1px solid ${subtleBg(theme, 1.6)}` }} />
 
-          {/* Orders section — animates when vertical changes */}
           <div className="px-5 pt-4 pb-5">
-            {/* Header */}
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                 <AnimatePresence mode="wait">
@@ -407,6 +369,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
 
               <button
+                type="button"
                 onClick={() => onNavigate('orders', selectedVertical ? { vertical: selectedVertical } : {})}
                 className="flex items-center gap-1 shrink-0 transition-opacity hover:opacity-60 active:opacity-40"
                 style={{ color: selectedVertical ? (verticalColor || colors.textSecondary) : colors.textSecondary }}
@@ -416,7 +379,6 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </button>
             </div>
 
-            {/* Order rows — keyed by vertical so they re-mount and stagger in */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedVertical || 'all'}
@@ -478,27 +440,14 @@ export const SalesScreen = ({ theme, onNavigate }) => {
           </div>
         </GlassCard>
 
-        {/* ── Commissions Preview ── */}
-        {commissionsSnapshot && (
-          <button onClick={() => onNavigate('sales/commissions')} className="w-full text-left group">
-            <GlassCard theme={theme} className="p-5" variant="elevated">
-              <TileHeader title="Commissions" action detail={formatCurrency(commissionsSnapshot.ytdTotal)} />
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[0.6875rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.45 }}>
-                    {commissionsSnapshot.year} YTD
-                  </p>
-                  <p className="text-sm font-medium mt-1" style={{ color: colors.textSecondary, opacity: 0.7 }}>
-                    View monthly commission payouts
-                  </p>
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                  Open
-                </span>
-              </div>
-            </GlassCard>
-          </button>
-        )}
+        <button type="button" onClick={() => onNavigate('sales/commissions')} className="w-full text-left group">
+          <GlassCard theme={theme} className="p-5" variant="elevated">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>Commissions</h3>
+              <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: colors.textSecondary, opacity: 0.45 }} />
+            </div>
+          </GlassCard>
+        </button>
       </div>
 
     </div>
