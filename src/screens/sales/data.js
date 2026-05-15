@@ -2,21 +2,96 @@
 import { VERTICAL_COLORS } from '../../constants/verticals.js';
 
 export const YTD_SALES_DATA = [
-    { label: 'Total Sales', current: 3666132, previous: 2900104, goal: 7000000 }, 
-    { label: 'Education', current: 1250000, previous: 1045589, goal: 2500000 }, 
+    { label: 'Total Sales', current: 3666132, previous: 2900104, goal: 7000000 },
+    { label: 'Education', current: 1250000, previous: 1045589, goal: 2500000 },
     { label: 'Health', current: 980000, previous: 850000, goal: 2000000 }
 ];
 
-export const MONTHLY_SALES_DATA = [ 
-    { month: 'Jan', bookings: 1259493, sales: 506304 }, 
-    { month: 'Feb', bookings: 497537, sales: 553922 }, 
-    { month: 'Mar', bookings: 397684, sales: 365601 }, 
-    { month: 'Apr', bookings: 554318, sales: 696628 }, 
-    { month: 'May', bookings: 840255, sales: 1340018 }, 
-    { month: 'Jun', bookings: 116846, sales: 36823 },
-    { month: 'Jul', bookings: 520000, sales: 785000 },
-    { month: 'Aug', bookings: 600000, sales: 825000 }
-];
+// Annual goals keyed by year — update each January
+export const ANNUAL_GOALS_BY_YEAR = {
+    2025: 7_000_000,
+    2024: 6_500_000,
+    2023: 6_000_000,
+    2022: 5_500_000,
+};
+
+// Monthly bookings + invoiced sales by year
+// When ERP is wired, replace with sales.getOrderSummary() grouped by month
+export const MONTHLY_SALES_DATA_BY_YEAR = {
+    2025: [
+        { month: 'Jan', bookings: 1259493, sales: 506304 },
+        { month: 'Feb', bookings: 497537,  sales: 553922 },
+        { month: 'Mar', bookings: 397684,  sales: 365601 },
+        { month: 'Apr', bookings: 554318,  sales: 696628 },
+        { month: 'May', bookings: 840255,  sales: 1340018 },
+        { month: 'Jun', bookings: 116846,  sales: 36823 },
+        { month: 'Jul', bookings: 520000,  sales: 785000 },
+        { month: 'Aug', bookings: 600000,  sales: 825000 },
+    ],
+    2024: [
+        { month: 'Jan', bookings: 980000,  sales: 810000 },
+        { month: 'Feb', bookings: 620000,  sales: 590000 },
+        { month: 'Mar', bookings: 745000,  sales: 680000 },
+        { month: 'Apr', bookings: 830000,  sales: 760000 },
+        { month: 'May', bookings: 910000,  sales: 870000 },
+        { month: 'Jun', bookings: 760000,  sales: 720000 },
+        { month: 'Jul', bookings: 680000,  sales: 640000 },
+        { month: 'Aug', bookings: 590000,  sales: 555000 },
+        { month: 'Sep', bookings: 870000,  sales: 830000 },
+        { month: 'Oct', bookings: 950000,  sales: 910000 },
+        { month: 'Nov', bookings: 710000,  sales: 680000 },
+        { month: 'Dec', bookings: 540000,  sales: 510000 },
+    ],
+    2023: [
+        { month: 'Jan', bookings: 810000,  sales: 740000 },
+        { month: 'Feb', bookings: 550000,  sales: 510000 },
+        { month: 'Mar', bookings: 680000,  sales: 620000 },
+        { month: 'Apr', bookings: 720000,  sales: 670000 },
+        { month: 'May', bookings: 840000,  sales: 790000 },
+        { month: 'Jun', bookings: 690000,  sales: 650000 },
+        { month: 'Jul', bookings: 600000,  sales: 560000 },
+        { month: 'Aug', bookings: 520000,  sales: 490000 },
+        { month: 'Sep', bookings: 760000,  sales: 720000 },
+        { month: 'Oct', bookings: 870000,  sales: 840000 },
+        { month: 'Nov', bookings: 640000,  sales: 610000 },
+        { month: 'Dec', bookings: 490000,  sales: 460000 },
+    ],
+    2022: [
+        { month: 'Jan', bookings: 680000,  sales: 620000 },
+        { month: 'Feb', bookings: 450000,  sales: 410000 },
+        { month: 'Mar', bookings: 560000,  sales: 510000 },
+        { month: 'Apr', bookings: 610000,  sales: 570000 },
+        { month: 'May', bookings: 720000,  sales: 680000 },
+        { month: 'Jun', bookings: 590000,  sales: 550000 },
+        { month: 'Jul', bookings: 510000,  sales: 475000 },
+        { month: 'Aug', bookings: 440000,  sales: 410000 },
+        { month: 'Sep', bookings: 640000,  sales: 600000 },
+        { month: 'Oct', bookings: 730000,  sales: 700000 },
+        { month: 'Nov', bookings: 550000,  sales: 520000 },
+        { month: 'Dec', bookings: 410000,  sales: 380000 },
+    ],
+};
+
+// Alias for current year — used by any component that doesn't need year selection
+export const MONTHLY_SALES_DATA = MONTHLY_SALES_DATA_BY_YEAR[2025];
+
+// Backlog — orders booked but not yet invoiced/shipped
+// Source: ERP (products.getLeadTime will inform scheduled ship dates when wired)
+export const BACKLOG_DATA = {
+    total: 2_845_000,
+    items: [
+        { dealer: 'RJE Business Interiors',  project: 'Downtown Campus Ph.2',       value: 485000, scheduledShip: '2025-09-15', vertical: 'Corporate',   status: 'In Production' },
+        { dealer: 'Business Furniture LLC',  project: 'Lawrence Township Ph.2',     value: 320000, scheduledShip: '2025-09-28', vertical: 'Education',   status: 'Scheduled' },
+        { dealer: 'OfficeWorks',             project: 'Meridian HQ Expansion',      value: 295000, scheduledShip: '2025-10-06', vertical: 'Corporate',   status: 'Scheduled' },
+        { dealer: 'Corporate Design Inc',    project: 'Parkview Medical Center',    value: 410000, scheduledShip: '2025-10-14', vertical: 'Healthcare',  status: 'In Production' },
+        { dealer: 'LOTH Inc.',               project: 'State Archives Renovation',  value: 275000, scheduledShip: '2025-10-22', vertical: 'Government',  status: 'Pending Release' },
+        { dealer: 'Sharp School Services',   project: 'Westfield K-8 STEM Wing',    value: 190000, scheduledShip: '2025-11-03', vertical: 'Education',   status: 'Scheduled' },
+        { dealer: 'Braden Business Systems', project: 'Regional HQ Refresh',        value: 225000, scheduledShip: '2025-11-10', vertical: 'Corporate',   status: 'Pending Release' },
+        { dealer: 'CVC',                     project: 'Operations Center Ph.2',     value: 180000, scheduledShip: '2025-11-17', vertical: 'Corporate',   status: 'Scheduled' },
+        { dealer: 'One Eleven Design',       project: 'Embassy Suites Lobby',       value: 265000, scheduledShip: '2025-12-01', vertical: 'Hospitality', status: 'In Production' },
+        { dealer: "Schroeder's",             project: 'Clinic Network Rollout',     value: 200000, scheduledShip: '2025-12-08', vertical: 'Healthcare',  status: 'Pending Release' },
+    ],
+};
 
 export const SALES_VERTICALS_DATA = [
     { label: 'Healthcare',  value: 2900104, color: VERTICAL_COLORS.Healthcare  },
