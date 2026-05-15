@@ -39,7 +39,7 @@ const sortQuarterEntries = (entries) =>
 export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
   const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [chartDataType, setChartDataType] = useState('bookings');
-  const [showTableView, setShowTableView] = useState(false);
+  const [showTableView, setShowTableView] = useState(true);
   const [selectedVertical, setSelectedVertical] = useState(null);
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
   const isDark = isDarkTheme(theme);
