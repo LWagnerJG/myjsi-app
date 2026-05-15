@@ -9,6 +9,7 @@ export const YTD_SALES_DATA = [
 
 // Annual goals keyed by year — update each January
 export const ANNUAL_GOALS_BY_YEAR = {
+    2026: 7_500_000,
     2025: 7_000_000,
     2024: 6_500_000,
     2023: 6_000_000,
@@ -18,6 +19,13 @@ export const ANNUAL_GOALS_BY_YEAR = {
 // Monthly bookings + invoiced sales by year
 // When ERP is wired, replace with sales.getOrderSummary() grouped by month
 export const MONTHLY_SALES_DATA_BY_YEAR = {
+    2026: [
+        { month: 'Jan', bookings: 1_182_400, sales:   524_800 },
+        { month: 'Feb', bookings:   537_200, sales:   491_600 },
+        { month: 'Mar', bookings:   428_900, sales:   382_400 },
+        { month: 'Apr', bookings:   618_700, sales:   734_200 },
+        { month: 'May', bookings:   316_500, sales:   192_300 },
+    ],
     2025: [
         { month: 'Jan', bookings: 1259493, sales: 506304 },
         { month: 'Feb', bookings: 497537,  sales: 553922 },

@@ -1,9 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { BarChart3, ChevronRight, Package, Table2 } from 'lucide-react';
+import { BarChart3, ChevronDown, ChevronRight, Package, Table2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MONTHLY_SALES_DATA_BY_YEAR,
-  MONTHLY_SALES_DATA,
   ANNUAL_GOALS_BY_YEAR,
   SALES_VERTICALS_DATA,
   CUSTOMER_RANK_DATA,
@@ -11,7 +10,6 @@ import {
   BACKLOG_DATA,
 } from './data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../orders/data.js';
-import { VERTICAL_COLORS } from '../../constants/verticals.js';
 import { SalesByVerticalBreakdown } from './components/SalesByVerticalBreakdown.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { isDarkTheme, subtleBg } from '../../design-system/tokens.js';
@@ -41,7 +39,7 @@ const sortQuarterEntries = (entries) =>
 export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
   const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [chartDataType, setChartDataType] = useState('bookings');
-  const [showTableView, setShowTableView] = useState(true);
+  const [showTableView, setShowTableView] = useState(false);
   const [selectedVertical, setSelectedVertical] = useState(null);
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
   const isDark = isDarkTheme(theme);
@@ -135,7 +133,6 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
     return { ytdTotal: sorted.reduce((s, [, v]) => s + v, 0), topEarners: sorted.slice(0, 3) };
   }, []);
 
-  // Column-layout table — main's approach
   const monthlyRows = useMemo(() => (
     activeMonthlyData.map(entry => ({
       month: entry.month,
@@ -178,42 +175,90 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
 
         {/* ── Hero KPI card ── */}
         <GlassCard theme={theme} className="min-w-0 overflow-hidden" variant="elevated">
-          <div className="p-4 sm:p-5 flex flex-col gap-4">
+          <div className="p-4 sm:p-5 flex flex-col gap-3">
 
-            {/* Big number + year selector */}
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="text-[2rem] sm:text-[2.6rem] font-black leading-none tracking-tight">
-                {formatCurrency(activeTotal)}
-              </div>
+            {/* Big number + year dropdown */}
+            <div className="flex items-center justify-between gap-3">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${selectedYear}-${chartDataType}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                  className="text-[2rem] sm:text-[2.6rem] font-black leading-none tracking-tight tabular-nums"
+                >
+                  {formatCurrency(activeTotal)}
+                </motion.div>
+              </AnimatePresence>
 
-              {/* Year selector — discreet pill group */}
-              <div className="flex items-center gap-0.5 rounded-full p-0.5 shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : '#E6E8E3' }}>
-                {YEAR_OPTIONS.map(y => (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => setSelectedYear(y)}
-                    className="relative px-2.5 py-1 rounded-full text-[0.625rem] font-bold transition-colors"
-                    style={{
-                      color: selectedYear === y ? (isDark ? '#fff' : colors.accent) : colors.textSecondary,
-                      opacity: selectedYear === y ? 1 : 0.4,
-                    }}
-                  >
-                    {selectedYear === y && (
-                      <motion.span
-                        layoutId="year-pill"
-                        className="absolute inset-0 rounded-full"
-                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : colors.surface }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                      />
-                    )}
-                    <span className="relative z-10">{y}</span>
-                  </button>
-                ))}
+              {/* Compact year dropdown */}
+              <div
+                className="relative inline-flex items-center rounded-full shrink-0"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : subtleBg(theme, 1.9) }}
+              >
+                <select
+                  value={selectedYear}
+                  onChange={e => setSelectedYear(Number(e.target.value))}
+                  className="appearance-none bg-transparent text-[0.75rem] font-bold cursor-pointer py-1.5 pl-3 pr-7 rounded-full"
+                  style={{ color: colors.textPrimary }}
+                  aria-label="Select year"
+                >
+                  {YEAR_OPTIONS.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="absolute right-2 w-3.5 h-3.5 pointer-events-none"
+                  style={{ color: colors.textSecondary, opacity: 0.45 }}
+                />
               </div>
             </div>
 
-            {/* Toggle controls — main's segmented pill style */}
+            {/* Progress bar */}
+            <div>
+              <div
+                className="relative w-full h-6 rounded-full overflow-hidden"
+                style={{ backgroundColor: subtleBg(theme, 1.8) }}
+              >
+                <span
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
+                  style={{ color: colors.textSecondary, opacity: 0.28, zIndex: 0 }}
+                >
+                  {formatCurrencyCompact(activeGoal)} goal
+                </span>
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
+                  style={{ backgroundColor: colors.accent }}
+                  animate={{ width: ready ? `${Math.max(progressPct, 3)}%` : '0%' }}
+                  transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.25 }}
+                >
+                  <AnimatePresence>
+                    {ready && progressPct > 14 && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.65, duration: 0.2 }}
+                        className="text-[0.5625rem] font-black tabular-nums select-none"
+                        style={{ color: isDark ? colors.accent : '#fff' }}
+                      >
+                        {progressPct.toFixed(0)}%
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
+              <div className="flex items-center justify-between mt-1.5">
+                <span className="text-[0.5625rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.4 }}>
+                  {chartDataType === 'bookings' ? 'Bookings' : 'Sales'} · {selectedYear}
+                </span>
+                <span className="text-[0.5625rem] font-semibold tabular-nums" style={{ color: colors.textSecondary, opacity: 0.4 }}>
+                  {formatCurrencyCompact(activeTotal)} of {formatCurrencyCompact(activeGoal)}
+                </span>
+              </div>
+            </div>
+
+            {/* Toggle controls */}
             <div className="flex items-center gap-2">
               <div
                 className="inline-flex h-8 sm:h-9 shrink-0 items-center rounded-full p-[3px] sm:p-1"
@@ -260,102 +305,84 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
             </div>
 
             {/* Chart / Table */}
-            {showTableView ? (
-              <div className="flex-1 min-h-0">
-                <div className={`grid h-full min-h-0 ${monthlyColumns.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
-                  {monthlyColumns.map((column, colIdx) => (
-                    <div
-                      key={`col-${colIdx}`}
-                      className={`flex flex-col ${monthlyColumns.length > 1 && colIdx > 0 ? 'sm:border-l' : ''}`}
-                      style={monthlyColumns.length > 1 && colIdx > 0 ? { borderColor: subtleBg(theme, 1.35) } : undefined}
-                    >
-                      {column.map((row, rowIdx) => (
+            <AnimatePresence mode="wait">
+              {showTableView ? (
+                <motion.div
+                  key="table"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex-1 min-h-0"
+                >
+                  {monthlyRows.length === 0 ? (
+                    <p className="text-sm py-4 text-center" style={{ color: colors.textSecondary, opacity: 0.4 }}>
+                      No data for {selectedYear}
+                    </p>
+                  ) : (
+                    <div className={`grid h-full min-h-0 ${monthlyColumns.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                      {monthlyColumns.map((column, colIdx) => (
                         <div
-                          key={row.month}
-                          className={`flex min-h-[3.125rem] flex-1 items-center justify-between gap-3 ${monthlyColumns.length > 1 ? (colIdx === 0 ? 'sm:pr-5' : 'sm:pl-5') : ''}`}
-                          style={{ borderBottom: rowIdx === column.length - 1 ? 'none' : `1px solid ${subtleBg(theme, 1.35)}` }}
+                          key={`col-${colIdx}`}
+                          className={`flex flex-col ${monthlyColumns.length > 1 && colIdx > 0 ? 'sm:border-l' : ''}`}
+                          style={monthlyColumns.length > 1 && colIdx > 0 ? { borderColor: subtleBg(theme, 1.35) } : undefined}
                         >
-                          <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>{row.month}</span>
-                          <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>{formatCurrency(row.value)}</span>
+                          {column.map((row, rowIdx) => (
+                            <div
+                              key={row.month}
+                              className={`flex min-h-[3.125rem] flex-1 items-center justify-between gap-3 ${monthlyColumns.length > 1 ? (colIdx === 0 ? 'sm:pr-5' : 'sm:pl-5') : ''}`}
+                              style={{ borderBottom: rowIdx === column.length - 1 ? 'none' : `1px solid ${subtleBg(theme, 1.35)}` }}
+                            >
+                              <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary }}>{row.month}</span>
+                              <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>{formatCurrency(row.value)}</span>
+                            </div>
+                          ))}
                         </div>
                       ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-end gap-1.5 h-[100px]">
-                {activeMonthlyData.map((m, i) => {
-                  const val = chartDataType === 'bookings' ? m.bookings : m.sales;
-                  const pct = (val / chartMax) * 100;
-                  return (
-                    <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1 h-full">
-                      <div className="w-full flex items-end flex-1">
-                        <div
-                          className="w-full rounded-sm"
-                          style={{
-                            height: ready ? `${Math.max(6, pct)}%` : '0%',
-                            backgroundColor: isDark ? 'rgba(245,240,235,0.55)' : colors.accent,
-                            opacity: isDark ? 1 : (0.18 + (pct / 100) * 0.28),
-                            transition: `height 0.5s ease-out ${0.05 + i * 0.03}s`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-[0.5rem] font-semibold tracking-wide" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                        {m.month}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* ── Progress bar — full-width pill, flush to card bottom ── */}
-          <div className="px-4 sm:px-5 pb-4">
-            <div
-              className="relative w-full h-6 rounded-full overflow-hidden"
-              style={{ backgroundColor: subtleBg(theme, 1.8) }}
-            >
-              {/* Goal label in the empty track */}
-              <span
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
-                style={{ color: colors.textSecondary, opacity: 0.28, zIndex: 0 }}
-              >
-                {formatCurrencyCompact(activeGoal)} goal
-              </span>
-
-              {/* Animated fill */}
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
-                style={{ backgroundColor: colors.accent }}
-                animate={{ width: ready ? `${Math.max(progressPct, 4)}%` : '0%' }}
-                transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.35 }}
-              >
-                <AnimatePresence>
-                  {ready && progressPct > 14 && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.7, duration: 0.2 }}
-                      className="text-[0.5625rem] font-black tabular-nums select-none"
-                      style={{ color: isDark ? colors.accent : '#fff' }}
-                    >
-                      {progressPct.toFixed(0)}%
-                    </motion.span>
                   )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="chart"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex items-end gap-1.5 h-[100px]"
+                >
+                  {activeMonthlyData.length === 0 ? (
+                    <p className="text-sm w-full text-center" style={{ color: colors.textSecondary, opacity: 0.4 }}>
+                      No data for {selectedYear}
+                    </p>
+                  ) : (
+                    activeMonthlyData.map((m, i) => {
+                      const val = chartDataType === 'bookings' ? m.bookings : m.sales;
+                      const pct = (val / chartMax) * 100;
+                      return (
+                        <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1 h-full">
+                          <div className="w-full flex items-end flex-1">
+                            <div
+                              className="w-full rounded-sm"
+                              style={{
+                                height: ready ? `${Math.max(6, pct)}%` : '0%',
+                                backgroundColor: isDark ? 'rgba(245,240,235,0.55)' : colors.accent,
+                                opacity: isDark ? 1 : (0.18 + (pct / 100) * 0.28),
+                                transition: `height 0.5s ease-out ${0.05 + i * 0.03}s`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-[0.5rem] font-semibold tracking-wide" style={{ color: colors.textSecondary, opacity: 0.5 }}>
+                            {m.month}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <div className="flex items-center justify-between mt-1.5">
-              <span className="text-[0.5625rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.4 }}>
-                {chartDataType === 'bookings' ? 'Bookings' : 'Sales'} · {selectedYear}
-              </span>
-              <span className="text-[0.5625rem] font-semibold tabular-nums" style={{ color: colors.textSecondary, opacity: 0.4 }}>
-                {formatCurrencyCompact(activeTotal)} of {formatCurrencyCompact(activeGoal)}
-              </span>
-            </div>
           </div>
         </GlassCard>
 
