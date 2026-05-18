@@ -36,7 +36,7 @@ const sortQuarterEntries = (entries) =>
     return pa.y === pb.y ? pa.q - pb.q : pa.y - pb.y;
   });
 
-export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
+export const SalesScreen = ({ theme, onNavigate }) => {
   const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
   const [chartDataType, setChartDataType] = useState('bookings');
   const [showTableView, setShowTableView] = useState(true);
@@ -85,16 +85,6 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
     if (!selectedVertical) return null;
     return SALES_VERTICALS_DATA.find(v => v.label === selectedVertical)?.color || null;
   }, [selectedVertical]);
-
-  const wonPipeline = useMemo(() => {
-    if (!Array.isArray(opportunities)) return { total: 0, count: 0 };
-    const won = opportunities.filter(o => o.stage === 'Won');
-    const total = won.reduce((sum, o) => {
-      const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : (o.value || 0);
-      return sum + (parseFloat(raw) || 0);
-    }, 0);
-    return { total, count: won.length };
-  }, [opportunities]);
 
   const topLeaders = useMemo(
     () => [...CUSTOMER_RANK_DATA].sort((a, b) => (b.bookings || 0) - (a.bookings || 0)).slice(0, 3),
@@ -298,53 +288,43 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
             </div>
 
             {/* Progress bar */}
-            <div>
-              <div
-                className="relative w-full h-6 rounded-full overflow-hidden"
-                style={{ backgroundColor: subtleBg(theme, 1.8) }}
+            <div
+              className="relative w-full h-6 rounded-full overflow-hidden"
+              style={{ backgroundColor: subtleBg(theme, 1.8) }}
+            >
+              <span
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
+                style={{ color: colors.textSecondary, opacity: 0.28, zIndex: 0 }}
               >
-                <span
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
-                  style={{ color: colors.textSecondary, opacity: 0.28, zIndex: 0 }}
-                >
-                  {formatCurrencyCompact(activeGoal)} goal
-                </span>
-                <motion.div
-                  className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
-                  style={{ backgroundColor: colors.accent }}
-                  animate={{ width: ready ? `${Math.max(progressPct, 3)}%` : '0%' }}
-                  transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.25 }}
-                >
-                  <AnimatePresence>
-                    {ready && progressPct > 14 && (
-                      <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.65, duration: 0.2 }}
-                        className="text-[0.5625rem] font-black tabular-nums select-none"
-                        style={{ color: isDark ? colors.accent : '#fff' }}
-                      >
-                        {progressPct.toFixed(0)}%
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[0.5625rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.4 }}>
-                  {chartDataType === 'bookings' ? 'Bookings' : 'Sales'} · {selectedYear}
-                </span>
-                <span className="text-[0.5625rem] font-semibold tabular-nums" style={{ color: colors.textSecondary, opacity: 0.4 }}>
-                  {formatCurrencyCompact(activeTotal)} of {formatCurrencyCompact(activeGoal)}
-                </span>
-              </div>
+                {formatCurrencyCompact(activeGoal)} goal
+              </span>
+              <motion.div
+                className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
+                style={{ backgroundColor: colors.accent }}
+                animate={{ width: ready ? `${Math.max(progressPct, 3)}%` : '0%' }}
+                transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.25 }}
+              >
+                <AnimatePresence>
+                  {ready && progressPct > 14 && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.65, duration: 0.2 }}
+                      className="text-[0.5625rem] font-black tabular-nums select-none"
+                      style={{ color: isDark ? colors.accent : '#fff' }}
+                    >
+                      {progressPct.toFixed(0)}%
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </div>
 
-            {/* Toggle controls */}
+            {/* Toggle controls — unified surface treatment */}
             <div className="flex items-center gap-2">
               <div
-                className="inline-flex h-8 sm:h-9 shrink-0 items-center rounded-full p-[3px] sm:p-1"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.075)' : '#E6E8E3' }}
+                className="inline-flex h-8 shrink-0 items-center rounded-full p-0.5"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : subtleBg(theme, 1.9) }}
                 role="group"
                 aria-label="Sales metric"
               >
@@ -355,15 +335,22 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
                       key={opt.value}
                       type="button"
                       onClick={() => setChartDataType(opt.value)}
-                      className="inline-flex h-[26px] sm:h-7 items-center justify-center rounded-full px-2.5 sm:px-3 text-[0.75rem] sm:text-[0.8125rem] font-semibold transition-all"
+                      className="relative inline-flex h-7 items-center justify-center rounded-full px-3.5 text-[0.75rem] font-bold transition-colors"
                       aria-pressed={selected}
-                      style={{
-                        backgroundColor: selected ? colors.accent : 'transparent',
-                        color: selected ? (theme?.colors?.accentText || '#FFFFFF') : colors.textSecondary,
-                        boxShadow: selected && !isDark ? '0 4px 12px rgba(53,53,53,0.18)' : 'none',
-                      }}
+                      style={{ color: selected ? (isDark ? '#fff' : colors.accent) : colors.textSecondary }}
                     >
-                      {opt.label}
+                      {selected && (
+                        <motion.span
+                          layoutId="metric-pill"
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : colors.surface,
+                            boxShadow: isDark ? 'none' : '0 1px 3px rgba(53,53,53,0.08), 0 1px 2px rgba(53,53,53,0.04)',
+                          }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                        />
+                      )}
+                      <span className="relative z-10">{opt.label}</span>
                     </button>
                   );
                 })}
@@ -372,17 +359,16 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
               <button
                 type="button"
                 onClick={() => setShowTableView(v => !v)}
-                className="flex h-8 sm:h-9 w-8 sm:w-9 shrink-0 items-center justify-center rounded-full border transition active:scale-95"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition active:scale-95"
                 style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : colors.surface,
-                  borderColor: isDark ? 'rgba(255,255,255,0.12)' : colors.border,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : subtleBg(theme, 1.9),
                   color: colors.textPrimary,
                 }}
                 aria-label={showTableView ? 'Switch to chart view' : 'Switch to table view'}
               >
                 {showTableView
-                  ? <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  : <Table2   className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                  ? <BarChart3 className="h-3.5 w-3.5" />
+                  : <Table2   className="h-3.5 w-3.5" />}
               </button>
             </div>
 
@@ -512,27 +498,6 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
             </GlassCard>
           </button>
         </div>
-
-        {/* ── Won Pipeline ── */}
-        {wonPipeline.count > 0 && (
-          <button type="button" onClick={() => onNavigate('projects', { tab: 'pipeline', stage: 'Won' })} className="w-full text-left">
-            <GlassCard theme={theme} className="p-4" variant="elevated">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[0.625rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.45 }}>Won Pipeline</p>
-                  <p className="text-xl font-black tabular-nums tracking-tight leading-tight mt-0.5">{formatCurrencyCompact(wonPipeline.total)}</p>
-                  <p className="text-[0.625rem] font-medium mt-0.5" style={{ color: colors.textSecondary, opacity: 0.5 }}>
-                    {wonPipeline.count} {wonPipeline.count === 1 ? 'project' : 'projects'} closed
-                  </p>
-                </div>
-                <div className="flex items-center gap-1" style={{ color: colors.textSecondary, opacity: 0.35 }}>
-                  <span className="text-xs font-semibold">Pipeline</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            </GlassCard>
-          </button>
-        )}
 
         {/* ── Backlog ── */}
         <GlassCard theme={theme} className="overflow-hidden" variant="elevated">
@@ -703,18 +668,16 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
           </div>
         </GlassCard>
 
-        {/* ── Commissions ── */}
+        {/* ── Commissions — simplified single-row tile ── */}
         {commissionsSnapshot && (
           <button type="button" onClick={() => onNavigate('commissions')} className="w-full text-left">
             <GlassCard theme={theme} className="p-4" variant="elevated">
-              <TileHeader title="Commissions" action detail={formatCurrencyCompact(commissionsSnapshot.ytdTotal)} />
-              <div className="divide-y" style={dividerStyle}>
-                {commissionsSnapshot.topEarners.map(([name, amount]) => (
-                  <div key={name} className={flatRowCls}>
-                    <span className="text-sm font-semibold truncate">{name}</span>
-                    <span className="text-sm font-bold tabular-nums ml-2">{formatCurrencyCompact(amount)}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-widest" style={{ color: colors.textSecondary, opacity: 0.45 }}>Commissions</p>
+                  <p className="text-xl font-black tabular-nums tracking-tight leading-tight mt-0.5">{formatCurrencyCompact(commissionsSnapshot.ytdTotal)}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 shrink-0" style={{ color: colors.textSecondary, opacity: 0.35 }} />
               </div>
             </GlassCard>
           </button>
