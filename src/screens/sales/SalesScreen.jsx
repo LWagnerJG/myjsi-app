@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { BarChart3, ChevronDown, ChevronRight, Package, Table2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -154,6 +154,21 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
   const [ready, setReady] = useState(false);
   useEffect(() => { const t = setTimeout(() => setReady(true), 300); return () => clearTimeout(t); }, []);
 
+  // Year-picker dropdown — branded, with outside-click + Escape handling
+  const [yearOpen, setYearOpen] = useState(false);
+  const yearRef = useRef(null);
+  useEffect(() => {
+    if (!yearOpen) return;
+    const onDown = (e) => { if (yearRef.current && !yearRef.current.contains(e.target)) setYearOpen(false); };
+    const onKey  = (e) => { if (e.key === 'Escape') setYearOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown',   onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown',   onKey);
+    };
+  }, [yearOpen]);
+
   const TileHeader = ({ title, action, detail }) => (
     <div className="flex items-center justify-between gap-3 mb-3">
       <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>{title}</h3>
@@ -177,41 +192,108 @@ export const SalesScreen = ({ theme, onNavigate, opportunities }) => {
         <GlassCard theme={theme} className="min-w-0 overflow-hidden" variant="elevated">
           <div className="p-4 sm:p-5 flex flex-col gap-3">
 
-            {/* Big number + year dropdown */}
-            <div className="flex items-center justify-between gap-3">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${selectedYear}-${chartDataType}`}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-                  className="text-[2rem] sm:text-[2.6rem] font-black leading-none tracking-tight tabular-nums"
-                >
-                  {formatCurrency(activeTotal)}
-                </motion.div>
-              </AnimatePresence>
+            {/* Big number + Backlog caption + year dropdown */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex flex-col gap-1">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${selectedYear}-${chartDataType}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                    className="text-[2rem] sm:text-[2.6rem] font-black leading-none tracking-tight tabular-nums"
+                  >
+                    {formatCurrency(activeTotal)}
+                  </motion.div>
+                </AnimatePresence>
 
-              {/* Compact year dropdown */}
-              <div
-                className="relative inline-flex items-center rounded-full shrink-0"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : subtleBg(theme, 1.9) }}
-              >
-                <select
-                  value={selectedYear}
-                  onChange={e => setSelectedYear(Number(e.target.value))}
-                  className="appearance-none bg-transparent text-[0.75rem] font-bold cursor-pointer py-1.5 pl-3 pr-7 rounded-full"
-                  style={{ color: colors.textPrimary }}
-                  aria-label="Select year"
+                {/* Discrete Backlog inline caption */}
+                <div className="flex items-center gap-1.5 text-[0.6875rem] font-semibold leading-none">
+                  <span
+                    className="uppercase tracking-[0.08em]"
+                    style={{ color: colors.textSecondary, opacity: 0.5 }}
+                  >
+                    Backlog
+                  </span>
+                  <span
+                    className="tabular-nums"
+                    style={{ color: colors.textPrimary, opacity: 0.75 }}
+                  >
+                    {formatCurrencyCompact(BACKLOG_DATA.total)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Branded year picker — pill trigger + soft popover */}
+              <div ref={yearRef} className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setYearOpen(o => !o)}
+                  className="inline-flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-2.5 text-[0.75rem] font-bold transition active:scale-95"
+                  style={{
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : subtleBg(theme, 1.9),
+                    color: colors.textPrimary,
+                  }}
+                  aria-haspopup="listbox"
+                  aria-expanded={yearOpen}
+                  aria-label={`Year: ${selectedYear}`}
                 >
-                  {YEAR_OPTIONS.map(y => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
-                <ChevronDown
-                  className="absolute right-2 w-3.5 h-3.5 pointer-events-none"
-                  style={{ color: colors.textSecondary, opacity: 0.45 }}
-                />
+                  <span className="tabular-nums">{selectedYear}</span>
+                  <motion.span
+                    animate={{ rotate: yearOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                    className="inline-flex"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" style={{ opacity: 0.55 }} />
+                  </motion.span>
+                </button>
+
+                <AnimatePresence>
+                  {yearOpen && (
+                    <motion.ul
+                      initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0,  scale: 1 }}
+                      exit={{    opacity: 0, y: -4, scale: 0.97 }}
+                      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                      role="listbox"
+                      className="absolute right-0 top-full mt-1.5 z-50 min-w-[5.5rem] rounded-2xl p-1 origin-top-right"
+                      style={{
+                        backgroundColor: colors.surface,
+                        border: `1px solid ${subtleBg(theme, 1.8)}`,
+                        boxShadow: isDark
+                          ? '0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)'
+                          : '0 12px 28px rgba(53,53,53,0.12), 0 2px 6px rgba(53,53,53,0.06)',
+                      }}
+                    >
+                      {YEAR_OPTIONS.map(y => {
+                        const isActive = y === selectedYear;
+                        return (
+                          <li key={y} role="option" aria-selected={isActive}>
+                            <button
+                              type="button"
+                              onClick={() => { setSelectedYear(y); setYearOpen(false); }}
+                              className="relative w-full text-left px-3 py-1.5 rounded-xl text-[0.75rem] font-bold tabular-nums transition-colors"
+                              style={{
+                                color: isActive ? (isDark ? '#fff' : colors.accent) : colors.textSecondary,
+                              }}
+                            >
+                              {isActive && (
+                                <motion.span
+                                  layoutId="year-active-pill"
+                                  className="absolute inset-0 rounded-xl"
+                                  style={{ backgroundColor: subtleBg(theme, 2.2) }}
+                                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                                />
+                              )}
+                              <span className="relative z-10">{y}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
