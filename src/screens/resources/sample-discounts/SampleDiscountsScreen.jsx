@@ -1,44 +1,23 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
-import { PageTitle } from '../../../components/common/PageTitle.jsx';
-import { isDarkTheme } from '../../../design-system/tokens.js';
+import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
 import { Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SAMPLE_POLICIES } from './data.js';
-import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 
-const stagger = (i) => ({
-    initial: { opacity: 0, y: 6 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.18, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] } },
-});
-
-const POLICY_NOTE = {
-    'dealer-project':  'Max qty 1 per model number',
-    'rep-showroom':    'Max qty 1 per model number',
-    'dealer-showroom': 'Treated as a standard order',
-};
-
-/* ── Card section header — matches ContractsScreen / DealerDetailScreen ── */
-const CardHeader = ({ children, right, dark, colors }) => (
-    <div
-        className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}` }}
-    >
-        <span
-            className="text-xs font-bold uppercase tracking-[0.07em]"
-            style={{ color: colors.textSecondary, opacity: 0.6 }}
-        >
-            {children}
-        </span>
-        {right}
-    </div>
-);
+const INFO   = '#5B7B8C';
+const WARN   = '#C4956A';
 
 export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
-    const isDark = isDarkTheme(theme);
-    const colors = theme.colors;
+    const isDark  = isDarkTheme(theme);
+    const colors  = theme.colors;
     const [copiedId, setCopiedId] = useState(null);
-    const subtleBorder = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
+
+    // Best discount first
+    const sorted = useMemo(
+        () => [...SAMPLE_POLICIES].sort((a, b) => b.discount - a.discount),
+        []
+    );
 
     const handleCopy = useCallback((policy) => {
         const val = `SSA ${policy.ssa}`;
@@ -58,152 +37,217 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
         } else {
             try {
                 const ta = document.createElement('textarea');
-                ta.value = val; document.body.appendChild(ta); ta.select();
-                document.execCommand('copy'); document.body.removeChild(ta);
+                ta.value = val;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
                 finish(true);
             } catch { finish(false); }
         }
     }, [setSuccessMessage]);
 
     return (
-        <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
+        <div
+            className="min-h-full app-header-offset overflow-x-hidden"
+            style={{ backgroundColor: colors.background }}
+        >
+            <div className="min-w-0 px-4 sm:px-6 lg:px-8 pt-5 pb-12 max-w-content mx-auto w-full space-y-3">
 
-            {/* ── Page header ── */}
-            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-2">
-                <PageTitle
-                    title="Sample Policies"
-                    subtitle="Effective May 1, 2021 - Commission not paid"
-                    theme={theme}
-                    className="px-0 pt-0 pb-0"
-                    titleClassName="text-[1.375rem] font-black"
-                    subtitleClassName="text-sm mt-0.5"
-                />
-            </ScreenTopChrome>
-
-            {/* ── Policy card ── */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-10">
-                <div className="max-w-content mx-auto w-full">
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
-
-                    <CardHeader dark={isDark} colors={colors} right={
+                {/* ── Page header ── */}
+                <div className="pb-1">
+                    <h1
+                        className="text-[1.75rem] font-black tracking-tight leading-tight"
+                        style={{ color: colors.textPrimary }}
+                    >
+                        Sample Policies
+                    </h1>
+                    <div className="flex items-center gap-2 flex-wrap mt-2">
                         <span
-                            className="text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
-                            style={{ color: colors.textSecondary, opacity: 0.4 }}
+                            className="text-xs font-semibold"
+                            style={{ color: colors.textPrimary, opacity: 0.35 }}
                         >
-                            {SAMPLE_POLICIES.length} policies
+                            Effective May 1, 2021
                         </span>
-                    }>
-                        Discount Schedule
-                    </CardHeader>
+                        <span
+                            className="inline-flex items-center text-[0.5625rem] font-black uppercase tracking-[0.1em] px-2 py-[3px] rounded-full"
+                            style={{
+                                backgroundColor: `${WARN}${isDark ? '28' : '18'}`,
+                                color: WARN,
+                            }}
+                        >
+                            No commission
+                        </span>
+                    </div>
+                </div>
 
-                    {SAMPLE_POLICIES.map((policy, i) => {
-                        const isCopied = copiedId === policy.id;
-                        const note     = POLICY_NOTE[policy.id];
-                        const isTop    = policy.discount === 85;
+                {/* ── Policy cards ── */}
+                {sorted.map((policy, i) => {
+                    const isCopied  = copiedId === policy.id;
+                    const isPremium = policy.discount === 85;
+                    const badgeColor = isPremium ? INFO : colors.accent;
+                    const badgeBg    = `${badgeColor}${isDark ? '22' : (isPremium ? '14' : '0F')}`;
 
-                        return (
-                            <motion.div
-                                key={policy.id}
-                                {...stagger(i)}
-                                className="flex items-center gap-4 px-5"
-                                style={{
-                                    paddingTop: 15,
-                                    paddingBottom: 15,
-                                    borderBottom: i < SAMPLE_POLICIES.length - 1
-                                        ? `1px solid ${subtleBorder}` : 'none',
-                                }}
-                            >
-                                {/* Discount badge — proper pill container */}
-                                <div
-                                    className="flex-shrink-0 w-[54px] h-[54px] rounded-2xl flex flex-col items-center justify-center"
-                                    style={{ backgroundColor: `${colors.accent}${isTop ? '18' : '0D'}` }}
-                                >
-                                    <span
-                                        className="text-xl font-black leading-none tabular-nums"
-                                        style={{ color: colors.accent }}
+                    // Pull notes that aren't the commission reminder (shown in page header)
+                    const notes = (policy.notes || []).filter(
+                        n => !n.toLowerCase().includes('commission')
+                    );
+
+                    return (
+                        <motion.div
+                            key={policy.id}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{
+                                duration: 0.24,
+                                delay: i * 0.055,
+                                ease: [0.34, 1.1, 0.64, 1],
+                            }}
+                        >
+                            <GlassCard theme={theme} variant="elevated" className="overflow-hidden p-0">
+
+                                {/* Top: badge + title + notes */}
+                                <div className="px-4 pt-4 pb-4 flex items-start gap-3.5">
+
+                                    {/* Discount badge */}
+                                    <div
+                                        className="rounded-[18px] flex flex-col items-center justify-center shrink-0"
+                                        style={{
+                                            width: 62,
+                                            height: 62,
+                                            backgroundColor: badgeBg,
+                                        }}
                                     >
-                                        {policy.discount}%
-                                    </span>
-                                    <span
-                                        className="text-[7.5px] font-bold uppercase tracking-[0.1em] mt-[3px]"
-                                        style={{ color: colors.accent, opacity: 0.5 }}
-                                    >
-                                        off list
-                                    </span>
+                                        <span
+                                            className="text-[1.375rem] font-black tabular-nums leading-none tracking-tight"
+                                            style={{ color: badgeColor }}
+                                        >
+                                            {policy.discount}%
+                                        </span>
+                                        <span
+                                            className="text-[6.5px] font-black uppercase tracking-[0.14em] mt-[3px]"
+                                            style={{ color: badgeColor, opacity: 0.5 }}
+                                        >
+                                            off list
+                                        </span>
+                                    </div>
+
+                                    {/* Title + optional "Best" badge + notes */}
+                                    <div className="flex-1 min-w-0 pt-1">
+                                        <div className="flex items-start gap-2 min-w-0">
+                                            <p
+                                                className="text-[0.9375rem] font-bold leading-snug tracking-tight flex-1 min-w-0"
+                                                style={{ color: colors.textPrimary }}
+                                            >
+                                                {policy.title}
+                                            </p>
+                                            {isPremium && (
+                                                <span
+                                                    className="shrink-0 text-[0.5rem] font-black uppercase tracking-[0.1em] px-1.5 py-[3px] rounded-md"
+                                                    style={{
+                                                        backgroundColor: `${INFO}${isDark ? '28' : '14'}`,
+                                                        color: INFO,
+                                                    }}
+                                                >
+                                                    Best
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {policy.subtitle && (
+                                            <p
+                                                className="text-xs mt-1 leading-snug"
+                                                style={{ color: colors.textPrimary, opacity: 0.5 }}
+                                            >
+                                                {policy.subtitle}
+                                            </p>
+                                        )}
+
+                                        {notes.map((note, ni) => (
+                                            <p
+                                                key={ni}
+                                                className="text-xs mt-0.5 leading-snug"
+                                                style={{ color: colors.textPrimary, opacity: 0.38 }}
+                                            >
+                                                {note}
+                                            </p>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                {/* Title + subtitle + note */}
-                                <div className="flex-1 min-w-0">
-                                    <p
-                                        className="text-[0.9375rem] font-bold leading-snug tracking-tight"
-                                        style={{ color: colors.textPrimary }}
-                                    >
-                                        {policy.title}
-                                    </p>
-                                    {policy.subtitle && (
-                                        <p
-                                            className="text-xs mt-[3px] leading-snug"
-                                            style={{ color: colors.textSecondary, opacity: 0.65 }}
-                                        >
-                                            {policy.subtitle}
-                                        </p>
-                                    )}
-                                    {note && (
-                                        <p
-                                            className="text-xs mt-[3px] leading-snug"
-                                            style={{ color: colors.textSecondary, opacity: 0.5 }}
-                                        >
-                                            {note}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* SSA copy — rounded-full pill per brand tokens */}
+                                {/* Full-width SSA copy footer */}
                                 <button
+                                    type="button"
                                     onClick={() => handleCopy(policy)}
-                                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-[7px] rounded-full transition-all active:scale-[0.93]"
+                                    className="w-full flex items-center justify-between px-4 min-h-[44px] py-3 transition-all active:opacity-60"
                                     style={{
                                         backgroundColor: isCopied
-                                            ? `${colors.accent}15`
-                                            : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)'),
-                                        border: `1px solid ${isCopied
-                                            ? colors.accent + '40'
-                                            : subtleBorder}`,
+                                            ? `${colors.accent}0A`
+                                            : subtleBg(theme, 1.5),
+                                        borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.045)'}`,
                                     }}
+                                    aria-label={`Copy SSA code ${policy.ssa}`}
                                 >
-                                    <span
-                                        className="text-[0.6875rem] font-mono font-semibold"
-                                        style={{ color: isCopied ? colors.accent : colors.textPrimary }}
-                                    >
-                                        {policy.ssa}
-                                    </span>
+                                    <div className="flex items-center gap-2.5">
+                                        <span
+                                            className="text-[0.5rem] font-black uppercase tracking-[0.18em]"
+                                            style={{ color: colors.textPrimary, opacity: 0.28 }}
+                                        >
+                                            SSA
+                                        </span>
+                                        <span
+                                            className="text-sm font-mono font-bold tracking-wider"
+                                            style={{
+                                                color: isCopied ? colors.accent : colors.textPrimary,
+                                                opacity: isCopied ? 1 : 0.82,
+                                                transition: 'color 200ms ease',
+                                            }}
+                                        >
+                                            {policy.ssa}
+                                        </span>
+                                    </div>
+
                                     <AnimatePresence mode="wait" initial={false}>
                                         {isCopied ? (
-                                            <motion.span key="check"
-                                                initial={{ scale: 0, opacity: 0 }}
+                                            <motion.span
+                                                key="check"
+                                                initial={{ scale: 0.6, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
-                                                exit={{ scale: 0, opacity: 0 }}
-                                                transition={{ duration: 0.14 }}
+                                                exit={{ scale: 0.6, opacity: 0 }}
+                                                transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                                                className="flex items-center gap-1.5 shrink-0"
                                             >
-                                                <Check className="w-3 h-3" style={{ color: colors.accent }} />
+                                                <span
+                                                    className="text-[0.5625rem] font-bold"
+                                                    style={{ color: colors.accent }}
+                                                >
+                                                    Copied
+                                                </span>
+                                                <Check className="w-3.5 h-3.5" style={{ color: colors.accent }} />
                                             </motion.span>
                                         ) : (
-                                            <motion.span key="copy"
-                                                initial={{ scale: 0, opacity: 0 }}
+                                            <motion.span
+                                                key="copy"
+                                                initial={{ scale: 0.6, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
-                                                exit={{ scale: 0, opacity: 0 }}
-                                                transition={{ duration: 0.14 }}
+                                                exit={{ scale: 0.6, opacity: 0 }}
+                                                transition={{ duration: 0.12 }}
+                                                className="shrink-0"
                                             >
-                                                <Copy className="w-3 h-3" style={{ color: colors.textSecondary, opacity: 0.4 }} />
+                                                <Copy
+                                                    className="w-3.5 h-3.5"
+                                                    style={{ color: colors.textPrimary, opacity: 0.28 }}
+                                                />
                                             </motion.span>
                                         )}
                                     </AnimatePresence>
                                 </button>
-                            </motion.div>
-                        );
-                    })}
-                </GlassCard>
-                </div>
+
+                            </GlassCard>
+                        </motion.div>
+                    );
+                })}
+
             </div>
         </div>
     );
