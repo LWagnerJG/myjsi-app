@@ -65,7 +65,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                     <div className="flex items-center gap-2 flex-wrap mt-2">
                         <span
                             className="text-xs font-semibold"
-                            style={{ color: colors.textPrimary, opacity: 0.35 }}
+                            style={{ color: colors.textPrimary, opacity: 0.42 }}
                         >
                             Effective May 1, 2021
                         </span>
@@ -86,7 +86,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                     const isCopied  = copiedId === policy.id;
                     const isPremium = policy.discount === 85;
                     const badgeColor = isPremium ? INFO : colors.accent;
-                    const badgeBg    = `${badgeColor}${isDark ? '22' : (isPremium ? '14' : '0F')}`;
+                    const badgeBg    = `${badgeColor}${isDark ? '2A' : (isPremium ? '1C' : '14')}`;
 
                     // Pull notes that aren't the commission reminder (shown in page header)
                     const notes = (policy.notes || []).filter(
@@ -143,7 +143,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                             </p>
                                             {isPremium && (
                                                 <span
-                                                    className="shrink-0 text-[0.5rem] font-black uppercase tracking-[0.1em] px-1.5 py-[3px] rounded-md"
+                                                    className="shrink-0 text-[0.5625rem] font-black uppercase tracking-[0.08em] px-1.5 py-[3px] rounded-md"
                                                     style={{
                                                         backgroundColor: `${INFO}${isDark ? '28' : '14'}`,
                                                         color: INFO,
@@ -167,7 +167,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                             <p
                                                 key={ni}
                                                 className="text-xs mt-0.5 leading-snug"
-                                                style={{ color: colors.textPrimary, opacity: 0.38 }}
+                                                style={{ color: colors.textPrimary, opacity: 0.45 }}
                                             >
                                                 {note}
                                             </p>
@@ -176,10 +176,12 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                 </div>
 
                                 {/* Full-width SSA copy footer */}
-                                <button
+                                <motion.button
                                     type="button"
                                     onClick={() => handleCopy(policy)}
-                                    className="w-full flex items-center justify-between px-4 min-h-[44px] py-3 transition-all active:opacity-60"
+                                    whileTap={{ scale: 0.985 }}
+                                    transition={{ type: 'spring', stiffness: 600, damping: 32 }}
+                                    className="w-full flex items-center justify-between px-4 min-h-[44px] py-3"
                                     style={{
                                         backgroundColor: isCopied
                                             ? `${colors.accent}0A`
@@ -241,10 +243,11 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                             </motion.span>
                                         )}
                                     </AnimatePresence>
-                                </button>
+                                </motion.button>
 
                             </GlassCard>
                         </motion.div>
+
                     );
                 })}
 
