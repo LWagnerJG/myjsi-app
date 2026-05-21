@@ -72,6 +72,15 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     [activeTotal, activeGoal],
   );
 
+  // YTD calendar progress — only meaningful for the current year.
+  const ytdPct = useMemo(() => {
+    if (selectedYear !== CURRENT_YEAR) return null;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1).getTime();
+    const end = new Date(now.getFullYear() + 1, 0, 1).getTime();
+    return ((now.getTime() - start) / (end - start)) * 100;
+  }, [selectedYear]);
+
   const allOrdersSorted = useMemo(
     () => [...ordersData].sort((a, b) => new Date(b.date) - new Date(a.date)),
     [ordersData],
@@ -287,37 +296,69 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
             </div>
 
-            {/* Progress bar */}
-            <div
-              className="relative w-full h-6 rounded-full overflow-hidden"
-              style={{ backgroundColor: subtleBg(theme, 1.8) }}
-            >
-              <span
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
-                style={{ color: colors.textSecondary, opacity: 0.28, zIndex: 0 }}
+            {/* Progress bar (with discrete YTD marker showing calendar-year pace) */}
+            <div className="relative pb-3.5">
+              <div
+                className="relative w-full h-6 rounded-full"
+                style={{ backgroundColor: subtleBg(theme, 1.8) }}
               >
-                {formatCurrencyCompact(activeGoal)} goal
-              </span>
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
-                style={{ backgroundColor: colors.accent }}
-                animate={{ width: ready ? `${Math.max(progressPct, 3)}%` : '0%' }}
-                transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.25 }}
-              >
-                <AnimatePresence>
-                  {ready && progressPct > 14 && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.65, duration: 0.2 }}
-                      className="text-[0.5625rem] font-black tabular-nums select-none"
-                      style={{ color: isDark ? colors.accent : '#fff' }}
+                {/* Clipped fill + goal label */}
+                <div className="absolute inset-0 rounded-full overflow-hidden">
+                  <span
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
+                    style={{ color: colors.textSecondary, opacity: 0.32, zIndex: 0 }}
+                  >
+                    {formatCurrencyCompact(activeGoal)} goal
+                  </span>
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
+                    style={{ backgroundColor: colors.accent }}
+                    animate={{ width: ready ? `${Math.max(progressPct, 3)}%` : '0%' }}
+                    transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.25 }}
+                  >
+                    <AnimatePresence>
+                      {ready && progressPct > 14 && (
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.65, duration: 0.2 }}
+                          className="text-[0.5625rem] font-black tabular-nums select-none"
+                          style={{ color: isDark ? colors.accent : '#fff' }}
+                        >
+                          {progressPct.toFixed(0)}%
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
+
+                {/* YTD marker — discrete whiskers above & below the bar at today's calendar position. */}
+                {ytdPct != null && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: ready ? 1 : 0 }}
+                    transition={{ delay: 1.05, duration: 0.25 }}
+                    className="absolute inset-y-0 pointer-events-none"
+                    style={{ left: `${ytdPct}%`, transform: 'translateX(-50%)', zIndex: 2 }}
+                    aria-hidden
+                  >
+                    <span
+                      className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-[2px] h-1.5 rounded-full"
+                      style={{ backgroundColor: colors.textPrimary, opacity: 0.55 }}
+                    />
+                    <span
+                      className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-[2px] h-1.5 rounded-full"
+                      style={{ backgroundColor: colors.textPrimary, opacity: 0.55 }}
+                    />
+                    <span
+                      className="absolute left-1/2 -translate-x-1/2 top-full mt-2 text-[0.5rem] font-bold uppercase tracking-[0.14em] whitespace-nowrap"
+                      style={{ color: colors.textSecondary, opacity: 0.55 }}
                     >
-                      {progressPct.toFixed(0)}%
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+                      Today
+                    </span>
+                  </motion.div>
+                )}
+              </div>
             </div>
 
             {/* Toggle controls — unified surface treatment */}
