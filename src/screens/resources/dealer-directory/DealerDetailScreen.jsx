@@ -5,7 +5,7 @@ import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
-import { isDarkTheme } from '../../../design-system/tokens.js';
+import { isDarkTheme, subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { formatCurrencyCompact, formatLongDate } from '../../../utils/format.js';
 import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG } from './data.js';
 import {
@@ -37,40 +37,34 @@ const HeaderMeta = ({ children, colors }) => (
     </span>
 );
 
-const InfoPill = ({ children, href, colors, isDark }) => {
+const InfoPill = ({ children, href, theme, colors }) => {
     const sharedProps = {
-        className: 'inline-flex items-center rounded-full px-3 py-1.5 text-[0.6875rem] font-semibold transition-opacity',
+        className: 'inline-flex items-center rounded-full px-3 py-1.5 text-[0.6875rem] font-semibold transition-opacity active:opacity-70',
         style: {
             color: colors.textSecondary,
-            opacity: 0.82,
-            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.72)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+            backgroundColor: subtleBg(theme, 1.6),
+            border: subtleBorder(theme),
         },
     };
 
     if (href) {
-        return (
-            <a href={href} {...sharedProps}>
-                {children}
-            </a>
-        );
+        return <a href={href} {...sharedProps}>{children}</a>;
     }
 
     return <span {...sharedProps}>{children}</span>;
 };
 
-const SummaryTile = ({ label, value, colors, isDark, accent = false, onClick, trailing }) => {
+const SummaryTile = ({ label, value, theme, colors, accent = false, onClick, trailing }) => {
     const Component = onClick ? 'button' : 'div';
 
     return (
         <Component
             type={onClick ? 'button' : undefined}
             onClick={onClick}
-            className={`rounded-[18px] px-3.5 py-3 text-left ${onClick ? 'transition-all active:scale-[0.98]' : ''}`}
+            className={`rounded-2xl px-3.5 py-3 text-left ${onClick ? 'transition-transform active:scale-[0.97]' : ''}`}
             style={{
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.76)',
-                border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
-                boxShadow: isDark ? 'none' : '0 10px 24px rgba(53,53,53,0.035)',
+                backgroundColor: subtleBg(theme, 1.6),
+                border: subtleBorder(theme),
             }}
         >
             <p
@@ -79,9 +73,9 @@ const SummaryTile = ({ label, value, colors, isDark, accent = false, onClick, tr
             >
                 {label}
             </p>
-            <div className="mt-1.5 flex items-center gap-1.5">
+            <div className="mt-1.5 flex items-center gap-1">
                 <span
-                    className="text-[1.125rem] font-black tracking-tight leading-none"
+                    className="text-[1.125rem] font-black tracking-tight leading-none truncate"
                     style={{ color: accent ? colors.accent : colors.textPrimary }}
                 >
                     {value}
@@ -92,13 +86,10 @@ const SummaryTile = ({ label, value, colors, isDark, accent = false, onClick, tr
     );
 };
 
-const ProgressBlock = ({ label, percent, tone, currentValue, goalValue, colors, isDark }) => (
+const ProgressBlock = ({ label, percent, tone, currentValue, goalValue, theme, colors, isDark }) => (
     <div
-        className="rounded-[20px] px-4 py-3.5"
-        style={{
-            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.62)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
-        }}
+        className="rounded-2xl px-4 py-3.5"
+        style={{ backgroundColor: subtleBg(theme, 1.3), border: subtleBorder(theme) }}
     >
         <div className="flex items-center justify-between gap-3 mb-2">
             <span className="text-[0.8125rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.82 }}>
@@ -106,7 +97,7 @@ const ProgressBlock = ({ label, percent, tone, currentValue, goalValue, colors, 
             </span>
             <span
                 className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.75rem] font-black tabular-nums"
-                style={{ color: tone, backgroundColor: `${tone}14` }}
+                style={{ color: tone, backgroundColor: `${tone}1A` }}
             >
                 {percent}%
             </span>
@@ -263,7 +254,7 @@ export const DealerDetailScreen = ({
     const maxSeriesAmt  = dealer.seriesSales?.[0]?.amount || 1;
     const totalVert     = dealer.verticalSales?.reduce((s, v) => s + v.value, 0) || 0;
     const discountShort = dealer.dailyDiscount?.split(' ')?.[0] || dealer.dailyDiscount || '—';
-    const subtleBorder  = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
+    const rowBorder     = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)';
     const topMetricChevron = <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.accent, opacity: 0.42 }} />;
     const latestMonth = dealer.monthlySales?.[dealer.monthlySales.length - 1];
     const teamSections  = [
@@ -290,18 +281,18 @@ export const DealerDetailScreen = ({
 
             {/* ─── Header ─── */}
             <ScreenTopChrome theme={theme} contentClassName="pt-1 pb-2" fade={false}>
-                <GlassCard theme={theme} className="rounded-[26px] overflow-hidden p-0">
-                    <div className="px-5 pt-4 pb-4">
-                        <div className="flex items-start gap-3 min-w-0">
+                <GlassCard theme={theme} className="overflow-hidden p-0">
+                    <div className="px-5 pt-5 pb-5">
+                        <div className="flex items-start gap-3.5 min-w-0">
                             <div
-                                className="w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center"
+                                className="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center"
                                 style={{
                                     backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : `${colors.accent}10`,
                                     color: isDark ? '#F4F1EC' : colors.accent,
-                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.05)'}`,
+                                    border: subtleBorder(theme),
                                 }}
                             >
-                                <span className="text-[0.75rem] font-black">
+                                <span className="text-[0.8125rem] font-black tracking-tight">
                                     {initials(dealer.name)}
                                 </span>
                             </div>
@@ -325,10 +316,10 @@ export const DealerDetailScreen = ({
 
                                 <div className="mt-3 flex flex-wrap gap-2">
                                     {dealer.territory && (
-                                        <InfoPill colors={colors} isDark={isDark}>{dealer.territory}</InfoPill>
+                                        <InfoPill theme={theme} colors={colors}>{dealer.territory}</InfoPill>
                                     )}
                                     {dealer.phone && (
-                                        <InfoPill href={`tel:${dealer.phone}`} colors={colors} isDark={isDark}>{dealer.phone}</InfoPill>
+                                        <InfoPill href={`tel:${dealer.phone}`} theme={theme} colors={colors}>{dealer.phone}</InfoPill>
                                     )}
                                 </div>
                             </div>
@@ -338,20 +329,20 @@ export const DealerDetailScreen = ({
                             <SummaryTile
                                 label="YTD Sales"
                                 value={formatCurrencyCompact(dealer.sales)}
+                                theme={theme}
                                 colors={colors}
-                                isDark={isDark}
                             />
                             <SummaryTile
                                 label="Bookings"
                                 value={formatCurrencyCompact(dealer.bookings)}
+                                theme={theme}
                                 colors={colors}
-                                isDark={isDark}
                             />
                             <SummaryTile
                                 label="Discount"
                                 value={discountShort}
+                                theme={theme}
                                 colors={colors}
-                                isDark={isDark}
                                 accent
                                 onClick={() => setShowDiscountPicker(true)}
                                 trailing={topMetricChevron}
@@ -365,7 +356,7 @@ export const DealerDetailScreen = ({
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-16 space-y-4 max-w-content mx-auto w-full">
 
                 {/* ── Goal Progress ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                <GlassCard theme={theme} className="overflow-hidden p-0">
                     <CardHeader colors={colors}>
                         Goal Progress
                     </CardHeader>
@@ -376,6 +367,7 @@ export const DealerDetailScreen = ({
                             tone={gColor}
                             currentValue={`${formatCurrencyCompact(dealer.sales)} sales`}
                             goalValue={`${formatCurrencyCompact(dealer.ytdGoal)} goal`}
+                            theme={theme}
                             colors={colors}
                             isDark={isDark}
                         />
@@ -387,6 +379,7 @@ export const DealerDetailScreen = ({
                                 tone={rColor}
                                 currentValue={`${formatCurrencyCompact(dealer.rebatableSales)} sales`}
                                 goalValue={`${formatCurrencyCompact(dealer.rebatableGoal)} goal`}
+                                theme={theme}
                                 colors={colors}
                                 isDark={isDark}
                             />
@@ -396,7 +389,7 @@ export const DealerDetailScreen = ({
 
                 {/* ── Monthly Trend ── */}
                 {dealer.monthlySales?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <GlassCard theme={theme} className="overflow-hidden p-0">
                         <CardHeader colors={colors} right={
                             <HeaderMeta colors={colors}>{`${latestMonth?.month || ''} ${formatCurrencyCompact(latestMonth?.amount || 0)}`.trim()}</HeaderMeta>
                         }>
@@ -411,7 +404,7 @@ export const DealerDetailScreen = ({
                 {/* ── Sales Breakdown ── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {dealer.verticalSales?.length > 0 && (
-                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                        <GlassCard theme={theme} className="overflow-hidden p-0">
                             <CardHeader colors={colors} right={<HeaderMeta colors={colors}>{formatCurrencyCompact(totalVert)} total</HeaderMeta>}>
                                 By Vertical
                             </CardHeader>
@@ -434,7 +427,7 @@ export const DealerDetailScreen = ({
                     )}
 
                     {dealer.seriesSales?.length > 0 && (
-                        <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                        <GlassCard theme={theme} className="overflow-hidden p-0">
                             <CardHeader colors={colors} right={
                                 <HeaderMeta colors={colors}>{dealer.seriesSales.length} series</HeaderMeta>
                             }>
@@ -460,7 +453,7 @@ export const DealerDetailScreen = ({
 
                 {/* ── Recent Projects ── */}
                 {dealer.recentProjects?.length > 0 && (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <GlassCard theme={theme} className="overflow-hidden p-0">
                         <CardHeader colors={colors} right={<HeaderMeta colors={colors}>{dealer.recentProjects.length} active</HeaderMeta>}>
                             Recent Projects
                         </CardHeader>
@@ -473,7 +466,7 @@ export const DealerDetailScreen = ({
                                     style={{
                                         paddingTop: 13,
                                         paddingBottom: 13,
-                                        borderBottom: i < dealer.recentProjects.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                        borderBottom: i < dealer.recentProjects.length - 1 ? `1px solid ${rowBorder}` : 'none',
                                     }}
                                 >
                                     <div className="flex-1 min-w-0">
@@ -502,7 +495,7 @@ export const DealerDetailScreen = ({
                 )}
 
                 {/* ── Team + Rewards ── */}
-                <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                <GlassCard theme={theme} className="overflow-hidden p-0">
                     <CardHeader colors={colors} right={
                         <div className="flex items-center gap-2">
                             <HeaderMeta colors={colors}>{totalTeamMembers} people</HeaderMeta>
@@ -549,7 +542,7 @@ export const DealerDetailScreen = ({
                                             key={m.name}
                                             className="flex items-center gap-3 py-2.5"
                                             style={{
-                                                borderBottom: mi < section.members.length - 1 ? `1px solid ${subtleBorder}` : 'none',
+                                                borderBottom: mi < section.members.length - 1 ? `1px solid ${rowBorder}` : 'none',
                                             }}
                                         >
                                             {/* Avatar */}
@@ -640,7 +633,7 @@ export const DealerDetailScreen = ({
                                                 )}
                                             </button>
                                         ))}
-                                        <div className="border-t my-1 mx-1" style={{ borderColor: subtleBorder }} />
+                                        <div className="border-t my-1 mx-1" style={{ borderColor: rowBorder }} />
                                         <button
                                             type="button"
                                             onClick={() => handleRemovePerson(menuState.person?.name)}
