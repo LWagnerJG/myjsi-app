@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { PillButton } from '../../../components/common/JSIButtons.jsx';
+import { SegmentedToggle } from '../../../components/common/GroupedToggle.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { Layers, Sparkles, FolderOpen } from 'lucide-react';
 import {
@@ -18,10 +19,10 @@ import { MyDeckCard } from './components/MyDeckCard.jsx';
 import { PresentationBuilder } from './components/PresentationBuilder.jsx';
 import { SlidePreviewModal } from './components/SlidePreviewModal.jsx';
 
-const TAB_CONFIG = [
-    { id: 'browse', label: 'Browse', Icon: Layers },
-    { id: 'my-decks', label: 'My Decks', Icon: FolderOpen },
-    { id: 'builder', label: 'Builder', Icon: Sparkles },
+const TAB_OPTIONS = [
+    { value: 'browse', label: 'Browse', icon: Layers },
+    { value: 'my-decks', label: 'My Decks', icon: FolderOpen },
+    { value: 'builder', label: 'Builder', icon: Sparkles },
 ];
 
 export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
@@ -143,40 +144,18 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
     }, []);
 
     const colors = theme.colors;
-    const borderColor = colors.border;
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ background: colors.background }}>
-            <div className="px-4 pt-3 pb-2 flex gap-2">
-                {TAB_CONFIG.map(({ id, label, Icon }) => {
-                    const active = activeTab === id;
-                    return (
-                        <button
-                            key={id}
-                            onClick={() => setActiveTab(id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-xs font-semibold transition-all"
-                            style={{
-                                background: active ? colors.accent : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.05)'),
-                                color: active ? (colors.accentText || (isDark ? '#1A1A1A' : '#FFFFFF')) : colors.textSecondary,
-                                border: `1px solid ${active ? colors.accent : borderColor}`,
-                            }}
-                        >
-                            <Icon className="w-3.5 h-3.5" />
-                            {label}
-                            {id === 'my-decks' && myDecks.length > 0 && (
-                                <span
-                                    className="ml-0.5 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-bold"
-                                    style={{
-                                        background: active ? 'rgba(255,255,255,0.25)' : `${colors.accent}20`,
-                                        color: active ? (isDark ? '#1A1A1A' : '#FFF') : colors.accent,
-                                    }}
-                                >
-                                    {myDecks.length}
-                                </span>
-                            )}
-                        </button>
-                    );
-                })}
+            <div className="px-4 pt-3 pb-2">
+                <SegmentedToggle
+                    value={activeTab}
+                    onChange={setActiveTab}
+                    options={TAB_OPTIONS}
+                    size="sm"
+                    fullWidth
+                    theme={theme}
+                />
             </div>
 
             <AnimatePresence mode="wait">
@@ -189,7 +168,7 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
                         transition={{ duration: 0.18 }}
                         className="flex-1 flex flex-col overflow-hidden"
                     >
-                        <div className="px-4 pb-2 space-y-2">
+                        <div className="px-4 pt-1 pb-2 space-y-3">
                             <StandardSearchBar value={search} onChange={setSearch} placeholder="Search presentations..." theme={theme} />
                             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
                                 {categories.map(cat => {
@@ -209,7 +188,7 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
                                 })}
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 space-y-4">
+                        <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 pt-1 space-y-3">
                             {showGbbCard && (
                                 <GoodBetterBestCard
                                     card={GOOD_BETTER_BEST_CARD}
@@ -248,7 +227,7 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 16 }}
                         transition={{ duration: 0.18 }}
-                        className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 pt-1 space-y-4"
+                        className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 pt-2 space-y-3"
                     >
                         {myDecks.length === 0 ? (
                             <GlassCard theme={theme} className="p-10 text-center">
@@ -257,7 +236,7 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
                                 <p className="text-sm mt-1 mb-4" style={{ color: colors.textSecondary }}>Generate one in the Builder or save from Browse.</p>
                                 <button
                                     onClick={() => setActiveTab('builder')}
-                                    className="px-5 py-2.5 rounded-2xl text-[0.8125rem] font-semibold"
+                                    className="px-5 py-2.5 rounded-full text-[0.8125rem] font-semibold"
                                     style={{ background: colors.accent, color: colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}
                                 >
                                     Open Builder

@@ -97,7 +97,7 @@ const SeriesRow = ({ row, theme, dark }) => (
     </div>
 );
 
-export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
+export const GoodBetterBestScreen = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const deck = GOOD_BETTER_BEST_DECK;
     const sections = deck.sections;
@@ -106,11 +106,6 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
 
     const total = sections.length;
     const active = sections[index] || sections[0];
-
-    const goBack = useCallback(() => {
-        if (typeof handleBack === 'function') handleBack();
-        else if (typeof onNavigate === 'function') onNavigate('presentations');
-    }, [handleBack, onNavigate]);
 
     const goTo = useCallback((next) => {
         setIndex((cur) => {
@@ -151,28 +146,19 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
 
     return (
         <div className="flex flex-col h-full" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            {/* Top chrome: back + label + share */}
+            {/* Top chrome: context label + share (back is handled by the app header) */}
             <div
                 className="flex-shrink-0"
                 style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 12px)', backgroundColor: theme.colors.background }}
             >
                 <ScreenTopChrome theme={theme} contentClassName="pb-2" fade={false}>
                     <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                            <button
-                                onClick={goBack}
-                                className="inline-flex items-center gap-1 pl-1.5 pr-3 rounded-full text-xs font-semibold transition-colors active:opacity-70 flex-shrink-0"
-                                style={{ height: 'var(--jsi-ctrl-h, 36px)', ...subtleBtn }}
-                            >
-                                <ChevronLeft className="w-4 h-4" /> Presentations
-                            </button>
-                            <span
-                                className="text-xs font-bold uppercase tracking-[0.16em] truncate"
-                                style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
-                            >
-                                Sales Deck
-                            </span>
-                        </div>
+                        <span
+                            className="text-[0.6875rem] font-bold uppercase tracking-[0.18em]"
+                            style={{ color: theme.colors.textSecondary, opacity: 0.6 }}
+                        >
+                            Sales Deck
+                        </span>
                         <button
                             onClick={onShare}
                             className="inline-flex items-center gap-1.5 px-3 rounded-full text-xs font-semibold transition-colors active:opacity-70 flex-shrink-0"
