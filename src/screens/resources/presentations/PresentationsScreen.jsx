@@ -9,9 +9,11 @@ import {
     PRESENTATIONS_DATA, PRESENTATION_CATEGORIES, MOCK_PRESENTATION_PDF_BASE64,
     INITIAL_MY_DECKS
 } from './data.js';
+import { GOOD_BETTER_BEST_CARD, GBB_ROUTE } from './goodBetterBestData.js';
 import { useCompanyResource } from '../../../hooks/useCompanyResource.js';
 
 import { PresentationCard } from './components/PresentationCard.jsx';
+import { GoodBetterBestCard } from './components/GoodBetterBestCard.jsx';
 import { MyDeckCard } from './components/MyDeckCard.jsx';
 import { PresentationBuilder } from './components/PresentationBuilder.jsx';
 import { SlidePreviewModal } from './components/SlidePreviewModal.jsx';
@@ -22,7 +24,7 @@ const TAB_CONFIG = [
     { id: 'builder', label: 'Builder', Icon: Sparkles },
 ];
 
-export const PresentationsScreen = ({ theme, screenParams }) => {
+export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
     const isDark = isDarkTheme(theme);
     const { data: presentationsData } = useCompanyResource('presentations', PRESENTATIONS_DATA);
 
@@ -32,6 +34,7 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
     const [search, setSearch] = useState('');
     const [preview, setPreview] = useState(null);
     const [myDecks, setMyDecks] = useState(INITIAL_MY_DECKS);
+    const [gbbShared, setGbbShared] = useState(false);
 
     const myDeckIds = useMemo(() => new Set(myDecks.map(d => String(d.id))), [myDecks]);
     const categories = useMemo(() => {
@@ -77,6 +80,37 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
             navigator.clipboard?.writeText(text);
         }
     }, []);
+
+    const openGbb = useCallback(() => {
+        onNavigate?.(GBB_ROUTE);
+    }, [onNavigate]);
+
+    const shareGbb = useCallback(async () => {
+        const url = typeof window !== 'undefined' ? `${window.location.origin}/${GBB_ROUTE}` : '';
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: GOOD_BETTER_BEST_CARD.title, text: GOOD_BETTER_BEST_CARD.description, url });
+                return;
+            }
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(url);
+                setGbbShared(true);
+                setTimeout(() => setGbbShared(false), 1800);
+            }
+        } catch { /* user cancelled */ }
+    }, []);
+
+    const showGbbCard = useMemo(() => {
+        if (selectedCategory !== 'all' && selectedCategory !== GOOD_BETTER_BEST_CARD.category) return false;
+        const query = search.trim().toLowerCase();
+        if (!query) return true;
+        return (
+            GOOD_BETTER_BEST_CARD.title.toLowerCase().includes(query)
+            || GOOD_BETTER_BEST_CARD.description.toLowerCase().includes(query)
+            || GOOD_BETTER_BEST_CARD.category.toLowerCase().includes(query)
+            || 'good better best'.includes(query)
+        );
+    }, [selectedCategory, search]);
 
     const handleAddToMyDecks = useCallback((p) => {
         setMyDecks(prev => {
@@ -176,7 +210,16 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 space-y-4">
-                            {filtered.length ? filtered.map(p => (
+                            {showGbbCard && (
+                                <GoodBetterBestCard
+                                    card={GOOD_BETTER_BEST_CARD}
+                                    theme={theme}
+                                    onOpen={openGbb}
+                                    onShare={shareGbb}
+                                    shared={gbbShared}
+                                />
+                            )}
+                            {filtered.map(p => (
                                 <PresentationCard
                                     key={p.id}
                                     p={p}
@@ -187,7 +230,8 @@ export const PresentationsScreen = ({ theme, screenParams }) => {
                                     onShare={() => sharePresentation(p)}
                                     onViewFull={(pres) => setPreview({ pres, idx: 0 })}
                                 />
-                            )) : (
+                            ))}
+                            {!filtered.length && !showGbbCard && (
                                 <GlassCard theme={theme} className="p-10 text-center">
                                     <p className="font-semibold" style={{ color: colors.textPrimary }}>No presentations found</p>
                                     <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>Try a different search or filter.</p>

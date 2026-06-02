@@ -147,6 +147,15 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
         return lazyWrap(TourVisitScreen);
     }
 
+    // Standalone, shareable Good · Better · Best sales deck.
+    // Supports /presentations/good-better-best and /resources/presentations/good-better-best.
+    if (
+        (base === 'presentations' && parts[1] === 'good-better-best') ||
+        (base === 'resources' && parts[1] === 'presentations' && parts[2] === 'good-better-best')
+    ) {
+        return lazyWrap(SCREEN_MAP['good-better-best']);
+    }
+
     if (base === 'resources') {
         const slug = parts.slice(1).join('/');
         const firstSegment = slug.split('/')[0];
