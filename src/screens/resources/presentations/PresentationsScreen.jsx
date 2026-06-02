@@ -2,8 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
-import { PillButton } from '../../../components/common/JSIButtons.jsx';
 import { SegmentedToggle } from '../../../components/common/GroupedToggle.jsx';
+import { PortalNativeSelect } from '../../../components/forms/PortalNativeSelect.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { Layers, Sparkles, FolderOpen } from 'lucide-react';
 import {
@@ -25,6 +25,10 @@ const TAB_OPTIONS = [
     { value: 'builder', label: 'Builder', icon: Sparkles },
 ];
 
+const GRID_CLASS = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5';
+const SHELL_CLASS = 'max-w-content mx-auto w-full';
+const EDGE_PADDING = 'px-4 sm:px-6 lg:px-8';
+
 export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
     const isDark = isDarkTheme(theme);
     const { data: presentationsData } = useCompanyResource('presentations', PRESENTATIONS_DATA);
@@ -38,11 +42,10 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
     const [gbbShared, setGbbShared] = useState(false);
 
     const myDeckIds = useMemo(() => new Set(myDecks.map(d => String(d.id))), [myDecks]);
-    const categories = useMemo(() => {
-        const liveCategories = presentationsData
-            .map((presentation) => presentation.category)
-            .filter(Boolean);
-        return ['all', ...new Set([...PRESENTATION_CATEGORIES, ...liveCategories])];
+    const categoryOptions = useMemo(() => {
+        const liveCategories = presentationsData.map((p) => p.category).filter(Boolean);
+        const all = [...new Set([...PRESENTATION_CATEGORIES, ...liveCategories])];
+        return [{ value: 'all', label: 'All categories' }, ...all.map((c) => ({ value: c, label: c }))];
     }, [presentationsData]);
 
     const filtered = useMemo(() => {
@@ -113,6 +116,8 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
         );
     }, [selectedCategory, search]);
 
+    const resultCount = filtered.length + (showGbbCard ? 1 : 0);
+
     const handleAddToMyDecks = useCallback((p) => {
         setMyDecks(prev => {
             if (prev.some(d => String(d.id) === String(p.id))) return prev;
@@ -147,15 +152,35 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ background: colors.background }}>
-            <div className="px-4 pt-3 pb-2">
-                <SegmentedToggle
-                    value={activeTab}
-                    onChange={setActiveTab}
-                    options={TAB_OPTIONS}
-                    size="sm"
-                    fullWidth
-                    theme={theme}
-                />
+            {/* Sticky top: tabs + (browse) filter bar */}
+            <div className="sticky top-0 z-20" style={{ background: colors.background }}>
+                <div className={`${SHELL_CLASS} ${EDGE_PADDING} pt-3 pb-2`}>
+                    <SegmentedToggle
+                        value={activeTab}
+                        onChange={setActiveTab}
+                        options={TAB_OPTIONS}
+                        size="sm"
+                        fullWidth
+                        theme={theme}
+                    />
+                    {activeTab === 'browse' && (
+                        <div className="mt-2.5 flex flex-col sm:flex-row sm:items-center gap-2.5">
+                            <div className="flex-1 min-w-0">
+                                <StandardSearchBar value={search} onChange={setSearch} placeholder="Search presentations..." theme={theme} />
+                            </div>
+                            <div className="w-full sm:w-52 flex-shrink-0">
+                                <PortalNativeSelect
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    options={categoryOptions}
+                                    theme={theme}
+                                    size="sm"
+                                    align="right"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -166,51 +191,36 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -16 }}
                         transition={{ duration: 0.18 }}
-                        className="flex-1 flex flex-col overflow-hidden"
+                        className="flex-1 overflow-y-auto scrollbar-hide"
                     >
-                        <div className="px-4 pt-1 pb-2 space-y-3">
-                            <StandardSearchBar value={search} onChange={setSearch} placeholder="Search presentations..." theme={theme} />
-                            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-                                {categories.map(cat => {
-                                    const active = selectedCategory === cat;
-                                    return (
-                                        <PillButton
-                                            key={cat}
-                                            onClick={() => setSelectedCategory(cat)}
-                                            isSelected={active}
-                                            size="compact"
+                        <div className={`${SHELL_CLASS} ${EDGE_PADDING} pt-1 pb-32`}>
+                            {resultCount > 0 ? (
+                                <div className={GRID_CLASS}>
+                                    {showGbbCard && (
+                                        <div className="sm:col-span-2 xl:col-span-3">
+                                            <GoodBetterBestCard
+                                                card={GOOD_BETTER_BEST_CARD}
+                                                theme={theme}
+                                                onOpen={openGbb}
+                                                onShare={shareGbb}
+                                                shared={gbbShared}
+                                            />
+                                        </div>
+                                    )}
+                                    {filtered.map(p => (
+                                        <PresentationCard
+                                            key={p.id}
+                                            p={p}
                                             theme={theme}
-                                            className="whitespace-nowrap flex-shrink-0"
-                                        >
-                                            {cat === 'all' ? 'All' : cat}
-                                        </PillButton>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 pt-1 space-y-3">
-                            {showGbbCard && (
-                                <GoodBetterBestCard
-                                    card={GOOD_BETTER_BEST_CARD}
-                                    theme={theme}
-                                    onOpen={openGbb}
-                                    onShare={shareGbb}
-                                    shared={gbbShared}
-                                />
-                            )}
-                            {filtered.map(p => (
-                                <PresentationCard
-                                    key={p.id}
-                                    p={p}
-                                    theme={theme}
-                                    onAddToMyDecks={handleAddToMyDecks}
-                                    myDeckIds={myDeckIds}
-                                    onDownload={() => downloadMock(p)}
-                                    onShare={() => sharePresentation(p)}
-                                    onViewFull={(pres) => setPreview({ pres, idx: 0 })}
-                                />
-                            ))}
-                            {!filtered.length && !showGbbCard && (
+                                            onAddToMyDecks={handleAddToMyDecks}
+                                            myDeckIds={myDeckIds}
+                                            onDownload={() => downloadMock(p)}
+                                            onShare={() => sharePresentation(p)}
+                                            onViewFull={(pres) => setPreview({ pres, idx: 0 })}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
                                 <GlassCard theme={theme} className="p-10 text-center">
                                     <p className="font-semibold" style={{ color: colors.textPrimary }}>No presentations found</p>
                                     <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>Try a different search or filter.</p>
@@ -227,31 +237,37 @@ export const PresentationsScreen = ({ theme, screenParams, onNavigate }) => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 16 }}
                         transition={{ duration: 0.18 }}
-                        className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-32 pt-2 space-y-3"
+                        className="flex-1 overflow-y-auto scrollbar-hide"
                     >
-                        {myDecks.length === 0 ? (
-                            <GlassCard theme={theme} className="p-10 text-center">
-                                <FolderOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: colors.textPrimary }} />
-                                <p className="font-semibold" style={{ color: colors.textPrimary }}>No saved decks yet</p>
-                                <p className="text-sm mt-1 mb-4" style={{ color: colors.textSecondary }}>Generate one in the Builder or save from Browse.</p>
-                                <button
-                                    onClick={() => setActiveTab('builder')}
-                                    className="px-5 py-2.5 rounded-full text-[0.8125rem] font-semibold"
-                                    style={{ background: colors.accent, color: colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}
-                                >
-                                    Open Builder
-                                </button>
-                            </GlassCard>
-                        ) : myDecks.map(deck => (
-                            <MyDeckCard
-                                key={deck.id}
-                                deck={deck}
-                                theme={theme}
-                                onDownload={() => downloadMock(deck)}
-                                onShare={() => sharePresentation(deck)}
-                                onDelete={() => handleDeleteDeck(deck.id)}
-                            />
-                        ))}
+                        <div className={`${SHELL_CLASS} ${EDGE_PADDING} pt-2 pb-32`}>
+                            {myDecks.length === 0 ? (
+                                <GlassCard theme={theme} className="p-10 text-center">
+                                    <FolderOpen className="w-10 h-10 mx-auto mb-3 opacity-20" style={{ color: colors.textPrimary }} />
+                                    <p className="font-semibold" style={{ color: colors.textPrimary }}>No saved decks yet</p>
+                                    <p className="text-sm mt-1 mb-4" style={{ color: colors.textSecondary }}>Generate one in the Builder or save from Browse.</p>
+                                    <button
+                                        onClick={() => setActiveTab('builder')}
+                                        className="px-5 py-2.5 rounded-full text-[0.8125rem] font-semibold"
+                                        style={{ background: colors.accent, color: colors.accentText || (isDark ? '#1A1A1A' : '#FFF') }}
+                                    >
+                                        Open Builder
+                                    </button>
+                                </GlassCard>
+                            ) : (
+                                <div className={GRID_CLASS}>
+                                    {myDecks.map(deck => (
+                                        <MyDeckCard
+                                            key={deck.id}
+                                            deck={deck}
+                                            theme={theme}
+                                            onDownload={() => downloadMock(deck)}
+                                            onShare={() => sharePresentation(deck)}
+                                            onDelete={() => handleDeleteDeck(deck.id)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </motion.div>
                 )}
 
