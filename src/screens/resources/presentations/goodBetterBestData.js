@@ -1,20 +1,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Good · Better · Best — standalone, deep-linked sales presentation
 //
-// Scope: JSI lounge seating, framed into three quotable tiers so a rep can
-// position the right product for a budget in seconds.
+// Concept: for each seating category, three products at three price points —
+// each tier a DIFFERENT JSI family — so a rep can position the right product for
+// any budget. One slide per category; Good / Better / Best across the columns.
 //
-// Integrity: every price below is the Grade A list price pulled from JSI's
-// published price lists on jsifurniture.com/pricing-planning-spec-guides
-// (verified June 2026). There are no placeholders — a series only appears once
-// its three tiers are confirmed against the official price list.
+// Integrity: every price is the Grade A list price pulled from JSI's published
+// price lists at jsifurniture.com/pricing-planning-spec-guides (verified June
+// 2026). No placeholders — a tier only appears once confirmed against the list.
 //
-//   Arwyn  (jsi_arwyn_pricelist):  AW6010 $2,363 · AW6011 $2,518 · AW6021 $3,066
-//   Caav   (jsi_caav_pricelist):   CVF3440-31 $3,765 · CVF3843-31 $3,984 · CVF3464-31 $4,872
-//   Poet   (jsi_poet_pricelist):   PLPF21 $3,309 · PLPF22 $4,643 · PLPF23 $6,127
+//   Lounge   Bourne BU7521D $1,941 · Arwyn AW6010 $2,363 · Caav CVF3440-31 $3,765
+//   Guest    Bryn BY2103WU $1,181 · Bourne BU7511D $1,648 · Arwyn AW6000WL $1,841
+//   Task     Cosgrove 72SMXA $1,165 · Knox KN3000WUF $1,365 · Protocol PT5600L $2,345
 //
 // Imagery: real JSI product photography served from JSI's Cloudinary CDN
-// (jasper-jsi-furniture) — the same source the rest of the app uses.
+// (jasper-jsi-furniture) — a distinct family photo per tier.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const GBB_SLUG = 'good-better-best';
@@ -28,57 +28,56 @@ export const GBB_TIERS = [
 
 const CLOUDINARY_BASE = 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload';
 // Real JSI product photography. Public IDs match the catalog on jsifurniture.com.
-const cl = (publicId, transform = 'c_fill,w_1280,h_960,g_auto/f_auto/q_auto') =>
+const cl = (publicId, transform = 'c_fill,w_900,h_760,g_auto/f_auto/q_auto') =>
     `${CLOUDINARY_BASE}/${transform}/v1/${publicId}`;
 
-const tier = (model, price, spec) => ({ model, price, spec });
+const item = (series, model, price, spec, publicId) => ({
+    series, model, price, spec, image: cl(publicId),
+});
 
 export const GOOD_BETTER_BEST_DECK = {
     id: GBB_SLUG,
     slug: GBB_SLUG,
     title: 'Good · Better · Best',
-    subtitle: 'JSI lounge seating, priced good to best — a quotable option for every budget.',
+    subtitle: 'Good, better, best across JSI families — the right product at every price point.',
     category: 'Sales Training',
     type: 'Interactive',
     updatedAt: '2026-06-02',
     description:
-        'Three flagship JSI lounge series, each laid out in three quotable tiers with model numbers, '
-        + 'Grade A list pricing, and a one-line spec so reps can position the right product fast.',
+        'Good / Better / Best across JSI seating categories — lounge, guest, and task. '
+        + 'Each tier is a different JSI family with its model number and verified Grade A list pricing.',
     sections: [
         {
-            id: 'arwyn',
-            eyebrow: 'Lounge Seating',
-            title: 'Arwyn',
-            blurb: 'Tailored single-seat lounge — from a small-scale cushion back up to the quilted wrap, on wood or metal feet.',
-            image: cl('jsi_arwyn_comp_00036_ryzcgw'),
+            id: 'lounge',
+            eyebrow: 'Category 01',
+            title: 'Lounge',
+            blurb: 'Single-seat lounge for waiting areas, alcoves, and open commons.',
             tiers: {
-                good: tier('AW6010', 2363, 'Single seat · small scale · cushion back · Grade A textile'),
-                better: tier('AW6011', 2518, 'Single seat · cushion back · Grade A textile'),
-                best: tier('AW6021', 3066, 'Single seat · quilted wrap · Grade A textile'),
+                good: item('Bourne', 'BU7521D', 1941, 'Single seat · maple frame · Grade A textile', 'jsi_bourne_comp_00001_vaoqmp'),
+                better: item('Arwyn', 'AW6010', 2363, 'Single seat · small-scale cushion back · Grade A textile', 'jsi_arwyn_comp_00036_ryzcgw'),
+                best: item('Caav', 'CVF3440-31', 3765, 'Single seat · maple legs · Grade A textile', 'jsi_caav_comp_00005_flho7u'),
             },
         },
         {
-            id: 'caav',
-            eyebrow: 'Lounge Seating',
-            title: 'Caav',
-            blurb: 'Sculptural freestanding lounge with a soft, grounded silhouette — scaling from a single seat to a two-seat settee.',
-            image: cl('jsi_caav_comp_00005_flho7u'),
+            id: 'guest',
+            eyebrow: 'Category 02',
+            title: 'Guest',
+            blurb: 'Side and guest seating for offices, conference rooms, and reception.',
             tiers: {
-                good: tier('CVF3440-31', 3765, 'Single seat · maple legs · Grade A textile'),
-                better: tier('CVF3843-31', 3984, 'Single seat · grand scale · Grade A textile'),
-                best: tier('CVF3464-31', 4872, 'Two seat · maple legs · Grade A textile'),
+                good: item('Bryn', 'BY2103WU', 1181, 'Armless guest · wood frame · Grade A textile', 'jsi_bryn_comp_00004_r7rt0y'),
+                better: item('Bourne', 'BU7511D', 1648, 'Guest chair · wall-saver · maple frame · Grade A textile', 'jsi_bourne_comp_00001_vaoqmp'),
+                best: item('Arwyn', 'AW6000WL', 1841, 'Guest chair · wood leg · Grade A textile', 'jsi_arwyn_comp_00033_vtxnqq'),
             },
         },
         {
-            id: 'poet',
-            eyebrow: 'Lounge Seating',
-            title: 'Poet',
-            blurb: 'Modular Peb lounge with a soft, pebble-like form — scales from a single seat to a three-seat sofa.',
-            image: cl('jsi_poet_component_00001_rlyrle'),
+            id: 'task',
+            eyebrow: 'Category 03',
+            title: 'Task & Swivel',
+            blurb: 'Conference and task swivels, from value to high-performance.',
             tiers: {
-                good: tier('PLPF21', 3309, 'Single seat · upholstered · Grade A textile'),
-                better: tier('PLPF22', 4643, 'Two seat · upholstered · Grade A textile'),
-                best: tier('PLPF23', 6127, 'Three seat · upholstered · Grade A textile'),
+                good: item('Cosgrove', '72SMXA', 1165, 'Mid-back armless swivel · knee tilt · Grade A textile', 'jsi_cosgrove_comp_0010_ihduq3'),
+                better: item('Knox', 'KN3000WUF', 1365, 'Flared-arm swivel · wood back · upholstered seat · Grade A textile', 'jsi_knox_comp_00001_y9fr9m'),
+                best: item('Protocol', 'PT5600L', 2345, 'High-performance task · swivel tilt · Grade A textile', 'jsi_protocol_comp_00001_qq9x1p'),
             },
         },
     ],
