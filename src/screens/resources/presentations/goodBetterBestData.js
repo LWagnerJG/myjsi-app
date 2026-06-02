@@ -4,9 +4,14 @@
 // Scope: JSI lounge seating, framed into three quotable tiers so a rep can
 // position the right product for a budget in seconds.
 //
-// Integrity rule: every tier here is a confirmed, quotable list price taken from
-// JSI's published Arwyn and Caav price lists (jsifurniture.com). There are no
-// placeholders — a series only appears once its three tiers are verified.
+// Integrity: every price below is the Grade A list price pulled from JSI's
+// published price lists on jsifurniture.com/pricing-planning-spec-guides
+// (verified June 2026). There are no placeholders — a series only appears once
+// its three tiers are confirmed against the official price list.
+//
+//   Arwyn  (jsi_arwyn_pricelist):  AW6010 $2,363 · AW6011 $2,518 · AW6021 $3,066
+//   Caav   (jsi_caav_pricelist):   CVF3440-31 $3,765 · CVF3843-31 $3,984 · CVF3464-31 $4,872
+//   Poet   (jsi_poet_pricelist):   PLPF21 $3,309 · PLPF22 $4,643 · PLPF23 $6,127
 //
 // Imagery: real JSI product photography served from JSI's Cloudinary CDN
 // (jasper-jsi-furniture) — the same source the rest of the app uses.
@@ -37,8 +42,8 @@ export const GOOD_BETTER_BEST_DECK = {
     type: 'Interactive',
     updatedAt: '2026-06-02',
     description:
-        'Two flagship JSI lounge series, each laid out in three quotable tiers with model numbers, '
-        + 'list pricing, and a one-line spec so reps can position the right product fast.',
+        'Three flagship JSI lounge series, each laid out in three quotable tiers with model numbers, '
+        + 'Grade A list pricing, and a one-line spec so reps can position the right product fast.',
     sections: [
         {
             id: 'arwyn',
@@ -62,6 +67,18 @@ export const GOOD_BETTER_BEST_DECK = {
                 good: tier('CVF3440-31', 3765, 'Single seat · maple legs · Grade A textile'),
                 better: tier('CVF3843-31', 3984, 'Single seat · grand scale · Grade A textile'),
                 best: tier('CVF3464-31', 4872, 'Two seat · maple legs · Grade A textile'),
+            },
+        },
+        {
+            id: 'poet',
+            eyebrow: 'Lounge Seating',
+            title: 'Poet',
+            blurb: 'Modular Peb lounge with a soft, pebble-like form — scales from a single seat to a three-seat sofa.',
+            image: cl('jsi_poet_component_00001_rlyrle'),
+            tiers: {
+                good: tier('PLPF21', 3309, 'Single seat · upholstered · Grade A textile'),
+                better: tier('PLPF22', 4643, 'Two seat · upholstered · Grade A textile'),
+                best: tier('PLPF23', 6127, 'Three seat · upholstered · Grade A textile'),
             },
         },
     ],
