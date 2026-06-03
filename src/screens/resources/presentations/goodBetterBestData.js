@@ -16,7 +16,8 @@
 //   Task     Cosgrove 72SMXA $1,165 · Knox KN3000WUF $1,365 · Protocol PT5600L $2,345
 //
 // Imagery: real JSI product photography from JSI's Cloudinary CDN — each public
-// id is the white-background product/category shot from jsifurniture.com.
+// id is the white-background product/category shot from jsifurniture.com. We add
+// b_white so any transparency flattens onto a clean white background.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const GBB_SLUG = 'good-better-best';
@@ -28,13 +29,14 @@ export const GBB_TIERS = [
     { id: 'best', label: 'Best', dot: '#4A7C59' },
 ];
 
-const CLOUDINARY_BASE = 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload';
+export const CLOUDINARY_BASE = 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload';
 // Real JSI product photography. Public IDs match the catalog on jsifurniture.com.
-const cl = (publicId, transform = 'c_fill,w_900,h_760,g_auto/f_auto/q_auto') =>
+// b_white guarantees a clean white background even for transparent source PNGs.
+const cl = (publicId, transform = 'c_pad,w_1000,h_820,b_white/f_auto/q_auto') =>
     `${CLOUDINARY_BASE}/${transform}/v1/${publicId}`;
 
 const item = (series, model, price, spec, publicId) => ({
-    series, model, price, spec, image: cl(publicId),
+    series, model, price, spec, publicId, image: cl(publicId),
 });
 
 export const GOOD_BETTER_BEST_DECK = {
