@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Share2, Check, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Check, X, Eye, EyeOff } from 'lucide-react';
 import { isDarkTheme } from '../../../design-system/tokens.js';
-import { GOOD_BETTER_BEST_DECK, GBB_TIERS, GBB_ROUTE, formatGbbPrice } from './goodBetterBestData.js';
+import { GOOD_BETTER_BEST_DECK, GBB_TIERS, GBB_ROUTE, gbbSectionIndex, formatGbbPrice } from './goodBetterBestData.js';
 
 const pad = (n) => String(n).padStart(2, '0');
 
 // One Good/Better/Best product column — a distinct JSI family, its own photo.
-const ProductCard = ({ tier, data, theme, dark }) => (
+const ProductCard = ({ tier, data, theme, dark, showPricing }) => (
     <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -41,23 +41,32 @@ const ProductCard = ({ tier, data, theme, dark }) => (
             <p className="text-[0.8125rem] leading-relaxed mt-2.5" style={{ color: theme.colors.textSecondary }}>
                 {data.spec}
             </p>
-            <div className="mt-auto pt-4 flex items-start gap-0.5" style={{ color: theme.colors.textPrimary }}>
-                <span className="text-base font-semibold mt-1">$</span>
-                <span className="text-[2.25rem] leading-none font-black tracking-tight tabular-nums">
-                    {formatGbbPrice(data.price)}
-                </span>
-                <span className="text-[0.6875rem] font-semibold self-end mb-1.5 ml-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>list</span>
+            <div className="mt-auto pt-4">
+                {showPricing ? (
+                    <div className="flex items-start gap-0.5" style={{ color: theme.colors.textPrimary }}>
+                        <span className="text-base font-semibold mt-1">$</span>
+                        <span className="text-[2.25rem] leading-none font-black tracking-tight tabular-nums">
+                            {formatGbbPrice(data.price)}
+                        </span>
+                        <span className="text-[0.6875rem] font-semibold self-end mb-1.5 ml-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>list</span>
+                    </div>
+                ) : (
+                    <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
+                        Pricing hidden
+                    </span>
+                )}
             </div>
         </div>
     </motion.div>
 );
 
-export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
+export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection }) => {
     const dark = isDarkTheme(theme);
     const deck = GOOD_BETTER_BEST_DECK;
     const sections = deck.sections;
-    const [index, setIndex] = useState(0);
+    const [index, setIndex] = useState(() => gbbSectionIndex(gbbSection));
     const [shareNote, setShareNote] = useState('');
+    const [showPricing, setShowPricing] = useState(true);
 
     const total = sections.length;
     const active = sections[index] || sections[0];
@@ -74,11 +83,21 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
         });
     }, [total]);
 
+    // Keep the address bar in sync so each category is its own shareable deep link
+    // (e.g. /presentations/good-better-best/guest) without re-rendering the app.
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const path = `/${GBB_ROUTE}/${active.id}`;
+        if (window.location.pathname !== path) {
+            window.history.replaceState(window.history.state, '', path);
+        }
+    }, [active.id]);
+
     const onShare = useCallback(async () => {
-        const url = typeof window !== 'undefined' ? `${window.location.origin}/${GBB_ROUTE}` : '';
+        const url = typeof window !== 'undefined' ? `${window.location.origin}/${GBB_ROUTE}/${active.id}` : '';
         try {
             if (navigator.share) {
-                await navigator.share({ title: deck.title, text: deck.subtitle, url });
+                await navigator.share({ title: `${deck.title} — ${active.title}`, text: deck.subtitle, url });
                 return;
             }
             if (navigator.clipboard?.writeText) {
@@ -87,7 +106,7 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
                 setTimeout(() => setShareNote(''), 1800);
             }
         } catch { /* user cancelled */ }
-    }, [deck.title, deck.subtitle]);
+    }, [deck.title, deck.subtitle, active.title, active.id]);
 
     useEffect(() => {
         const prev = document.body.style.overflow;
@@ -100,6 +119,7 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
             if (e.key === 'ArrowRight') goTo((c) => c + 1);
             else if (e.key === 'ArrowLeft') goTo((c) => c - 1);
             else if (e.key === 'Escape') close();
+            else if (e.key.toLowerCase() === 'p') setShowPricing((v) => !v);
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
@@ -136,32 +156,45 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
             aria-modal="true"
             aria-label={`${deck.title} presentation`}
         >
-            {/* Top bar */}
+            {/* Top bar — minimal, presentation chrome */}
             <div
                 className="flex-shrink-0 flex items-center justify-between gap-2 px-4 sm:px-6"
                 style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 14px)', paddingBottom: 12 }}
             >
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                     <button
                         onClick={close}
                         aria-label="Close presentation"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-all active:scale-90 flex-shrink-0"
-                        style={ghostBtn}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full transition-opacity opacity-45 hover:opacity-90 active:opacity-100 flex-shrink-0"
+                        style={{ color: theme.colors.textSecondary }}
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-[18px] h-[18px]" />
                     </button>
-                    <span className="text-sm font-bold tracking-tight truncate" style={{ color: theme.colors.textPrimary }}>
+                    <span className="text-sm font-bold tracking-tight truncate" style={{ color: theme.colors.textPrimary, opacity: 0.9 }}>
                         {deck.title}
                     </span>
                 </div>
-                <button
-                    onClick={onShare}
-                    className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold transition-all active:scale-95 flex-shrink-0"
-                    style={ghostBtn}
-                >
-                    {shareNote ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                    {shareNote || 'Share'}
-                </button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                        onClick={() => setShowPricing((v) => !v)}
+                        aria-pressed={showPricing}
+                        title="Toggle pricing (P)"
+                        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold transition-all active:scale-95"
+                        style={ghostBtn}
+                    >
+                        {showPricing ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                        <span className="hidden sm:inline">{showPricing ? 'Hide pricing' : 'Show pricing'}</span>
+                        <span className="sm:hidden">Pricing</span>
+                    </button>
+                    <button
+                        onClick={onShare}
+                        className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                        style={ghostBtn}
+                    >
+                        {shareNote ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                        {shareNote || 'Share'}
+                    </button>
+                </div>
             </div>
 
             {/* Content */}
@@ -215,7 +248,7 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack }) => {
                             {/* Good / Better / Best columns */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5 items-stretch">
                                 {tiersWithMeta.map((t) => (
-                                    <ProductCard key={t.id} tier={t} data={active.tiers[t.id]} theme={theme} dark={dark} />
+                                    <ProductCard key={t.id} tier={t} data={active.tiers[t.id]} theme={theme} dark={dark} showPricing={showPricing} />
                                 ))}
                             </div>
                         </motion.section>
