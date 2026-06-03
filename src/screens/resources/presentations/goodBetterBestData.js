@@ -6,15 +6,17 @@
 // any budget. One slide per category; Good / Better / Best across the columns.
 //
 // Integrity: every price is the Grade A list price pulled from JSI's published
-// price lists at jsifurniture.com/pricing-planning-spec-guides (verified June
-// 2026). No placeholders — a tier only appears once confirmed against the list.
+// price lists at jsifurniture.com/pricing-planning-spec-guides, and every model
+// + image was confirmed against the product pages on jsifurniture.com (verified
+// June 2026). No placeholders.
 //
 //   Lounge   Bourne BU7521D $1,941 · Arwyn AW6010 $2,363 · Caav CVF3440-31 $3,765
-//   Guest    Bryn BY2103WU $1,181 · Bourne BU7511D $1,648 · Arwyn AW6000WL $1,841
+//   Guest    Bryn BY2103PU $963 · Bourne BU7511D $1,648 · Arwyn AW6000WL $1,841
 //   Task     Cosgrove 72SMXA $1,165 · Knox KN3000WUF $1,365 · Protocol PT5600L $2,345
 //
-// Imagery: real JSI product photography served from JSI's Cloudinary CDN
-// (jasper-jsi-furniture) — a distinct family photo per tier.
+// Imagery: real JSI product photography from JSI's Cloudinary CDN — each public
+// id matches the exact product/category on jsifurniture.com (lounge vs guest vs
+// swivel, not a stool).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const GBB_SLUG = 'good-better-best';
@@ -42,7 +44,7 @@ export const GOOD_BETTER_BEST_DECK = {
     subtitle: 'Good, better, best across JSI families — the right product at every price point.',
     category: 'Sales Training',
     type: 'Interactive',
-    updatedAt: '2026-06-02',
+    updatedAt: '2026-06-03',
     description:
         'Good / Better / Best across JSI seating categories — lounge, guest, and task. '
         + 'Each tier is a different JSI family with its model number and verified Grade A list pricing.',
@@ -53,9 +55,9 @@ export const GOOD_BETTER_BEST_DECK = {
             title: 'Lounge',
             blurb: 'Single-seat lounge for waiting areas, alcoves, and open commons.',
             tiers: {
-                good: item('Bourne', 'BU7521D', 1941, 'Single seat · maple frame · Grade A textile', 'jsi_bourne_comp_00001_vaoqmp'),
+                good: item('Bourne', 'BU7521D', 1941, 'Single-seat lounge · maple frame · Grade A textile', 'jsi_bournequickship_comp_0002_sd2kic'),
                 better: item('Arwyn', 'AW6010', 2363, 'Single seat · small-scale cushion back · Grade A textile', 'jsi_arwyn_comp_00036_ryzcgw'),
-                best: item('Caav', 'CVF3440-31', 3765, 'Single seat · maple legs · Grade A textile', 'jsi_caav_comp_00005_flho7u'),
+                best: item('Caav', 'CVF3440-31', 3765, 'Single seat · maple legs · Grade A textile', 'jsi_caav_comp_00002_witulq'),
             },
         },
         {
@@ -64,7 +66,7 @@ export const GOOD_BETTER_BEST_DECK = {
             title: 'Guest',
             blurb: 'Side and guest seating for offices, conference rooms, and reception.',
             tiers: {
-                good: item('Bryn', 'BY2103WU', 1181, 'Armless guest · wood frame · Grade A textile', 'jsi_bryn_comp_00004_r7rt0y'),
+                good: item('Bryn', 'BY2103PU', 963, 'Armless guest · upholstered seat · Grade A textile', 'BY2103PP_nyqge7'),
                 better: item('Bourne', 'BU7511D', 1648, 'Guest chair · wall-saver · maple frame · Grade A textile', 'jsi_bourne_comp_00001_vaoqmp'),
                 best: item('Arwyn', 'AW6000WL', 1841, 'Guest chair · wood leg · Grade A textile', 'jsi_arwyn_comp_00033_vtxnqq'),
             },
@@ -76,7 +78,7 @@ export const GOOD_BETTER_BEST_DECK = {
             blurb: 'Conference and task swivels, from value to high-performance.',
             tiers: {
                 good: item('Cosgrove', '72SMXA', 1165, 'Mid-back armless swivel · knee tilt · Grade A textile', 'jsi_cosgrove_comp_0010_ihduq3'),
-                better: item('Knox', 'KN3000WUF', 1365, 'Flared-arm swivel · wood back · upholstered seat · Grade A textile', 'jsi_knox_comp_00001_y9fr9m'),
+                better: item('Knox', 'KN3000WUF', 1365, 'Flared-arm swivel · wood back · upholstered seat · Grade A textile', 'jsi_knoxquickship_comp_0007_kls07j'),
                 best: item('Protocol', 'PT5600L', 2345, 'High-performance task · swivel tilt · Grade A textile', 'jsi_protocol_comp_00001_qq9x1p'),
             },
         },
