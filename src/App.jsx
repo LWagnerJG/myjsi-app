@@ -149,11 +149,11 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
 
     // Standalone, shareable Good · Better · Best sales deck.
     // Supports /presentations/good-better-best and /resources/presentations/good-better-best.
-    if (
-        (base === 'presentations' && parts[1] === 'good-better-best') ||
-        (base === 'resources' && parts[1] === 'presentations' && parts[2] === 'good-better-best')
-    ) {
-        return lazyWrap(SCREEN_MAP['good-better-best']);
+    if (base === 'presentations' && parts[1] === 'good-better-best') {
+        return lazyWrap(SCREEN_MAP['good-better-best'], { gbbSection: parts[2] || null });
+    }
+    if (base === 'resources' && parts[1] === 'presentations' && parts[2] === 'good-better-best') {
+        return lazyWrap(SCREEN_MAP['good-better-best'], { gbbSection: parts[3] || null });
     }
 
     if (base === 'resources') {
