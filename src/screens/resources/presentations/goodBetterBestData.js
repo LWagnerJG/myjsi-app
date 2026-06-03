@@ -66,7 +66,7 @@ export const GOOD_BETTER_BEST_DECK = {
             title: 'Guest',
             blurb: 'Side and guest seating for offices, conference rooms, and reception.',
             tiers: {
-                good: item('Ria', 'RI2571', 1162, 'Guest chair · upholstered · wall-saver · Grade A textile', 'jsi_ria_comp_00001_ngpgdu'),
+                good: item('Ria', 'RI2571', 1162, 'Guest chair · upholstered · wall-saver · Grade A textile', 'RI2571_zzuh69'),
                 better: item('Bourne', 'BU7511D', 1648, 'Guest chair · wall-saver · maple frame · Grade A textile', 'jsi_bourne_comp_00001_vaoqmp'),
                 best: item('Arwyn', 'AW6000WL', 1841, 'Guest chair · wood leg · Grade A textile', 'jsi_arwyn_comp_00033_vtxnqq'),
             },

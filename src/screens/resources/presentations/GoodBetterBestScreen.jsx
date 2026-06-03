@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Share2, Check, X, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Check, X, Eye, EyeOff, Download, Loader2 } from 'lucide-react';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { GOOD_BETTER_BEST_DECK, GBB_TIERS, GBB_ROUTE, gbbSectionIndex, formatGbbPrice } from './goodBetterBestData.js';
+import { downloadGbbPdf } from './gbbPdf.js';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -41,21 +42,15 @@ const ProductCard = ({ tier, data, theme, dark, showPricing }) => (
             <p className="text-[0.8125rem] leading-relaxed mt-2.5" style={{ color: theme.colors.textSecondary }}>
                 {data.spec}
             </p>
-            <div className="mt-auto pt-4">
-                {showPricing ? (
-                    <div className="flex items-start gap-0.5" style={{ color: theme.colors.textPrimary }}>
-                        <span className="text-base font-semibold mt-1">$</span>
-                        <span className="text-[2.25rem] leading-none font-black tracking-tight tabular-nums">
-                            {formatGbbPrice(data.price)}
-                        </span>
-                        <span className="text-[0.6875rem] font-semibold self-end mb-1.5 ml-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>list</span>
-                    </div>
-                ) : (
-                    <span className="text-[0.8125rem] font-semibold" style={{ color: theme.colors.textSecondary, opacity: 0.6 }}>
-                        Pricing hidden
+            {showPricing && (
+                <div className="mt-auto pt-4 flex items-start gap-0.5" style={{ color: theme.colors.textPrimary }}>
+                    <span className="text-base font-semibold mt-1">$</span>
+                    <span className="text-[2.25rem] leading-none font-black tracking-tight tabular-nums">
+                        {formatGbbPrice(data.price)}
                     </span>
-                )}
-            </div>
+                    <span className="text-[0.6875rem] font-semibold self-end mb-1.5 ml-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>list</span>
+                </div>
+            )}
         </div>
     </motion.div>
 );
@@ -67,6 +62,7 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
     const [index, setIndex] = useState(() => gbbSectionIndex(gbbSection));
     const [shareNote, setShareNote] = useState('');
     const [showPricing, setShowPricing] = useState(true);
+    const [downloading, setDownloading] = useState(false);
 
     const total = sections.length;
     const active = sections[index] || sections[0];
@@ -107,6 +103,15 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
             }
         } catch { /* user cancelled */ }
     }, [deck.title, deck.subtitle, active.title, active.id]);
+
+    const onDownload = useCallback(async () => {
+        if (downloading) return;
+        setDownloading(true);
+        try {
+            await downloadGbbPdf({ showPricing });
+        } catch { /* swallow — user can retry */ }
+        finally { setDownloading(false); }
+    }, [downloading, showPricing]);
 
     useEffect(() => {
         const prev = document.body.style.overflow;
@@ -184,7 +189,16 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
                     >
                         {showPricing ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         <span className="hidden sm:inline">{showPricing ? 'Hide pricing' : 'Show pricing'}</span>
-                        <span className="sm:hidden">Pricing</span>
+                    </button>
+                    <button
+                        onClick={onDownload}
+                        disabled={downloading}
+                        title="Download as PDF"
+                        className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold transition-all active:scale-95 disabled:opacity-70"
+                        style={ghostBtn}
+                    >
+                        {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                        <span className="hidden sm:inline">{downloading ? 'Preparing…' : 'Download'}</span>
                     </button>
                     <button
                         onClick={onShare}
@@ -192,7 +206,7 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
                         style={ghostBtn}
                     >
                         {shareNote ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                        {shareNote || 'Share'}
+                        <span className="hidden sm:inline">{shareNote || 'Share'}</span>
                     </button>
                 </div>
             </div>
