@@ -22,11 +22,11 @@ const ProductCard = ({ tier, data, theme, dark, showPricing }) => (
         }}
     >
         <div className="h-1.5 w-full flex-shrink-0" style={{ background: tier.dot }} />
-        <div className="relative aspect-[4/3]" style={{ background: dark ? 'rgba(255,255,255,0.04)' : '#F0EDE8' }}>
+        <div className="relative aspect-[4/3]" style={{ background: '#FFFFFF' }}>
             <img src={data.image} alt={`${data.series} — ${tier.label}`} className="w-full h-full object-cover" loading="lazy" />
             <span
                 className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase tracking-[0.16em]"
-                style={{ background: dark ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.92)', color: theme.colors.textPrimary, backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+                style={{ background: 'rgba(255,255,255,0.92)', color: '#353535', border: '1px solid rgba(0,0,0,0.05)' }}
             >
                 <span className="w-2 h-2 rounded-full" style={{ background: tier.dot }} />
                 {tier.label}
@@ -108,6 +108,8 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
         if (downloading) return;
         setDownloading(true);
         try {
+            // The export mirrors exactly what's on screen — including whether
+            // pricing is currently shown or hidden.
             await downloadGbbPdf({ showPricing });
         } catch { /* swallow — user can retry */ }
         finally { setDownloading(false); }
@@ -270,7 +272,7 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
                 </div>
             </div>
 
-            {/* Prominent bottom nav */}
+            {/* Bottom nav — Prev / progress dots / Next (ends hide the button) */}
             <div
                 className="flex-shrink-0 px-4 sm:px-6 lg:px-8 pt-3"
                 style={{
@@ -281,17 +283,20 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
                     WebkitBackdropFilter: 'blur(10px)',
                 }}
             >
-                <div className="mx-auto w-full max-w-[1200px] flex items-center justify-between gap-3">
-                    <button
-                        onClick={() => goTo((c) => c - 1)}
-                        disabled={atStart}
-                        className="inline-flex items-center justify-center gap-1.5 h-12 px-5 sm:px-6 rounded-full text-sm font-semibold transition-all active:scale-95 disabled:opacity-30 disabled:active:scale-100"
-                        style={ghostBtn}
-                    >
-                        <ChevronLeft className="w-5 h-5" /> <span className="hidden sm:inline">Prev</span>
-                    </button>
+                <div className="mx-auto w-full max-w-[1200px] grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                    <div className="justify-self-start">
+                        {!atStart && (
+                            <button
+                                onClick={() => goTo((c) => c - 1)}
+                                className="inline-flex items-center justify-center gap-1.5 h-12 px-5 sm:px-6 rounded-full text-sm font-semibold transition-all active:scale-95"
+                                style={ghostBtn}
+                            >
+                                <ChevronLeft className="w-5 h-5" /> <span className="hidden sm:inline">Prev</span>
+                            </button>
+                        )}
+                    </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-self-center">
                         {sections.map((s, i) => (
                             <button
                                 key={s.id}
@@ -307,16 +312,19 @@ export const GoodBetterBestScreen = ({ theme, onNavigate, handleBack, gbbSection
                         ))}
                     </div>
 
-                    <button
-                        onClick={() => goTo((c) => c + 1)}
-                        disabled={atEnd}
-                        className="inline-flex items-center justify-center gap-2 h-12 px-6 sm:px-8 rounded-full text-sm font-bold transition-all active:scale-95 disabled:opacity-30 disabled:active:scale-100"
-                        style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow: '0 6px 18px rgba(53,53,53,0.18)' }}
-                    >
-                        <span className="hidden sm:inline">{atEnd ? 'Done' : `Next · ${sections[Math.min(index + 1, total - 1)].title}`}</span>
-                        <span className="sm:hidden">Next</span>
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
+                    <div className="justify-self-end">
+                        {!atEnd && (
+                            <button
+                                onClick={() => goTo((c) => c + 1)}
+                                className="inline-flex items-center justify-center gap-2 h-12 px-6 sm:px-8 rounded-full text-sm font-bold transition-all active:scale-95"
+                                style={{ background: theme.colors.accent, color: theme.colors.accentText, boxShadow: '0 6px 18px rgba(53,53,53,0.18)' }}
+                            >
+                                <span className="hidden sm:inline">{`Next · ${sections[Math.min(index + 1, total - 1)].title}`}</span>
+                                <span className="sm:hidden">Next</span>
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </motion.div>
