@@ -846,14 +846,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     {/* List price — editable */}
                     <div className="min-w-0 px-4 py-3.5">
                       <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>List Price</label>
-                      <div className="mt-2 flex items-baseline gap-1.5">
-                        <span aria-hidden="true" className="text-[1rem] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.4 }}>$</span>
+                      <div className="mt-2 flex items-baseline gap-1">
+                        <span aria-hidden="true" className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none" style={{ color: c.textSecondary, opacity: 0.5 }}>$</span>
                         <input
                           id={listPriceId}
                           inputMode="numeric"
                           value={formatListPriceInput(draft.value)}
                           onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                          className="commercial-value-input w-full bg-transparent outline-none font-semibold tracking-[-0.03em] leading-none tabular-nums focus-ring rounded-md"
+                          className="commercial-value-input w-full bg-transparent outline-none font-semibold tracking-[-0.02em] leading-none tabular-nums focus-ring rounded-md"
                           style={{ color: c.textPrimary }}
                           placeholder="0"
                         />
@@ -874,7 +874,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     >
                       <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Discount</span>
                       <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary }}>
+                        <span className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.7 }}>
                           {discountSummaryLabel}
                         </span>
                         <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
@@ -889,7 +889,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       <div className="flex items-center gap-1.5 sm:justify-end">
                         <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Net</span>
                       </div>
-                      <p className="mt-2 text-[1.25rem] font-bold tracking-[-0.03em] leading-none tabular-nums" style={{ color: c.textPrimary }}>
+                      <p className="mt-2 text-[1.25rem] font-semibold tracking-[-0.02em] leading-none tabular-nums" style={{ color: c.textPrimary }}>
                         {netValueLabel}
                       </p>
                     </div>
