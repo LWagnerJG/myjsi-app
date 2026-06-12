@@ -996,23 +996,53 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(isDark) }} placeholder="City, State" />
                     )}
                   </Row>
-                  <Row label="Contacts" theme={theme} className="sm:col-span-2">
-                    <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
-                  </Row>
-                  <Row label="Bid Path" theme={theme}>
-                    <div className="flex w-full min-h-[44px] items-center justify-between px-3.5 py-2" style={fieldSurface(isDark)}>
-                      <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>Bid process</span>
-                      <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} ariaLabel="Bid process" />
+                  <Row label="Bid Project" theme={theme}>
+                    <div className="flex w-full rounded-[16px] p-1" style={fieldSurface(isDark)}>
+                      {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
+                        const active = !!draft.isBid === opt.val;
+                        return (
+                          <button
+                            key={opt.label}
+                            type="button"
+                            onClick={() => update('isBid', opt.val)}
+                            aria-pressed={active}
+                            className="flex-1 min-h-[36px] rounded-[12px] text-[0.8125rem] font-semibold transition-all active:scale-[0.98] focus-ring"
+                            style={active
+                              ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }
+                              : { color: c.textSecondary }}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </Row>
-                  <Row label="Dealer Partners" theme={theme} className="sm:col-span-2">
-                    <div className="flex flex-wrap gap-1.5">
-                      {(draft.dealers || []).map(f => (
-                        <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
-                      ))}
-                      <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
+                  <div className="sm:col-span-2 space-y-3">
+                    <div className="space-y-1.5">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer Partners</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(draft.dealers || []).map(f => (
+                          <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
+                        ))}
+                        <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
+                      </div>
                     </div>
-                  </Row>
+                    <div className="space-y-1.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Contacts</span>
+                        {(draft.dealers || []).length > 0 ? (
+                          <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }}>Synced from dealer partners</span>
+                        ) : null}
+                      </div>
+                      {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
+                        <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
+                      ) : (
+                        <p className="flex min-h-[44px] items-center px-3.5 text-[0.75rem]" style={{ ...fieldSurface(isDark), color: c.textSecondary, opacity: 0.7 }}>
+                          Add a dealer partner to sync their contacts.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                   <Row label="A&D Firms" theme={theme} className="sm:col-span-2">
                     <div className="flex flex-wrap gap-1.5">
                       {(draft.designFirms || []).map(f => (
