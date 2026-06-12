@@ -297,9 +297,11 @@ export const ProjectSpotlight = ({
             zIndex: DESIGN_TOKENS.zIndex.popover,
           }}
         >
-          <div className="px-3.5 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
-            {query ? 'Matching current projects' : 'Current projects'}
-          </div>
+          {filtered.length > 0 && (
+            <div className="px-3.5 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
+              {query ? 'Matching current projects' : 'Current projects'}
+            </div>
+          )}
           <div id="project-spotlight-listbox" role="listbox" className="overflow-y-auto pb-2" style={{ maxHeight: 304, WebkitOverflowScrolling: 'touch' }}>
             {filtered.map((opp, idx) => {
               const highlighted = idx === hlIdx;
@@ -339,11 +341,6 @@ export const ProjectSpotlight = ({
                 {filtered.length > 0 && (
                   <div className="mx-3.5 border-t" style={{ borderColor: subtleBorder, opacity: 0.7 }} />
                 )}
-                {filtered.length === 0 && (
-                  <div className="px-3.5 pt-1 pb-2 text-[11px]" style={{ color: theme.colors.textSecondary }}>
-                    No current project matches. Continue with a new project name.
-                  </div>
-                )}
                 <button
                   type="button"
                   role="option"
@@ -358,13 +355,8 @@ export const ProjectSpotlight = ({
                   style={{ backgroundColor: hlIdx === filtered.length ? (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)') : 'transparent' }}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                        Use "{trimmedValue}" as a new project
-                      </div>
-                      <div className="text-[11px] mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                        This keeps the request moving without linking to an existing opportunity.
-                      </div>
+                    <div className="min-w-0 truncate text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+                      Use "{trimmedValue}" as a new project
                     </div>
                     <span
                       className="shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]"
