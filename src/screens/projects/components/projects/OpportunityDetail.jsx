@@ -195,25 +195,30 @@ const EditableIdentityField = ({ value, onChange, placeholder, ariaLabel, theme,
       : 'transparent';
   return (
     <div
-      className={`flex min-w-0 items-center gap-2 ${className}`}
+      className={`inline-flex max-w-full min-w-0 items-center gap-1.5 ${className}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ borderBottom: `1.5px solid ${underline}`, transition: 'border-color 150ms ease' }}
     >
-      <input
-        value={value || ''}
-        onChange={e => onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        aria-label={ariaLabel}
-        placeholder={placeholder}
-        className={`min-w-0 flex-1 bg-transparent outline-none ${inputClass}`}
-      />
+      <span className="relative grid min-w-0 max-w-full">
+        <span aria-hidden="true" className={`pointer-events-none invisible col-start-1 row-start-1 whitespace-pre ${inputClass}`}>
+          {value || placeholder || ' '}
+        </span>
+        <input
+          value={value || ''}
+          onChange={e => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          aria-label={ariaLabel}
+          placeholder={placeholder}
+          className={`col-start-1 row-start-1 w-full min-w-0 bg-transparent outline-none ${inputClass}`}
+        />
+      </span>
       {showIcon ? (
         <Pencil
           aria-hidden="true"
-          className="h-4 w-4 flex-shrink-0 transition-opacity"
-          style={{ color: c.textSecondary, opacity: focused ? 0 : hovered ? 0.6 : 0.32 }}
+          className="h-3.5 w-3.5 flex-shrink-0 transition-opacity"
+          style={{ color: c.textSecondary, opacity: focused ? 0 : hovered ? 0.7 : 0.4 }}
         />
       ) : null}
     </div>
@@ -766,7 +771,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           <div className="p-4 sm:p-5" style={sectionCardSurface(theme)}>
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-center">
               <div className="min-w-0">
-                <span className="mb-1.5 block text-[0.625rem] font-bold uppercase tracking-[0.12em]" style={{ color: c.textSecondary, opacity: 0.62 }}>Project Name</span>
+                <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Project Name</span>
                 <EditableIdentityField
                   value={draft.name}
                   onChange={v => update('name', v)}
