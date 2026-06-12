@@ -559,7 +559,7 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
 /* 
    MAIN COMPONENT
     */
-export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, members, currentUserId, sampleOrders = [], opportunities = [], customers = [], onOpenCustomer }) => {
+export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, onDone, members, currentUserId, sampleOrders = [], opportunities = [], customers = [], onOpenCustomer }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const listPriceId = useId();
@@ -625,6 +625,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     setRemoveOpen(false);
     onDelete?.(draftRef.current.id);
   }, [cancelPendingSave, onDelete]);
+  const handleDone = useCallback(() => {
+    clearTimeout(saveRef.current);
+    if (dirty.current) { onUpdateRef.current(draftRef.current); dirty.current = false; }
+    onDone?.();
+  }, [onDone]);
   const canRemove = Boolean(onDelete || onMarkLost);
 
   /* discount dropdown */
@@ -770,6 +775,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const heroSummaryParts = [draft.company, draft.vertical, draft.installationLocation]
     .map(v => String(v || '').trim())
     .filter(Boolean);
+  const competitionPresent = draft.competitionPresent === true || (draft.competitors || []).length > 0;
   const discountSummaryLabel = discountCode || 'Select discount';
   const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
   const netValueLabel = rawNumeric > 0 ? formatCurrency(netValue) : '—';
@@ -990,7 +996,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     )}
                   </Row>
                   <Row label="Bid Project" theme={theme}>
-                    <div className="flex w-full rounded-[16px] p-1" style={fieldSurface(isDark)}>
+                    <div className="flex w-full rounded-full p-1" style={fieldSurface(isDark)}>
                       {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
                         const active = !!draft.isBid === opt.val;
                         return (
@@ -999,7 +1005,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                             type="button"
                             onClick={() => update('isBid', opt.val)}
                             aria-pressed={active}
-                            className="flex-1 min-h-[36px] rounded-[12px] text-[0.8125rem] font-semibold transition-all active:scale-[0.98] focus-ring"
+                            className="flex-1 min-h-[36px] rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.98] focus-ring"
                             style={active
                               ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }
                               : { color: c.textSecondary }}
@@ -1017,7 +1023,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         {(draft.dealers || []).map(f => (
                           <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
                         ))}
-                        <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
+                        <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS.filter(x => !(draft.dealers || []).includes(x))} onAdd={v => addUnique('dealers', v)} theme={theme} />
                       </div>
                     </div>
                     <div className="space-y-1.5">
@@ -1041,7 +1047,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       {(draft.designFirms || []).map(f => (
                         <RemovableChip key={f} label={f} onRemove={() => removeFrom('designFirms', f)} theme={theme} />
                       ))}
-                      <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS} onAdd={v => addUnique('designFirms', v)} theme={theme} />
+                      <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS.filter(x => !(draft.designFirms || []).includes(x))} onAdd={v => addUnique('designFirms', v)} theme={theme} />
                     </div>
                   </Row>
                 </div>
@@ -1061,7 +1067,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           size="small"
                         />
                       ))}
-                      <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES} onAdd={addProductSeries} theme={theme} />
+                      <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES.filter(s => !(draft.products || []).some(p => p.series === s))} onAdd={addProductSeries} theme={theme} />
                     </div>
                   </Row>
                   <div className="space-y-1.5">
@@ -1069,15 +1075,23 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Competition</span>
                       <label className="inline-flex items-center gap-2 text-[0.6875rem] font-semibold cursor-pointer" style={{ color: c.textSecondary }}>
                         Present
-                        <ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} ariaLabel="Competition present" />
+                        <ToggleSwitch
+                          checked={competitionPresent}
+                          onChange={e => {
+                            const on = e.target.checked;
+                            setDraft(p => { dirty.current = true; return { ...p, competitionPresent: on, competitors: on ? (p.competitors || []) : [] }; });
+                          }}
+                          theme={theme}
+                          ariaLabel="Competition present"
+                        />
                       </label>
                     </div>
-                    {draft.competitionPresent !== false ? (
+                    {competitionPresent ? (
                       <div className="flex flex-wrap gap-1.5">
                         {(draft.competitors || []).map(comp => (
                           <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
                         ))}
-                        <SuggestInputPill placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None')} onAdd={v => addUnique('competitors', v)} theme={theme} />
+                        <SuggestInputPill placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
                       </div>
                     ) : (
                       <p className="flex min-h-10 items-center text-[0.75rem]" style={{ color: c.textSecondary, opacity: 0.65 }}>No competition noted</p>
@@ -1092,6 +1106,21 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   className="w-full resize-none p-3.5 text-[0.8125rem] leading-relaxed outline-none focus-ring"
                   style={{ ...fieldSurface(isDark), color: c.textPrimary }}
                   placeholder="Notes, constraints, next steps..." />
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  {(draft.documents || []).map(doc => (
+                    <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(isDark), color: c.textPrimary }}>
+                      <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+                      <span className="truncate">{doc.fileName}</span>
+                      <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </span>
+                  ))}
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(isDark), color: c.textSecondary }}>
+                    <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
+                    Attach documents
+                  </button>
+                </div>
               </Section>
             </div>
 
@@ -1159,11 +1188,24 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </div>
           </div>
 
-          {/* AUTOSAVE */}
-          <div className="flex justify-center pt-0.5 pb-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.5 }} />
-              <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.45 }}>Changes saved automatically</span>
+          {/* SAVE + STATUS */}
+          <div className="space-y-3 pt-1 pb-2">
+            {onDone ? (
+              <button
+                type="button"
+                onClick={handleDone}
+                className="flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:mx-auto sm:w-auto sm:min-w-[260px]"
+                style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
+              >
+                <Check className="h-4 w-4" aria-hidden="true" />
+                Save &amp; Close
+              </button>
+            ) : null}
+            <div className="flex justify-center">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.5 }} />
+                <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.45 }}>Changes saved automatically</span>
+              </div>
             </div>
           </div>
 

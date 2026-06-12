@@ -551,6 +551,7 @@ export const ProjectsScreen = forwardRef(({
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
       onMarkLost={updated => { updateOpportunity(updated); setSelectedOpportunity(null); onNavigate('projects'); }}
       onDelete={id => { deleteOpportunity(id); setSelectedOpportunity(null); onNavigate('projects'); }}
+      onDone={() => { setSelectedOpportunity(null); onNavigate('projects'); }}
     />
   );
 
