@@ -87,10 +87,6 @@ export const buildOpportunityProjectContacts = (opportunity, customer) => {
   const visibleCustomerContacts = (customer?.contacts || []).filter(
     (contact) => !contact?.visibility || contact.visibility === 'dealer',
   );
-  const primaryContactToken = normalizeText(opportunity?.contact);
-  const matchedCustomerContact = visibleCustomerContacts.find(
-    (contact) => normalizeText(contact?.name) === primaryContactToken,
-  );
 
   const contacts = [];
   const seen = new Set();
@@ -114,14 +110,25 @@ export const buildOpportunityProjectContacts = (opportunity, customer) => {
     });
   };
 
-  if (matchedCustomerContact) {
-    pushContact(matchedCustomerContact, 'primary', 'Primary project contact');
-  } else if (opportunity?.contact) {
-    pushContact({ name: opportunity.contact, role: 'Primary project contact' }, 'primary', 'Primary project contact');
-  }
+  const projectContactNames = Array.isArray(opportunity?.contacts) && opportunity.contacts.length
+    ? opportunity.contacts
+    : (opportunity?.contact ? [opportunity.contact] : []);
+
+  const matchedCustomerIds = new Set();
+  projectContactNames.forEach((rawName) => {
+    const token = normalizeText(rawName);
+    if (!token) return;
+    const match = visibleCustomerContacts.find((contact) => normalizeText(contact?.name) === token);
+    if (match) {
+      matchedCustomerIds.add(String(match.id));
+      pushContact(match, 'primary', 'Primary project contact');
+    } else {
+      pushContact({ name: rawName, role: 'Primary project contact' }, 'primary', 'Primary project contact');
+    }
+  });
 
   visibleCustomerContacts.forEach((contact) => {
-    if (matchedCustomerContact && String(contact?.id) === String(matchedCustomerContact?.id)) return;
+    if (matchedCustomerIds.has(String(contact?.id))) return;
     pushContact(contact, 'customer', 'Customer contact');
   });
 

@@ -586,6 +586,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     setDraft(p => { const n = { ...p, [k]: v }; dirty.current = true; return n; });
   }, []);
 
+  const contactList = useMemo(
+    () => Array.isArray(draft.contacts) ? draft.contacts : (draft.contact ? [draft.contact] : []),
+    [draft.contacts, draft.contact],
+  );
+  const setContacts = useCallback((next) => {
+    setDraft(p => { dirty.current = true; return { ...p, contacts: next, contact: next[0] || '' }; });
+  }, []);
+
   useEffect(() => {
     if (!dirty.current) return;
     clearTimeout(saveRef.current);
@@ -988,8 +996,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(isDark) }} placeholder="City, State" />
                     )}
                   </Row>
-                  <Row label="Primary Contact" theme={theme}>
-                    <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
+                  <Row label="Contacts" theme={theme} className="sm:col-span-2">
+                    <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
                   </Row>
                   <Row label="Bid Path" theme={theme}>
                     <div className="flex w-full min-h-[44px] items-center justify-between px-3.5 py-2" style={fieldSurface(isDark)}>
