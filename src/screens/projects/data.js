@@ -27,7 +27,7 @@ export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbabil
 
 export const URGENCY_LEVELS = ['Low', 'Medium', 'High'];
 export const PO_TIMEFRAMES = ['Unknown', 'Within 30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
-export const COMPETITORS = ['None', 'Kimball', 'OFS', 'Indiana', 'National', 'Haworth', 'HNI', 'MillerKnoll', 'Steelcase', 'Versteel', 'Krug', 'Lazyboy', 'DarRan', 'Hightower', 'Allsteel'];
+export const COMPETITORS = ['None', 'Unknown', 'Kimball', 'OFS', 'Indiana', 'National', 'Haworth', 'HNI', 'MillerKnoll', 'Steelcase', 'Versteel', 'Krug', 'Lazyboy', 'DarRan', 'Hightower', 'Allsteel'];
 export { DISCOUNT_OPTIONS, DAILY_DISCOUNT_OPTIONS, DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 export { VERTICALS, VERTICAL_COLORS } from '../../constants/verticals.js';
 export const WIN_PROBABILITY_OPTIONS = ['20%', '40%', '60%', '80%', '100%'];

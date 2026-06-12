@@ -42,7 +42,7 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => 
       />
       {open && filtered.length > 0 && (
         <div ref={menu} className="absolute z-50 mt-1.5 border shadow-lg overflow-hidden" style={{ background: theme.colors.surface, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.9)', maxHeight: 220, width: '100%', borderRadius: '16px' }}>
-          <div className="overflow-y-auto p-1.5" style={{ maxHeight: 220 }}>
+          <div className="overflow-y-auto scrollbar-hide p-1.5" style={{ maxHeight: 220 }}>
             {filtered.map(s => (
               <button
                 key={s}
