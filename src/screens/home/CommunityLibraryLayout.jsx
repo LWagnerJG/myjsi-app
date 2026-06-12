@@ -4,6 +4,7 @@ import { LibraryGrid } from '../library/LibraryGrid.jsx';
 import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { ChannelAwareFeed } from './components/community/ChannelAwareFeed.jsx';
+import { PostDetailSheet } from './components/community/PostDetailSheet.jsx';
 import { MyBoardView } from './components/community/MyBoardView.jsx';
 import { MakersStudioTab } from './components/community/MakersStudioTab.jsx';
 import { ChannelChips } from './components/community/ChannelChips.jsx';
@@ -45,9 +46,22 @@ export const CommunityLibraryLayout = ({
   savedImageIds = [], onToggleSaveImage,
   setBackHandler,
   currentScreen, onNavigate, currentUserId,
+  focusPostId,
 }) => {
   const dark = isDarkTheme(theme);
   const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Deep link support: community/post/{id} (e.g. from Home feed previews)
+  // opens that post's detail sheet on arrival.
+  const [focusedPostId, setFocusedPostId] = useState(focusPostId || null);
+  useEffect(() => { setFocusedPostId(focusPostId || null); }, [focusPostId]);
+  const focusedPost = useMemo(
+    () => focusedPostId != null
+      ? (posts || []).find((post) => String(post.id) === String(focusedPostId)) || null
+      : null,
+    [focusedPostId, posts],
+  );
+  const closeFocusedPost = useCallback(() => setFocusedPostId(null), []);
 
   const hasBoardContent = useMemo(() => {
     const hasComments = (posts || []).some((post) => (post.comments || []).some((comment) => comment.name === 'You'));
@@ -462,6 +476,20 @@ export const CommunityLibraryLayout = ({
         initialTemplate={createOnePagerTemplate}
         onPublished={handleOnePagerPublished}
       />
+
+      {focusedPost && (
+        <PostDetailSheet
+          post={focusedPost}
+          theme={theme}
+          dark={dark}
+          isLiked={!!likedPosts?.[focusedPost.id]}
+          isUpvoted={!!postUpvotes?.[focusedPost.id]}
+          onToggleLike={onToggleLike}
+          onUpvote={onUpvote}
+          onAddComment={onAddComment}
+          onClose={closeFocusedPost}
+        />
+      )}
     </div>
   );
 };
