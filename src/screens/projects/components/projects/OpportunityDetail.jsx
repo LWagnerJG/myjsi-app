@@ -753,12 +753,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
     : customerLinkSource === 'inferred'
       ? 'Matched'
       : 'Open';
-  const softRule = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.055)';
   const heroPanelBg = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(240,237,232,0.22)';
   const heroControlSurface = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : c.surface,
   };
-  const calcCellBg = isDark ? 'rgba(255,255,255,0.035)' : 'rgba(53,53,53,0.035)';
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
@@ -769,6 +767,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           <div className="p-4 sm:p-5" style={sectionCardSurface(theme)}>
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-center">
               <div className="min-w-0">
+                <span className="mb-1.5 block text-[0.625rem] font-bold uppercase tracking-[0.12em]" style={{ color: c.textSecondary, opacity: 0.62 }}>Project Name</span>
                 <EditableIdentityField
                   value={draft.name}
                   onChange={v => update('name', v)}
@@ -778,45 +777,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   inputClass="project-display-title font-semibold tracking-[-0.035em]"
                   className="max-w-[34rem]"
                 />
-                <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                  <EditableIdentityField
-                    value={draft.company}
-                    onChange={v => update('company', v)}
-                    ariaLabel="Customer account"
-                    placeholder="Customer account"
-                    theme={theme}
-                    inputClass="text-[0.9375rem] font-semibold"
-                    showIcon={false}
-                    className="w-auto min-w-[150px] max-w-[280px] flex-[0_1_auto]"
-                  />
-                  {customerConnectionLabel !== 'Open' ? (
-                    <span
-                      className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold"
-                      style={{
-                        backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'),
-                        color: draft.customerId ? c.accent : c.textSecondary,
-                      }}
-                    >
-                      {customerConnectionLabel}
-                    </span>
-                  ) : null}
-                  {customerLocationLabel ? (
-                    <span className="text-[0.6875rem] font-medium leading-tight" style={{ color: c.textSecondary, opacity: 0.72 }}>
-                      {customerLocationLabel}
-                    </span>
-                  ) : null}
-                  {linkedCustomer ? (
-                    <button
-                      type="button"
-                      onClick={openLinkedCustomer}
-                      className="inline-flex items-center gap-1 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
-                      style={{ color: c.textSecondary }}
-                    >
-                      Open profile
-                      <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.55 }} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </div>
               </div>
 
               <div className="rounded-[20px] p-3.5 sm:p-4" style={{ backgroundColor: heroPanelBg }}>
@@ -860,7 +820,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 <div className="rounded-[20px] overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.4)' }}>
                   <div className="grid sm:grid-cols-[minmax(0,0.95fr)_minmax(0,0.85fr)_minmax(0,1.05fr)]">
                     {/* List price — editable */}
-                    <div className="min-w-0 border-b px-4 py-3.5 sm:border-b-0 sm:border-r" style={{ borderColor: softRule }}>
+                    <div className="min-w-0 px-4 py-3.5">
                       <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>List Price</label>
                       <div className="mt-2 flex items-baseline gap-1.5">
                         <span aria-hidden="true" className="text-[1rem] font-bold tracking-tight leading-none" style={{ color: c.textSecondary, opacity: 0.4 }}>$</span>
@@ -883,9 +843,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
                       aria-haspopup="listbox"
                       aria-expanded={discountOpen}
-                      className="min-w-0 border-b px-4 py-3.5 text-left transition-all active:scale-[0.99] sm:border-b-0 sm:border-r focus-ring"
+                      className="min-w-0 px-4 py-3.5 text-left transition-all active:scale-[0.99] focus-ring"
                       style={{
-                        borderColor: softRule,
                         ...(discountOpen ? { boxShadow: `inset 0 0 0 1.5px ${c.accent}` } : {}),
                       }}
                     >
@@ -901,8 +860,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       </p>
                     </button>
 
-                    {/* Net — calculated, visually distinct from editable cells */}
-                    <div className="min-w-0 px-4 py-3.5 sm:text-right" style={{ backgroundColor: calcCellBg }}>
+                    {/* Net — calculated, distinguished by the Auto badge */}
+                    <div className="min-w-0 px-4 py-3.5 sm:text-right">
                       <div className="flex items-center gap-1.5 sm:justify-end">
                         <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Net</span>
                         <span className="rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-[0.08em]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)', color: c.textSecondary }}>
@@ -919,7 +878,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   </div>
 
                   {/* Rewards — part of the same commercial summary */}
-                  <div className="h-px" style={{ backgroundColor: softRule }} />
                   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
@@ -963,6 +921,37 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
 
               <Section title="Project Details" theme={theme}>
                 <div className="grid gap-3 sm:grid-cols-2">
+                  <Row label="Customer Account" theme={theme} className="sm:col-span-2">
+                    {(id) => (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input
+                          id={id}
+                          value={draft.company || ''}
+                          onChange={e => update('company', e.target.value)}
+                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px]`}
+                          style={{ color: c.textPrimary, ...fieldSurface(isDark) }}
+                          placeholder="Customer account name"
+                        />
+                        {customerConnectionLabel !== 'Open' ? (
+                          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold"
+                            style={{ backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'), color: draft.customerId ? c.accent : c.textSecondary }}>
+                            {customerConnectionLabel}
+                          </span>
+                        ) : null}
+                        {linkedCustomer ? (
+                          <button type="button" onClick={openLinkedCustomer}
+                            className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
+                            style={{ color: c.accent }}>
+                            Open profile
+                            <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.7 }} aria-hidden="true" />
+                          </button>
+                        ) : null}
+                        {customerLocationLabel ? (
+                          <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.72 }}>{customerLocationLabel}</span>
+                        ) : null}
+                      </div>
+                    )}
+                  </Row>
                   <Row label="Vertical" theme={theme}>
                     {(id) => <CompactSelect id={id} options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />}
                   </Row>
