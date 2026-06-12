@@ -212,7 +212,7 @@ body.jsi-modal-backdrop-active [data-app-header-scrim] {
 /* Universal search input placeholder — consistent muted style */
 input[type="search"]::placeholder,
 input::placeholder {
-    opacity: 0.45;
+    opacity: 0.5;
 }
 
 /* FormInput placeholder color driven by CSS custom property (set via JS, never innerHTML) */

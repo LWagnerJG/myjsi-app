@@ -847,8 +847,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     {/* List price — editable */}
                     <div className="min-w-0 px-4 py-3.5">
                       <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>List Price</label>
-                      <div className="mt-2 flex items-baseline gap-1">
-                        <span aria-hidden="true" className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none" style={{ color: c.textSecondary, opacity: 0.5 }}>$</span>
+                      <div className="mt-2 flex items-baseline gap-0">
+                        <span aria-hidden="true" className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none" style={{ color: c.textPrimary }}>$</span>
                         <input
                           id={listPriceId}
                           inputMode="numeric"
@@ -944,7 +944,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           id={id}
                           value={draft.company || ''}
                           onChange={e => update('company', e.target.value)}
-                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px] max-w-[460px]`}
+                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px]`}
                           style={{ color: c.textPrimary, ...fieldSurface(isDark) }}
                           placeholder="Customer account name"
                         />
@@ -977,7 +977,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <Row label="Install Date" theme={theme}>
                     {(id) => (
                       <input id={id} type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                        className={TEXT_INPUT_CLASS} style={{ color: draft.expectedInstallDate ? c.textPrimary : c.textSecondary, ...fieldSurface(isDark) }} />
+                        className={TEXT_INPUT_CLASS} style={{ color: draft.expectedInstallDate ? c.textPrimary : c.textSecondary, colorScheme: isDark ? 'dark' : 'light', ...fieldSurface(isDark) }} />
                     )}
                   </Row>
                   <Row label="Location" theme={theme}>
@@ -1085,29 +1085,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </div>
                 </div>
               </Section>
-
-              <Section title="Notes" theme={theme}>
-                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
-                  aria-label="Project notes"
-                  className="w-full resize-none p-3.5 text-[0.8125rem] leading-relaxed outline-none focus-ring"
-                  style={{ ...fieldSurface(isDark), color: c.textPrimary }}
-                  placeholder="Notes, constraints, next steps..." />
-                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                  {(draft.documents || []).map(doc => (
-                    <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(isDark), color: c.textPrimary }}>
-                      <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
-                      <span className="truncate">{doc.fileName}</span>
-                      <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
-                        <X className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                    </span>
-                  ))}
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(isDark), color: c.textSecondary }}>
-                    <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
-                    Attach documents
-                  </button>
-                </div>
-              </Section>
             </div>
 
             <div className="space-y-3.5 min-w-0">
@@ -1169,6 +1146,29 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       accentColor={STATUS_COLORS[relatedOrders[0]?.status] || undefined}
                     />
                   )}
+                </div>
+              </Section>
+
+              <Section title="Notes" theme={theme}>
+                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
+                  aria-label="Project notes"
+                  className="w-full resize-none p-3.5 text-[0.8125rem] leading-relaxed outline-none focus-ring"
+                  style={{ ...fieldSurface(isDark), color: c.textPrimary }}
+                  placeholder="Notes, constraints, next steps..." />
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  {(draft.documents || []).map(doc => (
+                    <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(isDark), color: c.textPrimary }}>
+                      <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+                      <span className="truncate">{doc.fileName}</span>
+                      <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </span>
+                  ))}
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(isDark), color: c.textSecondary }}>
+                    <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
+                    Attach documents
+                  </button>
                 </div>
               </Section>
             </div>
