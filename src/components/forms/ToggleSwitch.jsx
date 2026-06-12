@@ -1,7 +1,7 @@
 import React from 'react';
 import { isDarkTheme } from '../../design-system/tokens.js';
 
-export const ToggleSwitch = React.memo(({ checked, onChange, theme }) => {
+export const ToggleSwitch = React.memo(({ checked, onChange, theme, ariaLabel }) => {
     const dark = isDarkTheme(theme);
     const trackBg = checked
         ? theme.colors.accent
@@ -12,8 +12,9 @@ export const ToggleSwitch = React.memo(({ checked, onChange, theme }) => {
             type="button"
             role="switch"
             aria-checked={checked}
+            aria-label={ariaLabel}
             onClick={() => onChange({ target: { checked: !checked } })}
-            className="relative flex-shrink-0 transition-colors duration-200 focus:outline-none"
+            className="relative flex-shrink-0 transition-colors duration-200 focus-ring"
             style={{
                 width: 44,
                 height: 26,
