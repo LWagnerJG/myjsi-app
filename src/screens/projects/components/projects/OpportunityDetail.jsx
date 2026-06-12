@@ -779,11 +779,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const discountSummaryLabel = discountCode || 'Select discount';
   const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
   const netValueLabel = rawNumeric > 0 ? formatCurrency(netValue) : '—';
-  const netValueDetailLabel = rawNumeric > 0
-    ? discountPct > 0
-      ? 'Auto-calculated from list and discount'
-      : 'Matches list until a discount is selected'
-    : 'Enter list price to start';
   const rewardsDetailLabel = `Net below ${formatCurrency(REWARD_AUTO_OFF_NET_LIMIT)} with ${formatPercentLabel(REWARD_AUTO_OFF_DISCOUNT_MIN * 100)}+ discount starts rewards off.`;
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
@@ -889,19 +884,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       </p>
                     </button>
 
-                    {/* Net — calculated, distinguished by the Auto badge */}
+                    {/* Net — calculated */}
                     <div className="min-w-0 px-4 py-3.5 sm:text-right">
                       <div className="flex items-center gap-1.5 sm:justify-end">
                         <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Net</span>
-                        <span className="rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-[0.08em]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)', color: c.textSecondary }}>
-                          Auto
-                        </span>
                       </div>
                       <p className="mt-2 text-[1.25rem] font-bold tracking-[-0.03em] leading-none tabular-nums" style={{ color: c.textPrimary }}>
                         {netValueLabel}
-                      </p>
-                      <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.68 }}>
-                        {netValueDetailLabel}
                       </p>
                     </div>
                   </div>
