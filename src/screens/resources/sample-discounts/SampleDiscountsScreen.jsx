@@ -3,7 +3,7 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
 import { Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SAMPLE_POLICIES } from './data.js';
+import { SAMPLE_POLICIES, SAMPLE_POLICY_META } from './data.js';
 
 const INFO   = '#5B7B8C';
 const WARN   = '#C4956A';
@@ -55,19 +55,31 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
             <div className="min-w-0 px-4 sm:px-6 lg:px-8 pt-5 pb-12 max-w-content mx-auto w-full space-y-3">
 
                 {/* ── Page header ── */}
-                <div className="pb-1">
+                <div className="pb-2">
+                    <span
+                        className="text-[0.625rem] font-black uppercase tracking-[0.18em]"
+                        style={{ color: colors.accent }}
+                    >
+                        {SAMPLE_POLICY_META.programLabel}
+                    </span>
                     <h1
-                        className="text-[1.75rem] font-black tracking-tight leading-tight"
+                        className="text-[1.75rem] font-black tracking-tight leading-tight mt-1"
                         style={{ color: colors.textPrimary }}
                     >
                         Sample Policies
                     </h1>
+                    <p
+                        className="text-sm leading-relaxed mt-2 max-w-2xl"
+                        style={{ color: colors.textPrimary, opacity: 0.62 }}
+                    >
+                        {SAMPLE_POLICY_META.intro}
+                    </p>
                     <div className="flex items-center gap-2 flex-wrap mt-2">
                         <span
                             className="text-xs font-semibold"
                             style={{ color: colors.textPrimary, opacity: 0.42 }}
                         >
-                            Effective May 1, 2021
+                            {SAMPLE_POLICY_META.effectiveDate}
                         </span>
                         <span
                             className="inline-flex items-center text-[0.5625rem] font-black uppercase tracking-[0.1em] px-2 py-[3px] rounded-full"
@@ -76,9 +88,15 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                 color: WARN,
                             }}
                         >
-                            No commission
+                            Non-commissionable
                         </span>
                     </div>
+                    <p
+                        className="text-xs leading-snug mt-2"
+                        style={{ color: colors.textPrimary, opacity: 0.44 }}
+                    >
+                        {SAMPLE_POLICY_META.commissionNote}
+                    </p>
                 </div>
 
                 {/* ── Policy cards ── */}
@@ -149,7 +167,7 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                                         color: INFO,
                                                     }}
                                                 >
-                                                    Best
+                                                    Best value
                                                 </span>
                                             )}
                                         </div>
@@ -163,13 +181,20 @@ export const SampleDiscountsScreen = ({ theme, setSuccessMessage }) => {
                                             </p>
                                         )}
 
+                                        <p
+                                            className="text-xs mt-1.5 leading-relaxed"
+                                            style={{ color: colors.textPrimary, opacity: 0.62 }}
+                                        >
+                                            {policy.description}
+                                        </p>
+
                                         {notes.map((note, ni) => (
                                             <p
                                                 key={ni}
-                                                className="text-xs mt-0.5 leading-snug"
+                                                className="text-xs mt-1 leading-snug"
                                                 style={{ color: colors.textPrimary, opacity: 0.45 }}
                                             >
-                                                {note}
+                                                &bull; {note}
                                             </p>
                                         ))}
                                     </div>
