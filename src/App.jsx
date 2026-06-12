@@ -550,11 +550,15 @@ function App() {
         setPolls((prev) => prev.map(pl => pl.id !== pollId ? pl : { ...pl, options: pl.options.map(o => o.id === optionId ? { ...o, votes: (o.votes || 0) + 1 } : o) }));
     }, []);
 
-    // Reusable helper – flash a success toast for a fixed duration
+    // Reusable helper – flash a success toast for a fixed duration.
+    // Clears any in-flight timer so an earlier toast can't dismiss a newer one.
+    const successTimerRef = useRef(null);
     const flashSuccess = useCallback((msg, ms = 1500) => {
+        clearTimeout(successTimerRef.current);
         setSuccessMessage(msg);
-        setTimeout(() => setSuccessMessage(''), ms);
+        successTimerRef.current = setTimeout(() => setSuccessMessage(''), ms);
     }, []);
+    useEffect(() => () => clearTimeout(successTimerRef.current), []);
 
     const handleLibraryUpload = useCallback((assets) => {
         setLibraryAssets(prev => [...assets, ...prev]);

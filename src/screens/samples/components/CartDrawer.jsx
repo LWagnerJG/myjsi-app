@@ -88,6 +88,9 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
 
     const totalCartItems = useMemo(() => Object.values(cart).reduce((s, q) => s + q, 0), [cart]);
 
+    const submitNavTimerRef = useRef(null);
+    useEffect(() => () => clearTimeout(submitNavTimerRef.current), []);
+
     const submit = useCallback(() => {
         if (!shipToName.trim() || !address1.trim() || cartItems.length === 0) return;
         hapticSuccess();
@@ -101,7 +104,8 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
         setExpanded(false);
         setJustSubmitted(true);
         Object.entries(cart).forEach(([id, qty]) => { if (qty > 0) onUpdateCart({ id }, -qty); });
-        setTimeout(() => { onNavigate && onNavigate('home'); }, prefersReduced ? 1600 : 2600);
+        clearTimeout(submitNavTimerRef.current);
+        submitNavTimerRef.current = setTimeout(() => { onNavigate && onNavigate('home'); }, prefersReduced ? 1600 : 2600);
     }, [shipToName, address1, cartItems, cart, onUpdateCart, onNavigate, onSubmitOrder, address2, shipToType, prefersReduced, setExpanded]);
 
     const handleCreateNew = useCallback((type) => {

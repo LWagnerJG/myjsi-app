@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getToastMotion } from '../../design-system/motion.js';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
@@ -9,19 +9,30 @@ let idCounter = 0;
 export const ToastHost = ({ children, theme }) => {
   const [toasts, setToasts] = useState([]);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const dismissTimersRef = useRef(new Map());
 
   const push = useCallback((message, options={}) => {
     const id = ++idCounter;
     setToasts(t => [...t, { id, message, type: options.type || 'info', ttl: options.ttl || 3000 }]);
   }, []);
 
+  // Schedule one dismiss timer per toast. Re-mapping all timers on every
+  // change would reset existing toasts' countdowns whenever a new toast lands.
   useEffect(() => {
-    if (!toasts.length) return;
-    const timers = toasts.map(t => setTimeout(() => {
-      setToasts(cur => cur.filter(c => c.id !== t.id));
-    }, t.ttl));
-    return () => timers.forEach(clearTimeout);
+    const timers = dismissTimersRef.current;
+    toasts.forEach(t => {
+      if (timers.has(t.id)) return;
+      timers.set(t.id, setTimeout(() => {
+        timers.delete(t.id);
+        setToasts(cur => cur.filter(c => c.id !== t.id));
+      }, t.ttl));
+    });
   }, [toasts]);
+
+  useEffect(() => () => {
+    dismissTimersRef.current.forEach(clearTimeout);
+    dismissTimersRef.current.clear();
+  }, []);
 
   const toastMotion = getToastMotion(prefersReducedMotion);
   const ctxValue = useMemo(() => ({ push }), [push]);
