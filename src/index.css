@@ -28,9 +28,16 @@ textarea {
     font-size: max(1rem, 16px) !important;
 }
 
-.panel-content input.project-display-title {
-    font-size: clamp(2.25rem, 4vw, 2.95rem) !important;
-    line-height: 0.94 !important;
+/* Project detail hero title — must out-specific the global 16px input rule. */
+input.project-display-title {
+    font-size: clamp(1.625rem, 3vw, 1.875rem) !important;
+    line-height: 1.15 !important;
+}
+
+/* Project detail commercial figures — keep the editable List Price input the
+   same size as the adjacent Discount / Net display values. */
+input.commercial-value-input {
+    font-size: 1.25rem !important;
 }
 
 :root {

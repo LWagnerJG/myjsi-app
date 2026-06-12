@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, X } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { DEALER_CONTACTS } from './utils.js';
 
@@ -29,30 +29,32 @@ export const ContactSearchSelector = ({ value, onChange, dealers, theme }) => {
     return () => window.removeEventListener('mousedown', close);
   }, [open]);
 
-  const fieldBg = isDark ? 'rgba(255,255,255,0.055)' : 'rgba(240,237,232,0.46)';
-  const fieldBorder = '1px solid transparent';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.065)' : 'rgba(240,237,232,0.5)';
 
   return (
     <div className="relative" ref={ref}>
       {value ? (
-        <div className="flex min-h-[46px] items-center gap-2.5 py-2.5 px-3.5" style={{ background: fieldBg, border: fieldBorder, borderRadius: '16px' }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: `${theme.colors.accent}16`, color: theme.colors.accent }}>
+        <div className="flex min-h-[44px] items-center gap-2.5 py-2 px-3.5" style={{ background: fieldBg, borderRadius: '16px' }}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: `${theme.colors.accent}16`, color: theme.colors.accent }}>
             {value.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
           </div>
           <span className="flex-1 text-[0.875rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{value}</span>
-          <button type="button" onClick={() => { onChange(''); setQuery(''); }} className="w-6 h-6 rounded-full flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity" aria-label="Clear contact">
-            <span className="text-xs leading-none" style={{ color: theme.colors.textSecondary }}>x</span>
+          <button type="button" onClick={() => { onChange(''); setQuery(''); }} className="w-7 h-7 rounded-full flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity focus-ring" aria-label="Clear contact">
+            <X className="w-3.5 h-3.5" aria-hidden="true" style={{ color: theme.colors.textSecondary }} />
           </button>
         </div>
       ) : (
-        <div className="flex min-h-[46px] items-center gap-2.5 py-2.5 px-3.5" style={{ background: fieldBg, border: fieldBorder, borderRadius: '16px' }}>
-          <Search size={14} style={{ color: theme.colors.textSecondary, opacity: 0.4, flexShrink: 0 }} />
+        <div className="flex min-h-[44px] items-center gap-2.5 py-2 px-3.5" style={{ background: fieldBg, borderRadius: '16px' }}>
+          <Search size={14} aria-hidden="true" style={{ color: theme.colors.textSecondary, opacity: 0.4, flexShrink: 0 }} />
           <input
             value={query}
+            role="combobox"
+            aria-expanded={open}
+            aria-label="Search contacts"
             onChange={e => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
             onKeyDown={e => { if (e.key === 'Enter' && query.trim()) { onChange(query.trim()); setQuery(''); setOpen(false); } if (e.key === 'Escape') setOpen(false); }}
-            className="flex-1 bg-transparent outline-none text-[0.875rem] font-semibold"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[0.875rem] font-semibold"
             style={{ color: theme.colors.textPrimary }}
             placeholder="Search contacts"
           />

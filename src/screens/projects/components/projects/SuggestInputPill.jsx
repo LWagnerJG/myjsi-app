@@ -26,19 +26,19 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme }) => 
     setOpen(false);
   };
 
-  const fieldBg = isDark ? 'rgba(255,255,255,0.055)' : 'rgba(240,237,232,0.46)';
-  const fieldBorder = 'transparent';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.065)' : 'rgba(240,237,232,0.5)';
 
   return (
     <div className="relative" ref={ref} style={{ minWidth: 144 }}>
       <input
         value={q}
+        aria-label={placeholder}
         onChange={e => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onKeyDown={e => { if (e.key === 'Enter') { commit(q.trim()); } if (e.key === 'Escape') { setOpen(false); } }}
         placeholder={placeholder}
-        className="h-10 px-3.5 text-[0.8125rem] font-semibold outline-none border w-full"
-        style={{ backgroundColor: fieldBg, borderColor: fieldBorder, color: theme.colors.textPrimary, borderRadius: '16px' }}
+        className="min-h-[44px] px-3.5 text-[0.8125rem] font-semibold outline-none w-full focus-ring"
+        style={{ backgroundColor: fieldBg, color: theme.colors.textPrimary, borderRadius: '9999px' }}
       />
       {open && filtered.length > 0 && (
         <div ref={menu} className="absolute z-50 mt-1.5 border shadow-lg overflow-hidden" style={{ background: theme.colors.surface, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(227,224,216,0.9)', maxHeight: 220, width: '100%', borderRadius: '16px' }}>
