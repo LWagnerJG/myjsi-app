@@ -161,29 +161,6 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
   );
 };
 
-const MultiPillSelect = ({ options, value = [], onToggle, theme }) => {
-  const isDark = isDarkTheme(theme);
-  const chipBg = isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT;
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map(opt => {
-        const active = value.includes(opt);
-        return (
-          <button key={opt} type="button" aria-pressed={active} onClick={() => onToggle(opt)}
-            className="min-h-10 px-3.5 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97] focus-ring"
-            style={{
-              backgroundColor: active ? theme.colors.accent : chipBg,
-              color: active ? theme.colors.accentText : theme.colors.textSecondary,
-              ...(active ? { boxShadow: isDark ? '0 7px 14px rgba(0,0,0,0.14)' : '0 7px 14px rgba(53,53,53,0.07)' } : {}),
-            }}>
-            {opt}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
-
 /* Removable entity chip (dealers, A&D firms, series). */
 const RemovableChip = ({ label, detail, onRemove, theme, size = 'default' }) => {
   const isDark = isDarkTheme(theme);
@@ -761,7 +738,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
   }, [linkedCustomer, onOpenCustomer]);
   const heroDealers = (draft.dealers || []).filter(Boolean);
   const heroDealerLabel = heroDealers.length > 1 ? `${heroDealers[0]} +${heroDealers.length - 1}` : (heroDealers[0] || 'Not assigned');
-  const heroMetaLabel = [draft.vertical, draft.poTimeframe].filter(Boolean).join(' · ');
   const discountSummaryLabel = discountCode || 'Select discount';
   const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
   const netValueLabel = rawNumeric > 0 ? formatCurrency(netValue) : '—';
@@ -778,7 +754,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       ? 'Matched'
       : 'Open';
   const softRule = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.055)';
-  const heroPanelBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(240,237,232,0.38)';
+  const heroPanelBg = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(240,237,232,0.22)';
   const heroControlSurface = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : c.surface,
   };
@@ -793,11 +769,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
           <div className="p-4 sm:p-5" style={sectionCardSurface(theme)}>
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-center">
               <div className="min-w-0">
-                {heroMetaLabel ? (
-                  <p className="mb-1.5 text-[0.75rem] font-semibold" style={{ color: c.textSecondary }}>
-                    {heroMetaLabel}
-                  </p>
-                ) : null}
                 <EditableIdentityField
                   value={draft.name}
                   onChange={v => update('name', v)}
@@ -849,7 +820,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
               </div>
 
               <div className="rounded-[20px] p-3.5 sm:p-4" style={{ backgroundColor: heroPanelBg }}>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="min-w-0">
                     <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Stage</span>
                     <CompactSelect
@@ -869,12 +840,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       title={heroDealers.join(', ') || undefined}
                     >
                       <span className="truncate">{heroDealerLabel}</span>
-                    </p>
-                  </div>
-                  <div className="col-span-2 min-w-0 sm:col-span-1">
-                    <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Net Value</span>
-                    <p className="flex min-h-[44px] items-center text-[0.9375rem] font-bold tabular-nums tracking-[-0.02em]" style={{ color: c.textPrimary }}>
-                      {netValueLabel}
                     </p>
                   </div>
                 </div>
@@ -909,9 +874,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                           placeholder="0"
                         />
                       </div>
-                      <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.68 }}>
-                        Editable list total
-                      </p>
                     </div>
 
                     {/* Discount — dropdown */}
@@ -999,7 +961,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                 )}
               </Section>
 
-              <Section title="Project Profile" theme={theme}>
+              <Section title="Project Details" theme={theme}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Row label="Vertical" theme={theme}>
                     {(id) => <CompactSelect id={id} options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />}
@@ -1019,27 +981,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                         className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(isDark) }} placeholder="City, State" />
                     )}
                   </Row>
+                  <Row label="Primary Contact" theme={theme}>
+                    <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
+                  </Row>
                   <Row label="Bid Path" theme={theme}>
                     <div className="flex w-full min-h-[44px] items-center justify-between px-3.5 py-2" style={fieldSurface(isDark)}>
                       <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>Bid process</span>
                       <ToggleSwitch checked={!!draft.isBid} onChange={e => update('isBid', e.target.checked)} theme={theme} ariaLabel="Bid process" />
                     </div>
                   </Row>
-                </div>
-              </Section>
-
-              <Section title="Project Team" theme={theme}>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Row label="Primary Contact" theme={theme}>
-                    <ContactSearchSelector value={draft.contact || ''} onChange={v => update('contact', v)} dealers={draft.dealers || []} theme={theme} />
-                  </Row>
-                  <Row label="Customer Account" theme={theme}>
-                    {(id) => (
-                      <input id={id} value={draft.endUser || draft.company || ''} onChange={e => update('endUser', e.target.value)}
-                        className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(isDark) }} placeholder="Customer account name" />
-                    )}
-                  </Row>
-                  <Row label="Dealer Partners" theme={theme}>
+                  <Row label="Dealer Partners" theme={theme} className="sm:col-span-2">
                     <div className="flex flex-wrap gap-1.5">
                       {(draft.dealers || []).map(f => (
                         <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
@@ -1047,7 +998,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                       <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS} onAdd={v => addUnique('dealers', v)} theme={theme} />
                     </div>
                   </Row>
-                  <Row label="A&D Firms" theme={theme}>
+                  <Row label="A&D Firms" theme={theme} className="sm:col-span-2">
                     <div className="flex flex-wrap gap-1.5">
                       {(draft.designFirms || []).map(f => (
                         <RemovableChip key={f} label={f} onRemove={() => removeFrom('designFirms', f)} theme={theme} />
@@ -1078,10 +1029,18 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Competition</span>
-                      <ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} ariaLabel="Competition present" />
+                      <label className="inline-flex items-center gap-2 text-[0.6875rem] font-semibold cursor-pointer" style={{ color: c.textSecondary }}>
+                        Present
+                        <ToggleSwitch checked={draft.competitionPresent !== false} onChange={e => update('competitionPresent', e.target.checked)} theme={theme} ariaLabel="Competition present" />
+                      </label>
                     </div>
                     {draft.competitionPresent !== false ? (
-                      <MultiPillSelect options={COMPETITORS.filter(x => x !== 'None')} value={draft.competitors || []} onToggle={toggleCompetitor} theme={theme} />
+                      <div className="flex flex-wrap gap-1.5">
+                        {(draft.competitors || []).map(comp => (
+                          <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
+                        ))}
+                        <SuggestInputPill placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None')} onAdd={v => addUnique('competitors', v)} theme={theme} />
+                      </div>
                     ) : (
                       <p className="flex min-h-10 items-center text-[0.75rem]" style={{ color: c.textSecondary, opacity: 0.65 }}>No competition noted</p>
                     )}
