@@ -9,7 +9,7 @@ import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface } from '../../design-system/tokens.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
-import { formatCurrency, formatCompanyName, formatRelativeTime } from '../../utils/format.js';
+import { formatCurrency, formatCompanyName, formatRelativeTime, formatShortDate } from '../../utils/format.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
 const ORDERS_SHELL_CLASS = 'w-full max-w-[1120px] mx-auto';
@@ -164,7 +164,7 @@ const SAMPLE_STATUS_CONFIG = {
 const SampleOrderCard = ({ order, theme, dark }) => {
     const cfg = SAMPLE_STATUS_CONFIG[order.status] || SAMPLE_STATUS_CONFIG['processing'];
     const Icon = cfg.icon;
-    const dateStr = new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const dateStr = formatShortDate(order.date);
     const totalItems = order.items?.reduce((s, i) => s + (i.qty || 1), 0) ?? 0;
 
     return (
@@ -212,17 +212,18 @@ const SampleOrderCard = ({ order, theme, dark }) => {
     );
 };
 
-const SampleOrdersView = ({ theme, dark, searchTerm }) => {
+const SampleOrdersView = ({ theme, dark, searchTerm, sampleOrders }) => {
+    const orders = Array.isArray(sampleOrders) && sampleOrders.length ? sampleOrders : INITIAL_SAMPLE_ORDERS;
     const filtered = useMemo(() => {
         const q = searchTerm.toLowerCase();
-        if (!q) return INITIAL_SAMPLE_ORDERS;
-        return INITIAL_SAMPLE_ORDERS.filter(o =>
+        if (!q) return orders;
+        return orders.filter(o =>
             o.id.toLowerCase().includes(q) ||
             o.shipTo.toLowerCase().includes(q) ||
             o.address?.toLowerCase().includes(q) ||
             o.items?.some(i => i.name.toLowerCase().includes(q))
         );
-    }, [searchTerm]);
+    }, [orders, searchTerm]);
 
     if (!filtered.length) return (
         <div className="flex flex-col items-center justify-center py-16 text-center gap-1">
@@ -367,7 +368,7 @@ const OrdersFilterRail = ({
     );
 };
 
-export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
+export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) => {
     const { data: ordersData } = useCompanyResource('orders', ORDER_DATA);
     const dark = isDarkTheme(theme);
     const [searchTerm, setSearchTerm] = useState('');
@@ -495,7 +496,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams }) => {
                     <AnimatePresence mode="wait">
                       {dateType === 'samples' ? (
                         <motion.div key="samples" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                            <SampleOrdersView theme={theme} dark={dark} searchTerm={searchTerm} />
+                            <SampleOrdersView theme={theme} dark={dark} searchTerm={searchTerm} sampleOrders={sampleOrders} />
                         </motion.div>
                       ) : viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
