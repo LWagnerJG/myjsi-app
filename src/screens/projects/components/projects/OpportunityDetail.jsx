@@ -942,7 +942,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           id={id}
                           value={draft.company || ''}
                           onChange={e => update('company', e.target.value)}
-                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px]`}
+                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px] max-w-[460px]`}
                           style={{ color: c.textPrimary, ...fieldSurface(isDark) }}
                           placeholder="Customer account name"
                         />
@@ -1005,7 +1005,15 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       })}
                     </div>
                   </Row>
-                  <div className="sm:col-span-2 space-y-3">
+                  <Row label="A&D Firms" theme={theme}>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(draft.designFirms || []).map(f => (
+                        <RemovableChip key={f} label={f} onRemove={() => removeFrom('designFirms', f)} theme={theme} />
+                      ))}
+                      <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS.filter(x => !(draft.designFirms || []).includes(x))} onAdd={v => addUnique('designFirms', v)} theme={theme} />
+                    </div>
+                  </Row>
+                  <div className="sm:col-span-2 grid gap-x-4 gap-y-3 md:grid-cols-2 md:items-start">
                     <div className="space-y-1.5">
                       <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer Partners</span>
                       <div className="flex flex-wrap gap-1.5">
@@ -1031,14 +1039,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       )}
                     </div>
                   </div>
-                  <Row label="A&D Firms" theme={theme} className="sm:col-span-2">
-                    <div className="flex flex-wrap gap-1.5">
-                      {(draft.designFirms || []).map(f => (
-                        <RemovableChip key={f} label={f} onRemove={() => removeFrom('designFirms', f)} theme={theme} />
-                      ))}
-                      <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS.filter(x => !(draft.designFirms || []).includes(x))} onAdd={v => addUnique('designFirms', v)} theme={theme} />
-                    </div>
-                  </Row>
                 </div>
               </Section>
 
