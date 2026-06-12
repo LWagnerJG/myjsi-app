@@ -59,6 +59,25 @@ export const smartTitleCase = (str) => {
     }).join(' ');
 };
 
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * Parse a date value safely. Date-only strings ("YYYY-MM-DD") are treated as
+ * LOCAL calendar dates — `new Date('2026-04-29')` parses as UTC midnight and
+ * renders as Apr 28 in US timezones, which is wrong for ship/ETA/return dates.
+ * @param {string|number|Date} value
+ * @returns {Date|null} Parsed date, or null when missing/invalid
+ */
+export const parseDate = (value) => {
+  if (value == null || value === '') return null;
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+  const match = typeof value === 'string' ? value.match(DATE_ONLY_RE) : null;
+  const date = match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : new Date(value);
+  return isNaN(date.getTime()) ? null : date;
+};
+
 /**
  * Format a date string to locale date
  * @param {string|Date} dateStr - Date to format
@@ -66,8 +85,8 @@ export const smartTitleCase = (str) => {
  * @returns {string} Formatted date string
  */
 export const formatDate = (dateStr, options = {}) => {
-  const date = new Date(dateStr);
-  if (isNaN(date)) return '';
+  const date = parseDate(dateStr);
+  if (!date) return '';
   return date.toLocaleDateString('en-US', options);
 };
 
@@ -95,8 +114,8 @@ export const formatLongDate = (dateStr) =>
  */
 export const formatRelativeTime = (dateStr) => {
   if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
+  const date = parseDate(dateStr);
+  if (!date) return '';
   const diffMs = Date.now() - date.getTime();
   if (diffMs < 0) return 'just now';
   const mins = Math.floor(diffMs / 60000);

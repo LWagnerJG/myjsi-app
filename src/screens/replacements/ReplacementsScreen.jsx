@@ -6,6 +6,7 @@ import { EmptyState } from '../../components/common/EmptyState.jsx';
 import { REPLACEMENT_REQUESTS_DATA } from './data.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { isDarkTheme, JSI_COLORS } from '../../design-system/tokens.js';
+import { formatDate } from '../../utils/format.js';
 
 /* ── Header offset shared across views ── */
 const CONTENT_PT = 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)';
@@ -45,7 +46,7 @@ function RequestCard({ r, onClick, theme, dark }) {
                         {r.name}
                     </div>
                     <div className="text-[0.72rem] truncate opacity-60" style={{ color: theme.colors.textSecondary }}>
-                        {r.dealer || 'Unknown Dealer'} · {new Date(r.date).toLocaleDateString()}
+                        {r.dealer || 'Unknown Dealer'} · {formatDate(r.date)}
                     </div>
                 </div>
 
@@ -390,7 +391,7 @@ export const ReplacementsScreen = ({ theme }) => {
                                 <div className="text-xs font-bold uppercase tracking-[0.07em] opacity-45 mb-1"
                                     style={{ color: theme.colors.textSecondary }}>Date</div>
                                 <div style={{ color: theme.colors.textPrimary }}>
-                                    {new Date(selectedRequest.date).toLocaleDateString()}
+                                    {formatDate(selectedRequest.date)}
                                 </div>
                             </div>
                             <div>
