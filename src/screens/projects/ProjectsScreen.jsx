@@ -429,6 +429,10 @@ export const ProjectsScreen = forwardRef(({
     setOpportunities(prev => prev.map(o => o.id === updated.id ? updated : o));
   }, [setOpportunities]);
 
+  const deleteOpportunity = useCallback(id => {
+    setOpportunities(prev => prev.filter(o => o.id !== id));
+  }, [setOpportunities]);
+
   const handleAddCustomer = useCallback(newCustomer => {
     setCustomers(prev => [...prev, newCustomer]);
   }, []);
@@ -545,6 +549,8 @@ export const ProjectsScreen = forwardRef(({
       onNavigate={onNavigate}
       onOpenCustomer={setSelectedCustomer}
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
+      onMarkLost={updated => { updateOpportunity(updated); setSelectedOpportunity(null); onNavigate('projects'); }}
+      onDelete={id => { deleteOpportunity(id); setSelectedOpportunity(null); onNavigate('projects'); }}
     />
   );
 

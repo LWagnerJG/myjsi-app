@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
-import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2 } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
@@ -559,7 +559,7 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
 /* 
    MAIN COMPONENT
     */
-export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId, sampleOrders = [], opportunities = [], customers = [], onOpenCustomer }) => {
+export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, members, currentUserId, sampleOrders = [], opportunities = [], customers = [], onOpenCustomer }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const listPriceId = useId();
@@ -600,6 +600,24 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       dirty.current = false;
     }
   }, []);
+
+  /* remove project (move to Lost or delete permanently) */
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const cancelPendingSave = useCallback(() => {
+    dirty.current = false;
+    clearTimeout(saveRef.current);
+  }, []);
+  const handleMarkLost = useCallback(() => {
+    cancelPendingSave();
+    setRemoveOpen(false);
+    onMarkLost?.({ ...draftRef.current, stage: 'Lost' });
+  }, [cancelPendingSave, onMarkLost]);
+  const handleDelete = useCallback(() => {
+    cancelPendingSave();
+    setRemoveOpen(false);
+    onDelete?.(draftRef.current.id);
+  }, [cancelPendingSave, onDelete]);
+  const canRemove = Boolean(onDelete || onMarkLost);
 
   /* discount dropdown */
   const [discountOpen, setDiscountOpen] = useState(false);
@@ -1118,6 +1136,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             </div>
           </div>
 
+          {canRemove ? (
+            <div className="flex justify-center pb-5">
+              <button
+                type="button"
+                onClick={() => setRemoveOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring"
+                style={{ color: c.error }}
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                Delete project
+              </button>
+            </div>
+          ) : null}
+
         </div>
       </div>
 
@@ -1184,6 +1216,62 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
             >
               Authorize
             </PrimaryButton>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        show={removeOpen}
+        onClose={() => setRemoveOpen(false)}
+        title="Remove this project?"
+        theme={theme}
+        maxWidth="max-w-sm"
+      >
+        <div className="space-y-3">
+          <p className="text-[0.8125rem] leading-relaxed" style={{ color: c.textSecondary }}>
+            Choose how to remove <span className="font-semibold" style={{ color: c.textPrimary }}>{draft.name || 'this project'}</span> from your pipeline.
+          </p>
+
+          {onMarkLost ? (
+            <button
+              type="button"
+              onClick={handleMarkLost}
+              className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
+              style={fieldSurface(isDark)}
+            >
+              <span className="block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>Move to Lost</span>
+              <span className="mt-1 block text-[0.6875rem] leading-snug" style={{ color: c.textSecondary }}>
+                Keeps the project for reporting and moves it to the Lost stage.
+              </span>
+            </button>
+          ) : null}
+
+          {onDelete ? (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
+              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: CONTROL_RADIUS }}
+            >
+              <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold" style={{ color: c.error }}>
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                Delete permanently
+              </span>
+              <span className="mt-1 block text-[0.6875rem] leading-snug" style={{ color: c.textSecondary }}>
+                Removes the project and all its details. This can't be undone.
+              </span>
+            </button>
+          ) : null}
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={() => setRemoveOpen(false)}
+              className="px-4 py-2 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
+              style={{ backgroundColor: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </Modal>
