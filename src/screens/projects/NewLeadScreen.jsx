@@ -441,7 +441,7 @@ export const NewLeadScreen = ({
   }, []);
 
   const upd = useCallback((field, value) => {
-    if (field === 'vertical' && value !== 'Other (Please specify)') {
+    if (field === 'vertical' && value !== 'Other') {
       onNewLeadChange({ vertical: value, otherVertical: '' });
       return;
     }
@@ -542,9 +542,6 @@ export const NewLeadScreen = ({
     if (!String(newLeadData.project || '').trim()) next.project = 'Project name is required.';
     if (!newLeadData.projectStatus) next.projectStatus = 'Project stage is required.';
     if (!newLeadData.vertical) next.vertical = 'Vertical is required.';
-    if (newLeadData.vertical === 'Other (Please specify)' && !String(newLeadData.otherVertical || '').trim()) {
-      next.otherVertical = 'Please enter the vertical type.';
-    }
     if (parseCurrency(newLeadData.estimatedList) <= 0) next.estimatedList = 'Estimated list must be greater than zero.';
     if (!String(newLeadData.endUser || '').trim()) next.endUser = 'Select or create an end user.';
     if (!(newLeadData.dealers || []).length) next.dealers = 'Add at least one dealer.';
@@ -633,7 +630,7 @@ export const NewLeadScreen = ({
     const signals = [
       { label: 'Project Name', points: String(newLeadData.project || '').trim() ? 5 : 0, max: 5 },
       { label: 'Stage Progress', points: Math.round(stageProgress * 10), max: 10 },
-      { label: 'Vertical', points: newLeadData.vertical && (newLeadData.vertical !== 'Other (Please specify)' || String(newLeadData.otherVertical || '').trim()) ? 3 : 0, max: 3 },
+      { label: 'Vertical', points: newLeadData.vertical ? 3 : 0, max: 3 },
       { label: 'Win Probability', points: Math.round((winProbabilityValue / 100) * 10), max: 10 },
       { label: 'Estimated List', points: estimatedListPoints, max: 14 },
       { label: 'PO Timeframe', points: poTimeframePoints, max: 8 },
@@ -727,7 +724,7 @@ export const NewLeadScreen = ({
 
     add('Project', newLeadData.project, 0);
     add('Stage', newLeadData.projectStatus, 0);
-    add('Vertical', newLeadData.vertical === 'Other (Please specify)' ? newLeadData.otherVertical : newLeadData.vertical, 0);
+    add('Vertical', newLeadData.vertical === 'Other' ? (newLeadData.otherVertical || 'Other') : newLeadData.vertical, 0);
     if (newLeadData.installationLocation) add('Location', newLeadData.installationLocation, 0);
     if (newLeadData.expectedInstallDate) add('Install Date', newLeadData.expectedInstallDate, 0);
     if (parsedEstimatedList > 0) add('Estimated List', `$${parsedEstimatedList.toLocaleString()}`, 1);
@@ -975,40 +972,26 @@ export const NewLeadScreen = ({
 
               <Row label="Vertical" theme={theme} inline>
                 <div>
-                  {newLeadData.vertical === 'Other (Please specify)' ? (
-                    <div className="rounded-[18px] border overflow-hidden" style={{ borderColor: subtleBorder, backgroundColor: c.surface }}>
-                      <PortalNativeSelect
-                        value={newLeadData.vertical || ''}
-                        onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
-                        options={VERTICALS.map((v) => ({ label: v === 'Other (Please specify)' ? 'Other' : v, value: v }))}
-                        placeholder="Select vertical"
-                        theme={theme}
-                        size="sm"
-                        bordered={false}
-                      />
-                      <div className="h-px" style={{ backgroundColor: subtleBorder }} />
-                      <input
-                        type="text"
-                        value={newLeadData.otherVertical || ''}
-                        onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
-                        onBlur={() => markTouched('otherVertical')}
-                        placeholder="Specify other vertical"
-                        className="w-full h-9 px-3.5 text-sm focus:outline-none focus:ring-0 placeholder-theme-secondary bg-transparent border-0"
-                        style={{ color: c.textPrimary }}
-                      />
-                    </div>
-                  ) : (
-                    <PortalNativeSelect
-                      value={newLeadData.vertical || ''}
-                      onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
-                      options={VERTICALS.map((v) => ({ label: v === 'Other (Please specify)' ? 'Other' : v, value: v }))}
-                      placeholder="Select vertical"
-                      theme={theme}
-                      size="sm"
+                  <PortalNativeSelect
+                    value={newLeadData.vertical || ''}
+                    onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
+                    options={VERTICALS.map((v) => ({ label: v, value: v }))}
+                    placeholder="Select vertical"
+                    theme={theme}
+                    size="sm"
+                  />
+                  {newLeadData.vertical === 'Other' && (
+                    <input
+                      type="text"
+                      value={newLeadData.otherVertical || ''}
+                      onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
+                      placeholder="What kind?"
+                      autoFocus
+                      className="mt-2 w-full text-sm placeholder-theme-secondary focus:outline-none"
+                      style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
                     />
                   )}
                   <FieldError show={!!visibleError('vertical')} message={visibleError('vertical')} />
-                  <FieldError show={!!visibleError('otherVertical')} message={visibleError('otherVertical')} />
                 </div>
               </Row>
 
