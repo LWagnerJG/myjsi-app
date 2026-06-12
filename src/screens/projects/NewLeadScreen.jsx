@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronRight, FileText, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
@@ -142,6 +142,39 @@ const getHealthBand = (ratio) => {
 const FieldError = ({ show, message }) => {
   if (!show || !message) return null;
   return <p className="nl-field-error text-xs mt-1.5" style={{ color: 'var(--theme-error)' }}>{message}</p>;
+};
+
+// Compact secondary "quick pick" button shown beside a field (e.g. Unknown / Out to Bid).
+// Single source of truth so every side action shares the same size + active styling.
+const QuickPickButton = ({ active = false, theme, children, icon, className = '', ...props }) => {
+  const c = theme.colors;
+  const subtleBorder = getSubtleBorder(theme);
+  return (
+    <button
+      type="button"
+      className={`shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all flex items-center gap-1 ${className}`}
+      style={{
+        borderColor: active ? c.accent : subtleBorder,
+        color: active ? c.accent : c.textSecondary,
+        backgroundColor: active ? `${c.accent}12` : 'transparent',
+      }}
+      {...props}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+};
+
+// Inline label + toggle pair, keeping every switch in the flow visually identical.
+const ToggleField = ({ label, checked, onChange, theme }) => {
+  const c = theme.colors;
+  return (
+    <div className="flex items-center gap-2 shrink-0">
+      <span className="text-xs font-medium" style={{ color: checked ? c.textPrimary : c.textSecondary }}>{label}</span>
+      <ToggleSwitch checked={checked} onChange={onChange} theme={theme} />
+    </div>
+  );
 };
 
 const StrengthCircle = ({ percent, tone, size = 44, stroke = 4, textSize = '11px' }) => {
@@ -1213,14 +1246,13 @@ export const NewLeadScreen = ({
                         surfaceBg
                       />
                     </div>
-                    <button
-                      type="button"
+                    <QuickPickButton
+                      theme={theme}
                       onClick={() => { setDiscountCustom(false); upd('discount', ''); }}
-                      className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors"
-                      style={{ color: c.textSecondary, borderColor: subtleBorder }}
+                      icon={<ChevronLeft className="w-3.5 h-3.5" />}
                     >
-                      ← Discounts
-                    </button>
+                      List
+                    </QuickPickButton>
                   </div>
                 ) : (
                   <PortalNativeSelect
@@ -1278,18 +1310,13 @@ export const NewLeadScreen = ({
                         resetOnSelect={false}
                       />
                     </div>
-                    <button
-                      type="button"
+                    <QuickPickButton
+                      active={newLeadData.endUser === 'Unknown'}
+                      theme={theme}
                       onClick={() => { upd('endUser', 'Unknown'); markTouched('endUser'); }}
-                      className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
-                      style={{
-                        borderColor: newLeadData.endUser === 'Unknown' ? theme.colors.accent : subtleBorder,
-                        color: newLeadData.endUser === 'Unknown' ? theme.colors.accent : c.textSecondary,
-                        backgroundColor: newLeadData.endUser === 'Unknown' ? `${theme.colors.accent}12` : 'transparent',
-                      }}
                     >
                       Unknown
-                    </button>
+                    </QuickPickButton>
                   </div>
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
@@ -1327,14 +1354,12 @@ export const NewLeadScreen = ({
                           integratedChips
                         />
                       </div>
-                      <button
-                        type="button"
+                      <QuickPickButton
+                        theme={theme}
                         onClick={() => { setDealerOutToBid(true); upd('dealers', ['Out to Bid']); markTouched('dealers'); }}
-                        className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
-                        style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                       >
                         Out to Bid
-                      </button>
+                      </QuickPickButton>
                     </div>
                   )}
                   <FieldError show={!!visibleError('dealers')} message={visibleError('dealers')} />
@@ -1360,29 +1385,24 @@ export const NewLeadScreen = ({
                       integratedChips
                     />
                   </div>
-                  <button
-                    type="button"
+                  <QuickPickButton
+                    active={(newLeadData.designFirms || []).includes('Unknown')}
+                    theme={theme}
                     onClick={() => {
                       const current = newLeadData.designFirms || [];
                       if (!current.includes('Unknown')) upd('designFirms', ['Unknown', ...current]);
                     }}
-                    className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
-                    style={{
-                      borderColor: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : subtleBorder,
-                      color: (newLeadData.designFirms || []).includes('Unknown') ? theme.colors.accent : c.textSecondary,
-                      backgroundColor: (newLeadData.designFirms || []).includes('Unknown') ? `${theme.colors.accent}12` : 'transparent',
-                    }}
                   >
                     Unknown
-                  </button>
+                  </QuickPickButton>
                 </div>
               </Row>
 
               <Row label="Competition" theme={theme} inline>
                 <div>
-                  {newLeadData.competitionPresent ? (
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      {newLeadData.competitionPresent ? (
                         <SpotlightMultiSelect
                           selectedItems={newLeadData.competitors || []}
                           onAddItem={(competitor) => {
@@ -1399,62 +1419,43 @@ export const NewLeadScreen = ({
                           compact={false}
                           integratedChips
                         />
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-xs font-medium" style={{ color: c.textSecondary }}>Active</span>
-                        <ToggleSwitch
-                          checked
-                          onChange={() => {
-                            upd('competitionPresent', false);
-                            upd('competitors', []);
-                            markTouched('competitionPresent');
-                            markTouched('competitors');
-                          }}
-                          theme={theme}
-                        />
-                      </div>
+                      ) : (
+                        <div className="flex items-center min-h-[40px]">
+                          <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Not in this deal</span>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2 min-h-[40px]">
-                      <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>None</span>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-                        <ToggleSwitch
-                          checked={false}
-                          onChange={() => {
-                            upd('competitionPresent', true);
-                            markTouched('competitionPresent');
-                          }}
-                          theme={theme}
-                        />
-                      </div>
-                    </div>
-                  )}
+                    <ToggleField
+                      label="Active"
+                      checked={!!newLeadData.competitionPresent}
+                      onChange={() => {
+                        upd('competitionPresent', !newLeadData.competitionPresent);
+                        markTouched('competitionPresent');
+                        markTouched('competitors');
+                      }}
+                      theme={theme}
+                    />
+                  </div>
                   <FieldError show={!!visibleError('competitors')} message={visibleError('competitors')} />
                 </div>
               </Row>
 
-              <div className="flex items-center justify-between gap-4 py-2.5">
-                <span className="text-xs font-semibold shrink-0" style={{ color: c.textSecondary }}>Rewards</span>
-                <div className="flex items-center gap-5 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium" style={{ color: salesRewardEnabled ? c.textPrimary : c.textSecondary }}>Sales 3%</span>
-                    <ToggleSwitch
-                      checked={salesRewardEnabled}
-                      onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
-                      theme={theme}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium" style={{ color: designerRewardEnabled ? c.textPrimary : c.textSecondary }}>Designer 1%</span>
-                    <ToggleSwitch
-                      checked={designerRewardEnabled}
-                      onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
-                      theme={theme}
-                    />
-                  </div>
+              <Row label="Rewards" theme={theme} inline>
+                <div className="flex items-center justify-end gap-5 min-h-[40px]">
+                  <ToggleField
+                    label="Sales 3%"
+                    checked={salesRewardEnabled}
+                    onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
+                    theme={theme}
+                  />
+                  <ToggleField
+                    label="Designer 1%"
+                    checked={designerRewardEnabled}
+                    onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
+                    theme={theme}
+                  />
                 </div>
-              </div>
-
+              </Row>
             </Section>
           </>
         )}
