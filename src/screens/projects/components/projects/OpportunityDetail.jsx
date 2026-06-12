@@ -767,8 +767,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const openLinkedCustomer = useCallback(() => {
     if (linkedCustomer && typeof onOpenCustomer === 'function') onOpenCustomer(linkedCustomer);
   }, [linkedCustomer, onOpenCustomer]);
-  const heroDealers = (draft.dealers || []).filter(Boolean);
-  const heroDealerLabel = heroDealers.length > 1 ? `${heroDealers[0]} +${heroDealers.length - 1}` : (heroDealers[0] || 'Not assigned');
+  const heroSummaryParts = [draft.company, draft.vertical, draft.installationLocation]
+    .map(v => String(v || '').trim())
+    .filter(Boolean);
   const discountSummaryLabel = discountCode || 'Select discount';
   const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
   const netValueLabel = rawNumeric > 0 ? formatCurrency(netValue) : '—';
@@ -783,7 +784,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     : customerLinkSource === 'inferred'
       ? 'Matched'
       : 'Open';
-  const heroPanelBg = isDark ? 'rgba(255,255,255,0.02)' : 'rgba(240,237,232,0.22)';
   const heroControlSurface = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : c.surface,
   };
@@ -795,7 +795,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           {/* HERO — project identity + at-a-glance summary */}
           <div className="p-4 sm:p-5" style={sectionCardSurface(theme)}>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-center">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:items-center">
               <div className="min-w-0">
                 <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Project Name</span>
                 <EditableIdentityField
@@ -807,33 +807,26 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   inputClass="project-display-title font-semibold tracking-[-0.035em]"
                   className="max-w-[34rem]"
                 />
+                {heroSummaryParts.length > 0 && (
+                  <p className="mt-1.5 truncate text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }} title={heroSummaryParts.join('  \u00b7  ')}>
+                    {heroSummaryParts.join('  \u00b7  ')}
+                  </p>
+                )}
               </div>
 
-              <div className="rounded-[20px] p-3.5 sm:p-4" style={{ backgroundColor: heroPanelBg }}>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="min-w-0">
-                    <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Stage</span>
-                    <CompactSelect
-                      options={STAGES}
-                      value={draft.stage}
-                      onChange={v => update('stage', v)}
-                      theme={theme}
-                      ariaLabel="Project stage"
-                      surfaceStyle={heroControlSurface}
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer</span>
-                    <p
-                      className="flex min-h-[44px] items-center text-[0.875rem] font-semibold"
-                      style={{ color: heroDealers.length ? c.textPrimary : c.textSecondary }}
-                      title={heroDealers.join(', ') || undefined}
-                    >
-                      <span className="truncate">{heroDealerLabel}</span>
-                    </p>
-                  </div>
+              <div className="space-y-2.5">
+                <div className="min-w-0">
+                  <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Stage</span>
+                  <CompactSelect
+                    options={STAGES}
+                    value={draft.stage}
+                    onChange={v => update('stage', v)}
+                    theme={theme}
+                    ariaLabel="Project stage"
+                    surfaceStyle={heroControlSurface}
+                  />
                 </div>
-                <div className="mt-2.5">
+                <div>
                   <div className="mb-1 flex items-center justify-between gap-3">
                     <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Win Probability</span>
                     <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{currentProbability}%</span>
