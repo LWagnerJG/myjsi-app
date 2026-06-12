@@ -972,25 +972,29 @@ export const NewLeadScreen = ({
 
               <Row label="Vertical" theme={theme} inline>
                 <div>
-                  <PortalNativeSelect
-                    value={newLeadData.vertical || ''}
-                    onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
-                    options={VERTICALS.map((v) => ({ label: v, value: v }))}
-                    placeholder="Select vertical"
-                    theme={theme}
-                    size="sm"
-                  />
-                  {newLeadData.vertical === 'Other' && (
-                    <input
-                      type="text"
-                      value={newLeadData.otherVertical || ''}
-                      onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
-                      placeholder="What kind?"
-                      autoFocus
-                      className="mt-2 w-full text-sm placeholder-theme-secondary focus:outline-none"
-                      style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
-                    />
-                  )}
+                  <div className={newLeadData.vertical === 'Other' ? 'flex items-center gap-2' : ''}>
+                    <div className={newLeadData.vertical === 'Other' ? 'w-[42%] flex-shrink-0' : 'w-full'}>
+                      <PortalNativeSelect
+                        value={newLeadData.vertical || ''}
+                        onChange={(e) => { upd('vertical', e.target.value); markTouched('vertical'); }}
+                        options={VERTICALS.map((v) => ({ label: v, value: v }))}
+                        placeholder="Select vertical"
+                        theme={theme}
+                        size="sm"
+                      />
+                    </div>
+                    {newLeadData.vertical === 'Other' && (
+                      <input
+                        type="text"
+                        value={newLeadData.otherVertical || ''}
+                        onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
+                        placeholder="What kind?"
+                        autoFocus
+                        className="min-w-0 flex-1 text-sm placeholder-theme-secondary focus:outline-none"
+                        style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
+                      />
+                    )}
+                  </div>
                   <FieldError show={!!visibleError('vertical')} message={visibleError('vertical')} />
                 </div>
               </Row>
