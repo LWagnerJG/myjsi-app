@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Briefcase, MapPin, Plus, X, Building2, Upload, ImageIcon, Search, ChevronDown, Check, Store, Pencil } from 'lucide-react';
+import { Briefcase, MapPin, Plus, X, Building2, ChevronDown, Check, Store, Pencil } from 'lucide-react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
-import { INSTALLATION_CONSTANTS } from './installation-data.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { STAGES } from './data.js';
@@ -16,7 +15,7 @@ import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
-import { buildOpportunityProjectContacts, resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
+import { resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
 
 const CUSTOMER_TYPES = [
   { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
@@ -269,261 +268,12 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
   );
 };
 
-const AddInstallModal = ({ theme, onClose, onAdd, customers }) => {
-  const isDark = isDarkTheme(theme);
-  const c = theme.colors;
-  const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
-  const fieldTile = fieldTileSurface(theme);
-  const MAX_PHOTOS = INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxPhotos;
-
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [projectSearch, setProjectSearch]     = useState('');
-  const [projectOpen, setProjectOpen]         = useState(false);
-  const [location, setLocation]               = useState('');
-  const [photos, setPhotos]                   = useState([]);
-  const [error, setError]                     = useState('');
-  const searchRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const projectDropdownRef = useRef(null);
-
-  useEffect(() => { searchRef.current?.focus(); }, []);
-
-  const projectOptions = useMemo(() => {
-    return (customers || []).flatMap(cust =>
-      (cust.projects || []).map(p => ({
-        id: p.id,
-        label: `${cust.name}: ${p.name}`,
-        customerName: cust.name,
-        projectName: p.name,
-        location: p.location || `${cust.location?.city || ''}, ${cust.location?.state || ''}`,
-      })),
-    );
-  }, [customers]);
-
-  const filteredProjects = useMemo(() => {
-    const q = projectSearch.toLowerCase().trim();
-    if (!q) return projectOptions;
-    return projectOptions.filter(p =>
-      p.customerName.toLowerCase().includes(q) ||
-      p.projectName.toLowerCase().includes(q),
-    );
-  }, [projectSearch, projectOptions]);
-
-  useEffect(() => {
-    if (!projectOpen) return;
-    const close = (e) => {
-      if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target)) setProjectOpen(false);
-    };
-    document.addEventListener('mousedown', close);
-    document.addEventListener('touchstart', close, { passive: true });
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('touchstart', close); };
-  }, [projectOpen]);
-
-  const handleSelectProject = useCallback((proj) => {
-    setSelectedProject(proj);
-    setProjectSearch(proj.label);
-    setProjectOpen(false);
-    if (proj.location && !location) setLocation(proj.location);
-    setError('');
-  }, [location]);
-
-  const photoPreviewUrls = useMemo(
-    () => photos.map(file => URL.createObjectURL(file)),
-    [photos],
-  );
-
-  useEffect(() => {
-    return () => { photoPreviewUrls.forEach(url => URL.revokeObjectURL(url)); };
-  }, [photoPreviewUrls]);
-
-  const handleFileChange = useCallback((e) => {
-    if (!e.target.files) return;
-    const valid = Array.from(e.target.files).filter(f =>
-      INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.acceptedFormats.includes(f.type) &&
-      f.size <= INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.maxFileSize,
-    );
-    if (photos.length + valid.length <= MAX_PHOTOS) {
-      setPhotos(p => [...p, ...valid]);
-      setError('');
-    }
-    e.target.value = '';
-  }, [photos.length, MAX_PHOTOS]);
-
-  const removePhoto = useCallback((idx) => {
-    setPhotos(p => p.filter((_, i) => i !== idx));
-  }, []);
-
-  const handleSubmit = () => {
-    if (!selectedProject)          { setError('Select a project.'); return; }
-    if (!location.trim() || location.trim().length < 3) { setError('Location is required.'); return; }
-    if (photos.length < 1)        { setError('Add at least one photo.'); return; }
-
-    onAdd({
-      name: selectedProject.projectName,
-      location: location.trim(),
-      image: URL.createObjectURL(photos[0]),
-      photoCount: photos.length,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    });
-    onClose();
-  };
-
-  return createPortal(
-    <div className="fixed inset-0 flex items-end sm:items-center justify-center"
-      style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-      onClick={onClose}>
-      <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
-        style={{ ...modalCardSurface(theme), overflow: 'visible', maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}>
-
-        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderBottom: `1px solid ${border}`, backgroundColor: c.surface }}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
-              <ImageIcon className="w-4 h-4" style={{ color: c.accent }} />
-            </div>
-            <h2 className="text-base font-bold" style={{ color: c.textPrimary }}>Add Install</h2>
-          </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-            <X className="w-4 h-4" style={{ color: c.textSecondary }} />
-          </button>
-        </div>
-
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
-          <div>
-            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Project</label>
-            <div className="relative" ref={projectDropdownRef}>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: c.textSecondary }} />
-              <input
-                ref={searchRef}
-                value={projectSearch}
-                onFocus={() => setProjectOpen(true)}
-                onChange={e => { setProjectSearch(e.target.value); setSelectedProject(null); setProjectOpen(true); setError(''); }}
-                placeholder="Search customer or project..."
-                className="w-full rounded-full pl-[34px] pr-4 text-sm outline-none"
-                style={{ ...fieldTile, height: 44, color: c.textPrimary }}
-              />
-              {projectOpen && filteredProjects.length > 0 && (
-                <div className="absolute left-0 right-0 z-50 overflow-hidden"
-                  style={{
-                    ...modalCardSurface(theme),
-                    top: 'calc(100% + 6px)',
-                  }}>
-                  <div className="overflow-y-auto py-1" style={{ maxHeight: 216 }}>
-                    {filteredProjects.map(proj => (
-                      <button key={proj.id} type="button"
-                        onMouseDown={e => { e.preventDefault(); handleSelectProject(proj); }}
-                        onClick={() => handleSelectProject(proj)}
-                        className="w-full text-left px-4 py-2.5 text-[0.8125rem] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
-                        style={{ color: c.textPrimary }}>
-                        <span className="font-medium" style={{ color: c.textSecondary }}>{proj.customerName}:</span>{' '}
-                        <span className="font-semibold">{proj.projectName}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {projectOpen && filteredProjects.length === 0 && projectSearch.trim() && (
-                <div className="absolute left-0 right-0 z-50 overflow-hidden"
-                  style={{
-                    ...modalCardSurface(theme),
-                    top: 'calc(100% + 6px)',
-                  }}>
-                  <div className="px-4 py-3 text-[0.8125rem]" style={{ color: c.textSecondary }}>
-                    No matching projects
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Location</label>
-            <AutoCompleteCombobox
-              value={location}
-              onChange={(val) => { setLocation(val); setError(''); }}
-              onSelect={(val) => { setLocation(val); setError(''); }}
-              onAddNew={(val) => { setLocation(val.trim()); setError(''); }}
-              options={CITY_OPTIONS}
-              placeholder="Search city..."
-              theme={theme}
-              compact
-              resetOnSelect={false}
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.84 }}>Photos</label>
-              <span className="text-xs font-semibold tabular-nums" style={{ color: c.textSecondary, opacity: 0.6 }}>{photos.length}/{MAX_PHOTOS}</span>
-            </div>
-            {photos.length === 0 ? (
-              <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors"
-                style={{ borderColor: border, ...fieldTile, color: c.textSecondary }}>
-                <Upload className="w-5 h-5" style={{ opacity: 0.5 }} />
-                <span className="text-xs font-semibold" style={{ color: c.textPrimary }}>Add Photos</span>
-              </button>
-            ) : (
-              <div className="grid grid-cols-3 gap-2">
-                {photoPreviewUrls.map((url, idx) => (
-                  <div key={url} className="relative aspect-square rounded-xl overflow-hidden" style={{ border: `1px solid ${border}` }}>
-                    <img src={url} alt="" className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => removePhoto(idx)}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'rgba(24,24,24,0.7)', color: '#fff' }}>
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-                {photos.length < MAX_PHOTOS && (
-                  <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors"
-                    style={{ borderColor: border, color: c.textSecondary, ...fieldTile }}>
-                    <Plus className="w-4 h-4" />
-                    <span className="text-[0.625rem] font-semibold">Add</span>
-                  </button>
-                )}
-              </div>
-            )}
-            <input
-              type="file" ref={fileInputRef} multiple className="hidden"
-              accept={INSTALLATION_CONSTANTS.PHOTO_REQUIREMENTS.acceptedFormats.join(',')}
-              onChange={handleFileChange}
-            />
-          </div>
-
-          {error && <p className="text-xs font-medium" style={{ color: JSI_COLORS.error }}>{error}</p>}
-
-          <div className="flex gap-3 pt-1">
-            <button onClick={onClose}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all active:scale-[0.97]"
-              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
-              Cancel
-            </button>
-            <button onClick={handleSubmit}
-              className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.97]"
-              style={{ backgroundColor: c.accent, color: c.accentText }}>
-              Add Install
-            </button>
-          </div>
-        </div>
-
-        {/* Safe area bottom */}
-        <div style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
-      </div>
-    </div>,
-    document.body,
-  );
-};
-
 export const ProjectsScreen = forwardRef(({
   onNavigate, theme, opportunities, setOpportunities,
   projectsInitialTab, clearProjectsInitialTab,
   projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
-  setBackHandler, onAddInstall, sampleOrders,
+  setBackHandler, sampleOrders,
   screenParams,
 }, ref) => {
   const isDark = isDarkTheme(theme);
@@ -534,7 +284,6 @@ export const ProjectsScreen = forwardRef(({
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const [customerType, setCustomerType] = usePersistentState('pref.projects.customerType', 'end-users');
   const [showAddCustomer, setShowAddCustomer] = useState(false);
-  const [showAddInstall, setShowAddInstall] = useState(false);
   const [companyFilter, setCompanyFilter] = useState(screenParams?.company || null);
   const screenParamsCompany = screenParams?.company || null;
   useEffect(() => {
@@ -663,7 +412,6 @@ export const ProjectsScreen = forwardRef(({
         opportunity,
         linkedCustomer: customer,
         customerLinkSource: source,
-        projectContacts: buildOpportunityProjectContacts(opportunity, customer),
       };
     }),
     [customers, filteredOpportunities],
@@ -916,11 +664,10 @@ export const ProjectsScreen = forwardRef(({
             presentedOpportunities.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-                  {presentedOpportunities.map(({ opportunity, linkedCustomer, customerLinkSource, projectContacts }) => (
+                  {presentedOpportunities.map(({ opportunity, linkedCustomer, customerLinkSource }) => (
                     <ProjectCard key={opportunity.id} opp={opportunity} theme={theme}
                       linkedCustomer={linkedCustomer}
                       customerLinkSource={customerLinkSource}
-                      projectContacts={projectContacts}
                       onClick={() => onNavigate(`projects/${opportunity.id}`)} />
                   ))}
                 </div>
@@ -940,7 +687,7 @@ export const ProjectsScreen = forwardRef(({
             ) : (
               <SharedEmptyState icon={Briefcase} theme={theme}
                 title={`No projects in ${selectedPipelineStage}`}
-                description='Tap "+ Project" to add one.' />
+                description='Tap "New" above to create one.' />
             )
           )}
 
@@ -955,7 +702,7 @@ export const ProjectsScreen = forwardRef(({
             ) : (
               <SharedEmptyState icon={Building2} theme={theme}
                 title={`No ${ctaSingular.toLowerCase()}s yet`}
-                description={`Tap "+ ${ctaSingular}" to add one.`} />
+                description='Tap "New" above to add one.' />
             )
           )}
 
@@ -973,7 +720,7 @@ export const ProjectsScreen = forwardRef(({
             ) : (
               <SharedEmptyState icon={Briefcase} theme={theme}
                 title="No installations recorded yet"
-                description='Tap "+ Install" to add one.' />
+                description='Tap "New" above to add one.' />
             )
           )}
         </TabContent>
@@ -986,15 +733,6 @@ export const ProjectsScreen = forwardRef(({
           onAdd={handleAddCustomer}
           customerType={customerType}
           typeSingular={ctaSingular}
-        />
-      )}
-
-      {showAddInstall && (
-        <AddInstallModal
-          theme={theme}
-          onClose={() => setShowAddInstall(false)}
-          onAdd={onAddInstall}
-          customers={customers}
         />
       )}
     </div>

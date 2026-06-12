@@ -16,16 +16,18 @@ export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkS
     : `${displayCustomerName} · Customer profile pending`;
 
   let displayValue = opp.value;
-  if (displayValue != null) {
+  if (displayValue != null && displayValue !== '') {
     if (typeof displayValue === 'number') displayValue = '$' + displayValue.toLocaleString();
     else if (typeof displayValue === 'string' && !displayValue.trim().startsWith('$')) {
       const num = parseFloat(displayValue.replace(/[^0-9.]/g, ''));
       if (!isNaN(num)) displayValue = '$' + num.toLocaleString();
     }
+  } else {
+    displayValue = '—';
   }
 
   return (
-    <button onClick={onClick} className="w-full text-left" style={{ WebkitTapHighlightColor: 'transparent' }}>
+    <button onClick={onClick} className="w-full text-left focus-ring rounded-2xl" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <div
         className="rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
         style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}
