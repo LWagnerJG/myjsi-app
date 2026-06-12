@@ -815,7 +815,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 )}
               </div>
 
-              <div className="space-y-2.5">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:items-end lg:grid-cols-1">
                 <div className="min-w-0">
                   <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Stage</span>
                   <CompactSelect
@@ -827,7 +827,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     surfaceStyle={heroControlSurface}
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="mb-1 flex items-center justify-between gap-3">
                     <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Win Probability</span>
                     <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{currentProbability}%</span>
