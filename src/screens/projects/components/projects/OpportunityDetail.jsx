@@ -1024,12 +1024,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Contacts</span>
-                        {(draft.dealers || []).length > 0 ? (
-                          <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }}>Synced from dealer partners</span>
-                        ) : null}
-                      </div>
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Contacts</span>
                       {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
                         <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
                       ) : (
