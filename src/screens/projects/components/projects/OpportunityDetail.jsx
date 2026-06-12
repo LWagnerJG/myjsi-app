@@ -746,7 +746,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
       ? 'Auto-calculated from list and discount'
       : 'Matches list until a discount is selected'
     : 'Enter list price to start';
-  const rewardsStatusLabel = rewardDefaultOff ? 'Auto-default off' : 'Defaults on';
   const rewardsDetailLabel = `Net below ${formatCurrency(REWARD_AUTO_OFF_NET_LIMIT)} with ${formatPercentLabel(REWARD_AUTO_OFF_DISCOUNT_MIN * 100)}+ discount starts rewards off.`;
   const customerConnectionLabel = draft.customerId
     ? 'Linked'
@@ -881,10 +880,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, members, currentUserId
                   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
-                      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold whitespace-nowrap"
-                        style={{ backgroundColor: rewardDefaultOff ? `${c.warning}18` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'), color: rewardDefaultOff ? c.warning : c.textSecondary }}>
-                        {rewardsStatusLabel}
-                      </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <RewardTogglePill
