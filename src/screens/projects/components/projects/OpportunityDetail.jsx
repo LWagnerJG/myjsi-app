@@ -788,6 +788,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const heroControlSurface = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : c.surface,
   };
+  const commercialDivider = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)';
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
@@ -867,8 +868,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
                       aria-haspopup="listbox"
                       aria-expanded={discountOpen}
-                      className="min-w-0 px-4 py-3.5 text-left transition-all active:scale-[0.99] focus-ring"
+                      className="min-w-0 px-4 py-3.5 text-left transition-all active:scale-[0.99] focus-ring border-t sm:border-t-0 sm:border-l"
                       style={{
+                        borderColor: commercialDivider,
                         ...(discountOpen ? { boxShadow: `inset 0 0 0 1.5px ${c.accent}` } : {}),
                       }}
                     >
@@ -885,7 +887,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     </button>
 
                     {/* Net — calculated */}
-                    <div className="min-w-0 px-4 py-3.5 sm:text-right">
+                    <div className="min-w-0 px-4 py-3.5 sm:text-right border-t sm:border-t-0 sm:border-l" style={{ borderColor: commercialDivider }}>
                       <div className="flex items-center gap-1.5 sm:justify-end">
                         <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Net</span>
                       </div>
@@ -896,7 +898,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </div>
 
                   {/* Rewards — part of the same commercial summary */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-3 border-t" style={{ borderColor: commercialDivider }}>
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
                     </div>
