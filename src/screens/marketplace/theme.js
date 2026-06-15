@@ -5,9 +5,11 @@ export const getMarketplacePalette = (theme) => {
 
   return {
     dark,
-    brand: dark ? '#D7AD6B' : '#A26B2A',
-    brandInk: dark ? '#201A13' : '#FFFFFF',
-    brandSoft: dark ? 'rgba(215,173,107,0.18)' : 'rgba(162,107,42,0.12)',
+    // Align to the app-wide accent so buttons, chips, and badges match every
+    // other screen instead of an off-brand gold.
+    brand: theme.colors.accent,
+    brandInk: theme.colors.accentText,
+    brandSoft: dark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.06)',
     panel: dark ? 'rgba(255,255,255,0.08)' : '#F3EFE7',
     panelStrong: dark ? 'rgba(255,255,255,0.12)' : '#E7E1D6',
     panelSubtle: dark ? 'rgba(255,255,255,0.05)' : '#F8F5EE',

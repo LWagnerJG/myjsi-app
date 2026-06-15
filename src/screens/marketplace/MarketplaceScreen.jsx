@@ -286,17 +286,6 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
     [showAllActivity, txnHistory],
   );
 
-  const selectedCategoryName = useMemo(
-    () => MARKETPLACE_CATEGORIES.find((category) => category.id === selectedCategory)?.name || 'All categories',
-    [selectedCategory],
-  );
-
-  const shopStats = useMemo(() => ([
-    { label: 'Collection', value: `${MARKETPLACE_PRODUCTS.length} items` },
-    { label: 'Categories', value: `${MARKETPLACE_CATEGORIES.length - 1} sections` },
-    { label: 'In cart', value: cartItemCount ? `${cartItemCount} queued` : 'Clear' },
-  ]), [cartItemCount]);
-
   const orderStats = useMemo(() => ([
     { label: 'Processing', value: String(orderStatusCounts.processing), valueColor: theme.colors.warning },
     { label: 'Shipped', value: String(orderStatusCounts.shipped), valueColor: theme.colors.info },
@@ -338,52 +327,40 @@ export const MarketplaceScreen = ({ theme, userSettings }) => {
                   subtitle="A tighter edit of merch, drinkware, and team gear."
                   metricLabel="Available now"
                   metricCaption={cartItemCount ? `${cartItemCount} item${cartItemCount !== 1 ? 's' : ''} in cart` : 'Ready for your next redemption'}
-                  stats={shopStats}
                 />
 
-                <GlassCard theme={theme} className="p-4 sm:p-5" style={{ boxShadow: palette.shadow }}>
-                  <SectionHeader
+                <div className="space-y-3">
+                  <StandardSearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Search merch or gear..."
                     theme={theme}
-                    palette={palette}
-                    icon={Search}
-                    eyebrow="Browse"
-                    title={searchQuery.trim() ? `${filteredProducts.length} result${filteredProducts.length !== 1 ? 's' : ''}` : 'Shop the collection'}
-                    meta={selectedCategoryName}
                   />
 
-                  <div className="space-y-3">
-                    <StandardSearchBar
-                      value={searchQuery}
-                      onChange={setSearchQuery}
-                      placeholder="Search merch or gear..."
-                      theme={theme}
-                    />
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                    {MARKETPLACE_CATEGORIES.map((category) => {
+                      const active = selectedCategory === category.id;
 
-                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                      {MARKETPLACE_CATEGORIES.map((category) => {
-                        const active = selectedCategory === category.id;
-
-                        return (
-                          <button
-                            key={category.id}
-                            onClick={() => {
-                              hapticLight();
-                              setSelectedCategory(category.id);
-                            }}
-                            className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
-                            style={{
-                              backgroundColor: active ? palette.brand : (palette.dark ? 'rgba(255,255,255,0.08)' : palette.panelSubtle),
-                              color: active ? palette.brandInk : theme.colors.textSecondary,
-                              border: `1px solid ${active ? palette.brand : palette.border}`,
-                            }}
-                          >
-                            {category.name}
-                          </button>
-                        );
-                      })}
-                    </div>
+                      return (
+                        <button
+                          key={category.id}
+                          onClick={() => {
+                            hapticLight();
+                            setSelectedCategory(category.id);
+                          }}
+                          className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 flex-shrink-0"
+                          style={{
+                            backgroundColor: active ? palette.brand : (palette.dark ? 'rgba(255,255,255,0.08)' : palette.panelSubtle),
+                            color: active ? palette.brandInk : theme.colors.textSecondary,
+                            border: `1px solid ${active ? palette.brand : palette.border}`,
+                          }}
+                        >
+                          {category.name}
+                        </button>
+                      );
+                    })}
                   </div>
-                </GlassCard>
+                </div>
 
                 {filteredProducts.length > 0 ? (
                   <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>

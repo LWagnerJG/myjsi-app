@@ -690,6 +690,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   /* tag helpers */
   const toggleCompetitor = (comp) => { const list = draft.competitors || []; update('competitors', list.includes(comp) ? list.filter(x => x !== comp) : [...list, comp]); };
+  const setCompetition = (on) => { setDraft(p => { dirty.current = true; return { ...p, competitionPresent: on, competitors: on ? (p.competitors || []) : [] }; }); };
   const addProductSeries = (series) => { if (!series) return; const list = draft.products || []; if (!list.some(p => p.series === series)) update('products', [...list, { series }]); };
   const removeProductSeries = (series) => update('products', (draft.products || []).filter(p => p.series !== series));
   const removeFrom = (key, val) => update(key, (draft[key] || []).filter(x => x !== val));
@@ -775,7 +776,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const heroSummaryParts = [draft.company, draft.vertical, draft.installationLocation]
     .map(v => String(v || '').trim())
     .filter(Boolean);
-  const competitionPresent = draft.competitionPresent === true || (draft.competitors || []).length > 0;
+  const competitionValue = (draft.competitors || []).length > 0 || draft.competitionPresent === true
+    ? true
+    : (draft.competitionPresent === false ? false : null);
   const discountSummaryLabel = discountCode || 'Select discount';
   const discountDetailLabel = discountPct > 0 ? `${formatPercentLabel(discountPct * 100)} off list` : 'Select pricing basis';
   const netValueLabel = rawNumeric > 0 ? formatCurrency(netValue) : '—';
@@ -1007,34 +1010,32 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       })}
                     </div>
                   </Row>
+                  <div className="space-y-1.5">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer Partners</span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {(draft.dealers || []).map(f => (
+                        <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
+                      ))}
+                      <SuggestInputPill collapsible placeholder="Add dealer" suggestions={INITIAL_DEALERS.filter(x => !(draft.dealers || []).includes(x))} onAdd={v => addUnique('dealers', v)} theme={theme} />
+                    </div>
+                  </div>
                   <Row label="A&D Firms" theme={theme}>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {(draft.designFirms || []).map(f => (
                         <RemovableChip key={f} label={f} onRemove={() => removeFrom('designFirms', f)} theme={theme} />
                       ))}
-                      <SuggestInputPill placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS.filter(x => !(draft.designFirms || []).includes(x))} onAdd={v => addUnique('designFirms', v)} theme={theme} />
+                      <SuggestInputPill collapsible placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS.filter(x => !(draft.designFirms || []).includes(x))} onAdd={v => addUnique('designFirms', v)} theme={theme} />
                     </div>
                   </Row>
-                  <div className="sm:col-span-2 grid gap-x-4 gap-y-3 md:grid-cols-2 md:items-start">
-                    <div className="space-y-1.5">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer Partners</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(draft.dealers || []).map(f => (
-                          <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
-                        ))}
-                        <SuggestInputPill placeholder="Add dealer" suggestions={INITIAL_DEALERS.filter(x => !(draft.dealers || []).includes(x))} onAdd={v => addUnique('dealers', v)} theme={theme} />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Contacts</span>
-                      {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
-                        <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
-                      ) : (
-                        <p className="flex min-h-[44px] items-center px-3.5 text-[0.75rem]" style={{ ...fieldSurface(isDark), color: c.textSecondary, opacity: 0.7 }}>
-                          Add a dealer partner to sync their contacts.
-                        </p>
-                      )}
-                    </div>
+                  <div className="space-y-1.5">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Contacts</span>
+                    {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
+                      <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
+                    ) : (
+                      <p className="flex min-h-[44px] items-center px-3.5 text-[0.75rem]" style={{ ...fieldSurface(isDark), color: c.textSecondary, opacity: 0.7 }}>
+                        Add a dealer partner to sync their contacts.
+                      </p>
+                    )}
                   </div>
                 </div>
               </Section>
@@ -1042,7 +1043,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               <Section title="Specs & Competition" theme={theme}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Row label={`Specified Series (${(draft.products || []).length})`} theme={theme}>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {(draft.products || []).map(p => (
                         <RemovableChip
                           key={p.series}
@@ -1053,34 +1054,37 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           size="small"
                         />
                       ))}
-                      <SuggestInputPill placeholder="Add series..." suggestions={JSI_SERIES.filter(s => !(draft.products || []).some(p => p.series === s))} onAdd={addProductSeries} theme={theme} />
+                      <SuggestInputPill collapsible placeholder="Add series..." suggestions={JSI_SERIES.filter(s => !(draft.products || []).some(p => p.series === s))} onAdd={addProductSeries} theme={theme} />
                     </div>
                   </Row>
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 min-h-[20px]">
                       <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Competition</span>
-                      <label className="inline-flex items-center gap-2 text-[0.6875rem] font-semibold cursor-pointer" style={{ color: c.textSecondary }}>
-                        Present
-                        <ToggleSwitch
-                          checked={competitionPresent}
-                          onChange={e => {
-                            const on = e.target.checked;
-                            setDraft(p => { dirty.current = true; return { ...p, competitionPresent: on, competitors: on ? (p.competitors || []) : [] }; });
-                          }}
-                          theme={theme}
-                          ariaLabel="Competition present"
-                        />
-                      </label>
+                      <div className="flex rounded-full p-0.5" style={fieldSurface(isDark)}>
+                        {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
+                          const active = competitionValue === opt.val;
+                          return (
+                            <button
+                              key={opt.label}
+                              type="button"
+                              onClick={() => setCompetition(opt.val)}
+                              aria-pressed={active}
+                              className="min-h-[28px] px-3.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                              style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    {competitionPresent ? (
-                      <div className="flex flex-wrap gap-1.5">
+                    {competitionValue === true && (
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {(draft.competitors || []).map(comp => (
                           <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
                         ))}
-                        <SuggestInputPill placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
+                        <SuggestInputPill collapsible placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
                       </div>
-                    ) : (
-                      <p className="flex min-h-10 items-center text-[0.75rem]" style={{ color: c.textSecondary, opacity: 0.65 }}>No competition noted</p>
                     )}
                   </div>
                 </div>

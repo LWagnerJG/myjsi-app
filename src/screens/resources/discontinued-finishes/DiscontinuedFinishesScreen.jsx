@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
-import { ShoppingCart, Palette, CalendarDays } from 'lucide-react';
+import { ShoppingCart, Palette, CalendarDays, ArrowRight } from 'lucide-react';
 import { EmptyState } from '../../../components/common/EmptyState.jsx';
 import { isDarkTheme } from '../../../design-system/tokens.js';
 import { SAMPLE_PRODUCTS } from '../../samples/data.js';
@@ -47,11 +47,19 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
         };
     }, []);
 
-    const LongArrow = () => (
-        <svg width="28" height="12" viewBox="0 0 28 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="6" x2="22" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <polyline points="20,2 26,6 20,10" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+    /* ── Connector chip between the two swatches ── */
+    const Connector = ({ size = 28 }) => (
+        <div
+            className="flex items-center justify-center flex-shrink-0 rounded-full"
+            style={{
+                width: size,
+                height: size,
+                color: accent,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
+            }}
+        >
+            <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.25} />
+        </div>
     );
     const finishes = dataset.records;
 
@@ -112,23 +120,26 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
     );
 
     /* ── Single row ── */
-    const FinishRow = ({ finish, isLast }) => {
+    const hoverSurface = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.025)';
+    const FinishRow = ({ finish }) => {
         return (
             <button
                 type="button"
                 onClick={() => setSelectedFinish(finish)}
-                className="w-full text-left focus:outline-none transition-colors active:scale-[0.995] transition-transform"
+                className="group w-full text-left focus:outline-none rounded-2xl transition-all duration-200 active:scale-[0.985]"
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = hoverSurface; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
                 <div
-                    className="items-center px-4 py-3.5"
+                    className="items-center px-3 py-3 sm:px-3.5"
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(0,1fr) 40px minmax(0,1fr)',
-                        gap: 0,
+                        gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)',
+                        gap: 8,
                         alignItems: 'center',
                     }}
                 >
-                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
                         <Swatch image="" alt={finish.oldName} tone={finish.legacySwatchTone} />
                         <div className="min-w-0">
                             <p className="font-semibold text-[0.8125rem] leading-tight truncate" style={{ color: text }}>
@@ -148,11 +159,9 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-center" style={{ color: accent, opacity: 0.46 }}>
-                        <LongArrow />
-                    </div>
+                    <Connector />
 
-                    <div className="flex items-center gap-2.5 min-w-0 pl-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
                         <Swatch image={finish.replacementImage} alt={finish.newName} tone={finish.legacySwatchTone} />
                         <div className="min-w-0">
                             <p className="font-semibold text-[0.8125rem] leading-tight truncate" style={{ color: text }}>
@@ -164,11 +173,6 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                         </div>
                     </div>
                 </div>
-
-                {/* Divider */}
-                {!isLast && (
-                    <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }} />
-                )}
             </button>
         );
     };
@@ -201,14 +205,12 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                         {items.length} finishes
                                     </span>
                                 </div>
-                                <GlassCard theme={theme} className="overflow-hidden" style={{ padding: 0 }}>
-                                    {items.map((finish, index) => (
-                                        <FinishRow
-                                            key={finish.id}
-                                            finish={finish}
-                                            isLast={index === items.length - 1}
-                                        />
-                                    ))}
+                                <GlassCard theme={theme} className="overflow-hidden" style={{ padding: 6 }}>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-1.5">
+                                        {items.map((finish) => (
+                                            <FinishRow key={finish.id} finish={finish} />
+                                        ))}
+                                    </div>
                                 </GlassCard>
                             </section>
                         ))}
@@ -236,8 +238,8 @@ export const DiscontinuedFinishesScreen = ({ theme, onNavigate, onUpdateCart }) 
                                     <p className="text-[0.625rem] mt-0.5 font-medium" style={{ color: sub, opacity: 0.5 }}>Discontinued</p>
                                 </div>
                             </div>
-                            <div className="flex-shrink-0 -mt-5" style={{ color: sub, opacity: 0.4 }}>
-                                <LongArrow />
+                            <div className="flex-shrink-0 -mt-5">
+                                <Connector size={32} />
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <Swatch image={selectedFinish.replacementImage} alt={selectedFinish.newName} size={52} tone={selectedFinish.legacySwatchTone} />
