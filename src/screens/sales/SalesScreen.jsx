@@ -188,7 +188,7 @@ export const SalesScreen = ({ theme, onNavigate }) => {
       <div className="min-w-0 px-4 sm:px-6 lg:px-8 pt-5 pb-6 space-y-4 max-w-content mx-auto w-full">
 
         {/* ── Hero KPI card ── */}
-        <GlassCard theme={theme} className="min-w-0 overflow-hidden" variant="elevated">
+        <GlassCard theme={theme} className="min-w-0 overflow-visible" variant="elevated">
           <div className="p-4 sm:p-5 flex flex-col gap-3">
 
             {/* Big number + Backlog caption + year dropdown */}

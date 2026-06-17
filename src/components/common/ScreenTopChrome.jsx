@@ -25,7 +25,7 @@ export const ScreenTopChrome = React.memo(({
             rgba(${bgRgb},0) 100%)`;
 
     return (
-        <div className={`relative flex-shrink-0 ${className}`.trim()} style={{ backgroundColor: theme.colors.background }}>
+        <div className={`relative z-10 flex-shrink-0 ${className}`.trim()} style={{ backgroundColor: theme.colors.background }}>
             <div className={`mx-auto w-full ${maxWidthClass} ${horizontalPaddingClass} ${contentClassName}`.trim()}>
                 {children}
             </div>

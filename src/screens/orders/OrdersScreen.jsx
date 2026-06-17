@@ -420,7 +420,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            <div className="flex-shrink-0 w-full">
+            <div className="flex-shrink-0 w-full relative z-10">
                 <div className={`${ORDERS_EDGE_PADDING} ${ORDERS_SHELL_CLASS} pt-4 pb-2.5 flex flex-col gap-2.5`}>
                     <div className="space-y-2.5">
                         <div>
