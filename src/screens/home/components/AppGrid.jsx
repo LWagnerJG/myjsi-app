@@ -104,7 +104,7 @@ export const AppGrid = ({
                                 style={{
                                     backgroundColor: colors.tileSurface,
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                                    minHeight: 88,
+                                    height: 96,
                                 }}
                             >
                                 <div
@@ -156,7 +156,7 @@ export const AppGrid = ({
                             aria-label={`Open ${app.name}`}
                             className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
                             style={{
-                                minHeight: 88,
+                                height: 96,
                                 backgroundColor: colors.tileSurface,
                             }}
                         >
@@ -207,7 +207,7 @@ export const AppGrid = ({
                         aria-label="Customize home apps"
                         className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 gap-1.5 p-2.5 sm:p-3"
                         style={{
-                            minHeight: 88,
+                            height: 96,
                             backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)',
                         }}
                     >

@@ -27,7 +27,7 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
         touchAction: 'none',
         width: '100%',
         minWidth: 0,
-        minHeight: 88
+        height: 96
     };
 
     const iconColor = colors.accent;
