@@ -66,7 +66,6 @@ export const CartDrawer = ({ cart, onUpdateCart, theme, userSettings, dealers, d
     }, [dirQuery, dealers, designFirms]);
 
     useEffect(() => {
-        if (dirOpen && dirSearchRef.current) dirSearchRef.current.focus();
         if (!dirOpen) setDirQuery('');
     }, [dirOpen]);
 
