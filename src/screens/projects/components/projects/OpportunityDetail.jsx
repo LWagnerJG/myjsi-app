@@ -37,7 +37,7 @@ const CHIP_BG_LIGHT = 'rgba(240,237,232,0.62)';
 const CHIP_BG_DARK = 'rgba(255,255,255,0.08)';
 const CONTROL_RADIUS = '16px';
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
-const DETAIL_SECTION_TITLE_CLASS = 'text-[0.98rem] sm:text-[1.05rem] font-semibold tracking-[-0.02em] leading-none';
+const DETAIL_SECTION_TITLE_CLASS = 'text-sm font-semibold tracking-tight leading-none';
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
 const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3.5 bg-transparent outline-none text-[0.875rem] font-medium focus-ring';
 
@@ -165,19 +165,19 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
 const RemovableChip = ({ label, detail, onRemove, theme, size = 'default' }) => {
   const isDark = isDarkTheme(theme);
   const sizeClass = size === 'small'
-    ? 'min-h-10 px-3.5 text-[0.75rem]'
-    : 'min-h-[44px] px-4 text-[0.8125rem]';
+    ? 'h-7 px-2.5 text-[0.625rem]'
+    : 'h-8 px-3 text-[0.6875rem]';
   return (
     <button
       type="button"
       onClick={onRemove}
       aria-label={`Remove ${label}`}
-      className={`inline-flex max-w-full items-center gap-1.5 rounded-full font-semibold transition-all active:scale-[0.97] focus-ring ${sizeClass}`}
-      style={{ backgroundColor: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: theme.colors.textPrimary }}
+      className={`inline-flex max-w-full items-center gap-1 rounded-full font-medium transition-all active:scale-[0.97] focus-ring ${sizeClass}`}
+      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)', color: theme.colors.textPrimary }}
     >
       <span className="truncate">{label}</span>
-      {detail ? <span className="flex-shrink-0 text-[0.625rem] font-medium tabular-nums opacity-45">{detail}</span> : null}
-      <X className="h-3 w-3 flex-shrink-0 opacity-40" aria-hidden="true" />
+      {detail ? <span className="flex-shrink-0 text-[0.5625rem] tabular-nums" style={{ opacity: 0.4 }}>{detail}</span> : null}
+      <X className="h-2.5 w-2.5 flex-shrink-0" style={{ opacity: 0.3 }} aria-hidden="true" />
     </button>
   );
 };
@@ -226,15 +226,12 @@ const EditableIdentityField = ({ value, onChange, placeholder, ariaLabel, theme,
 };
 
 const RewardTogglePill = ({ label, sublabel, checked, onChange, theme }) => {
-  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
   return (
-    <div className="inline-flex items-center gap-3 rounded-full py-1.5 pl-3.5 pr-1.5" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
-      <div className="min-w-0">
-        <span className="block text-[0.75rem] font-semibold leading-none" style={{ color: theme.colors.textPrimary }}>{label}</span>
-        <span className="mt-1 block text-[0.625rem] font-medium leading-none tabular-nums" style={{ color: theme.colors.textSecondary, opacity: 0.72 }}>
-          {sublabel}
-        </span>
-      </div>
+    <div className="inline-flex items-center gap-2">
+      <span className="text-[0.75rem] font-medium" style={{ color: checked ? c.textPrimary : c.textSecondary, opacity: checked ? 1 : 0.6 }}>
+        {label} <span className="tabular-nums">{sublabel}</span>
+      </span>
       <ToggleSwitch checked={checked} onChange={onChange} theme={theme} ariaLabel={`${label} reward`} />
     </div>
   );
@@ -846,7 +843,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             <div className="space-y-3.5 min-w-0">
               <Section title="Commercial" theme={theme}>
                 <div className="rounded-[20px] overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.4)' }}>
-                  <div className="grid sm:grid-cols-[minmax(0,0.95fr)_minmax(0,0.85fr)_minmax(0,1.05fr)]">
+                  <div className="grid sm:grid-cols-2">
                     {/* List price — editable */}
                     <div className="min-w-0 px-4 py-3.5">
                       <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>List Price</label>
@@ -862,6 +859,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           placeholder="0"
                         />
                       </div>
+                      {rawNumeric > 0 && discountPct > 0 && (
+                        <p className="mt-1.5 text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.48 }}>
+                          → {netValueLabel} net
+                        </p>
+                      )}
                     </div>
 
                     {/* Discount — dropdown */}
@@ -888,34 +890,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         {discountDetailLabel}
                       </p>
                     </button>
-
-                    {/* Net — calculated */}
-                    <div className="min-w-0 px-4 py-3.5 sm:text-right border-t sm:border-t-0 sm:border-l" style={{ borderColor: commercialDivider }}>
-                      <div className="flex items-center gap-1.5 sm:justify-end">
-                        <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Net</span>
-                      </div>
-                      <p className="mt-2 text-[1.25rem] font-semibold tracking-[-0.02em] leading-none tabular-nums" style={{ color: c.textPrimary }}>
-                        {netValueLabel}
-                      </p>
-                    </div>
                   </div>
 
-                  {/* Rewards — part of the same commercial summary */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-3 border-t" style={{ borderColor: commercialDivider }}>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
+                  {/* Rewards — simple inline row */}
+                  <div className="flex items-center justify-between px-4 py-2.5 border-t" style={{ borderColor: commercialDivider }}>
+                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
+                    <div className="flex items-center gap-4">
                       <RewardTogglePill
                         label="Sales"
-                        sublabel={salesRewardEnabled ? '3%' : 'Off'}
+                        sublabel={salesRewardEnabled ? '3%' : 'off'}
                         checked={salesRewardEnabled}
                         onChange={e => setRewardEnabled('salesReward', e.target.checked)}
                         theme={theme}
                       />
                       <RewardTogglePill
                         label="Designer"
-                        sublabel={designerRewardEnabled ? '1%' : 'Off'}
+                        sublabel={designerRewardEnabled ? '1%' : 'off'}
                         checked={designerRewardEnabled}
                         onChange={e => setRewardEnabled('designerReward', e.target.checked)}
                         theme={theme}
@@ -989,27 +979,28 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(isDark) }} placeholder="City, State" />
                     )}
                   </Row>
-                  <Row label="Bid Project" theme={theme}>
-                    <div className="flex w-full rounded-full p-1" style={fieldSurface(isDark)}>
-                      {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
-                        const active = !!draft.isBid === opt.val;
-                        return (
-                          <button
-                            key={opt.label}
-                            type="button"
-                            onClick={() => update('isBid', opt.val)}
-                            aria-pressed={active}
-                            className="flex-1 min-h-[36px] rounded-full text-[0.8125rem] font-semibold transition-all active:scale-[0.98] focus-ring"
-                            style={active
-                              ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }
-                              : { color: c.textSecondary }}
-                          >
-                            {opt.label}
-                          </button>
-                        );
-                      })}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 min-h-[44px]">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Bid Project</span>
+                      <div className="flex rounded-full p-0.5" style={fieldSurface(isDark)}>
+                        {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
+                          const active = !!draft.isBid === opt.val;
+                          return (
+                            <button
+                              key={opt.label}
+                              type="button"
+                              onClick={() => update('isBid', opt.val)}
+                              aria-pressed={active}
+                              className="min-h-[28px] px-3.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                              style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </Row>
+                  </div>
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
