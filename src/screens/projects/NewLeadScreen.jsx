@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, UploadCloud, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, FileText, MapPin, UploadCloud, X } from 'lucide-react';
 import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
@@ -910,7 +910,7 @@ export const NewLeadScreen = ({
         <div key={step} className={`space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
           <>
-            <Section title="Project Basics" theme={theme}>
+            <Section theme={theme}>
               <Row label="Project Name" theme={theme} inline>
                 <div>
                   <ProjectSpotlight
@@ -921,7 +921,7 @@ export const NewLeadScreen = ({
                     opportunities={opportunities}
                     selectedOpportunityId={newLeadData.pastProjectRef}
                     onBlur={() => markTouched('project')}
-                    placeholder="Enter project name"
+                    placeholder="Enter or search project name"
                     theme={theme}
                   />
                   <FieldError show={!!visibleError('project')} message={visibleError('project')} />
@@ -942,23 +942,23 @@ export const NewLeadScreen = ({
                           onClick={() => { upd('projectStatus', stage); markTouched('projectStatus'); }}
                           className="flex items-center gap-2 rounded-full border transition-all text-left px-2.5 py-2"
                           style={{
-                            backgroundColor: isSelected ? c.accent : isPast ? `${c.accent}14` : 'transparent',
-                            borderColor: isSelected ? c.accent : isPast ? `${c.accent}50` : subtleBorder,
+                            backgroundColor: isSelected ? c.accent : isPast ? `${c.accent}20` : 'transparent',
+                            borderColor: isSelected ? c.accent : isPast ? c.accent : subtleBorder,
                           }}
                         >
                           <span
                             className="text-[0.625rem] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0"
                             style={{
                               width: 18, height: 18,
-                              backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? `${c.accent}20` : dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
-                              color: isSelected ? c.accentText : isPast ? c.accent : c.textSecondary,
+                              backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : isPast ? c.accent : dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
+                              color: isSelected ? c.accentText : isPast ? c.accentText : c.textSecondary,
                             }}
                           >
                             {num}
                           </span>
                           <span
                             className="text-[0.8125rem] font-semibold leading-tight"
-                            style={{ color: isSelected ? c.accentText : c.textPrimary }}
+                            style={{ color: isSelected ? c.accentText : isPast ? c.accent : c.textPrimary }}
                           >
                             {stage}
                           </span>
@@ -1028,11 +1028,14 @@ export const NewLeadScreen = ({
                   <button
                     type="button"
                     onClick={() => setLocationInputOpen(true)}
-                    className="w-full h-10 rounded-full border flex items-center justify-between px-4 text-sm transition-colors"
-                    style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
+                    className="w-full h-10 rounded-full border flex items-center justify-between px-3.5 transition-colors active:scale-[0.98]"
+                    style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface }}
                   >
-                    <span className="text-sm font-medium">Unknown</span>
-                    <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Set location</span>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                      <span className="text-sm font-medium" style={{ color: c.textSecondary, opacity: 0.5 }}>Unknown</span>
+                    </div>
+                    <span className="text-xs font-semibold" style={{ color: c.accent }}>Set location</span>
                   </button>
                 )}
               </Row>
@@ -1061,11 +1064,14 @@ export const NewLeadScreen = ({
                   <button
                     type="button"
                     onClick={() => setDateInputOpen(true)}
-                    className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
-                    style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface, color: c.textSecondary }}
+                    className="w-full h-10 rounded-full border flex items-center justify-between px-3.5 transition-colors active:scale-[0.98]"
+                    style={{ borderColor: subtleBorder, backgroundColor: dark ? c.background : c.surface }}
                   >
-                    <span className="text-sm font-medium">Unknown</span>
-                    <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Set date</span>
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                      <span className="text-sm font-medium" style={{ color: c.textSecondary, opacity: 0.5 }}>Unknown</span>
+                    </div>
+                    <span className="text-xs font-semibold" style={{ color: c.accent }}>Set date</span>
                   </button>
                 )}
               </Row>

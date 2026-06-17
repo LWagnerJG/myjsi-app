@@ -98,7 +98,7 @@ export const ProjectSpotlight = ({
   selectedOpportunityId,
   onBlur,
   theme,
-  placeholder = 'Enter project name',
+  placeholder = 'Enter or search project name',
 }) => {
   const [open, setOpen] = useState(false);
   const [hlIdx, setHlIdx] = useState(0);
