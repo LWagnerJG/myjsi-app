@@ -308,7 +308,7 @@ const OrdersFilterRail = ({
                     aria-expanded={dealerMenuOpen}
                 >
                     <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textPrimary, opacity: dealerActive ? 1 : 0.82 }} />
-                    <span className="min-w-0 truncate text-[0.75rem] font-semibold max-w-[min(8rem,32vw)] min-[420px]:max-w-[6.5rem] sm:max-w-[8rem]" style={{ color: theme.colors.textPrimary }}>
+                    <span className="hidden sm:inline min-w-0 truncate text-[0.75rem] font-semibold sm:max-w-[8rem]" style={{ color: theme.colors.textPrimary }}>
                         {dealerLabel}
                     </span>
                 </button>
