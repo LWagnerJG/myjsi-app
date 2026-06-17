@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useLayoutEffect, useR
 import { createPortal } from 'react-dom';
 import { Briefcase, MapPin, Plus, X, Building2, ChevronDown, Check, Store, Pencil } from 'lucide-react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
+import { Modal } from '../../components/common/Modal.jsx';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { STAGES } from './data.js';
@@ -106,14 +107,11 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
   const fieldTile = fieldTileSurface(theme);
 
-  const [name, setName]       = useState('');
-  const [location, setLocation] = useState('');
-  const [vertical, setVertical] = useState('');
+  const [name, setName]           = useState('');
+  const [location, setLocation]   = useState('');
+  const [vertical, setVertical]   = useState('');
   const [customVertical, setCustomVertical] = useState('');
-  const [error, setError]     = useState('');
-  const nameRef = useRef(null);
-
-  useEffect(() => { nameRef.current?.focus(); }, []);
+  const [error, setError]         = useState('');
 
   const resolvedVertical = vertical === 'Other' && customVertical.trim() ? customVertical.trim() : vertical;
 
@@ -124,11 +122,11 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
     if (vertical === 'Other' && !customVertical.trim()) { setError('Enter a custom vertical.'); return; }
 
     const parts = location.trim().split(',').map(s => s.trim());
-    const city = parts[0] || location.trim();
+    const city  = parts[0] || location.trim();
     const state = (parts[1] || '').toUpperCase().slice(0, 2);
 
     const typeMap = { 'dealers': 'dealer', 'design-firms': 'design-firm', 'end-users': 'end-user' };
-    const newCustomer = {
+    onAdd({
       id: `cust-${Date.now()}`,
       type: typeMap[customerType] || 'end-user',
       name: name.trim(),
@@ -142,129 +140,122 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
       contacts: [],
       contactVisibilityLocked: false,
       documents: [],
-    };
-    onAdd(newCustomer);
+    });
     onClose();
   };
 
-  return createPortal(
-    <div className="fixed inset-0 flex items-end sm:items-center justify-center"
-      style={{ zIndex: 9000, backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-      onClick={onClose}>
-      <div className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl"
-        style={{ ...modalCardSurface(theme), overflow: 'visible', maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}>
-
-        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0 rounded-t-3xl sm:rounded-t-2xl" style={{ borderBottom: `1px solid ${border}`, backgroundColor: c.surface }}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${c.accent}15` }}>
-              <Building2 className="w-4 h-4" style={{ color: c.accent }} />
-            </div>
-            <h2 className="text-base font-bold" style={{ color: c.textPrimary }}>Add {typeSingular}</h2>
-          </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }}>
-            <X className="w-4 h-4" style={{ color: c.textSecondary }} />
-          </button>
+  return (
+    <Modal show onClose={onClose} title={`Add ${typeSingular}`} theme={theme}>
+      <div className="space-y-4">
+        {/* Account Name */}
+        <div>
+          <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary }}>
+            Account Name
+          </label>
+          <input
+            value={name}
+            onChange={e => { setName(e.target.value); setError(''); }}
+            placeholder="e.g. Midwest Health Partners"
+            className="w-full rounded-full px-4 py-2.5 text-sm outline-none transition-all"
+            style={{ ...fieldTile, color: c.textPrimary }}
+          />
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-hide" style={{ backgroundColor: c.surface, borderBottomLeftRadius: 'inherit', borderBottomRightRadius: 'inherit' }}>
-          <div>
-            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Account Name</label>
-            <input
-              ref={nameRef}
-              value={name} onChange={e => { setName(e.target.value); setError(''); }}
-              placeholder="e.g. Midwest Health Partners"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{ ...fieldTile, color: c.textPrimary }}
-            />
-          </div>
+        {/* Location */}
+        <div>
+          <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary }}>
+            Location
+          </label>
+          <AutoCompleteCombobox
+            value={location}
+            onChange={val => { setLocation(val); setError(''); }}
+            onSelect={val => { setLocation(val); setError(''); }}
+            onAddNew={val => { setLocation(val.trim()); setError(''); }}
+            options={CITY_OPTIONS}
+            placeholder="Search city..."
+            theme={theme}
+            compact
+            resetOnSelect={false}
+          />
+        </div>
 
-          <div>
-            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Location</label>
-            <AutoCompleteCombobox
-              value={location}
-              onChange={(val) => { setLocation(val); setError(''); }}
-              onSelect={(val) => { setLocation(val); setError(''); }}
-              onAddNew={(val) => { setLocation(val.trim()); setError(''); }}
-              options={CITY_OPTIONS}
-              placeholder="Search city..."
-              theme={theme}
-              compact
-              resetOnSelect={false}
-            />
-          </div>
-
-          <div>
-            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary, opacity: 0.84 }}>Vertical</label>
-            <div className="flex flex-wrap gap-2">
-              {VERTICAL_OPTIONS.map(v => {
-                const active = vertical === v;
-                const vColor = VERTICAL_COLORS[v] || c.accent;
-                if (v === 'Other') {
-                  return (
-                    <div key={v} className="inline-flex items-center gap-0 rounded-full transition-all"
-                      style={{
-                        backgroundColor: active ? `${vColor}20` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-                        border: active ? `1.5px solid ${vColor}60` : `1.5px solid ${border}`,
-                      }}>
-                      <button type="button"
-                        onClick={() => { setVertical('Other'); setError(''); }}
-                        className="px-3 py-1.5 text-xs font-semibold"
-                        style={{ color: active ? vColor : c.textSecondary }}>
-                        Other{active ? ':' : ''}
-                      </button>
-                      {active && (
-                        <input
-                          autoFocus
-                          value={customVertical}
-                          onChange={e => { setCustomVertical(e.target.value); setError(''); }}
-                          placeholder="type..."
-                          className="bg-transparent text-xs font-semibold outline-none w-20 pr-3 py-1.5"
-                          style={{ color: vColor }}
-                          maxLength={30}
-                        />
-                      )}
-                    </div>
-                  );
-                }
+        {/* Vertical */}
+        <div>
+          <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary }}>
+            Vertical
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {VERTICAL_OPTIONS.map(v => {
+              const active  = vertical === v;
+              const vColor  = VERTICAL_COLORS[v] || c.accent;
+              if (v === 'Other') {
                 return (
-                  <button key={v} type="button"
-                    onClick={() => { setVertical(v); setCustomVertical(''); setError(''); }}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-[0.97]"
+                  <div key={v}
+                    className="inline-flex items-center gap-0 rounded-full transition-all"
                     style={{
                       backgroundColor: active ? `${vColor}20` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
-                      color: active ? vColor : c.textSecondary,
                       border: active ? `1.5px solid ${vColor}60` : `1.5px solid ${border}`,
-                    }}>
-                    {v}
-                  </button>
+                    }}
+                  >
+                    <button type="button"
+                      onClick={() => { setVertical('Other'); setError(''); }}
+                      className="px-3 py-1.5 text-xs font-semibold"
+                      style={{ color: active ? vColor : c.textSecondary }}
+                    >
+                      Other{active ? ':' : ''}
+                    </button>
+                    {active && (
+                      <input
+                        value={customVertical}
+                        onChange={e => { setCustomVertical(e.target.value); setError(''); }}
+                        placeholder="type..."
+                        className="bg-transparent text-xs font-semibold outline-none w-20 pr-3 py-1.5"
+                        style={{ color: vColor }}
+                        maxLength={30}
+                      />
+                    )}
+                  </div>
                 );
-              })}
-            </div>
-          </div>
-
-          {error && <p className="text-xs font-medium" style={{ color: JSI_COLORS.error }}>{error}</p>}
-
-          <div className="flex gap-3 pt-1">
-            <button onClick={onClose}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all active:scale-[0.97]"
-              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}>
-              Cancel
-            </button>
-            <button onClick={handleSubmit}
-              className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.97]"
-              style={{ backgroundColor: c.accent, color: c.accentText }}>
-              Add {typeSingular}
-            </button>
+              }
+              return (
+                <button key={v} type="button"
+                  onClick={() => { setVertical(v); setCustomVertical(''); setError(''); }}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-[0.97]"
+                  style={{
+                    backgroundColor: active ? `${vColor}20` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
+                    color: active ? vColor : c.textSecondary,
+                    border: active ? `1.5px solid ${vColor}60` : `1.5px solid ${border}`,
+                  }}
+                >
+                  {v}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Safe area bottom */}
-        <div style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
+        {error && (
+          <p className="text-xs font-medium" style={{ color: JSI_COLORS.error }}>{error}</p>
+        )}
+
+        <div className="flex gap-3 pt-1">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.97]"
+            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', color: c.textSecondary }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="flex-1 py-3 rounded-full text-sm font-bold transition-all active:scale-[0.97]"
+            style={{ backgroundColor: c.accent, color: c.accentText }}
+          >
+            Add {typeSingular}
+          </button>
+        </div>
       </div>
-    </div>,
-    document.body,
+    </Modal>
   );
 };
 
