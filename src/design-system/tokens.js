@@ -284,7 +284,7 @@ export const subtleBg = (theme, strength = 1) => {
   const dark = isDarkTheme(theme);
   return dark
     ? `rgba(255,255,255,${(0.042 * strength).toFixed(3)})`
-    : `rgba(0,0,0,${(0.025 * strength).toFixed(4)})`;
+    : `rgba(255, 255, 255, ${Math.min(0.92, 0.38 * strength).toFixed(2)})`;
 };
 
 /**
@@ -314,9 +314,9 @@ export const sectionCardSurface = (theme) => {
 export const fieldTileSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : 'rgba(234, 236, 233, 0.76)',
-    border: dark ? subtleBorder(theme) : 'none',
-    borderRadius: DESIGN_TOKENS.borderRadius.lg,
+    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : 'rgba(255, 255, 255, 0.82)',
+    border: 'none',
+    borderRadius: DESIGN_TOKENS.borderRadius.pill,
   };
 };
 
