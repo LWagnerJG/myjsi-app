@@ -98,12 +98,13 @@ export const ProductCard = React.memo(({ product, theme, isInRequest, onView, on
                             className="w-full flex items-center justify-center min-h-[36px] px-3 rounded-full font-semibold text-[0.6875rem] transition-all active:scale-[0.98] focus-ring disabled:opacity-45 disabled:cursor-not-allowed"
                             style={{
                                 backgroundColor: isInRequest
-                                    ? c.success
+                                    ? `${c.success}18`
                                     : (isAvailable ? c.accent : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)')),
-                                color: isInRequest || isAvailable ? (c.accentText || '#FFFFFF') : c.textSecondary,
+                                color: isInRequest ? c.success : (isAvailable ? (c.accentText || '#FFFFFF') : c.textSecondary),
+                                border: isInRequest ? `1px solid ${c.success}40` : 'none',
                             }}
                         >
-                            {isInRequest ? 'Added to Request' : (isAvailable ? 'Add to Request' : 'Unavailable')}
+                            {isInRequest ? 'Added · tap to remove' : (isAvailable ? 'Add to Request' : 'Unavailable')}
                         </button>
                     </div>
                 </div>
