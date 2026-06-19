@@ -309,14 +309,14 @@ export const sectionCardSurface = (theme) => {
 };
 
 /**
- * Standard warm inset tile for grouped controls and lightweight data blocks.
+ * Standard cool-grey inset tile for grouped controls and lightweight data blocks.
  */
 export const fieldTileSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : 'rgba(240,237,232,0.88)',
-    border: 'none',
-    borderRadius: DESIGN_TOKENS.borderRadius.xl,
+    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : 'rgba(234, 236, 233, 0.76)',
+    border: subtleBorder(theme),
+    borderRadius: DESIGN_TOKENS.borderRadius.lg,
   };
 };
 
