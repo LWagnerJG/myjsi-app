@@ -22,7 +22,6 @@ import {
     isDarkTheme,
     sectionCardSurface,
     fieldTileSurface,
-    cardSurface,
     subtleBg,
     subtleBorder,
 } from '../../../design-system/tokens.js';
@@ -51,7 +50,6 @@ const buildDefaultExperienceSelections = () =>
         ])
     );
 
-const TRIP_CONTROL_H = 44;
 const TRIP_CONTROL_CLASS = 'min-h-[44px] h-[44px]';
 const TRIP_CONTROL_TEXT = 'text-[0.8125rem] font-medium';
 
@@ -1013,9 +1011,10 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
         <div
             className="rounded-2xl p-3.5 transition-all duration-200"
             style={{
-                ...cardSurface(theme),
+                backgroundColor: hasSelection ? `${c.accent}14` : subtleBg(theme, 1),
+                border: 'none',
                 borderLeft: `3px solid ${hasSelection ? c.accent : 'transparent'}`,
-                opacity: hasSelection ? 1 : 0.92,
+                opacity: hasSelection ? 1 : 0.88,
             }}
         >
             <div className="flex items-start gap-3">
@@ -1047,7 +1046,7 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
                                         key={option}
                                         className="rounded-full px-2 py-1 text-[0.625rem] font-semibold"
                                         style={{
-                                            backgroundColor: `${c.accent}12`,
+                                            backgroundColor: `${c.accent}14`,
                                             color: c.accent,
                                         }}
                                     >
@@ -1109,7 +1108,7 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
                                 className="flex min-h-[44px] w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-all focus-ring"
                                 style={{
                                     color: c.textPrimary,
-                                    backgroundColor: isSelected ? `${c.accent}10` : 'transparent',
+                                    backgroundColor: isSelected ? `${c.accent}14` : 'transparent',
                                     border: isSelected ? `1px solid ${c.accent}44` : 'none',
                                 }}
                             >
@@ -1152,7 +1151,6 @@ const GuestPanel = ({
     onChange,
     onRemove,
 }) => {
-    const dark = isDarkTheme(theme);
     const c = theme.colors;
     const repAttendee = isRepAttendee(guest);
     const showNameError = submitAttempted && (!guest.legalFirstName.trim() || !guest.legalLastName.trim());
