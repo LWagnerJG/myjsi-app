@@ -17,7 +17,13 @@ import {
 } from 'lucide-react';
 import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.jsx';
 import { JSIActionButton, JSIActionButtonGroup } from '../../../components/common/JSIButtons.jsx';
-import { isDarkTheme } from '../../../design-system/tokens.js';
+import {
+    FIELD_LABEL_CLASSNAME,
+    isDarkTheme,
+    sectionCardSurface,
+    fieldTileSurface,
+    subtleBorder,
+} from '../../../design-system/tokens.js';
 import { FormInput } from '../../../components/common/FormComponents.jsx';
 import { SearchableSelect } from '../../../components/forms/SearchableSelect.jsx';
 import { hapticLight, hapticSuccess, hapticWarning } from '../../../utils/haptics.js';
@@ -473,13 +479,85 @@ const DateRangeDropdown = ({
     );
 };
 
+const TourVisitSectionHeader = ({ title, subtitle, icon: Icon, theme, action }) => {
+    const c = theme.colors;
+    return (
+        <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+                {Icon ? (
+                    <span
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                        style={{ backgroundColor: `${c.accent}12`, color: c.accent }}
+                    >
+                        <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                ) : null}
+                <div className="min-w-0">
+                    <h2 className="text-sm font-semibold tracking-tight" style={{ color: c.textPrimary }}>{title}</h2>
+                    {subtitle ? (
+                        <p className="mt-0.5 text-[0.75rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.82 }}>
+                            {subtitle}
+                        </p>
+                    ) : null}
+                </div>
+            </div>
+            {action || null}
+        </div>
+    );
+};
+
+const FacilityGridCard = ({ facility, onClick, theme }) => {
+    const isDark = isDarkTheme(theme);
+    const c = theme.colors;
+    const tile = fieldTileSurface(theme);
+
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className="group flex h-full min-h-[44px] flex-col rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] focus-ring"
+            style={{
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : c.surface,
+                border: subtleBorder(theme),
+                boxShadow: isDark ? 'none' : '0 1px 4px rgba(53,53,53,0.05)',
+            }}
+        >
+            <p className={`${FIELD_LABEL_CLASSNAME} uppercase tracking-[0.12em]`} style={{ color: c.textSecondary, opacity: 0.72 }}>
+                {facility.eyebrow}
+            </p>
+            <h3 className="mt-1.5 text-[0.9375rem] font-semibold leading-snug tracking-tight" style={{ color: c.textPrimary }}>
+                {facility.name}
+            </h3>
+            <div className="mt-2 flex items-center gap-1.5 text-[0.75rem] font-medium" style={{ color: c.info }}>
+                <MapPin className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden="true" />
+                <span>{facility.location}</span>
+            </div>
+            <p className="mt-2 flex-1 text-[0.6875rem] leading-relaxed line-clamp-2" style={{ color: c.textSecondary, opacity: 0.85 }}>
+                {facility.blurb}
+            </p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="inline-flex rounded-full px-2.5 py-1 text-[0.625rem] font-semibold" style={{ ...tile, color: c.textSecondary }}>
+                    {facility.details[0]}
+                </span>
+                <span
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full transition-transform group-hover:translate-x-0.5"
+                    style={{ backgroundColor: `${c.accent}12`, color: c.accent }}
+                    aria-hidden="true"
+                >
+                    <ArrowRight className="h-4 w-4" />
+                </span>
+            </div>
+        </button>
+    );
+};
+
 const FacilityOption = ({ facility, selected, onClick, theme, isInList = false, showTopDivider = false }) => {
     const dark = isDarkTheme(theme);
     return (
     <button
         type="button"
         onClick={onClick}
-        className={`w-full px-3.5 py-3.5 text-left transition-all motion-card sm:px-4 ${isInList ? '' : 'rounded-[18px]'}`}
+        className={`w-full px-3.5 py-3.5 text-left transition-all motion-card sm:px-4 focus-ring active:scale-[0.98] ${isInList ? '' : 'rounded-[18px]'}`}
         style={{
             backgroundColor: selected ? `${theme.colors.accent}0f` : (isInList ? 'transparent' : panelChrome(theme).backgroundColor),
             border: selected ? `1px solid ${theme.colors.accent}44` : (isInList ? 'none' : panelChrome(theme).border),
@@ -580,186 +658,162 @@ const TourVisitBooleanField = ({ label, value, onChange, theme }) => {
 };
 
 const UpcomingVisitDirectory = ({ visits, expandedVisitId, onToggleVisit, theme }) => {
-    const dark = isDarkTheme(theme);
-    const border = bdr(dark);
+    const isDark = isDarkTheme(theme);
+    const c = theme.colors;
+    const tile = fieldTileSurface(theme);
+    const dividerColor = c.border || (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.08)');
+
+    if (!visits.length) {
+        return (
+            <section className="rounded-[24px] p-5 text-center" style={sectionCardSurface(theme)}>
+                <CalendarDays className="mx-auto h-8 w-8 opacity-30" style={{ color: c.textSecondary }} aria-hidden="true" />
+                <p className="mt-3 text-sm font-medium" style={{ color: c.textPrimary }}>No upcoming trips</p>
+                <p className="mt-1 text-[0.75rem]" style={{ color: c.textSecondary }}>Scheduled visits will appear here as itinerary cards.</p>
+            </section>
+        );
+    }
+
     return (
-    <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
-        <CardHeader
-            title="Upcoming Trips"
-            subtitle={`${visits.length} active visit${visits.length === 1 ? '' : 's'}`}
-            icon={CalendarDays}
-            theme={theme}
-        />
+        <section className="space-y-3">
+            <TourVisitSectionHeader
+                title="Upcoming Trips"
+                subtitle={`${visits.length} active visit${visits.length === 1 ? '' : 's'}`}
+                icon={CalendarDays}
+                theme={theme}
+            />
 
-        <div>
-            {visits.map((visit, visitIndex) => {
-                const isExpanded = expandedVisitId === visit.id;
-                const isPendingApproval = visit.approvalStatus === 'pending';
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+                {visits.map((visit) => {
+                    const isExpanded = expandedVisitId === visit.id;
+                    const isPendingApproval = visit.approvalStatus === 'pending';
 
-                return (
-                    <div
-                        key={visit.id}
-                        className="overflow-hidden"
-                        style={{
-                            backgroundColor: isExpanded ? fieldSurf(dark) : 'transparent',
-                            borderTop: visitIndex > 0 ? `1px solid ${border}` : 'none',
-                        }}
-                    >
-                        <button
-                            type="button"
-                            onClick={() => onToggleVisit(visit.id)}
-                            className="flex w-full items-start gap-3 px-4 py-4 text-left transition-all"
+                    return (
+                        <article
+                            key={visit.id}
+                            className="overflow-hidden rounded-2xl transition-shadow duration-200"
+                            style={{
+                                ...sectionCardSurface(theme),
+                                borderLeft: `3px solid ${isPendingApproval ? c.warning : c.accent}`,
+                            }}
                         >
-                            <span
-                                className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                                style={iconTileChrome(theme, isExpanded)}
+                            <button
+                                type="button"
+                                onClick={() => onToggleVisit(visit.id)}
+                                className="flex w-full items-start gap-3 p-4 text-left transition-colors active:scale-[0.995] focus-ring"
+                                aria-expanded={isExpanded}
                             >
-                                <CalendarDays className="h-4 w-4" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                                <div className="flex items-start justify-between gap-3">
-                                    <h3 className="min-w-0 text-sm font-semibold leading-5" style={{ color: theme.colors.textPrimary }}>
-                                        {visit.companyName}
-                                    </h3>
-                                    <ChevronDown
-                                        className="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200"
-                                        style={{
-                                            color: theme.colors.textSecondary,
-                                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                        }}
-                                    />
-                                </div>
-                                <div className="hidden" aria-hidden="true">
-                                    {visit.dateLabel} / {visit.facilityName}
-                                </div>
-                                <div className="mt-2 flex flex-wrap gap-1.5">
-                                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme)}>
-                                        <Clock3 className="h-3 w-3" />
-                                        {visit.dateLabel}
-                                    </span>
-                                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme)}>
-                                        <MapPin className="h-3 w-3" />
-                                        {visit.facilityName}
-                                    </span>
-                                    {isPendingApproval ? (
-                                        <span
-                                            className="inline-flex items-center rounded-full px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.08em]"
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <h3 className="text-[0.9375rem] font-semibold leading-snug tracking-tight" style={{ color: c.textPrimary }}>
+                                            {visit.companyName}
+                                        </h3>
+                                        <ChevronDown
+                                            className="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200"
                                             style={{
-                                                color: theme.colors.warning,
-                                                backgroundColor: theme.colors.warningLight,
-                                                border: `1px solid ${theme.colors.warning}22`,
+                                                color: c.textSecondary,
+                                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                                             }}
+                                            aria-hidden="true"
+                                        />
+                                    </div>
+
+                                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                                        <span
+                                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.625rem] font-semibold tabular-nums"
+                                            style={{ ...tile, color: c.textPrimary }}
                                         >
-                                            Pending
+                                            <Clock3 className="h-3 w-3 opacity-70" aria-hidden="true" />
+                                            {visit.dateLabel}
                                         </span>
+                                        <span
+                                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.625rem] font-semibold"
+                                            style={{ ...tile, color: c.textSecondary }}
+                                        >
+                                            <MapPin className="h-3 w-3 opacity-70" aria-hidden="true" />
+                                            <span className="truncate max-w-[10rem]">{visit.facilityName}</span>
+                                        </span>
+                                        {isPendingApproval ? (
+                                            <span
+                                                className="inline-flex items-center rounded-full px-2.5 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.06em]"
+                                                style={{
+                                                    color: c.warning,
+                                                    backgroundColor: c.warningLight,
+                                                    border: `1px solid ${c.warning}33`,
+                                                }}
+                                            >
+                                                Pending
+                                            </span>
+                                        ) : null}
+                                    </div>
+
+                                    {!isExpanded ? (
+                                        <p className="mt-2 text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.8 }}>
+                                            {visit.overnightLabel}
+                                            {visit.attendees ? ` · ${visit.attendees}` : ''}
+                                        </p>
                                     ) : null}
                                 </div>
-                                {isPendingApproval ? (
-                                    <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: theme.colors.warning }}>
-                                        {visit.approvalLabel || 'Awaiting JSI approval'}
-                                    </p>
-                                ) : null}
-                            </div>
-                        </button>
+                            </button>
 
-                        {isExpanded ? (
-                            <div className="px-4 pb-4 pt-0">
-                                <div className="hidden" aria-hidden="true">
-                                    {visit.overnightLabel} / {visit.attendees}
-                                </div>
-                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                    <div className="rounded-[14px] px-3 py-2.5" style={panelChrome(theme)}>
-                                        <p style={eyebrow(theme.colors)}>Length</p>
-                                        <p className="mt-1 text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
-                                            {visit.overnightLabel}
-                                        </p>
-                                    </div>
-                                    <div className="rounded-[14px] px-3 py-2.5" style={panelChrome(theme)}>
-                                        <p style={eyebrow(theme.colors)}>Attendees</p>
-                                        <p className="mt-1 text-sm font-semibold leading-5" style={{ color: theme.colors.textPrimary }}>
-                                            {visit.attendees}
-                                        </p>
-                                    </div>
-                                </div>
-                                {visit.agendaLabel ? (
-                                    <div
-                                        className="mt-2.5 rounded-[14px] px-3 py-2.5 text-[0.6875rem] font-semibold leading-4"
-                                        style={{
-                                            color: isPendingApproval ? theme.colors.warning : theme.colors.textSecondary,
-                                            backgroundColor: isPendingApproval ? theme.colors.warningLight : fieldSurf(dark),
-                                            border: `1px solid ${isPendingApproval ? `${theme.colors.warning}22` : border}`,
-                                        }}
-                                    >
-                                        {visit.agendaLabel}
-                                    </div>
-                                ) : null}
-                                <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                                    {visit.agenda.map((day) => (
-                                        <div
-                                            key={`${visit.id}-${day.dayLabel}`}
-                                            className="rounded-[16px] px-3.5 py-3"
-                                            style={panelChrome(theme)}
-                                        >
-                                            <div className="flex items-center justify-between gap-3">
-                                                <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em]" style={{ color: theme.colors.textSecondary }}>
-                                                    {day.dayLabel}
-                                                </p>
-                                                <span className="rounded-full px-2 py-1 text-[0.625rem] font-semibold" style={chipChrome(theme)}>
-                                                    {day.sessions.length} stops
-                                                </span>
-                                            </div>
-                                            <div className="mt-3 space-y-3">
-                                                {day.sessions.map((session, sessionIndex) => {
-                                                    const { time, detail } = parseAgendaSession(session);
-                                                    const isLastSession = sessionIndex === day.sessions.length - 1;
-
-                                                    return (
-                                                        <div key={`${visit.id}-${day.dayLabel}-${session}`} className="grid grid-cols-[66px_1fr] gap-3">
-                                                            <div className="pt-1 text-[0.625rem] font-semibold uppercase tracking-[0.08em]" style={{ color: theme.colors.textSecondary }}>
-                                                                {time || `Stop ${sessionIndex + 1}`}
-                                                            </div>
-                                                            <div className="flex gap-3">
-                                                                <div className="relative flex w-3 shrink-0 justify-center">
-                                                                    <span
-                                                                        className="mt-1.5 h-2.5 w-2.5 rounded-full"
-                                                                        style={{ backgroundColor: theme.colors.accent }}
-                                                                    />
-                                                                    {!isLastSession ? (
-                                                                        <span
-                                                                            className="absolute left-1/2 top-4 w-px -translate-x-1/2"
-                                                                            style={{
-                                                                                bottom: '-18px',
-                                                                                backgroundColor: border,
-                                                                            }}
-                                                                        />
-                                                                    ) : null}
-                                                                </div>
-                                                                <div
-                                                                    className="flex-1 rounded-[12px] px-3 py-2.5"
-                                                                    style={{
-                                                                        backgroundColor: theme.colors.surface,
-                                                                        border: `1px solid ${border}`,
-                                                                    }}
-                                                                >
-                                                                    <p className="text-xs font-medium leading-5" style={{ color: theme.colors.textPrimary }}>
-                                                                        {detail}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
+                            {isExpanded ? (
+                                <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: dividerColor }}>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="rounded-xl px-3 py-2.5" style={tile}>
+                                            <p className={`${FIELD_LABEL_CLASSNAME} uppercase tracking-[0.1em] opacity-70`} style={{ color: c.textSecondary }}>Length</p>
+                                            <p className="mt-1 text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{visit.overnightLabel}</p>
                                         </div>
-                                    ))}
+                                        <div className="rounded-xl px-3 py-2.5" style={tile}>
+                                            <p className={`${FIELD_LABEL_CLASSNAME} uppercase tracking-[0.1em] opacity-70`} style={{ color: c.textSecondary }}>Attendees</p>
+                                            <p className="mt-1 text-[0.8125rem] font-semibold leading-snug" style={{ color: c.textPrimary }}>{visit.attendees}</p>
+                                        </div>
+                                    </div>
+
+                                    {visit.agendaLabel ? (
+                                        <p
+                                            className="mt-2.5 rounded-xl px-3 py-2 text-[0.6875rem] font-medium leading-snug"
+                                            style={{
+                                                color: isPendingApproval ? c.warning : c.textSecondary,
+                                                backgroundColor: isPendingApproval ? c.warningLight : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.55)'),
+                                            }}
+                                        >
+                                            {visit.agendaLabel}
+                                        </p>
+                                    ) : null}
+
+                                    <div className="mt-3 space-y-3">
+                                        {visit.agenda.map((day) => (
+                                            <div key={`${visit.id}-${day.dayLabel}`} className="rounded-xl px-3.5 py-3" style={tile}>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <p className={`${FIELD_LABEL_CLASSNAME} uppercase tracking-[0.1em]`} style={{ color: c.textSecondary }}>
+                                                        {day.dayLabel}
+                                                    </p>
+                                                    <span className="rounded-full px-2 py-0.5 text-[0.625rem] font-semibold" style={{ backgroundColor: `${c.accent}12`, color: c.accent }}>
+                                                        {day.sessions.length} stops
+                                                    </span>
+                                                </div>
+                                                <ul className="mt-2.5 space-y-2">
+                                                    {day.sessions.map((session) => {
+                                                        const { time, detail } = parseAgendaSession(session);
+                                                        return (
+                                                            <li key={`${visit.id}-${day.dayLabel}-${session}`} className="flex gap-2.5 text-[0.75rem]">
+                                                                <span className="w-14 shrink-0 pt-0.5 text-[0.625rem] font-semibold uppercase tracking-wide tabular-nums" style={{ color: c.textSecondary, opacity: 0.75 }}>
+                                                                    {time || '—'}
+                                                                </span>
+                                                                <span className="flex-1 leading-snug" style={{ color: c.textPrimary }}>{detail}</span>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ) : null}
-                    </div>
-                );
-            })}
-        </div>
-    </div>
+                            ) : null}
+                        </article>
+                    );
+                })}
+            </div>
+        </section>
     );
 };
 
@@ -1815,33 +1869,27 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
     return (
         <div className="screen-container app-header-offset relative" style={{ backgroundColor: theme.colors.background }}>
             <div className="screen-content-area">
-                <div className={`screen-content-inner pt-4 md:pt-5 ${showTourVisitSubmitCta ? 'pb-28' : ''}`}>
-                    <div className="mx-auto w-full max-w-[760px] space-y-3">
+                <div className={`screen-content-inner w-full pt-4 md:pt-5 ${showTourVisitSubmitCta ? 'pb-28' : 'pb-8'} space-y-5`}>
                         {entryMode === 'home' ? (
                             <>
-                                <div className="overflow-hidden rounded-[24px]" style={cardChrome(theme)}>
-                                    <CardHeader
+                                <section className="rounded-[24px] p-4 sm:p-5" style={sectionCardSurface(theme)}>
+                                    <TourVisitSectionHeader
                                         title="Schedule Trip"
-                                        subtitle="Start from the right hosted location"
+                                        subtitle="Choose a hosted location to begin"
                                         icon={Building2}
                                         theme={theme}
                                     />
-                                    <div className="p-3">
-                                        <div className="overflow-hidden rounded-[16px]" style={panelChrome(theme)}>
-                                            {TOUR_VISIT_FACILITIES.map((facility, facilityIndex) => (
-                                                <FacilityOption
-                                                    key={facility.id}
-                                                    facility={facility}
-                                                    selected={false}
-                                                    onClick={() => handleFacilitySelect(facility.id)}
-                                                    theme={theme}
-                                                    isInList
-                                                    showTopDivider={facilityIndex > 0}
-                                                />
-                                            ))}
-                                        </div>
+                                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                        {TOUR_VISIT_FACILITIES.map((facility) => (
+                                            <FacilityGridCard
+                                                key={facility.id}
+                                                facility={facility}
+                                                onClick={() => handleFacilitySelect(facility.id)}
+                                                theme={theme}
+                                            />
+                                        ))}
                                     </div>
-                                </div>
+                                </section>
 
                                 <UpcomingVisitDirectory
                                     visits={upcomingVisits}
@@ -2221,7 +2269,6 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                 </div>
                             </div>
                         ) : null}
-                    </div>
                 </div>
             </div>
 
