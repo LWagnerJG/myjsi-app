@@ -50,14 +50,33 @@ const buildDefaultExperienceSelections = () =>
         ])
     );
 
+const TRIP_FIELD_FILL = '#F2F4F6';
+const TRIP_FIELD_FILL_ACTIVE = '#E8EAED';
 const TRIP_CONTROL_CLASS = 'min-h-[44px] h-[44px]';
 const TRIP_CONTROL_TEXT = 'text-[0.8125rem] font-medium';
 const TRIP_PILL_CLASS = 'rounded-full';
-const TRIP_PILL_INPUT_CLASS = '[&_input]:!h-[44px] [&_input]:!min-h-0 [&_input]:!rounded-full [&_input]:!border-none [&_textarea]:!rounded-3xl [&_textarea]:!border-none [&_textarea]:!min-h-[96px]';
-const TRIP_SELECT_PILL_CLASS = '!h-[44px] !min-h-[44px] !rounded-full !px-4 !pr-10 !text-[0.8125rem] !font-medium focus-ring';
-const tripFieldShellStyle = (theme, { tall = false } = {}) => ({
-    ...fieldTileSurface(theme),
-    borderRadius: tall ? '24px' : '9999px',
+const TRIP_PILL_INPUT_CLASS = '[&_input]:!h-[44px] [&_input]:!min-h-0 [&_input]:!rounded-full [&_input]:!border-none [&_input]:!shadow-none [&_input]:!outline-none [&_textarea]:!rounded-3xl [&_textarea]:!border-none [&_textarea]:!shadow-none [&_textarea]:!outline-none [&_textarea]:!min-h-[96px]';
+const TRIP_SELECT_PILL_CLASS = '!h-[44px] !min-h-[44px] !rounded-full !border-0 !border-transparent !px-4 !pr-10 !text-[0.8125rem] !font-medium !shadow-none focus:!border-0 focus:!shadow-none focus-visible:!outline-none focus-visible:!ring-0';
+const tripFieldShellStyle = (theme, { tall = false } = {}) => {
+    const dark = isDarkTheme(theme);
+    return {
+        backgroundColor: dark ? 'rgba(255,255,255,0.055)' : TRIP_FIELD_FILL,
+        border: 'none',
+        borderRadius: tall ? '20px' : '9999px',
+    };
+};
+const tripSelectControlStyle = (theme, hasValue) => ({
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderColor: 'transparent',
+    outline: 'none',
+    boxShadow: 'none',
+    color: hasValue ? theme.colors.textPrimary : theme.colors.textSecondary,
+});
+const tripActionButtonStyle = (theme) => ({
+    backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.08)' : TRIP_FIELD_FILL,
+    border: 'none',
+    minHeight: 44,
 });
 
 const fieldSurf = (dark) => dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.03)';
@@ -228,13 +247,6 @@ const buildSubmittedUpcomingVisit = ({
     agenda: buildTripAgenda(experienceSelections),
 });
 
-const tripSelectControlStyle = (theme, hasValue) => ({
-    backgroundColor: 'transparent',
-    border: 'none',
-    boxShadow: 'none',
-    color: hasValue ? theme.colors.textPrimary : theme.colors.textSecondary,
-});
-
 const TripField = ({ label, required, theme, children, className = '', tall = false, flexible = false }) => {
     const c = theme.colors;
     const shellClass = tall
@@ -250,7 +262,7 @@ const TripField = ({ label, required, theme, children, className = '', tall = fa
                 {required ? <span style={{ color: c.error }}> *</span> : null}
             </span>
             <div
-                className={`flex w-full ${shellClass}`}
+                className={`trip-field-shell flex w-full transition-[background-color] duration-150 has-[:focus-visible]:bg-[#E8EAED] dark:has-[:focus-visible]:bg-white/[0.09] ${shellClass}`}
                 style={tripFieldShellStyle(theme, { tall })}
             >
                 {children}
@@ -549,14 +561,14 @@ const FacilityPickerPill = ({ facility, selected, onClick, theme }) => {
             title={summary}
             className={`flex ${TRIP_CONTROL_CLASS} w-full items-center gap-3 px-4 text-left transition-[background-color,color] duration-200 focus-ring ${TRIP_PILL_CLASS}`}
             style={{
-                backgroundColor: selected ? `${c.accent}14` : fieldTileSurface(theme).backgroundColor,
+                backgroundColor: selected ? `${c.accent}14` : TRIP_FIELD_FILL,
                 color: c.textPrimary,
             }}
         >
             <span
                 className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
                 style={{
-                    backgroundColor: selected ? `${c.accent}18` : subtleBg(theme, 1.2),
+                    backgroundColor: selected ? `${c.accent}18` : TRIP_FIELD_FILL_ACTIVE,
                     color: selected ? c.accent : c.textSecondary,
                 }}
             >
@@ -692,7 +704,7 @@ const TourVisitBooleanField = ({ label, value, onChange, theme }) => {
                             className="h-[36px] min-w-[52px] rounded-full px-3.5 text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
                             style={active
                                 ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }
-                                : { color: c.textSecondary, backgroundColor: subtleBg(theme, 1.5) }}
+                                : { color: c.textSecondary, backgroundColor: TRIP_FIELD_FILL_ACTIVE }}
                         >
                             {opt.label}
                         </button>
@@ -709,6 +721,7 @@ const TripFormInput = ({ label, required, theme, className = '', type = 'text', 
             <FormInput
                 theme={theme}
                 type={type}
+                flatFocus
                 surfaceBackground="transparent"
                 surfaceBorder="none"
                 {...inputProps}
@@ -1059,93 +1072,86 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
 
     return (
         <div
-            className="rounded-[28px] p-3.5 transition-[background-color] duration-200 ease-out"
+            className="overflow-hidden rounded-2xl p-3.5 transition-[background-color] duration-200 ease-out"
             style={{
-                backgroundColor: hasSelection ? `${c.accent}14` : subtleBg(theme, 1),
+                backgroundColor: hasSelection ? `${c.accent}14` : TRIP_FIELD_FILL,
             }}
         >
             <div className="flex items-start gap-3">
                 <span
                     className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-[background-color,color] duration-200"
                     style={{
-                        backgroundColor: hasSelection ? `${c.accent}14` : subtleBg(theme, 1.2),
+                        backgroundColor: hasSelection ? `${c.accent}14` : TRIP_FIELD_FILL_ACTIVE,
                         color: hasSelection ? c.accent : c.textSecondary,
                     }}
                 >
                     <Sparkles className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div className="min-w-0 flex-1">
-                    <button
-                        type="button"
-                        onClick={() => onToggleExpanded(track.id)}
-                        className="flex w-full items-start justify-between gap-3 text-left focus-ring rounded-full"
-                        aria-expanded={expanded}
-                        aria-controls={`experience-track-${track.id}`}
-                    >
-                        <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                        <button
+                            type="button"
+                            onClick={() => onToggleExpanded(track.id)}
+                            className="min-w-0 flex-1 text-left focus-visible:outline-none"
+                            aria-expanded={expanded}
+                            aria-controls={`experience-track-${track.id}`}
+                        >
                             <h4 className={TRIP_CONTROL_TEXT} style={{ color: c.textPrimary, fontWeight: 600 }}>{track.title}</h4>
                             <p className="mt-1 text-[0.75rem] font-normal leading-5" style={{ color: c.textSecondary }}>
                                 {track.description}
                             </p>
-                        </div>
-                        <ChevronDown
-                            className="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200 ease-out"
-                            style={{
-                                color: c.textSecondary,
-                                transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                            }}
-                            aria-hidden="true"
-                        />
-                    </button>
-
-                    <div className={`mt-2 min-h-7 ${expanded ? 'hidden' : 'flex'} flex-wrap items-center gap-1.5`}>
-                        {!expanded && hasSelection ? (
-                            selectedOptions.map((option) => (
-                                <span
-                                    key={option}
-                                    className={`inline-flex h-7 max-w-full items-center truncate rounded-full px-2.5 ${TRIP_CONTROL_TEXT}`}
-                                    style={{
-                                        backgroundColor: `${c.accent}14`,
-                                        color: c.accent,
-                                        fontSize: '0.6875rem',
-                                    }}
-                                >
-                                    {option}
-                                </span>
-                            ))
-                        ) : (
-                            <span
-                                className={`inline-flex h-7 items-center rounded-full px-2.5 ${TRIP_CONTROL_TEXT}`}
-                                style={{
-                                    backgroundColor: hasSelection ? `${c.accent}14` : subtleBg(theme, 1.2),
-                                    color: hasSelection ? c.accent : c.textSecondary,
-                                    fontSize: '0.6875rem',
-                                }}
+                        </button>
+                        <div className="flex shrink-0 items-center gap-1">
+                            <button
+                                type="button"
+                                onClick={() => onToggleExpanded(track.id)}
+                                aria-label={expanded ? 'Collapse track' : 'Expand track'}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-200 ease-out focus-visible:outline-none"
+                                style={{ color: c.textSecondary, transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
                             >
-                                {hasSelection ? `${selectedOptions.length} selected` : 'Choose options'}
-                            </span>
-                        )}
+                                <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    onOpenInfo(track.id);
+                                }}
+                                aria-label={`More information about ${track.title}`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full transition-[background-color] duration-200 focus-visible:outline-none"
+                                style={{ backgroundColor: TRIP_FIELD_FILL_ACTIVE, color: c.textSecondary }}
+                            >
+                                <Info className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
                     </div>
+
+                    {!expanded ? (
+                        <div className="mt-2 flex min-h-7 flex-wrap items-center gap-1.5">
+                            {hasSelection ? (
+                                selectedOptions.map((option) => (
+                                    <span
+                                        key={option}
+                                        className="inline-flex h-7 max-w-full items-center truncate rounded-full px-2.5 text-[0.6875rem] font-medium"
+                                        style={{ backgroundColor: `${c.accent}14`, color: c.accent }}
+                                    >
+                                        {option}
+                                    </span>
+                                ))
+                            ) : (
+                                <span
+                                    className="inline-flex h-7 items-center rounded-full px-2.5 text-[0.6875rem] font-medium"
+                                    style={{ backgroundColor: TRIP_FIELD_FILL_ACTIVE, color: c.textSecondary }}
+                                >
+                                    Choose options
+                                </span>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
-                <button
-                    type="button"
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        onOpenInfo(track.id);
-                    }}
-                    aria-label={`More information about ${track.title}`}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-[background-color] duration-200 focus-ring"
-                    style={{
-                        backgroundColor: subtleBg(theme, 1.2),
-                        color: c.textSecondary,
-                    }}
-                >
-                    <Info className="h-3.5 w-3.5" />
-                </button>
             </div>
 
             <div
-                id={`experience-track-${track.id}`}
                 style={{
                     display: 'grid',
                     gridTemplateRows: expanded ? '1fr' : '0fr',
@@ -1153,15 +1159,8 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
                 }}
                 aria-hidden={!expanded}
             >
-                <div className="overflow-hidden">
-                    <div
-                        className="mt-3 flex flex-col gap-2"
-                        style={{
-                            opacity: expanded ? 1 : 0,
-                            transition: `opacity 180ms ease-out`,
-                            pointerEvents: expanded ? 'auto' : 'none',
-                        }}
-                    >
+                <div className="min-h-0 overflow-hidden">
+                    <div id={`experience-track-${track.id}`} className="mt-3 flex flex-col gap-2 pb-0.5">
                         {track.options.map((option) => {
                             const optionLabel = getExperienceOptionLabel(option);
                             const optionDesc = getExperienceOptionDescription(option);
@@ -1172,16 +1171,16 @@ const ExperienceTrackCard = ({ track, selectedOptions, expanded, onToggleExpande
                                     type="button"
                                     onClick={() => onToggleOption(track.id, optionLabel)}
                                     title={optionDesc || undefined}
-                                    className={`flex min-h-[44px] w-full items-center gap-2.5 px-4 py-2 text-left transition-[background-color,color] duration-200 focus-ring ${TRIP_PILL_CLASS}`}
+                                    className={`flex min-h-[44px] w-full items-center gap-2.5 px-4 py-2 text-left transition-[background-color,color] duration-200 focus-visible:outline-none ${TRIP_PILL_CLASS}`}
                                     style={{
                                         color: c.textPrimary,
-                                        backgroundColor: isSelected ? `${c.accent}14` : subtleBg(theme, 0.8),
+                                        backgroundColor: isSelected ? `${c.accent}14` : TRIP_FIELD_FILL_ACTIVE,
                                     }}
                                 >
                                     <span
                                         className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-[background-color,color] duration-200"
                                         style={{
-                                            backgroundColor: isSelected ? c.accent : subtleBg(theme, 1.2),
+                                            backgroundColor: isSelected ? c.accent : TRIP_FIELD_FILL,
                                             color: isSelected ? (c.accentText || '#FFFFFF') : c.textSecondary,
                                         }}
                                     >
@@ -1246,7 +1245,7 @@ const GuestPanel = ({
                     <span
                         className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                         style={{
-                            backgroundColor: expanded ? `${c.accent}14` : subtleBg(theme, 1.5),
+                            backgroundColor: expanded ? `${c.accent}14` : TRIP_FIELD_FILL_ACTIVE,
                             color: expanded ? c.accent : c.textSecondary,
                         }}
                     >
@@ -1423,7 +1422,7 @@ const GuestPanel = ({
                                                             className="min-h-[36px] rounded-full px-2.5 py-1 text-[0.6875rem] font-medium transition-all focus-ring"
                                                             style={{
                                                                 color: isSelected ? c.textPrimary : c.textSecondary,
-                                                                backgroundColor: isSelected ? `${c.accent}14` : subtleBg(theme, 1.5),
+                                                                backgroundColor: isSelected ? `${c.accent}14` : TRIP_FIELD_FILL_ACTIVE,
                                                             }}
                                                         >
                                                             {restriction}
@@ -1618,12 +1617,13 @@ const AddAttendeeActions = ({
     }
 
     return (
-        <JSIActionButtonGroup compact wrap className="w-full [&_button]:!min-h-[44px]">
+        <JSIActionButtonGroup compact wrap className="w-full">
             <JSIActionButton
                 theme={theme}
                 size="small"
                 icon={<Plus className="h-3.5 w-3.5" />}
                 onClick={onAddGuest}
+                style={tripActionButtonStyle(theme)}
             >
                 Add guest
             </JSIActionButton>
@@ -1634,6 +1634,7 @@ const AddAttendeeActions = ({
                     size="small"
                     icon={<Plus className="h-3.5 w-3.5" />}
                     onClick={onOpenRepPicker}
+                    style={tripActionButtonStyle(theme)}
                 >
                     Add rep
                 </JSIActionButton>
@@ -2131,16 +2132,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
 
     return (
         <div className="screen-container app-header-offset relative flex flex-col" style={{ backgroundColor: theme.colors.background }}>
-            <div className={`screen-content-area flex-1 min-h-0 ${showTourVisitSubmitCta ? 'relative' : ''}`}>
-                {showTourVisitSubmitCta ? (
-                    <div
-                        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24"
-                        style={{
-                            background: `linear-gradient(to top, ${theme.colors.background} 0%, transparent 100%)`,
-                        }}
-                        aria-hidden="true"
-                    />
-                ) : null}
+            <div className="screen-content-area flex-1 min-h-0">
                 <div className={`screen-content-inner w-full pt-4 md:pt-5 space-y-4 ${showTourVisitSubmitCta ? 'pb-36 sm:pb-40' : 'pb-8'}`}>
                         {entryMode === 'home' ? (
                             <>
@@ -2290,7 +2282,7 @@ export const TourVisitScreen = ({ theme, userSettings, setBackHandler, members =
                                             </span>
                                         )}
                                     />
-                                    <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 md:items-start">
+                                    <div className="mt-4 flex flex-col gap-3">
                                         {TOUR_VISIT_EXPERIENCE_TRACKS.map((track) => (
                                             <ExperienceTrackCard
                                                 key={track.id}

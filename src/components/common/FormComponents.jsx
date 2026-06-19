@@ -30,23 +30,26 @@ export const FormInput = ({
     surfaceBorder,
     error,
     disabled,
+    flatFocus = false,
     ...props
 }) => {
     const inputRef = React.useRef(null);
 
     const baseBg = surfaceBackground ?? (softChrome ? theme.colors.background : whiteBg ? '#fff' : theme.colors.subtle);
     const errorBorder   = '1px solid rgba(184,92,92,0.5)';
-    const baseBorder    = surfaceBorder ?? (
-        error       ? errorBorder :
-        softChrome  ? '1px solid rgba(0,0,0,0.04)' :
-                      `1px solid ${theme.colors.border}`
-    );
+    const baseBorder    = flatFocus
+        ? 'none'
+        : (surfaceBorder ?? (
+            error       ? errorBorder :
+            softChrome  ? '1px solid rgba(0,0,0,0.04)' :
+                          `1px solid ${theme.colors.border}`
+        ));
 
     const focusRingColor = theme.colors.focusRing || 'rgba(0,0,0,0.08)';
     const errorRingColor = 'rgba(184,92,92,0.18)';
 
     const handleFocus = () => {
-        if (!inputRef.current) return;
+        if (flatFocus || !inputRef.current) return;
         inputRef.current.style.boxShadow = `0 0 0 3px ${error ? errorRingColor : focusRingColor}`;
         if (!error) {
             inputRef.current.style.borderColor = softChrome
@@ -55,7 +58,7 @@ export const FormInput = ({
         }
     };
     const handleBlur = () => {
-        if (!inputRef.current) return;
+        if (flatFocus || !inputRef.current) return;
         inputRef.current.style.boxShadow = error ? `0 0 0 3px ${errorRingColor}` : 'none';
         inputRef.current.style.borderColor = error
             ? 'rgba(184,92,92,0.5)'
@@ -69,7 +72,9 @@ export const FormInput = ({
         color: theme.colors.textPrimary,
         opacity: disabled ? 0.5 : 1,
         cursor: disabled ? 'not-allowed' : undefined,
-        transition: 'box-shadow 150ms ease, border-color 150ms ease',
+        transition: flatFocus ? 'color 150ms ease' : 'box-shadow 150ms ease, border-color 150ms ease',
+        outline: flatFocus ? 'none' : undefined,
+        boxShadow: flatFocus ? 'none' : undefined,
     };
 
     return (
