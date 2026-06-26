@@ -144,6 +144,45 @@ const FieldError = ({ show, message }) => {
   return <p className="nl-field-error text-xs mt-1.5" style={{ color: 'var(--theme-error)' }}>{message}</p>;
 };
 
+const DrivingSpecsBadge = ({ accent }) => (
+  <span
+    className="text-[0.625rem] font-semibold leading-none px-1.5 py-0.5 rounded-full whitespace-nowrap"
+    style={{ color: accent, backgroundColor: `${accent}18` }}
+  >
+    Driving Specs
+  </span>
+);
+
+const EndUserSelectedChip = ({ label, isDrivingSpecs, onToggleDrivingSpecs, onClear, theme }) => {
+  const c = theme.colors;
+  const border = isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-xs font-medium border"
+      style={{ background: isDarkTheme(theme) ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)', borderColor: border, color: c.textPrimary }}
+    >
+      <button
+        type="button"
+        onClick={() => onToggleDrivingSpecs(label)}
+        className="truncate max-w-[180px] text-left hover:opacity-80 transition-opacity"
+        aria-pressed={isDrivingSpecs}
+        title={isDrivingSpecs ? 'Driving specs contact' : 'Mark as driving specs'}
+      >
+        {label}
+      </button>
+      {isDrivingSpecs ? <DrivingSpecsBadge accent={c.accent} /> : null}
+      <button
+        type="button"
+        onClick={onClear}
+        className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-colors"
+        aria-label={`Remove ${label}`}
+      >
+        <X className="w-3 h-3" style={{ color: c.textSecondary }} />
+      </button>
+    </span>
+  );
+};
+
 // Compact secondary "quick pick" button shown beside a field (e.g. Unknown / Out to Bid).
 // Single source of truth so every side action shares the same size + active styling.
 const QuickPickButton = ({ active = false, theme, children, icon, className = '', ...props }) => {
@@ -456,6 +495,32 @@ export const NewLeadScreen = ({
     setTouched((prev) => ({ ...prev, [field]: true }));
   }, []);
 
+  const toggleDrivingSpecs = useCallback((type, name) => {
+    const normalized = String(name || '').trim();
+    if (!normalized) return;
+    const current = newLeadData.drivingSpecs;
+    const isSame = current?.type === type && current?.name === normalized;
+    onNewLeadChange({ drivingSpecs: isSame ? null : { type, name: normalized } });
+  }, [newLeadData.drivingSpecs, onNewLeadChange]);
+
+  const clearDrivingSpecsIfMatch = useCallback((type, name) => {
+    const current = newLeadData.drivingSpecs;
+    if (current?.type === type && current?.name === name) {
+      onNewLeadChange({ drivingSpecs: null });
+    }
+  }, [newLeadData.drivingSpecs, onNewLeadChange]);
+
+  const setEndUser = useCallback((value) => {
+    const normalized = String(value || '').trim();
+    const updates = { endUser: value };
+    const current = newLeadData.drivingSpecs;
+    if (current?.type === 'endUser' && current.name !== normalized) {
+      updates.drivingSpecs = null;
+    }
+    onNewLeadChange(updates);
+    markTouched('endUser');
+  }, [markTouched, newLeadData.drivingSpecs, onNewLeadChange]);
+
   const handleProjectInputChange = useCallback((nextValue) => {
     const currentSelectedProject = (opportunities || []).find((opp) => String(opp?.id) === String(newLeadData.pastProjectRef || ''));
     const selectedName = currentSelectedProject ? String(currentSelectedProject.name || currentSelectedProject.project || '').trim() : '';
@@ -498,9 +563,8 @@ export const NewLeadScreen = ({
     const normalized = String(value || '').trim();
     if (!normalized) return;
     setEndUserOptions((prev) => mergeUnique(prev, normalized));
-    upd('endUser', normalized);
-    markTouched('endUser');
-  }, [markTouched, upd]);
+    setEndUser(normalized);
+  }, [setEndUser]);
 
   const stageIndex = useMemo(
     () => stageOptions.indexOf(newLeadData.projectStatus), // -1 when nothing selected
@@ -738,6 +802,10 @@ export const NewLeadScreen = ({
     } else {
       add('Competition', 'None', 1);
     }
+    if (newLeadData.drivingSpecs?.name) {
+      const typeLabels = { endUser: 'End User', dealer: 'Dealer', designFirm: 'A&D Firm' };
+      add('Driving Specs', `${typeLabels[newLeadData.drivingSpecs.type] || newLeadData.drivingSpecs.type}: ${newLeadData.drivingSpecs.name}`, 1);
+    }
     add('Rewards', [salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None', 1);
     if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber, 2);
     if (quoteMode === 'needed') add('Quote', 'Quote needed', 2);
@@ -767,6 +835,7 @@ export const NewLeadScreen = ({
     seriesCount,
     newLeadData.competitionPresent,
     newLeadData.competitors,
+    newLeadData.drivingSpecs,
     salesRewardEnabled,
     designerRewardEnabled,
     notesPreview,
@@ -1287,14 +1356,17 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Stakeholders & Competition" theme={theme}>
+              <p className="text-[0.6875rem] px-1 -mt-1 mb-2" style={{ color: c.textSecondary, opacity: 0.65 }}>
+                Tap a selected contact to mark as Driving Specs.
+              </p>
               <Row label="End User" theme={theme} inline>
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <AutoCompleteCombobox
                         value={newLeadData.endUser || ''}
-                        onChange={(val) => { upd('endUser', val); markTouched('endUser'); }}
-                        onSelect={(val) => { upd('endUser', val); markTouched('endUser'); }}
+                        onChange={setEndUser}
+                        onSelect={setEndUser}
                         onAddNew={addEndUserOption}
                         options={endUserOptions}
                         placeholder="Search or add end user"
@@ -1306,11 +1378,25 @@ export const NewLeadScreen = ({
                     <QuickPickButton
                       active={newLeadData.endUser === 'Unknown'}
                       theme={theme}
-                      onClick={() => { upd('endUser', 'Unknown'); markTouched('endUser'); }}
+                      onClick={() => setEndUser('Unknown')}
                     >
                       Unknown
                     </QuickPickButton>
                   </div>
+                  {String(newLeadData.endUser || '').trim() ? (
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      <EndUserSelectedChip
+                        label={newLeadData.endUser}
+                        isDrivingSpecs={drivingSpecsForType('endUser') === newLeadData.endUser}
+                        onToggleDrivingSpecs={(name) => toggleDrivingSpecs('endUser', name)}
+                        onClear={() => {
+                          clearDrivingSpecsIfMatch('endUser', newLeadData.endUser);
+                          setEndUser('');
+                        }}
+                        theme={theme}
+                      />
+                    </div>
+                  ) : null}
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
               </Row>
@@ -1338,13 +1424,19 @@ export const NewLeadScreen = ({
                             if (!current.some((d) => d.toLowerCase() === norm.toLowerCase())) upd('dealers', [...current, norm]);
                             markTouched('dealers');
                           }}
-                          onRemoveItem={(dealer) => { upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer)); markTouched('dealers'); }}
+                          onRemoveItem={(dealer) => {
+                            clearDrivingSpecsIfMatch('dealer', dealer);
+                            upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer));
+                            markTouched('dealers');
+                          }}
                           options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])}
                           onAddNew={(dealer) => { const norm = dealer.trim(); setDealers((prev) => prev.some((d) => d.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
                           placeholder="Search or create dealer"
                           theme={theme}
                           compact={false}
                           integratedChips
+                          drivingSpecsItem={drivingSpecsForType('dealer')}
+                          onToggleDrivingSpecs={(name) => toggleDrivingSpecs('dealer', name)}
                         />
                       </div>
                       <QuickPickButton
@@ -1369,13 +1461,18 @@ export const NewLeadScreen = ({
                         const current = newLeadData.designFirms || [];
                         if (!current.some((f) => f.toLowerCase() === norm.toLowerCase())) upd('designFirms', [...current, norm]);
                       }}
-                      onRemoveItem={(firm) => upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm))}
+                      onRemoveItem={(firm) => {
+                        clearDrivingSpecsIfMatch('designFirm', firm);
+                        upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm));
+                      }}
                       options={['Unknown', ...(designFirms || []).filter((f) => f !== 'Unknown')]}
                       onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
                       placeholder="Search or create firm"
                       theme={theme}
                       compact={false}
                       integratedChips
+                      drivingSpecsItem={drivingSpecsForType('designFirm')}
+                      onToggleDrivingSpecs={(name) => toggleDrivingSpecs('designFirm', name)}
                     />
                   </div>
                   <QuickPickButton

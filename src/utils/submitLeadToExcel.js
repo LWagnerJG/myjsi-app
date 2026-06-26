@@ -19,6 +19,9 @@ const flattenLead = (lead) => ({
   dealers:          (lead.dealers || []).join(', '),
   adFirms:          (lead.designFirms || []).join(', '),
   endUser:          lead.endUser || '',
+  drivingSpecs:     lead.drivingSpecs
+                      ? `${lead.drivingSpecs.type}:${lead.drivingSpecs.name}`
+                      : '',
   bid:              lead.isBid ? 'Yes' : 'No',
   competition:      lead.competitionPresent ? 'Yes' : 'No',
   competitors:      (lead.competitors || []).join(', '),

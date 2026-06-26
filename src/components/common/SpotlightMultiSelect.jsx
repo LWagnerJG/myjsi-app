@@ -2,6 +2,59 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { Search, Plus, X } from "lucide-react";
 import { isDarkTheme } from "../../design-system/tokens.js";
 
+const DrivingSpecsBadge = ({ accent }) => (
+  <span
+    className="text-[0.625rem] font-semibold leading-none px-1.5 py-0.5 rounded-full whitespace-nowrap"
+    style={{ color: accent, backgroundColor: `${accent}18` }}
+  >
+    Driving Specs
+  </span>
+);
+
+const SelectedChip = ({
+  label,
+  isDrivingSpecs,
+  onToggleDrivingSpecs,
+  onRemove,
+  palette,
+  showIntegratedChips,
+  dark,
+  bordered,
+  compact,
+}) => (
+  <span
+    className={`inline-flex items-center gap-1.5 ${compact ? 'pl-2 pr-1 py-0.5' : 'pl-3 pr-2 py-1'} rounded-full text-xs font-medium flex-shrink-0${bordered ? ' border' : ''}`}
+    style={{
+      background: showIntegratedChips ? (dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.04)") : palette.chipBg,
+      borderColor: palette.border,
+      color: palette.text,
+    }}
+  >
+    {onToggleDrivingSpecs ? (
+      <button
+        type="button"
+        onClick={() => onToggleDrivingSpecs(label)}
+        className={`truncate ${compact ? 'max-w-[140px]' : 'max-w-[180px]'} text-left hover:opacity-80 transition-opacity`}
+        aria-pressed={isDrivingSpecs}
+        title={isDrivingSpecs ? 'Driving specs contact' : 'Mark as driving specs'}
+      >
+        {label}
+      </button>
+    ) : (
+      <span className={`truncate ${compact ? 'max-w-[140px]' : 'max-w-[180px]'}`}>{label}</span>
+    )}
+    {isDrivingSpecs ? <DrivingSpecsBadge accent={palette.accent} /> : null}
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onRemove?.(); }}
+      className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-colors"
+      aria-label={`Remove ${label}`}
+    >
+      <X className="w-3 h-3" style={{ color: palette.hint }} />
+    </button>
+  </span>
+);
+
 export function SpotlightMultiSelect({
   label,
   selectedItems = [],
@@ -14,6 +67,8 @@ export function SpotlightMultiSelect({
   compact = false,
   integratedChips = false,
   bordered = true,
+  drivingSpecsItem = null,
+  onToggleDrivingSpecs = null,
 }) {
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
@@ -182,21 +237,18 @@ export function SpotlightMultiSelect({
           {compact && selectedItems.length > 0 && (
             <div className="flex items-center gap-1 flex-shrink-0 overflow-x-auto max-w-[72%] scrollbar-hide">
               {selectedItems.map((s) => (
-                <span
+                <SelectedChip
                   key={s}
-                  className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-xs font-medium border flex-shrink-0"
-                  style={{ background: palette.chipBg, borderColor: palette.border, color: palette.text }}
-                >
-                  <span className="truncate max-w-[180px]">{s}</span>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); onRemoveItem?.(s); }}
-                    className="w-4 h-4 flex items-center justify-center rounded-full"
-                    aria-label={`Remove ${s}`}
-                  >
-                    <X className="w-3 h-3" style={{ color: palette.hint }} />
-                  </button>
-                </span>
+                  label={s}
+                  isDrivingSpecs={drivingSpecsItem === s}
+                  onToggleDrivingSpecs={onToggleDrivingSpecs}
+                  onRemove={() => onRemoveItem?.(s)}
+                  palette={palette}
+                  showIntegratedChips={false}
+                  dark={dark}
+                  bordered
+                  compact
+                />
               ))}
             </div>
           )}
@@ -279,25 +331,18 @@ export function SpotlightMultiSelect({
           }
         >
           {selectedItems.map((s) => (
-            <span
+            <SelectedChip
               key={s}
-              className={`inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-xs font-medium${bordered ? " border" : ""}`}
-              style={{
-                background: showIntegratedChips ? (dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.04)") : palette.chipBg,
-                borderColor: palette.border,
-                color: palette.text,
-              }}
-            >
-              {s}
-              <button
-                type="button"
-                onClick={() => onRemoveItem?.(s)}
-                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-colors"
-                aria-label={`Remove ${s}`}
-              >
-                <X className="w-3 h-3" style={{ color: palette.hint }} />
-              </button>
-            </span>
+              label={s}
+              isDrivingSpecs={drivingSpecsItem === s}
+              onToggleDrivingSpecs={onToggleDrivingSpecs}
+              onRemove={() => onRemoveItem?.(s)}
+              palette={palette}
+              showIntegratedChips={showIntegratedChips}
+              dark={dark}
+              bordered={bordered}
+              compact={false}
+            />
           ))}
         </div>
       )}
