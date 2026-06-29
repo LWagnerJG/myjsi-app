@@ -151,19 +151,20 @@ const FieldError = ({ show, message }) => {
   return <p className="nl-field-error text-xs mt-1.5" style={{ color: 'var(--theme-error)' }}>{message}</p>;
 };
 
-// Compact secondary "quick pick" button shown beside a field (e.g. Unknown / Out to Bid).
-// Single source of truth so every side action shares the same size + active styling.
-const QuickPickButton = ({ active = false, theme, children, icon, className = '', ...props }) => {
+const QuickPickButton = ({ active = false, disabled = false, theme, children, icon, className = '', ...props }) => {
   const c = theme.colors;
   const subtleBorder = getSubtleBorder(theme);
   return (
     <button
       type="button"
+      disabled={disabled}
       className={`shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all flex items-center gap-1 ${className}`}
       style={{
         borderColor: active ? c.accent : subtleBorder,
         color: active ? c.accent : c.textSecondary,
         backgroundColor: active ? `${c.accent}12` : 'transparent',
+        opacity: disabled ? 0.45 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
       }}
       {...props}
     >
@@ -172,6 +173,24 @@ const QuickPickButton = ({ active = false, theme, children, icon, className = ''
     </button>
   );
 };
+
+const StakeholderCollapsedPill = ({ label, hint, onExpand, theme }) => {
+  const c = theme.colors;
+  return (
+    <button
+      type="button"
+      onClick={onExpand}
+      className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
+      style={{ borderColor: c.accent, backgroundColor: `${c.accent}12`, color: c.textPrimary }}
+    >
+      <span className="text-sm font-medium" style={{ color: c.accent }}>{label}</span>
+      <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>{hint}</span>
+    </button>
+  );
+};
+
+const getRealDealers = (dealers = []) => (dealers || []).filter((dealer) => String(dealer).trim().toLowerCase() !== 'out to bid');
+const getRealDesignFirms = (firms = []) => (firms || []).filter((firm) => String(firm).trim().toLowerCase() !== 'unknown');
 
 // Inline label + toggle pair, keeping every switch in the flow visually identical.
 const ToggleField = ({ label, checked, onChange, theme }) => {
@@ -368,8 +387,8 @@ export const NewLeadScreen = ({
   // Location/date "Unknown" collapsed state — show input only when user explicitly opens it
   const [locationInputOpen, setLocationInputOpen] = useState(() => !!newLeadData.installationLocation);
   const [dateInputOpen, setDateInputOpen] = useState(() => !!newLeadData.expectedInstallDate);
-  // Dealers "Out to Bid" state — collapses search area to a single pill
-  const [dealerOutToBid, setDealerOutToBid] = useState(() => (newLeadData.dealers || []).includes('Out to Bid'));
+  const [dealerFieldExpanded, setDealerFieldExpanded] = useState(() => getRealDealers(newLeadData.dealers).length > 0);
+  const [designFirmFieldExpanded, setDesignFirmFieldExpanded] = useState(() => getRealDesignFirms(newLeadData.designFirms).length > 0);
 
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
@@ -395,6 +414,42 @@ export const NewLeadScreen = ({
   useEffect(() => {
     setEndUserOptions((prev) => mergeUnique(prev, (opportunities || []).map((opp) => opp.company)));
   }, [opportunities]);
+
+  useEffect(() => {
+    const dealers = newLeadData.dealers || [];
+    const designFirmsList = newLeadData.designFirms || [];
+    const hasLegacyBid = dealers.some((dealer) => String(dealer).trim().toLowerCase() === 'out to bid');
+    const legacyUnknownOnly = designFirmsList.includes('Unknown') && getRealDesignFirms(designFirmsList).length === 0;
+    const updates = {};
+
+    if (hasLegacyBid) {
+      updates.isBid = true;
+      updates.dealers = getRealDealers(dealers);
+    }
+    if (legacyUnknownOnly && !newLeadData.designFirmUnknown) {
+      updates.designFirmUnknown = true;
+      updates.designFirms = [];
+    }
+    if (Object.keys(updates).length) onNewLeadChange(updates);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const realDealers = useMemo(() => getRealDealers(newLeadData.dealers), [newLeadData.dealers]);
+  const realDesignFirms = useMemo(() => getRealDesignFirms(newLeadData.designFirms), [newLeadData.designFirms]);
+  const isDealerOutToBid = !!newLeadData.isBid;
+  const isDesignFirmUnknown = !!newLeadData.designFirmUnknown;
+
+  useEffect(() => {
+    if (realDealers.length > 0) setDealerFieldExpanded(true);
+    else if (isDealerOutToBid) setDealerFieldExpanded(false);
+  }, [realDealers.length, isDealerOutToBid]);
+
+  useEffect(() => {
+    if (realDesignFirms.length > 0) setDesignFirmFieldExpanded(true);
+    else if (isDesignFirmUnknown) setDesignFirmFieldExpanded(false);
+  }, [realDesignFirms.length, isDesignFirmUnknown]);
+
+  const showDealerCollapsed = isDealerOutToBid && realDealers.length === 0 && !dealerFieldExpanded;
+  const showDesignFirmCollapsed = isDesignFirmUnknown && realDesignFirms.length === 0 && !designFirmFieldExpanded;
 
   useEffect(() => {
     // Scroll back to top so each step feels like a fresh page
@@ -493,13 +548,14 @@ export const NewLeadScreen = ({
   const addDesignFirm = useCallback((firm) => {
     const norm = firm.trim();
     if (!norm) return;
-    const current = newLeadData.designFirms || [];
+    const current = getRealDesignFirms(newLeadData.designFirms);
     if (current.some((f) => f.toLowerCase() === norm.toLowerCase())) return;
-    const updates = { designFirms: [...current, norm] };
+    const updates = { designFirms: [...current, norm], designFirmUnknown: false };
     if (isSpecifierCandidate(norm)) {
       updates.drivingSpecs = { type: 'designFirm', name: norm };
     }
     onNewLeadChange(updates);
+    setDesignFirmFieldExpanded(true);
   }, [newLeadData.designFirms, onNewLeadChange]);
 
   const setEndUser = useCallback((value) => {
@@ -594,7 +650,7 @@ export const NewLeadScreen = ({
     if (!newLeadData.vertical) next.vertical = 'Vertical is required.';
     if (parseCurrency(newLeadData.estimatedList) <= 0) next.estimatedList = 'Estimated list must be greater than zero.';
     if (!String(newLeadData.endUser || '').trim()) next.endUser = 'Select or create an end user.';
-    if (!(newLeadData.dealers || []).length) next.dealers = 'Add at least one dealer.';
+    if (!realDealers.length && !newLeadData.isBid) next.dealers = 'Add at least one dealer or mark Out to Bid.';
     if (!newLeadData.poTimeframe) next.poTimeframe = 'PO timeframe is required.';
     if (newLeadData.competitionPresent && !(newLeadData.competitors || []).length) {
       next.competitors = 'Add at least one competitor or switch Competition off.';
@@ -611,11 +667,13 @@ export const NewLeadScreen = ({
     newLeadData.estimatedList,
     newLeadData.endUser,
     newLeadData.dealers,
+    newLeadData.isBid,
     newLeadData.poTimeframe,
     newLeadData.competitionPresent,
     newLeadData.competitors,
     newLeadData.jsiQuoteExists,
     newLeadData.jsiQuoteNumber,
+    realDealers,
   ]);
 
 
@@ -685,8 +743,8 @@ export const NewLeadScreen = ({
       { label: 'Estimated List', points: estimatedListPoints, max: 14 },
       { label: 'PO Timeframe', points: poTimeframePoints, max: 8 },
       { label: 'End User', points: String(newLeadData.endUser || '').trim() ? 5 : 0, max: 5 },
-      { label: 'Dealer Coverage', points: (newLeadData.dealers || []).length ? 6 : 0, max: 6 },
-      { label: 'A&D Alignment', points: (newLeadData.designFirms || []).length ? 3 : 1, max: 3 },
+      { label: 'Dealer Coverage', points: (realDealers.length || newLeadData.isBid) ? 6 : 0, max: 6 },
+      { label: 'A&D Alignment', points: (realDesignFirms.length || newLeadData.designFirmUnknown) ? 3 : 1, max: 3 },
       { label: 'Discount Quality', points: discountPoints, max: 8 },
       { label: 'Competition Position', points: competitionPoints, max: 7 },
       { label: 'Quote Strategy', points: quotePoints, max: 7 },
@@ -718,6 +776,7 @@ export const NewLeadScreen = ({
     newLeadData.poTimeframe,
     newLeadData.endUser,
     newLeadData.dealers,
+    newLeadData.isBid,
     newLeadData.designFirms,
     newLeadData.competitionPresent,
     newLeadData.competitors,
@@ -733,6 +792,9 @@ export const NewLeadScreen = ({
     newLeadData.attachments,
     stageIndex,
     stageOptions.length,
+    realDealers,
+    realDesignFirms,
+    newLeadData.designFirmUnknown,
   ]);
   const salesRewardEnabled = newLeadData.salesReward !== false;
   const designerRewardEnabled = newLeadData.designerReward !== false;
@@ -780,8 +842,14 @@ export const NewLeadScreen = ({
     if (parsedEstimatedList > 0) add('Estimated List', `$${parsedEstimatedList.toLocaleString()}`, 1);
     add('PO Timeframe', newLeadData.poTimeframe, 1);
     add('End User', newLeadData.endUser, 1);
-    if ((newLeadData.dealers || []).length) add('Dealers', (newLeadData.dealers || []).join(', '), 1);
-    if ((newLeadData.designFirms || []).length) add('A&D Firms', (newLeadData.designFirms || []).join(', '), 1);
+    if (realDealers.length || newLeadData.isBid) {
+      const dealerText = [newLeadData.isBid ? 'Out to bid' : null, realDealers.length ? realDealers.join(', ') : null].filter(Boolean).join(' · ');
+      add('Dealers', dealerText, 1);
+    }
+    if (realDesignFirms.length || newLeadData.designFirmUnknown) {
+      const firmText = [newLeadData.designFirmUnknown ? 'Unknown' : null, realDesignFirms.length ? realDesignFirms.join(', ') : null].filter(Boolean).join(' · ');
+      add('A&D Firms', firmText, 1);
+    }
     if (newLeadData.competitionPresent) {
       add('Competition', 'Present', 1);
       if ((newLeadData.competitors || []).length) add('Competitors', (newLeadData.competitors || []).join(', '), 1);
@@ -812,7 +880,11 @@ export const NewLeadScreen = ({
     newLeadData.poTimeframe,
     newLeadData.endUser,
     newLeadData.dealers,
+    newLeadData.isBid,
     newLeadData.designFirms,
+    newLeadData.designFirmUnknown,
+    realDealers,
+    realDesignFirms,
     newLeadData.installationLocation,
     newLeadData.expectedInstallDate,
     quoteMode,
@@ -1362,16 +1434,21 @@ export const NewLeadScreen = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
-                      <AutoCompleteCombobox
-                        value={newLeadData.endUser || ''}
-                        onChange={setEndUser}
-                        onSelect={setEndUser}
+                      <SpotlightMultiSelect
+                        selectedItems={newLeadData.endUser ? [newLeadData.endUser] : []}
+                        onAddItem={(user) => {
+                          const norm = user.trim();
+                          if (!norm) return;
+                          setEndUserOptions((prev) => mergeUnique(prev, norm));
+                          setEndUser(norm);
+                        }}
+                        onRemoveItem={() => setEndUser('')}
+                        options={endUserOptions.filter((option) => option.toLowerCase() !== String(newLeadData.endUser || '').toLowerCase())}
                         onAddNew={addEndUserOption}
-                        options={endUserOptions}
                         placeholder="Search or add end user"
                         theme={theme}
-                        compact
-                        resetOnSelect={false}
+                        compact={false}
+                        integratedChips
                       />
                     </div>
                     <QuickPickButton
@@ -1388,32 +1465,30 @@ export const NewLeadScreen = ({
 
               <Row label="Dealer(s)" theme={theme} inline>
                 <div>
-                  {dealerOutToBid ? (
-                    <button
-                      type="button"
-                      onClick={() => { setDealerOutToBid(false); upd('dealers', []); markTouched('dealers'); }}
-                      className="w-full h-10 rounded-full border flex items-center justify-between px-4 transition-colors"
-                      style={{ borderColor: theme.colors.accent, backgroundColor: `${theme.colors.accent}12`, color: c.textPrimary }}
-                    >
-                      <span className="text-sm font-medium" style={{ color: theme.colors.accent }}>Out to Bid</span>
-                      <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Add dealers</span>
-                    </button>
+                  {showDealerCollapsed ? (
+                    <StakeholderCollapsedPill
+                      label="Out to Bid"
+                      hint="Add dealers"
+                      onExpand={() => setDealerFieldExpanded(true)}
+                      theme={theme}
+                    />
                   ) : (
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <SpotlightMultiSelect
-                          selectedItems={newLeadData.dealers || []}
+                          selectedItems={realDealers}
                           onAddItem={(dealer) => {
                             const norm = dealer.trim();
-                            const current = newLeadData.dealers || [];
+                            if (!norm || norm.toLowerCase() === 'out to bid') return;
+                            const current = realDealers;
                             if (!current.some((d) => d.toLowerCase() === norm.toLowerCase())) upd('dealers', [...current, norm]);
                             markTouched('dealers');
                           }}
                           onRemoveItem={(dealer) => {
-                            upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer));
+                            upd('dealers', realDealers.filter((item) => item !== dealer));
                             markTouched('dealers');
                           }}
-                          options={(newLeadData.dealers || []).length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])}
+                          options={(realDealers.length > 0 ? (dealers || []).filter((item) => item !== 'Undecided') : (dealers || [])).filter((item) => item.toLowerCase() !== 'out to bid')}
                           onAddNew={(dealer) => { const norm = dealer.trim(); setDealers((prev) => prev.some((d) => d.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
                           placeholder="Search or create dealer"
                           theme={theme}
@@ -1422,8 +1497,17 @@ export const NewLeadScreen = ({
                         />
                       </div>
                       <QuickPickButton
+                        active={isDealerOutToBid}
                         theme={theme}
-                        onClick={() => { setDealerOutToBid(true); upd('dealers', ['Out to Bid']); markTouched('dealers'); }}
+                        onClick={() => {
+                          if (realDealers.length === 0) {
+                            onNewLeadChange({ isBid: true, dealers: [] });
+                            setDealerFieldExpanded(false);
+                          } else {
+                            upd('isBid', !isDealerOutToBid);
+                          }
+                          markTouched('dealers');
+                        }}
                       >
                         Out to Bid
                       </QuickPickButton>
@@ -1434,32 +1518,45 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="A&D Firm(s)" theme={theme} inline>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 min-w-0">
-                    <SpotlightMultiSelect
-                      selectedItems={newLeadData.designFirms || []}
-                      onAddItem={addDesignFirm}
-                      onRemoveItem={(firm) => {
-                        upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm));
-                      }}
-                      options={['Unknown', ...(designFirms || []).filter((f) => f !== 'Unknown')]}
-                      onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
-                      placeholder="Search or create firm"
+                <div>
+                  {showDesignFirmCollapsed ? (
+                    <StakeholderCollapsedPill
+                      label="Unknown"
+                      hint="Add A&D firms"
+                      onExpand={() => setDesignFirmFieldExpanded(true)}
                       theme={theme}
-                      compact={false}
-                      integratedChips
                     />
-                  </div>
-                  <QuickPickButton
-                    active={(newLeadData.designFirms || []).includes('Unknown')}
-                    theme={theme}
-                    onClick={() => {
-                      const current = newLeadData.designFirms || [];
-                      if (!current.includes('Unknown')) upd('designFirms', ['Unknown', ...current]);
-                    }}
-                  >
-                    Unknown
-                  </QuickPickButton>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <SpotlightMultiSelect
+                          selectedItems={realDesignFirms}
+                          onAddItem={addDesignFirm}
+                          onRemoveItem={(firm) => {
+                            upd('designFirms', realDesignFirms.filter((item) => item !== firm));
+                          }}
+                          options={(designFirms || []).filter((firm) => firm !== 'Unknown')}
+                          onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
+                          placeholder="Search or create firm"
+                          theme={theme}
+                          compact={false}
+                          integratedChips
+                        />
+                      </div>
+                      <QuickPickButton
+                        active={isDesignFirmUnknown && realDesignFirms.length === 0}
+                        theme={theme}
+                        disabled={realDesignFirms.length > 0}
+                        onClick={() => {
+                          if (realDesignFirms.length > 0) return;
+                          onNewLeadChange({ designFirmUnknown: true, designFirms: [] });
+                          setDesignFirmFieldExpanded(false);
+                        }}
+                      >
+                        Unknown
+                      </QuickPickButton>
+                    </div>
+                  )}
                 </div>
               </Row>
 
@@ -1513,7 +1610,7 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Rewards" theme={theme} inline>
-                <div className="flex items-center justify-end gap-5 min-h-[40px]">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4 min-h-[40px]">
                   <ToggleField
                     label="Sales 3%"
                     checked={salesRewardEnabled}
