@@ -208,6 +208,21 @@ const ToggleField = ({ label, checked, onChange, theme }) => {
   );
 };
 
+const RewardTogglePill = ({ label, sublabel, checked, onChange, theme }) => {
+  const c = theme.colors;
+  return (
+    <div className="inline-flex items-center gap-2">
+      <span
+        className="text-xs font-medium tabular-nums"
+        style={{ color: checked ? c.textPrimary : c.textSecondary, opacity: checked ? 1 : 0.65 }}
+      >
+        {label} {sublabel}
+      </span>
+      <ToggleSwitch checked={checked} onChange={onChange} theme={theme} ariaLabel={`${label} reward`} />
+    </div>
+  );
+};
+
 const StrengthCircle = ({ percent, tone, size = 44, stroke = 4, textSize = '11px' }) => {
   const normalized = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
   const radius = (size - stroke) / 2;
@@ -1503,9 +1518,7 @@ export const NewLeadScreen = ({
                       <QuickPickButton
                         active={isEndUserUnknown && !realEndUser}
                         theme={theme}
-                        disabled={!!realEndUser}
                         onClick={() => {
-                          if (realEndUser) return;
                           onNewLeadChange({ endUserUnknown: true, endUser: '' });
                           setEndUserFieldExpanded(false);
                           markTouched('endUser');
@@ -1666,15 +1679,17 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Rewards" theme={theme} inline>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4 min-h-[40px]">
-                  <ToggleField
-                    label="Sales 3%"
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 min-h-[40px]">
+                  <RewardTogglePill
+                    label="Sales"
+                    sublabel={salesRewardEnabled ? '3%' : 'off'}
                     checked={salesRewardEnabled}
                     onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
                     theme={theme}
                   />
-                  <ToggleField
-                    label="Designer 1%"
+                  <RewardTogglePill
+                    label="Designer"
+                    sublabel={designerRewardEnabled ? '1%' : 'off'}
                     checked={designerRewardEnabled}
                     onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
                     theme={theme}
