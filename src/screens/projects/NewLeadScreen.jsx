@@ -531,6 +531,10 @@ export const NewLeadScreen = ({
     markTouched('endUser');
   }, [markTouched, newLeadData.drivingSpecs, onNewLeadChange]);
 
+  const drivingSpecsForType = useCallback((type) => (
+    newLeadData.drivingSpecs?.type === type ? newLeadData.drivingSpecs.name : null
+  ), [newLeadData.drivingSpecs]);
+
   const handleProjectInputChange = useCallback((nextValue) => {
     const currentSelectedProject = (opportunities || []).find((opp) => String(opp?.id) === String(newLeadData.pastProjectRef || ''));
     const selectedName = currentSelectedProject ? String(currentSelectedProject.name || currentSelectedProject.project || '').trim() : '';
