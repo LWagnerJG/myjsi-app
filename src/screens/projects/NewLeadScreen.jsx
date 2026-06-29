@@ -191,6 +191,11 @@ const StakeholderCollapsedPill = ({ label, hint, onExpand, theme }) => {
 
 const getRealDealers = (dealers = []) => (dealers || []).filter((dealer) => String(dealer).trim().toLowerCase() !== 'out to bid');
 const getRealDesignFirms = (firms = []) => (firms || []).filter((firm) => String(firm).trim().toLowerCase() !== 'unknown');
+const getRealEndUser = (endUser = '') => {
+  const trimmed = String(endUser || '').trim();
+  return trimmed.toLowerCase() === 'unknown' ? '' : trimmed;
+};
+const isUnknownStakeholderValue = (value) => String(value || '').trim().toLowerCase() === 'unknown';
 
 // Inline label + toggle pair, keeping every switch in the flow visually identical.
 const ToggleField = ({ label, checked, onChange, theme }) => {
@@ -389,6 +394,7 @@ export const NewLeadScreen = ({
   const [dateInputOpen, setDateInputOpen] = useState(() => !!newLeadData.expectedInstallDate);
   const [dealerFieldExpanded, setDealerFieldExpanded] = useState(() => getRealDealers(newLeadData.dealers).length > 0);
   const [designFirmFieldExpanded, setDesignFirmFieldExpanded] = useState(() => getRealDesignFirms(newLeadData.designFirms).length > 0);
+  const [endUserFieldExpanded, setEndUserFieldExpanded] = useState(() => !!getRealEndUser(newLeadData.endUser));
 
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
@@ -407,9 +413,9 @@ export const NewLeadScreen = ({
   }, [newLeadData.projectStatus, onNewLeadChange, stageOptions]);
 
   useEffect(() => {
-    if (!String(newLeadData.endUser || '').trim()) return;
-    setEndUserOptions((prev) => mergeUnique(prev, newLeadData.endUser));
-  }, [newLeadData.endUser]);
+    if (!realEndUser) return;
+    setEndUserOptions((prev) => mergeUnique(prev, realEndUser));
+  }, [realEndUser]);
 
   useEffect(() => {
     setEndUserOptions((prev) => mergeUnique(prev, (opportunities || []).map((opp) => opp.company)));
@@ -420,6 +426,7 @@ export const NewLeadScreen = ({
     const designFirmsList = newLeadData.designFirms || [];
     const hasLegacyBid = dealers.some((dealer) => String(dealer).trim().toLowerCase() === 'out to bid');
     const legacyUnknownOnly = designFirmsList.includes('Unknown') && getRealDesignFirms(designFirmsList).length === 0;
+    const legacyEndUserUnknown = String(newLeadData.endUser || '').trim().toLowerCase() === 'unknown';
     const updates = {};
 
     if (hasLegacyBid) {
@@ -430,13 +437,24 @@ export const NewLeadScreen = ({
       updates.designFirmUnknown = true;
       updates.designFirms = [];
     }
+    if (legacyEndUserUnknown && !newLeadData.endUserUnknown) {
+      updates.endUserUnknown = true;
+      updates.endUser = '';
+    }
     if (Object.keys(updates).length) onNewLeadChange(updates);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const realDealers = useMemo(() => getRealDealers(newLeadData.dealers), [newLeadData.dealers]);
   const realDesignFirms = useMemo(() => getRealDesignFirms(newLeadData.designFirms), [newLeadData.designFirms]);
+  const realEndUser = useMemo(() => getRealEndUser(newLeadData.endUser), [newLeadData.endUser]);
   const isDealerOutToBid = !!newLeadData.isBid;
   const isDesignFirmUnknown = !!newLeadData.designFirmUnknown;
+  const isEndUserUnknown = !!newLeadData.endUserUnknown;
+
+  useEffect(() => {
+    if (realEndUser) setEndUserFieldExpanded(true);
+    else if (isEndUserUnknown) setEndUserFieldExpanded(false);
+  }, [realEndUser, isEndUserUnknown]);
 
   useEffect(() => {
     if (realDealers.length > 0) setDealerFieldExpanded(true);
@@ -450,6 +468,7 @@ export const NewLeadScreen = ({
 
   const showDealerCollapsed = isDealerOutToBid && realDealers.length === 0 && !dealerFieldExpanded;
   const showDesignFirmCollapsed = isDesignFirmUnknown && realDesignFirms.length === 0 && !designFirmFieldExpanded;
+  const showEndUserCollapsed = isEndUserUnknown && !realEndUser && !endUserFieldExpanded;
 
   useEffect(() => {
     // Scroll back to top so each step feels like a fresh page
@@ -548,6 +567,11 @@ export const NewLeadScreen = ({
   const addDesignFirm = useCallback((firm) => {
     const norm = firm.trim();
     if (!norm) return;
+    if (isUnknownStakeholderValue(norm)) {
+      onNewLeadChange({ designFirmUnknown: true, designFirms: [] });
+      setDesignFirmFieldExpanded(false);
+      return;
+    }
     const current = getRealDesignFirms(newLeadData.designFirms);
     if (current.some((f) => f.toLowerCase() === norm.toLowerCase())) return;
     const updates = { designFirms: [...current, norm], designFirmUnknown: false };
@@ -558,8 +582,18 @@ export const NewLeadScreen = ({
     setDesignFirmFieldExpanded(true);
   }, [newLeadData.designFirms, onNewLeadChange]);
 
-  const setEndUser = useCallback((value) => {
-    onNewLeadChange({ endUser: value });
+  const addEndUser = useCallback((value) => {
+    const norm = String(value || '').trim();
+    if (!norm) return;
+    if (isUnknownStakeholderValue(norm)) {
+      onNewLeadChange({ endUserUnknown: true, endUser: '' });
+      setEndUserFieldExpanded(false);
+      markTouched('endUser');
+      return;
+    }
+    setEndUserOptions((prev) => mergeUnique(prev, norm));
+    onNewLeadChange({ endUser: norm, endUserUnknown: false });
+    setEndUserFieldExpanded(true);
     markTouched('endUser');
   }, [markTouched, onNewLeadChange]);
 
@@ -590,23 +624,21 @@ export const NewLeadScreen = ({
       pastProjectRef: String(opp?.id ?? ''),
     };
 
-    if (companyName && !String(newLeadData.endUser || '').trim()) {
+    if (companyName && !realEndUser && !newLeadData.endUserUnknown) {
       updates.endUser = companyName;
+      updates.endUserUnknown = false;
     }
 
     onNewLeadChange(updates);
     markTouched('project');
-    if (companyName && !String(newLeadData.endUser || '').trim()) {
+    if (companyName && !realEndUser && !newLeadData.endUserUnknown) {
       markTouched('endUser');
     }
-  }, [markTouched, newLeadData.endUser, onNewLeadChange]);
+  }, [markTouched, newLeadData.endUserUnknown, onNewLeadChange, realEndUser]);
 
   const addEndUserOption = useCallback((value) => {
-    const normalized = String(value || '').trim();
-    if (!normalized) return;
-    setEndUserOptions((prev) => mergeUnique(prev, normalized));
-    setEndUser(normalized);
-  }, [setEndUser]);
+    addEndUser(value);
+  }, [addEndUser]);
 
   const stageIndex = useMemo(
     () => stageOptions.indexOf(newLeadData.projectStatus), // -1 when nothing selected
@@ -649,7 +681,7 @@ export const NewLeadScreen = ({
     if (!newLeadData.projectStatus) next.projectStatus = 'Project stage is required.';
     if (!newLeadData.vertical) next.vertical = 'Vertical is required.';
     if (parseCurrency(newLeadData.estimatedList) <= 0) next.estimatedList = 'Estimated list must be greater than zero.';
-    if (!String(newLeadData.endUser || '').trim()) next.endUser = 'Select or create an end user.';
+    if (!realEndUser && !newLeadData.endUserUnknown) next.endUser = 'Select or create an end user.';
     if (!realDealers.length && !newLeadData.isBid) next.dealers = 'Add at least one dealer or mark Out to Bid.';
     if (!newLeadData.poTimeframe) next.poTimeframe = 'PO timeframe is required.';
     if (newLeadData.competitionPresent && !(newLeadData.competitors || []).length) {
@@ -666,6 +698,8 @@ export const NewLeadScreen = ({
     newLeadData.otherVertical,
     newLeadData.estimatedList,
     newLeadData.endUser,
+    newLeadData.endUserUnknown,
+    realEndUser,
     newLeadData.dealers,
     newLeadData.isBid,
     newLeadData.poTimeframe,
@@ -742,7 +776,7 @@ export const NewLeadScreen = ({
       { label: 'Win Probability', points: Math.round((winProbabilityValue / 100) * 10), max: 10 },
       { label: 'Estimated List', points: estimatedListPoints, max: 14 },
       { label: 'PO Timeframe', points: poTimeframePoints, max: 8 },
-      { label: 'End User', points: String(newLeadData.endUser || '').trim() ? 5 : 0, max: 5 },
+      { label: 'End User', points: (realEndUser || newLeadData.endUserUnknown) ? 5 : 0, max: 5 },
       { label: 'Dealer Coverage', points: (realDealers.length || newLeadData.isBid) ? 6 : 0, max: 6 },
       { label: 'A&D Alignment', points: (realDesignFirms.length || newLeadData.designFirmUnknown) ? 3 : 1, max: 3 },
       { label: 'Discount Quality', points: discountPoints, max: 8 },
@@ -775,6 +809,8 @@ export const NewLeadScreen = ({
     newLeadData.estimatedList,
     newLeadData.poTimeframe,
     newLeadData.endUser,
+    newLeadData.endUserUnknown,
+    realEndUser,
     newLeadData.dealers,
     newLeadData.isBid,
     newLeadData.designFirms,
@@ -841,7 +877,9 @@ export const NewLeadScreen = ({
     if (newLeadData.expectedInstallDate) add('Install Date', newLeadData.expectedInstallDate, 0);
     if (parsedEstimatedList > 0) add('Estimated List', `$${parsedEstimatedList.toLocaleString()}`, 1);
     add('PO Timeframe', newLeadData.poTimeframe, 1);
-    add('End User', newLeadData.endUser, 1);
+    if (newLeadData.endUserUnknown || realEndUser) {
+      add('End User', newLeadData.endUserUnknown ? 'Unknown' : realEndUser, 1);
+    }
     if (realDealers.length || newLeadData.isBid) {
       const dealerText = [newLeadData.isBid ? 'Out to bid' : null, realDealers.length ? realDealers.join(', ') : null].filter(Boolean).join(' · ');
       add('Dealers', dealerText, 1);
@@ -879,6 +917,8 @@ export const NewLeadScreen = ({
     parsedEstimatedList,
     newLeadData.poTimeframe,
     newLeadData.endUser,
+    newLeadData.endUserUnknown,
+    realEndUser,
     newLeadData.dealers,
     newLeadData.isBid,
     newLeadData.designFirms,
@@ -1432,33 +1472,49 @@ export const NewLeadScreen = ({
             <Section title="Stakeholders & Competition" theme={theme}>
               <Row label="End User" theme={theme} inline>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 min-w-0">
-                      <SpotlightMultiSelect
-                        selectedItems={newLeadData.endUser ? [newLeadData.endUser] : []}
-                        onAddItem={(user) => {
-                          const norm = user.trim();
-                          if (!norm) return;
-                          setEndUserOptions((prev) => mergeUnique(prev, norm));
-                          setEndUser(norm);
-                        }}
-                        onRemoveItem={() => setEndUser('')}
-                        options={endUserOptions.filter((option) => option.toLowerCase() !== String(newLeadData.endUser || '').toLowerCase())}
-                        onAddNew={addEndUserOption}
-                        placeholder="Search or add end user"
-                        theme={theme}
-                        compact={false}
-                        integratedChips
-                      />
-                    </div>
-                    <QuickPickButton
-                      active={newLeadData.endUser === 'Unknown'}
+                  {showEndUserCollapsed ? (
+                    <StakeholderCollapsedPill
+                      label="Unknown"
+                      hint="Add end user"
+                      onExpand={() => setEndUserFieldExpanded(true)}
                       theme={theme}
-                      onClick={() => setEndUser('Unknown')}
-                    >
-                      Unknown
-                    </QuickPickButton>
-                  </div>
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <SpotlightMultiSelect
+                          selectedItems={realEndUser ? [realEndUser] : []}
+                          onAddItem={addEndUser}
+                          onRemoveItem={() => {
+                            onNewLeadChange({ endUser: '', endUserUnknown: false });
+                            markTouched('endUser');
+                          }}
+                          options={endUserOptions.filter((option) => (
+                            isUnknownStakeholderValue(option)
+                            || option.toLowerCase() !== String(realEndUser || '').toLowerCase()
+                          ))}
+                          onAddNew={addEndUserOption}
+                          placeholder="Search or add end user"
+                          theme={theme}
+                          compact={false}
+                          integratedChips
+                        />
+                      </div>
+                      <QuickPickButton
+                        active={isEndUserUnknown && !realEndUser}
+                        theme={theme}
+                        disabled={!!realEndUser}
+                        onClick={() => {
+                          if (realEndUser) return;
+                          onNewLeadChange({ endUserUnknown: true, endUser: '' });
+                          setEndUserFieldExpanded(false);
+                          markTouched('endUser');
+                        }}
+                      >
+                        Unknown
+                      </QuickPickButton>
+                    </div>
+                  )}
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
               </Row>
@@ -1535,7 +1591,7 @@ export const NewLeadScreen = ({
                           onRemoveItem={(firm) => {
                             upd('designFirms', realDesignFirms.filter((item) => item !== firm));
                           }}
-                          options={(designFirms || []).filter((firm) => firm !== 'Unknown')}
+                          options={['Unknown', ...(designFirms || []).filter((firm) => !isUnknownStakeholderValue(firm))]}
                           onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
                           placeholder="Search or create firm"
                           theme={theme}

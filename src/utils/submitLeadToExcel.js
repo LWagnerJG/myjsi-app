@@ -17,8 +17,11 @@ const flattenLead = (lead) => ({
   poTimeframe:      lead.poTimeframe || '',
   contract:         lead.contractType || '',
   dealers:          (lead.dealers || []).join(', '),
-  adFirms:          (lead.designFirms || []).join(', '),
-  endUser:          lead.endUser || '',
+  adFirms:          [
+    ...(lead.designFirmUnknown ? ['Unknown'] : []),
+    ...(lead.designFirms || []).filter((firm) => String(firm).trim().toLowerCase() !== 'unknown'),
+  ].join(', '),
+  endUser:          lead.endUserUnknown ? 'Unknown' : (lead.endUser || ''),
   drivingSpecs:     lead.drivingSpecs
                       ? `${lead.drivingSpecs.type}:${lead.drivingSpecs.name}`
                       : '',
