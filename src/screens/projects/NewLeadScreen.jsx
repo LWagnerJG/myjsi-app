@@ -406,6 +406,13 @@ export const NewLeadScreen = ({
     (opportunities || []).map((opp) => opp.company),
   ));
 
+  const realDealers = useMemo(() => getRealDealers(newLeadData.dealers), [newLeadData.dealers]);
+  const realDesignFirms = useMemo(() => getRealDesignFirms(newLeadData.designFirms), [newLeadData.designFirms]);
+  const realEndUser = useMemo(() => getRealEndUser(newLeadData.endUser), [newLeadData.endUser]);
+  const isDealerOutToBid = !!newLeadData.isBid;
+  const isDesignFirmUnknown = !!newLeadData.designFirmUnknown;
+  const isEndUserUnknown = !!newLeadData.endUserUnknown;
+
   useEffect(() => {
     if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus)) {
       onNewLeadChange({ projectStatus: stageOptions[0] });
@@ -443,13 +450,6 @@ export const NewLeadScreen = ({
     }
     if (Object.keys(updates).length) onNewLeadChange(updates);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const realDealers = useMemo(() => getRealDealers(newLeadData.dealers), [newLeadData.dealers]);
-  const realDesignFirms = useMemo(() => getRealDesignFirms(newLeadData.designFirms), [newLeadData.designFirms]);
-  const realEndUser = useMemo(() => getRealEndUser(newLeadData.endUser), [newLeadData.endUser]);
-  const isDealerOutToBid = !!newLeadData.isBid;
-  const isDesignFirmUnknown = !!newLeadData.designFirmUnknown;
-  const isEndUserUnknown = !!newLeadData.endUserUnknown;
 
   useEffect(() => {
     if (realEndUser) setEndUserFieldExpanded(true);
