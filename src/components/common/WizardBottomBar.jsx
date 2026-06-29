@@ -14,6 +14,7 @@ export const WizardBottomBar = ({
     healthNode,
     actionNode,
     className = '',
+    contentMaxWidthClass = 'max-w-content',
 }) => {
     const c = theme.colors;
 
@@ -23,7 +24,7 @@ export const WizardBottomBar = ({
             className={`sticky bottom-0 z-20 rounded-t-2xl ${className}`}
             style={floatingBarStyle(theme)}
         >
-            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2">
+            <div className={`${contentMaxWidthClass} mx-auto px-4 sm:px-6 pt-3 pb-2`}>
                 {/* Step pills + health */}
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-1">
@@ -59,7 +60,7 @@ export const WizardBottomBar = ({
             </div>
 
             <div
-                className="max-w-content mx-auto px-4 sm:px-6 lg:px-8"
+                className={`${contentMaxWidthClass} mx-auto px-4 sm:px-6`}
                 style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
             >
                 {actionNode || null}

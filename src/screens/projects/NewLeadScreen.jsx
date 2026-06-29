@@ -19,6 +19,12 @@ import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
 
 const WIN_PRESETS = [10, 25, 50, 75, 90];
+const WIN_MIN = 5;
+const WIN_MAX = 100;
+const getWinSliderFillPercent = (value) => {
+  const clamped = Math.max(WIN_MIN, Math.min(WIN_MAX, Number(value) || WIN_MIN));
+  return ((clamped - WIN_MIN) / (WIN_MAX - WIN_MIN)) * 100;
+};
 const getWinBand = (pct) => {
   if (pct <= 15) return { label: 'Unlikely', tone: '#B85C5C' };
   if (pct <= 35) return { label: 'Possible', tone: '#C4956A' };
@@ -52,6 +58,7 @@ const FILE_MAX_SIZE = 20 * 1024 * 1024;
 const FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'png', 'jpg', 'jpeg', 'heic'];
 const FILE_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.heic';
 const STEP_LABELS = ['Basics', 'Scope', 'Review'];
+const NEW_LEAD_MAX_WIDTH = 'max-w-2xl';
 const getSubtleBorder = (theme) => (isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)');
 
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -468,9 +475,12 @@ export const NewLeadScreen = ({
         .nl-fwd  { animation: nl-slide-in-right .25s cubic-bezier(.25,.46,.45,.94) both; }
         .nl-back { animation: nl-slide-in-left  .25s cubic-bezier(.25,.46,.45,.94) both; }
 
-        .win-slider { -webkit-appearance:none; appearance:none; height:5px; border-radius:99px; outline:none; cursor:pointer; display:block; width:100%; }
-        .win-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; border:2.5px solid var(--ws-accent,#666); box-shadow:0 1px 6px rgba(0,0,0,0.18); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
+        .win-slider { -webkit-appearance:none; appearance:none; height:22px; border-radius:99px; outline:none; cursor:pointer; display:block; width:100%; background:transparent; }
+        .win-slider::-webkit-slider-runnable-track { height:5px; border-radius:99px; background:transparent; }
+        .win-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; border:2.5px solid var(--ws-accent,#666); box-shadow:0 1px 6px rgba(0,0,0,0.18); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; margin-top:-8.5px; }
         .win-slider::-webkit-slider-thumb:active { transform:scale(1.18); box-shadow:0 2px 12px rgba(0,0,0,0.22); }
+        .win-slider::-moz-range-track { height:5px; border-radius:99px; background:transparent; }
+        .win-slider::-moz-range-progress { background:transparent; }
         .win-slider::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:#fff; border:2.5px solid var(--ws-accent,#666); box-shadow:0 1px 6px rgba(0,0,0,0.18); cursor:pointer; box-sizing:border-box; }
         .win-slider:focus { outline:none; }
         .win-slider:focus-visible::-webkit-slider-thumb { box-shadow:0 0 0 4px var(--ws-accent-ring,rgba(0,0,0,0.15)), 0 1px 6px rgba(0,0,0,0.18); }
@@ -974,7 +984,7 @@ export const NewLeadScreen = ({
     <form onSubmit={handleSubmit} className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
       {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
       <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
-      <div className="px-4 sm:px-6 lg:px-8 pb-32 max-w-content mx-auto w-full" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
+      <div className={`px-4 sm:px-6 pb-32 ${NEW_LEAD_MAX_WIDTH} mx-auto w-full`} style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
 
         <div key={step} className={`space-y-4 ${stepAnimClass}`}>
         {step === 0 && (
@@ -1213,6 +1223,7 @@ export const NewLeadScreen = ({
                   const winProb = newLeadData.winProbability ?? 50;
                   const winBand = getWinBand(winProb);
                   const trackBg = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)';
+                  const fillPercent = getWinSliderFillPercent(winProb);
                   return (
                     <div>
                       <div className="flex items-center justify-between mb-3">
@@ -1226,21 +1237,36 @@ export const NewLeadScreen = ({
                           {winBand.label}
                         </span>
                       </div>
-                      <input
-                        type="range"
-                        min={5}
-                        max={100}
-                        step={5}
-                        value={winProb}
-                        onChange={(e) => upd('winProbability', Number(e.target.value))}
-                        className="win-slider"
-                        style={{
-                          '--ws-accent': c.accent,
-                          '--ws-accent-ring': `${c.accent}44`,
-                          background: `linear-gradient(to right, ${c.accent} ${winProb}%, ${trackBg} ${winProb}%)`,
-                        }}
-                      />
-                      <div className="flex gap-1.5 mt-3">
+                      <div className="relative flex items-center h-[22px]">
+                        <div
+                          className="absolute inset-x-0 h-[5px] rounded-full pointer-events-none"
+                          style={{ backgroundColor: trackBg }}
+                          aria-hidden="true"
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `calc(11px + (100% - 22px) * ${fillPercent / 100})`,
+                              backgroundColor: c.accent,
+                              transition: 'width 80ms ease-out',
+                            }}
+                          />
+                        </div>
+                        <input
+                          type="range"
+                          min={WIN_MIN}
+                          max={WIN_MAX}
+                          step={5}
+                          value={winProb}
+                          onChange={(e) => upd('winProbability', Number(e.target.value))}
+                          className="win-slider relative z-[1]"
+                          style={{
+                            '--ws-accent': c.accent,
+                            '--ws-accent-ring': `${c.accent}44`,
+                          }}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-3">
                         {WIN_PRESETS.map((pct) => {
                           const active = winProb === pct;
                           return (
@@ -1248,7 +1274,7 @@ export const NewLeadScreen = ({
                               key={pct}
                               type="button"
                               onClick={() => upd('winProbability', pct)}
-                              className="flex-1 rounded-full py-1.5 border transition-all"
+                              className="rounded-full py-1.5 px-3 border transition-all"
                               style={{
                                 fontSize: "0.75rem",
                                 fontWeight: 600,
@@ -1799,6 +1825,7 @@ export const NewLeadScreen = ({
         steps={STEP_LABELS}
         currentStep={step}
         onStepChange={animateToStep}
+        contentMaxWidthClass={NEW_LEAD_MAX_WIDTH}
         healthNode={<InlineStepHealth health={health} theme={theme} />}
         actionNode={step < 2 ? (
           <div style={{ opacity: stepValid ? 1 : 0.45, transition: 'opacity 0.2s ease' }}>

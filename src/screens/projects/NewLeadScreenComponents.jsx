@@ -43,17 +43,17 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 
 /* Compact field row */
 export const Row = ({ label, children, theme, tip, inline }) => {
-  const rowLayout = inline ? 'grid items-start gap-1.5 md:grid-cols-[100px_minmax(0,1fr)] md:gap-2.5' : '';
+  const rowLayout = inline ? 'grid items-start gap-1.5 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-3' : '';
   return (
   <div className={`${rowLayout} py-2`}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? 'md:min-h-[34px] md:pt-1' : 'mb-1'}`}>
+      <div className={`flex items-center gap-1.5 ${inline ? 'sm:min-h-[34px] sm:pt-1' : 'mb-1'}`}>
         <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
     )}
-    {inline ? <div className="min-w-0">{children}</div> : children}
+    {inline ? <div className="min-w-0 w-full">{children}</div> : children}
   </div>
   );
 };
