@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Search, Plus, X } from "lucide-react";
-import { DESIGN_TOKENS, isDarkTheme } from "../../design-system/tokens.js";
+import { isDarkTheme, PORTAL_MENU_Z_INDEX, portalMenuRowBg, portalMenuSurface } from "../../design-system/tokens.js";
 import { getNoAutofillName, NO_AUTOFILL_INPUT_PROPS } from "../../utils/noAutofillInput.js";
+import { announceSpotlightMenuOpen, claimSpotlightMenu } from "../../utils/spotlightMenuCoordinator.js";
 
 export function SpotlightMultiSelect({
   label,
@@ -25,6 +26,7 @@ export function SpotlightMultiSelect({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [inputLocked, setInputLocked] = useState(true);
   const [inputName] = useState(() => getNoAutofillName("spotlight"));
+  const menuId = useId();
 
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
@@ -33,8 +35,8 @@ export function SpotlightMultiSelect({
   const listboxId = useMemo(() => `listbox-${Math.random().toString(36).substr(2, 9)}`, []);
 
   const dark = isDarkTheme(theme);
+  const menuShell = portalMenuSurface(theme);
   const palette = {
-    bg: theme.colors.surface,
     field: dark ? theme.colors.background : theme.colors.surface,
     border: dark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.07)",
     text: theme.colors.textPrimary,
@@ -44,6 +46,11 @@ export function SpotlightMultiSelect({
   };
   const dimmedFieldBg = dark ? "rgba(255,255,255,0.04)" : "rgba(53,53,53,0.03)";
   const dimmedBorder = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
+
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    setActiveIndex(-1);
+  }, []);
 
   const measure = useCallback(() => {
     if (!triggerRef.current) return null;
@@ -56,13 +63,22 @@ export function SpotlightMultiSelect({
     return rect;
   }, []);
 
+  const openMenu = useCallback(() => {
+    setInputLocked(false);
+    announceSpotlightMenuOpen(menuId);
+    setOpen(true);
+    inputRef.current?.focus();
+  }, [menuId]);
+
   useLayoutEffect(() => {
     if (!open) {
       setMenuPos(null);
       return;
     }
     measure();
-  }, [open, measure]);
+  }, [open, measure, q, selectedItems.length]);
+
+  useEffect(() => claimSpotlightMenu(menuId, closeMenu), [menuId, closeMenu]);
 
   useEffect(() => {
     if (!open) return;
@@ -77,9 +93,17 @@ export function SpotlightMultiSelect({
 
   useEffect(() => {
     if (!open) return;
+    const onScrollClose = () => closeMenu();
+    const panel = document.querySelector(".panel-content");
+    panel?.addEventListener("scroll", onScrollClose, { passive: true });
+    return () => panel?.removeEventListener("scroll", onScrollClose);
+  }, [open, closeMenu]);
+
+  useEffect(() => {
+    if (!open) return;
     const close = (e) => {
       if (wrapperRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
-      setOpen(false);
+      closeMenu();
     };
     document.addEventListener("mousedown", close);
     document.addEventListener("touchstart", close, { passive: true });
@@ -87,7 +111,7 @@ export function SpotlightMultiSelect({
       document.removeEventListener("mousedown", close);
       document.removeEventListener("touchstart", close);
     };
-  }, [open]);
+  }, [open, closeMenu]);
 
   const norm = (s) => (s || "").trim().toLowerCase();
 
@@ -119,7 +143,7 @@ export function SpotlightMultiSelect({
     if (!val) return;
     onAddItem?.(val);
     setQ("");
-    setOpen(false);
+    closeMenu();
     inputRef.current?.blur();
   };
 
@@ -129,13 +153,13 @@ export function SpotlightMultiSelect({
     onAddNew?.(name);
     onAddItem?.(name);
     setQ("");
-    setOpen(false);
+    closeMenu();
     inputRef.current?.blur();
   };
 
   const handleKeyDown = (e) => {
     if (!open) {
-      if (e.key === "ArrowDown" || e.key === "Enter") { e.preventDefault(); setOpen(true); }
+      if (e.key === "ArrowDown" || e.key === "Enter") { e.preventDefault(); openMenu(); }
       return;
     }
     switch (e.key) {
@@ -148,29 +172,23 @@ export function SpotlightMultiSelect({
         else if (filtered.length === 1 && !canCreate) pick(filtered[0]);
         else if (canCreate && filtered.length === 0) create();
         break;
-      case "Escape": e.preventDefault(); setOpen(false); inputRef.current?.blur(); break;
-      case "Tab": setOpen(false); break;
+      case "Escape": e.preventDefault(); closeMenu(); inputRef.current?.blur(); break;
+      case "Tab": closeMenu(); break;
       default: break;
     }
   };
 
-  const openMenu = useCallback(() => {
-    setInputLocked(false);
-    setOpen(true);
-    inputRef.current?.focus();
-  }, []);
+  const showMenu = open && menuPos && (filtered.length > 0 || canCreate);
 
-  const showMenu = open && (filtered.length > 0 || canCreate);
-
-  const menuStyle = menuPos ? {
+  const menuStyle = {
     position: "fixed",
-    left: menuPos.left,
-    width: menuPos.width,
-    zIndex: DESIGN_TOKENS.zIndex.popover,
-    ...(dropUp
+    left: menuPos?.left ?? 0,
+    width: menuPos?.width ?? 0,
+    zIndex: PORTAL_MENU_Z_INDEX,
+    ...(dropUp && menuPos
       ? { bottom: window.innerHeight - menuPos.top + 6 }
-      : { top: menuPos.bottom + 6 }),
-  } : {};
+      : { top: menuPos?.bottom ? menuPos.bottom + 6 : 0 }),
+  };
 
   return (
     <div className="w-full" ref={wrapperRef}>
@@ -192,7 +210,7 @@ export function SpotlightMultiSelect({
           }}
           onClick={openMenu}
         >
-          <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint, opacity: dimmed ? 0.65 : 1 }} />
+          <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
           <input
             ref={inputRef}
             type="text"
@@ -201,12 +219,12 @@ export function SpotlightMultiSelect({
             readOnly={inputLocked}
             {...NO_AUTOFILL_INPUT_PROPS}
             value={q}
-            onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-            onFocus={() => { setInputLocked(false); setOpen(true); }}
+            onChange={(e) => { setQ(e.target.value); openMenu(); }}
+            onFocus={() => { setInputLocked(false); openMenu(); }}
             onKeyDown={handleKeyDown}
             placeholder={selectedItems.length > 0 && compact ? "" : placeholder}
             className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? "text-[0.8125rem]" : "text-sm"}`}
-            style={{ color: palette.text, opacity: dimmed ? 0.75 : 1 }}
+            style={{ color: palette.text }}
             role="combobox"
             aria-expanded={open}
             aria-controls={open ? listboxId : undefined}
@@ -236,21 +254,20 @@ export function SpotlightMultiSelect({
           )}
         </div>
 
-        {showMenu && menuPos && createPortal(
+        {showMenu && typeof document !== "undefined" && createPortal(
           <div
             ref={menuRef}
             id={listboxId}
             role="listbox"
-            className="rounded-2xl border overflow-y-auto"
+            className="rounded-2xl overflow-hidden"
             style={{
               ...menuStyle,
-              backgroundColor: palette.bg,
-              borderColor: palette.border,
-              boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.45)" : "0 8px 24px rgba(0,0,0,0.12)",
+              ...menuShell,
               maxHeight: 260,
+              overflowY: "auto",
             }}
           >
-            <div className="py-1">
+            <div className="py-1" style={{ backgroundColor: menuShell.backgroundColor }}>
               {filtered.map((opt, idx) => (
                 <button
                   key={opt}
@@ -259,10 +276,11 @@ export function SpotlightMultiSelect({
                   type="button"
                   role="option"
                   aria-selected={activeIndex === idx}
-                  className={`w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium transition-colors ${
-                    activeIndex === idx ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
-                  }`}
-                  style={{ color: palette.text }}
+                  className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium"
+                  style={{
+                    color: palette.text,
+                    backgroundColor: portalMenuRowBg(activeIndex === idx, theme),
+                  }}
                   onMouseDown={(e) => { e.preventDefault(); pick(opt); }}
                   onMouseEnter={() => setActiveIndex(idx)}
                 >
@@ -271,26 +289,26 @@ export function SpotlightMultiSelect({
               ))}
               {canCreate && (
                 <>
-                  {filtered.length > 0 && <div className="h-px mx-2 my-1" style={{ background: palette.border }} />}
+                  {filtered.length > 0 && (
+                    <div className="h-px mx-2 my-1" style={{ backgroundColor: dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)" }} />
+                  )}
                   <button
                     id={`${listboxId}-option-${filtered.length}`}
                     data-index={filtered.length}
                     type="button"
                     role="option"
                     aria-selected={activeIndex === filtered.length}
-                    className={`w-full text-left px-4 py-2.5 text-[0.8125rem] font-semibold flex items-center gap-2 transition-colors ${
-                      activeIndex === filtered.length ? "bg-black/[0.07] dark:bg-white/[0.07]" : "hover:bg-black/[0.04] dark:hover:bg-white/[0.08]"
-                    }`}
-                    style={{ color: palette.accent }}
+                    className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-semibold flex items-center gap-2"
+                    style={{
+                      color: palette.accent,
+                      backgroundColor: portalMenuRowBg(activeIndex === filtered.length, theme),
+                    }}
                     onMouseDown={(e) => { e.preventDefault(); create(); }}
                     onMouseEnter={() => setActiveIndex(filtered.length)}
                   >
                     <Plus className="w-4 h-4 flex-shrink-0" /> Create "{q.trim()}"
                   </button>
                 </>
-              )}
-              {!filtered.length && !canCreate && (
-                <div className="px-4 py-3 text-[0.8125rem]" style={{ color: palette.hint }}>No matches</div>
               )}
             </div>
           </div>,

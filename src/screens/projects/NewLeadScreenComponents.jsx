@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Check } from 'lucide-react';
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
-import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, isDarkTheme, PORTAL_MENU_Z_INDEX, portalMenuSurface } from '../../design-system/tokens.js';
 import { getNoAutofillName, NO_AUTOFILL_INPUT_PROPS } from '../../utils/noAutofillInput.js';
+import { announceSpotlightMenuOpen, claimSpotlightMenu } from '../../utils/spotlightMenuCoordinator.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -181,12 +182,14 @@ export const ProjectSpotlight = ({
   const [hlIdx, setHlIdx] = useState(0);
   const [inputLocked, setInputLocked] = useState(true);
   const [inputName] = useState(() => getNoAutofillName('project'));
+  const menuId = useId();
   const anchorRef = useRef(null);
   const menuRef = useRef(null);
   const inputRef = useRef(null);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
 
   const dark = isDarkTheme(theme);
+  const menuShell = portalMenuSurface(theme);
   const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
   const query = normalizeSpotlightText(value);
   const trimmedValue = String(value || '').trim();
@@ -230,8 +233,13 @@ export const ProjectSpotlight = ({
 
   const doOpen = useCallback(() => {
     measure();
+    announceSpotlightMenuOpen(menuId);
     setOpen(true);
-  }, [measure]);
+  }, [measure, menuId]);
+
+  const closeMenu = useCallback(() => setOpen(false), []);
+
+  useEffect(() => claimSpotlightMenu(menuId, closeMenu), [menuId, closeMenu]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -367,15 +375,13 @@ export const ProjectSpotlight = ({
       {open && createPortal(
         <div
           ref={menuRef}
-          className="fixed rounded-[22px] border overflow-hidden"
+          className="fixed rounded-[22px] overflow-hidden"
           style={{
             top: pos.top,
             left: pos.left,
             width: pos.width,
-            background: theme.colors.surface,
-            borderColor: subtleBorder,
-            boxShadow: dark ? '0 14px 40px rgba(0,0,0,0.42)' : '0 14px 32px rgba(0,0,0,0.12)',
-            zIndex: DESIGN_TOKENS.zIndex.popover,
+            ...menuShell,
+            zIndex: PORTAL_MENU_Z_INDEX,
           }}
         >
           {filtered.length > 0 && (
@@ -468,6 +474,8 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
   const menuRef = useRef(null);
   const inputRef = useRef(null);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
+  const dark = isDarkTheme(theme);
+  const menuShell = portalMenuSurface(theme);
 
   const norm = s => s.toLowerCase();
   const filtered = useMemo(() => {
@@ -510,7 +518,6 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
     else if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
   }, [open, filtered, hlIdx, pick, doOpen]);
 
-  const dark = isDarkTheme(theme);
   const subtleBorder = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
   return (
@@ -528,11 +535,12 @@ export const ProductSpotlight = ({ selectedSeries, onAdd, available, theme }) =>
       </div>
       {open && createPortal(
         <div ref={menuRef}
-          className="fixed rounded-2xl border shadow-xl overflow-hidden"
+          className="fixed rounded-2xl overflow-hidden"
           style={{
             top: pos.top, left: pos.left, width: pos.width,
-            maxHeight: 280, background: theme.colors.surface, borderColor: subtleBorder,
-            zIndex: DESIGN_TOKENS.zIndex.popover,
+            maxHeight: 280,
+            ...menuShell,
+            zIndex: PORTAL_MENU_Z_INDEX,
           }}>
           <div className="overflow-y-auto" style={{ maxHeight: 280, WebkitOverflowScrolling: 'touch' }}>
             {filtered.length > 0 ? filtered.map((s, idx) => {

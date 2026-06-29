@@ -321,6 +321,34 @@ export const fieldTileSurface = (theme) => {
 };
 
 /**
+ * Opaque fixed-position menu shell for portaled Spotlight / combobox dropdowns.
+ * Uses explicit hex colors so iOS compositor never bleeds page content through.
+ */
+export const portalMenuSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  const borderColor = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+  return {
+    backgroundColor: dark ? '#242424' : '#FFFFFF',
+    border: `1px solid ${borderColor}`,
+    boxShadow: dark ? '0 12px 40px rgba(0,0,0,0.55)' : '0 12px 32px rgba(53,53,53,0.14)',
+    opacity: 1,
+    isolation: 'isolate',
+    transform: 'translateZ(0)',
+    WebkitBackfaceVisibility: 'hidden',
+    backfaceVisibility: 'hidden',
+  };
+};
+
+/** Above app chrome; matches SearchableSelect. */
+export const PORTAL_MENU_Z_INDEX = 10000;
+
+export const portalMenuRowBg = (active, theme) => {
+  const dark = isDarkTheme(theme);
+  if (!active) return 'transparent';
+  return dark ? '#333333' : '#F2F4F6';
+};
+
+/**
  * Standard modal / popover card shell.
  */
 export const modalCardSurface = (theme) => {

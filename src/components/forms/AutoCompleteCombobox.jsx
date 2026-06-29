@@ -1,8 +1,9 @@
-import React, { useState, useRef, useMemo, useEffect, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useLayoutEffect, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
-import { DESIGN_TOKENS, inputSurface, isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
+import { inputSurface, isDarkTheme, PORTAL_MENU_Z_INDEX, portalMenuRowBg, portalMenuSurface, subtleBorder } from '../../design-system/tokens.js';
 import { getNoAutofillName, NO_AUTOFILL_INPUT_PROPS } from '../../utils/noAutofillInput.js';
+import { announceSpotlightMenuOpen, claimSpotlightMenu } from '../../utils/spotlightMenuCoordinator.js';
 
 export const AutoCompleteCombobox = React.memo(({
     label,
@@ -24,10 +25,14 @@ export const AutoCompleteCombobox = React.memo(({
     const [menuPos, setMenuPos] = useState(null);
     const [inputLocked, setInputLocked] = useState(true);
     const [inputName] = useState(() => getNoAutofillName('combobox'));
+    const menuId = useId();
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
     const menuRef = useRef(null);
     const dark = isDarkTheme(theme);
+    const menuShell = portalMenuSurface(theme);
+
+    const closeMenu = useCallback(() => setIsOpen(false), []);
 
     const measure = useCallback(() => {
         if (!wrapperRef.current) return null;
@@ -55,12 +60,22 @@ export const AutoCompleteCombobox = React.memo(({
     const sharedInputSurface = inputSurface(theme);
     const inputBg = dark ? theme.colors.background : sharedInputSurface.backgroundColor;
 
+    useEffect(() => claimSpotlightMenu(menuId, closeMenu), [menuId, closeMenu]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const onScrollClose = () => closeMenu();
+        const panel = document.querySelector('.panel-content');
+        panel?.addEventListener('scroll', onScrollClose, { passive: true });
+        return () => panel?.removeEventListener('scroll', onScrollClose);
+    }, [isOpen, closeMenu]);
+
     // Close on outside click/tap
     useEffect(() => {
         if (!isOpen) return;
         const close = (e) => {
             if (wrapperRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
-            setIsOpen(false);
+            closeMenu();
         };
         document.addEventListener('mousedown', close);
         document.addEventListener('touchstart', close, { passive: true });
@@ -68,7 +83,7 @@ export const AutoCompleteCombobox = React.memo(({
             document.removeEventListener('mousedown', close);
             document.removeEventListener('touchstart', close);
         };
-    }, [isOpen]);
+    }, [isOpen, closeMenu]);
 
     useLayoutEffect(() => {
         if (!isOpen) {
@@ -105,7 +120,13 @@ export const AutoCompleteCombobox = React.memo(({
         inputRef.current?.blur();
     };
 
-    const showList = showDropdown && isOpen && filtered.length > 0;
+    const openMenu = useCallback(() => {
+        if (!showDropdown) return;
+        announceSpotlightMenuOpen(menuId);
+        setIsOpen(true);
+    }, [menuId, showDropdown]);
+
+    const showList = showDropdown && isOpen && menuPos && filtered.length > 0;
 
     return (
         <div className="space-y-2">
@@ -129,11 +150,11 @@ export const AutoCompleteCombobox = React.memo(({
                     value={value || ''}
                     onFocus={() => {
                         setInputLocked(false);
-                        if (showDropdown) setIsOpen(true);
+                        openMenu();
                     }}
                     onChange={(e) => {
                         onChange(e.target.value);
-                        if (showDropdown) setIsOpen(true);
+                        openMenu();
                     }}
                     placeholder={placeholder}
                     className="w-full border rounded-full focus:outline-none focus:ring-0"
@@ -148,34 +169,32 @@ export const AutoCompleteCombobox = React.memo(({
                     }}
                 />
 
-                {showList && menuPos && createPortal(
+                {showList && typeof document !== 'undefined' && createPortal(
                     <div
                         ref={menuRef}
-                        className={`rounded-2xl border overflow-hidden ${dropdownClassName}`}
+                        className={`rounded-2xl overflow-hidden ${dropdownClassName}`}
                         style={{
                             position: 'fixed',
                             left: menuPos.left,
                             width: menuPos.width,
-                            zIndex: DESIGN_TOKENS.zIndex.popover,
+                            zIndex: PORTAL_MENU_Z_INDEX,
                             ...(dropUp
                                 ? { bottom: window.innerHeight - menuPos.top + 6 }
                                 : { top: menuPos.bottom + 6 }),
-                            backgroundColor: theme.colors.surface,
-                            borderColor,
-                            boxShadow: dark
-                                ? '0 8px 32px rgba(0,0,0,0.45)'
-                                : '0 8px 24px rgba(0,0,0,0.11)',
+                            ...menuShell,
+                            maxHeight: 216,
+                            overflowY: 'auto',
                         }}
                     >
-                        <div className="overflow-y-auto py-1" style={{ maxHeight: 216 }}>
+                        <div className="py-1" style={{ backgroundColor: menuShell.backgroundColor }}>
                             {filtered.map((opt) => (
                                 <button
                                     key={opt}
                                     type="button"
                                     onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
                                     onClick={() => handleSelect(opt)}
-                                    className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
-                                    style={{ color: theme.colors.textPrimary }}
+                                    className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium"
+                                    style={{ color: theme.colors.textPrimary, backgroundColor: 'transparent' }}
                                 >
                                     {opt}
                                 </button>
