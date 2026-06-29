@@ -9,6 +9,7 @@ import { WizardBottomBar } from '../../components/common/WizardBottomBar.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js';
 import { hapticSuccess } from '../../utils/haptics.js';
 import { formatDate } from '../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, PO_TIMEFRAMES } from './data.js';
@@ -191,6 +192,7 @@ const StakeholderCollapsedPill = ({ label, hint, onExpand, theme }) => {
 
 const getRealDealers = (dealers = []) => (dealers || []).filter((dealer) => String(dealer).trim().toLowerCase() !== 'out to bid');
 const getRealDesignFirms = (firms = []) => (firms || []).filter((firm) => String(firm).trim().toLowerCase() !== 'unknown');
+const getRealCompetitors = (competitors = []) => (competitors || []).filter((name) => String(name).trim().toLowerCase() !== 'unknown');
 const getRealEndUser = (endUser = '') => {
   const trimmed = String(endUser || '').trim();
   return trimmed.toLowerCase() === 'unknown' ? '' : trimmed;
@@ -387,6 +389,7 @@ export const NewLeadScreen = ({
   const c = theme.colors;
   const dark = isDarkTheme(theme);
   const subtleBorder = getSubtleBorder(theme);
+  const prefersReducedMotion = usePrefersReducedMotion();
   const stageOptions = useMemo(() => STAGES.filter((stage) => stage !== 'Won' && stage !== 'Lost'), []);
 
   const [step, setStep] = useState(0);
@@ -394,11 +397,11 @@ export const NewLeadScreen = ({
   const prevStepRef = useRef(0);
 
   const animateToStep = useCallback((nextStep) => {
-    const dir = nextStep > prevStepRef.current ? 'nl-fwd' : 'nl-back';
+    const dir = prefersReducedMotion ? '' : (nextStep > prevStepRef.current ? 'nl-fwd' : 'nl-back');
     prevStepRef.current = nextStep;
     setStepAnimClass(dir);
     setStep(nextStep);
-  }, []);
+  }, [prefersReducedMotion]);
 
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -410,6 +413,7 @@ export const NewLeadScreen = ({
   const [dealerFieldExpanded, setDealerFieldExpanded] = useState(() => getRealDealers(newLeadData.dealers).length > 0);
   const [designFirmFieldExpanded, setDesignFirmFieldExpanded] = useState(() => getRealDesignFirms(newLeadData.designFirms).length > 0);
   const [endUserFieldExpanded, setEndUserFieldExpanded] = useState(() => !!getRealEndUser(newLeadData.endUser));
+  const [competitionFieldExpanded, setCompetitionFieldExpanded] = useState(() => getRealCompetitors(newLeadData.competitors).length > 0);
 
   // Custom discount mode — true when the stored value isn't in the predefined list
   const [discountCustom, setDiscountCustom] = useState(
@@ -423,10 +427,12 @@ export const NewLeadScreen = ({
 
   const realDealers = useMemo(() => getRealDealers(newLeadData.dealers), [newLeadData.dealers]);
   const realDesignFirms = useMemo(() => getRealDesignFirms(newLeadData.designFirms), [newLeadData.designFirms]);
+  const realCompetitors = useMemo(() => getRealCompetitors(newLeadData.competitors), [newLeadData.competitors]);
   const realEndUser = useMemo(() => getRealEndUser(newLeadData.endUser), [newLeadData.endUser]);
   const isDealerOutToBid = !!newLeadData.isBid;
   const isDesignFirmUnknown = !!newLeadData.designFirmUnknown;
   const isEndUserUnknown = !!newLeadData.endUserUnknown;
+  const isCompetitionUnknown = !!newLeadData.competitionUnknown;
 
   useEffect(() => {
     if (newLeadData.projectStatus && !stageOptions.includes(newLeadData.projectStatus)) {
@@ -446,8 +452,10 @@ export const NewLeadScreen = ({
   useEffect(() => {
     const dealers = newLeadData.dealers || [];
     const designFirmsList = newLeadData.designFirms || [];
+    const competitorsList = newLeadData.competitors || [];
     const hasLegacyBid = dealers.some((dealer) => String(dealer).trim().toLowerCase() === 'out to bid');
     const legacyUnknownOnly = designFirmsList.includes('Unknown') && getRealDesignFirms(designFirmsList).length === 0;
+    const legacyCompetitionUnknown = competitorsList.includes('Unknown') && getRealCompetitors(competitorsList).length === 0;
     const legacyEndUserUnknown = String(newLeadData.endUser || '').trim().toLowerCase() === 'unknown';
     const updates = {};
 
@@ -458,6 +466,10 @@ export const NewLeadScreen = ({
     if (legacyUnknownOnly && !newLeadData.designFirmUnknown) {
       updates.designFirmUnknown = true;
       updates.designFirms = [];
+    }
+    if (legacyCompetitionUnknown && !newLeadData.competitionUnknown) {
+      updates.competitionUnknown = true;
+      updates.competitors = [];
     }
     if (legacyEndUserUnknown && !newLeadData.endUserUnknown) {
       updates.endUserUnknown = true;
@@ -481,9 +493,15 @@ export const NewLeadScreen = ({
     else if (isDesignFirmUnknown) setDesignFirmFieldExpanded(false);
   }, [realDesignFirms.length, isDesignFirmUnknown]);
 
+  useEffect(() => {
+    if (realCompetitors.length > 0) setCompetitionFieldExpanded(true);
+    else if (isCompetitionUnknown) setCompetitionFieldExpanded(false);
+  }, [realCompetitors.length, isCompetitionUnknown]);
+
   const showDealerCollapsed = isDealerOutToBid && realDealers.length === 0 && !dealerFieldExpanded;
   const showDesignFirmCollapsed = isDesignFirmUnknown && realDesignFirms.length === 0 && !designFirmFieldExpanded;
   const showEndUserCollapsed = isEndUserUnknown && !realEndUser && !endUserFieldExpanded;
+  const showCompetitionCollapsed = !!newLeadData.competitionPresent && isCompetitionUnknown && realCompetitors.length === 0 && !competitionFieldExpanded;
 
   useEffect(() => {
     // Scroll back to top so each step feels like a fresh page
@@ -522,8 +540,13 @@ export const NewLeadScreen = ({
       s.textContent = `
         @keyframes nl-slide-in-right { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
         @keyframes nl-slide-in-left  { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:translateX(0); } }
-        .nl-fwd  { animation: nl-slide-in-right .25s cubic-bezier(.25,.46,.45,.94) both; }
-        .nl-back { animation: nl-slide-in-left  .25s cubic-bezier(.25,.46,.45,.94) both; }
+        @keyframes nl-field-in { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+        .nl-fwd  { animation: nl-slide-in-right .28s cubic-bezier(.22,1,.36,1) both; }
+        .nl-back { animation: nl-slide-in-left  .28s cubic-bezier(.22,1,.36,1) both; }
+        .nl-field-in { animation: nl-field-in .24s cubic-bezier(.22,1,.36,1) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .nl-fwd, .nl-back, .nl-field-in { animation: none !important; }
+        }
 
         .win-slider { -webkit-appearance:none; appearance:none; height:22px; border-radius:99px; outline:none; cursor:pointer; display:block; width:100%; background:transparent; }
         .win-slider::-webkit-slider-runnable-track { height:5px; border-radius:99px; background:transparent; }
@@ -545,7 +568,7 @@ export const NewLeadScreen = ({
       return;
     }
     if (field === 'competitionPresent' && value === false) {
-      onNewLeadChange({ competitionPresent: false, competitors: [], otherCompetitor: '' });
+      onNewLeadChange({ competitionPresent: false, competitors: [], otherCompetitor: '', competitionUnknown: false });
       return;
     }
     onNewLeadChange({ [field]: value });
@@ -596,6 +619,22 @@ export const NewLeadScreen = ({
     onNewLeadChange(updates);
     setDesignFirmFieldExpanded(true);
   }, [newLeadData.designFirms, onNewLeadChange]);
+
+  const addCompetitor = useCallback((competitor) => {
+    const norm = competitor.trim();
+    if (!norm) return;
+    if (isUnknownStakeholderValue(norm)) {
+      onNewLeadChange({ competitionUnknown: true, competitors: [] });
+      setCompetitionFieldExpanded(false);
+      markTouched('competitors');
+      return;
+    }
+    const current = getRealCompetitors(newLeadData.competitors);
+    if (current.some((name) => name.toLowerCase() === norm.toLowerCase())) return;
+    onNewLeadChange({ competitionUnknown: false, competitors: [...current, norm] });
+    setCompetitionFieldExpanded(true);
+    markTouched('competitors');
+  }, [markTouched, newLeadData.competitors, onNewLeadChange]);
 
   const addEndUser = useCallback((value) => {
     const norm = String(value || '').trim();
@@ -699,8 +738,8 @@ export const NewLeadScreen = ({
     if (!realEndUser && !newLeadData.endUserUnknown) next.endUser = 'Select or create an end user.';
     if (!realDealers.length && !newLeadData.isBid) next.dealers = 'Add at least one dealer or mark Out to Bid.';
     if (!newLeadData.poTimeframe) next.poTimeframe = 'PO timeframe is required.';
-    if (newLeadData.competitionPresent && !(newLeadData.competitors || []).length) {
-      next.competitors = 'Add at least one competitor or switch Competition off.';
+    if (newLeadData.competitionPresent && !realCompetitors.length && !newLeadData.competitionUnknown) {
+      next.competitors = 'Add a competitor, mark Unknown, or switch Competition off.';
     }
     if (newLeadData.jsiQuoteExists && !String(newLeadData.jsiQuoteNumber || '').trim()) {
       next.jsiQuoteNumber = 'Quote number is required when Existing Quote is selected.';
@@ -719,10 +758,12 @@ export const NewLeadScreen = ({
     newLeadData.isBid,
     newLeadData.poTimeframe,
     newLeadData.competitionPresent,
+    newLeadData.competitionUnknown,
     newLeadData.competitors,
     newLeadData.jsiQuoteExists,
     newLeadData.jsiQuoteNumber,
     realDealers,
+    realCompetitors,
   ]);
 
 
@@ -781,7 +822,7 @@ export const NewLeadScreen = ({
           : 3;
 
     const competitionPoints = newLeadData.competitionPresent
-      ? ((newLeadData.competitors || []).length ? 4 : 1)
+      ? (realCompetitors.length || newLeadData.competitionUnknown ? 4 : 1)
       : 7;
 
     const signals = [
@@ -830,6 +871,7 @@ export const NewLeadScreen = ({
     newLeadData.isBid,
     newLeadData.designFirms,
     newLeadData.competitionPresent,
+    newLeadData.competitionUnknown,
     newLeadData.competitors,
     newLeadData.salesReward,
     newLeadData.designerReward,
@@ -845,6 +887,7 @@ export const NewLeadScreen = ({
     stageOptions.length,
     realDealers,
     realDesignFirms,
+    realCompetitors,
     newLeadData.designFirmUnknown,
   ]);
   const salesRewardEnabled = newLeadData.salesReward !== false;
@@ -904,10 +947,13 @@ export const NewLeadScreen = ({
       add('A&D Firms', firmText, 1);
     }
     if (newLeadData.competitionPresent) {
-      add('Competition', 'Present', 1);
-      if ((newLeadData.competitors || []).length) add('Competitors', (newLeadData.competitors || []).join(', '), 1);
+      const compText = [
+        newLeadData.competitionUnknown ? 'Unknown' : null,
+        realCompetitors.length ? realCompetitors.join(', ') : null,
+      ].filter(Boolean).join(' · ') || 'Unknown';
+      add('Competition', compText, 1);
     } else {
-      add('Competition', 'None', 1);
+      add('Competition', 'Inactive', 1);
     }
     if (newLeadData.drivingSpecs?.name) {
       const typeLabels = { endUser: 'End user', dealer: 'Dealer', designFirm: 'A&D' };
@@ -947,7 +993,9 @@ export const NewLeadScreen = ({
     selectedSeriesNames,
     seriesCount,
     newLeadData.competitionPresent,
+    newLeadData.competitionUnknown,
     newLeadData.competitors,
+    realCompetitors,
     newLeadData.drivingSpecs,
     salesRewardEnabled,
     designerRewardEnabled,
@@ -1166,15 +1214,17 @@ export const NewLeadScreen = ({
                       />
                     </div>
                     {newLeadData.vertical === 'Other' && (
-                      <input
-                        type="text"
-                        value={newLeadData.otherVertical || ''}
-                        onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
-                        placeholder="What kind?"
-                        autoFocus
-                        className="min-w-0 flex-1 text-sm placeholder-theme-secondary focus:outline-none"
-                        style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
-                      />
+                      <Reveal show reduceMotion={prefersReducedMotion} className="min-w-0 flex-1">
+                        <input
+                          type="text"
+                          value={newLeadData.otherVertical || ''}
+                          onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
+                          placeholder="What kind?"
+                          autoFocus
+                          className="w-full text-sm placeholder-theme-secondary focus:outline-none"
+                          style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
+                        />
+                      </Reveal>
                     )}
                   </div>
                   <FieldError show={!!visibleError('vertical')} message={visibleError('vertical')} />
@@ -1182,7 +1232,7 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Install Location" theme={theme} inline>
-                {(locationInputOpen || newLeadData.installationLocation) ? (
+                <Reveal show={locationInputOpen || !!newLeadData.installationLocation} reduceMotion={prefersReducedMotion}>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <AutoCompleteCombobox
@@ -1197,16 +1247,15 @@ export const NewLeadScreen = ({
                         resetOnSelect={false}
                       />
                     </div>
-                    <button
-                      type="button"
+                    <QuickPickButton
+                      theme={theme}
                       onClick={() => { upd('installationLocation', ''); setLocationInputOpen(false); }}
-                      className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
-                      style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
-                    </button>
+                    </QuickPickButton>
                   </div>
-                ) : (
+                </Reveal>
+                <Reveal show={!locationInputOpen && !newLeadData.installationLocation} reduceMotion={prefersReducedMotion}>
                   <button
                     type="button"
                     onClick={() => setLocationInputOpen(true)}
@@ -1219,11 +1268,11 @@ export const NewLeadScreen = ({
                     </div>
                     <span className="text-xs font-semibold" style={{ color: c.accent }}>Set location</span>
                   </button>
-                )}
+                </Reveal>
               </Row>
 
               <Row label="Install Date" theme={theme} inline>
-                {(dateInputOpen || newLeadData.expectedInstallDate) ? (
+                <Reveal show={dateInputOpen || !!newLeadData.expectedInstallDate} reduceMotion={prefersReducedMotion}>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <DatePickerInput
@@ -1233,16 +1282,15 @@ export const NewLeadScreen = ({
                         placeholder="Set date..."
                       />
                     </div>
-                    <button
-                      type="button"
+                    <QuickPickButton
+                      theme={theme}
                       onClick={() => { upd('expectedInstallDate', ''); setDateInputOpen(false); }}
-                      className="shrink-0 h-10 rounded-full border px-4 text-xs font-semibold transition-all"
-                      style={{ borderColor: subtleBorder, color: c.textSecondary, backgroundColor: 'transparent' }}
                     >
                       Unknown
-                    </button>
+                    </QuickPickButton>
                   </div>
-                ) : (
+                </Reveal>
+                <Reveal show={!dateInputOpen && !newLeadData.expectedInstallDate} reduceMotion={prefersReducedMotion}>
                   <button
                     type="button"
                     onClick={() => setDateInputOpen(true)}
@@ -1255,11 +1303,11 @@ export const NewLeadScreen = ({
                     </div>
                     <span className="text-xs font-semibold" style={{ color: c.accent }}>Set date</span>
                   </button>
-                )}
+                </Reveal>
               </Row>
             </Section>
 
-            <Reveal show={!!duplicateMatches.length}>
+            <Reveal show={!!duplicateMatches.length} reduceMotion={prefersReducedMotion}>
               <div style={{ paddingTop: '1rem' }}>
                 <Section title="Potential Duplicates" theme={theme}>
                   <div className="space-y-2 pt-2">
@@ -1425,7 +1473,7 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Discount" theme={theme} inline>
-                {discountCustom ? (
+                <Reveal show={discountCustom} reduceMotion={prefersReducedMotion}>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <FormInput
@@ -1445,7 +1493,8 @@ export const NewLeadScreen = ({
                       List
                     </QuickPickButton>
                   </div>
-                ) : (
+                </Reveal>
+                <Reveal show={!discountCustom} reduceMotion={prefersReducedMotion}>
                   <PortalNativeSelect
                     value={newLeadData.discount || ''}
                     onChange={(e) => {
@@ -1465,7 +1514,7 @@ export const NewLeadScreen = ({
                     size="sm"
                     mutedValues={['Unknown', '__discount_other__']}
                   />
-                )}
+                </Reveal>
               </Row>
 
               <Row label="Contract" theme={theme} inline>
@@ -1487,16 +1536,20 @@ export const NewLeadScreen = ({
             <Section title="Stakeholders & Competition" theme={theme}>
               <Row label="End User" theme={theme} inline>
                 <div>
-                  {showEndUserCollapsed ? (
+                  <Reveal show={showEndUserCollapsed} reduceMotion={prefersReducedMotion}>
                     <StakeholderCollapsedPill
                       label="Unknown"
                       hint="Add end user"
                       onExpand={() => setEndUserFieldExpanded(true)}
                       theme={theme}
                     />
-                  ) : (
+                  </Reveal>
+                  <Reveal show={!showEndUserCollapsed} reduceMotion={prefersReducedMotion}>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
+                      <div
+                        className="flex-1 min-w-0 transition-opacity duration-200"
+                        style={{ opacity: isEndUserUnknown && !realEndUser ? 0.55 : 1 }}
+                      >
                         <SpotlightMultiSelect
                           selectedItems={realEndUser ? [realEndUser] : []}
                           onAddItem={addEndUser}
@@ -1505,11 +1558,11 @@ export const NewLeadScreen = ({
                             markTouched('endUser');
                           }}
                           options={endUserOptions.filter((option) => (
-                            isUnknownStakeholderValue(option)
-                            || option.toLowerCase() !== String(realEndUser || '').toLowerCase()
+                            !isUnknownStakeholderValue(option)
+                            && option.toLowerCase() !== String(realEndUser || '').toLowerCase()
                           ))}
                           onAddNew={addEndUserOption}
-                          placeholder="Search or add end user"
+                          placeholder={isEndUserUnknown && !realEndUser ? 'Add end user name' : 'Search or add end user'}
                           theme={theme}
                           compact={false}
                           integratedChips
@@ -1527,21 +1580,22 @@ export const NewLeadScreen = ({
                         Unknown
                       </QuickPickButton>
                     </div>
-                  )}
+                  </Reveal>
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
               </Row>
 
               <Row label="Dealer(s)" theme={theme} inline>
                 <div>
-                  {showDealerCollapsed ? (
+                  <Reveal show={showDealerCollapsed} reduceMotion={prefersReducedMotion}>
                     <StakeholderCollapsedPill
                       label="Out to Bid"
                       hint="Add dealers"
                       onExpand={() => setDealerFieldExpanded(true)}
                       theme={theme}
                     />
-                  ) : (
+                  </Reveal>
+                  <Reveal show={!showDealerCollapsed} reduceMotion={prefersReducedMotion}>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <SpotlightMultiSelect
@@ -1581,32 +1635,36 @@ export const NewLeadScreen = ({
                         Out to Bid
                       </QuickPickButton>
                     </div>
-                  )}
+                  </Reveal>
                   <FieldError show={!!visibleError('dealers')} message={visibleError('dealers')} />
                 </div>
               </Row>
 
               <Row label="A&D Firm(s)" theme={theme} inline>
                 <div>
-                  {showDesignFirmCollapsed ? (
+                  <Reveal show={showDesignFirmCollapsed} reduceMotion={prefersReducedMotion}>
                     <StakeholderCollapsedPill
                       label="Unknown"
                       hint="Add A&D firms"
                       onExpand={() => setDesignFirmFieldExpanded(true)}
                       theme={theme}
                     />
-                  ) : (
+                  </Reveal>
+                  <Reveal show={!showDesignFirmCollapsed} reduceMotion={prefersReducedMotion}>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
+                      <div
+                        className="flex-1 min-w-0 transition-opacity duration-200"
+                        style={{ opacity: isDesignFirmUnknown && realDesignFirms.length === 0 ? 0.55 : 1 }}
+                      >
                         <SpotlightMultiSelect
                           selectedItems={realDesignFirms}
                           onAddItem={addDesignFirm}
                           onRemoveItem={(firm) => {
                             upd('designFirms', realDesignFirms.filter((item) => item !== firm));
                           }}
-                          options={['Unknown', ...(designFirms || []).filter((firm) => !isUnknownStakeholderValue(firm))]}
+                          options={(designFirms || []).filter((firm) => !isUnknownStakeholderValue(firm))}
                           onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
-                          placeholder="Search or create firm"
+                          placeholder={isDesignFirmUnknown && realDesignFirms.length === 0 ? 'Add firm name' : 'Search or create firm'}
                           theme={theme}
                           compact={false}
                           integratedChips
@@ -1615,9 +1673,7 @@ export const NewLeadScreen = ({
                       <QuickPickButton
                         active={isDesignFirmUnknown && realDesignFirms.length === 0}
                         theme={theme}
-                        disabled={realDesignFirms.length > 0}
                         onClick={() => {
-                          if (realDesignFirms.length > 0) return;
                           onNewLeadChange({ designFirmUnknown: true, designFirms: [] });
                           setDesignFirmFieldExpanded(false);
                         }}
@@ -1625,43 +1681,69 @@ export const NewLeadScreen = ({
                         Unknown
                       </QuickPickButton>
                     </div>
-                  )}
+                  </Reveal>
                 </div>
               </Row>
 
-              <SpecifierPicker
-                options={specifierOptions}
-                value={newLeadData.drivingSpecs}
-                onSelect={toggleDrivingSpecs}
-                theme={theme}
-              />
+              <Reveal show={specifierOptions.length > 0} reduceMotion={prefersReducedMotion}>
+                <SpecifierPicker
+                  options={specifierOptions}
+                  value={newLeadData.drivingSpecs}
+                  onSelect={toggleDrivingSpecs}
+                  theme={theme}
+                />
+              </Reveal>
 
               <Row label="Competition" theme={theme} inline>
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
-                      {newLeadData.competitionPresent ? (
-                        <SpotlightMultiSelect
-                          selectedItems={newLeadData.competitors || []}
-                          onAddItem={(competitor) => {
-                            const norm = competitor.trim();
-                            const current = newLeadData.competitors || [];
-                            if (!current.some((co) => co.toLowerCase() === norm.toLowerCase())) upd('competitors', [...current, norm]);
-                            markTouched('competitors');
-                          }}
-                          onRemoveItem={(competitor) => { upd('competitors', (newLeadData.competitors || []).filter((item) => item !== competitor)); markTouched('competitors'); }}
-                          options={['Unknown', ...COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')]}
-                          onAddNew={(name) => { const norm = name.trim(); upd('competitors', [...new Set([...(newLeadData.competitors || []), norm])]); }}
-                          placeholder="Search or add competitor"
-                          theme={theme}
-                          compact={false}
-                          integratedChips
-                        />
-                      ) : (
-                        <div className="flex items-center min-h-[40px]">
-                          <span className="text-xs" style={{ color: c.textSecondary, opacity: 0.55 }}>Not in this deal</span>
-                        </div>
-                      )}
+                      <Reveal show={!!newLeadData.competitionPresent} reduceMotion={prefersReducedMotion}>
+                        <Reveal show={showCompetitionCollapsed} reduceMotion={prefersReducedMotion}>
+                          <StakeholderCollapsedPill
+                            label="Unknown"
+                            hint="Add competitor"
+                            onExpand={() => setCompetitionFieldExpanded(true)}
+                            theme={theme}
+                          />
+                        </Reveal>
+                        <Reveal show={!showCompetitionCollapsed} reduceMotion={prefersReducedMotion}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="flex-1 min-w-0 transition-opacity duration-200"
+                              style={{ opacity: isCompetitionUnknown ? 0.55 : 1 }}
+                            >
+                              <SpotlightMultiSelect
+                                selectedItems={realCompetitors}
+                                onAddItem={addCompetitor}
+                                onRemoveItem={(competitor) => {
+                                  upd('competitors', realCompetitors.filter((item) => item !== competitor));
+                                  markTouched('competitors');
+                                }}
+                                options={isCompetitionUnknown
+                                  ? []
+                                  : COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')}
+                                onAddNew={(name) => { addCompetitor(name); }}
+                                placeholder={isCompetitionUnknown ? 'Add competitor name' : 'Search or add competitor'}
+                                theme={theme}
+                                compact={false}
+                                integratedChips
+                              />
+                            </div>
+                            <QuickPickButton
+                              active={isCompetitionUnknown && realCompetitors.length === 0}
+                              theme={theme}
+                              onClick={() => {
+                                onNewLeadChange({ competitionUnknown: true, competitors: [] });
+                                setCompetitionFieldExpanded(false);
+                                markTouched('competitors');
+                              }}
+                            >
+                              Unknown
+                            </QuickPickButton>
+                          </div>
+                        </Reveal>
+                      </Reveal>
                     </div>
                     <ToggleField
                       label="Active"
@@ -1730,19 +1812,17 @@ export const NewLeadScreen = ({
                     >
                       No Quote Needed
                     </PillButton>
-                    {quoteMode === 'existing' && (
-                      <div className="flex-1 min-w-[190px]">
-                        <FormInput
-                          value={newLeadData.jsiQuoteNumber || ''}
-                          onChange={(e) => { upd('jsiQuoteNumber', e.target.value); markTouched('jsiQuoteNumber'); }}
-                          onBlur={() => markTouched('jsiQuoteNumber')}
-                          placeholder="e.g. Q-12345"
-                          theme={theme}
-                          size="sm"
-                          surfaceBg
-                        />
-                      </div>
-                    )}
+                    <Reveal show={quoteMode === 'existing'} reduceMotion={prefersReducedMotion} className="flex-1 min-w-[190px]">
+                      <FormInput
+                        value={newLeadData.jsiQuoteNumber || ''}
+                        onChange={(e) => { upd('jsiQuoteNumber', e.target.value); markTouched('jsiQuoteNumber'); }}
+                        onBlur={() => markTouched('jsiQuoteNumber')}
+                        placeholder="e.g. Q-12345"
+                        theme={theme}
+                        size="sm"
+                        surfaceBg
+                      />
+                    </Reveal>
                   </div>
                   <FieldError show={!!visibleError('jsiQuoteNumber')} message={visibleError('jsiQuoteNumber')} />
                 </div>
@@ -1758,7 +1838,7 @@ export const NewLeadScreen = ({
                   available={JSI_SERIES}
                   theme={theme}
                 />
-                {(newLeadData.products || []).length > 0 && (
+                <Reveal show={(newLeadData.products || []).length > 0} reduceMotion={prefersReducedMotion}>
                   <div className="mt-3 space-y-2">
                     {(newLeadData.products || []).map((product, idx) => {
                       const prompts = getSeriesProcurementPrompts(product.series);
@@ -1800,7 +1880,7 @@ export const NewLeadScreen = ({
                       );
                     })}
                   </div>
-                )}
+                </Reveal>
               </div>
             </Section>
 

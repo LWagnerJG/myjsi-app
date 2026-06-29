@@ -27,7 +27,10 @@ const flattenLead = (lead) => ({
                       : '',
   bid:              lead.isBid ? 'Yes' : 'No',
   competition:      lead.competitionPresent ? 'Yes' : 'No',
-  competitors:      (lead.competitors || []).join(', '),
+  competitors:      [
+    ...(lead.competitionUnknown ? ['Unknown'] : []),
+    ...(lead.competitors || []).filter((name) => String(name).trim().toLowerCase() !== 'unknown'),
+  ].join(', '),
   jsiQuoteNumber:   lead.jsiQuoteNumber || '',
   quoteNeeded:      lead.quoteNeeded ? 'Yes' : 'No',
   products:         (lead.products || []).map(p => p.series).join(', '),

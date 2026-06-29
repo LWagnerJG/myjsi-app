@@ -23,7 +23,7 @@ export const INITIAL_OPPORTUNITIES = [
 
 export const STAGES = ['Discovery', 'Specifying', 'Decision/Bidding', 'PO Expected', 'Won', 'Lost'];
 
-export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbability: 50, projectStatus: '', vertical: '', otherVertical: '', estimatedList: '', poTimeframe: '', competitors: [], otherCompetitor: '', competitionPresent: false, isBid: false, designFirmUnknown: false, endUserUnknown: false, jsiSpecServices: false, quoteType: 'New Quote', pastProjectRef: '', discount: '', salesReward: true, designerReward: true, products: [], notes: '', jsiQuoteExists: false, jsiQuoteNumber: '', quoteNeeded: false, expectedInstallDate: '', endUser: '', isContract: false, contractType: '', drivingSpecs: null };
+export const EMPTY_LEAD = { project: '', designFirm: '', dealer: '', winProbability: 50, projectStatus: '', vertical: '', otherVertical: '', estimatedList: '', poTimeframe: '', competitors: [], otherCompetitor: '', competitionPresent: false, competitionUnknown: false, isBid: false, designFirmUnknown: false, endUserUnknown: false, jsiSpecServices: false, quoteType: 'New Quote', pastProjectRef: '', discount: '', salesReward: true, designerReward: true, products: [], notes: '', jsiQuoteExists: false, jsiQuoteNumber: '', quoteNeeded: false, expectedInstallDate: '', endUser: '', isContract: false, contractType: '', drivingSpecs: null };
 
 export const URGENCY_LEVELS = ['Low', 'Medium', 'High'];
 export const PO_TIMEFRAMES = ['Unknown', 'Within 30 Days', '30-60 Days', '60-180 Days', '180+ Days', 'Next Year'];
