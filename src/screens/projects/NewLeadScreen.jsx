@@ -16,7 +16,7 @@ import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
-import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section, SpecifierPicker, buildSpecifierOptions } from './NewLeadScreenComponents.jsx';
+import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section, SpecifierPicker, buildSpecifierOptions, getDefaultSpecifierOption, isSpecifierCandidate } from './NewLeadScreenComponents.jsx';
 
 const WIN_PRESETS = [10, 25, 50, 75, 90];
 const WIN_MIN = 5;
@@ -485,9 +485,22 @@ export const NewLeadScreen = ({
     }
     const match = current && specifierOptions.find((option) => option.type === current.type && option.name === current.name);
     if (!match) {
-      onNewLeadChange({ drivingSpecs: { type: specifierOptions[0].type, name: specifierOptions[0].name } });
+      const fallback = getDefaultSpecifierOption(specifierOptions);
+      if (fallback) onNewLeadChange({ drivingSpecs: { type: fallback.type, name: fallback.name } });
     }
   }, [specifierOptions, newLeadData.drivingSpecs, onNewLeadChange]);
+
+  const addDesignFirm = useCallback((firm) => {
+    const norm = firm.trim();
+    if (!norm) return;
+    const current = newLeadData.designFirms || [];
+    if (current.some((f) => f.toLowerCase() === norm.toLowerCase())) return;
+    const updates = { designFirms: [...current, norm] };
+    if (isSpecifierCandidate(norm)) {
+      updates.drivingSpecs = { type: 'designFirm', name: norm };
+    }
+    onNewLeadChange(updates);
+  }, [newLeadData.designFirms, onNewLeadChange]);
 
   const setEndUser = useCallback((value) => {
     onNewLeadChange({ endUser: value });
@@ -777,7 +790,7 @@ export const NewLeadScreen = ({
     }
     if (newLeadData.drivingSpecs?.name) {
       const typeLabels = { endUser: 'End user', dealer: 'Dealer', designFirm: 'A&D' };
-      add('Specifier', `${typeLabels[newLeadData.drivingSpecs.type] || newLeadData.drivingSpecs.type} · ${newLeadData.drivingSpecs.name}`, 1);
+      add('Who is leading the specifications?', `${typeLabels[newLeadData.drivingSpecs.type] || newLeadData.drivingSpecs.type} · ${newLeadData.drivingSpecs.name}`, 1);
     }
     add('Rewards', [salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None', 1);
     if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber, 2);
@@ -1425,11 +1438,7 @@ export const NewLeadScreen = ({
                   <div className="flex-1 min-w-0">
                     <SpotlightMultiSelect
                       selectedItems={newLeadData.designFirms || []}
-                      onAddItem={(firm) => {
-                        const norm = firm.trim();
-                        const current = newLeadData.designFirms || [];
-                        if (!current.some((f) => f.toLowerCase() === norm.toLowerCase())) upd('designFirms', [...current, norm]);
-                      }}
+                      onAddItem={addDesignFirm}
                       onRemoveItem={(firm) => {
                         upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm));
                       }}

@@ -42,13 +42,13 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 };
 
 /* Compact field row */
-export const Row = ({ label, children, theme, tip, inline }) => {
-  const rowLayout = inline ? 'grid items-start gap-x-3 gap-y-1.5 sm:grid-cols-[112px_minmax(0,1fr)]' : '';
+export const Row = ({ label, children, theme, tip, inline, labelWrap = false, labelColumnWidth = '112px' }) => {
+  const rowLayout = inline ? `grid items-start gap-x-3 gap-y-1.5 sm:grid-cols-[${labelColumnWidth}_minmax(0,1fr)]` : '';
   return (
   <div className={`${rowLayout} py-2`}>
     {label && (
       <div className={`flex items-center gap-1.5 ${inline ? 'sm:min-h-[34px] sm:pt-0.5' : 'mb-1'}`}>
-        <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+        <label className={`text-[0.8125rem] font-semibold ${inline && !labelWrap ? 'whitespace-nowrap' : ''}`}
           style={{ color: theme.colors.textSecondary }}>{label}</label>
         {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
@@ -60,23 +60,35 @@ export const Row = ({ label, children, theme, tip, inline }) => {
 
 const SPECIFIER_SKIP = new Set(['unknown', 'undecided', 'out to bid', 'n/a']);
 
+export const isSpecifierCandidate = (name) => {
+  const trimmed = String(name || '').trim();
+  return !!trimmed && !SPECIFIER_SKIP.has(trimmed.toLowerCase());
+};
+
 export const buildSpecifierOptions = (lead = {}) => {
   const options = [];
   const seen = new Set();
   const add = (type, name, group) => {
     const trimmed = String(name || '').trim();
-    if (!trimmed || SPECIFIER_SKIP.has(trimmed.toLowerCase())) return;
+    if (!isSpecifierCandidate(trimmed)) return;
     const key = `${type}:${trimmed.toLowerCase()}`;
     if (seen.has(key)) return;
     seen.add(key);
     options.push({ type, name: trimmed, group });
   };
 
+  (lead.designFirms || []).forEach((name) => add('designFirm', name, 'A&D'));
   add('endUser', lead.endUser, 'End user');
   (lead.dealers || []).forEach((name) => add('dealer', name, 'Dealer'));
-  (lead.designFirms || []).forEach((name) => add('designFirm', name, 'A&D'));
   return options;
 };
+
+export const getDefaultSpecifierOption = (options = []) => {
+  if (!options.length) return null;
+  return options.find((option) => option.type === 'designFirm') || options[0];
+};
+
+const SPECIFIER_ROW_LABEL = 'Who is leading the specifications?';
 
 /* Unified specifier picker — appears once real stakeholders exist */
 export const SpecifierPicker = ({ options, value, onSelect, theme }) => {
@@ -86,11 +98,9 @@ export const SpecifierPicker = ({ options, value, onSelect, theme }) => {
   const border = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
 
   return (
-    <div className="mt-1 pt-3 border-t" style={{ borderColor: border }}>
-        <p className="text-[0.8125rem] font-semibold mb-2.5" style={{ color: theme.colors.textPrimary }}>
-          Specifier
-        </p>
-        <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Specifier">
+    <div className="pt-1 border-t" style={{ borderColor: border }}>
+      <Row label={SPECIFIER_ROW_LABEL} theme={theme} inline labelWrap labelColumnWidth="148px">
+        <div className="flex flex-wrap gap-1.5" role="listbox" aria-label={SPECIFIER_ROW_LABEL}>
           {options.map((opt) => {
             const active = value?.type === opt.type && value?.name === opt.name;
             return (
@@ -118,7 +128,8 @@ export const SpecifierPicker = ({ options, value, onSelect, theme }) => {
             );
           })}
         </div>
-      </div>
+      </Row>
+    </div>
   );
 };
 
