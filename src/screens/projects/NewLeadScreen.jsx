@@ -540,12 +540,12 @@ export const NewLeadScreen = ({
       s.textContent = `
         @keyframes nl-slide-in-right { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
         @keyframes nl-slide-in-left  { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:translateX(0); } }
-        @keyframes nl-field-in { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
-        .nl-fwd  { animation: nl-slide-in-right .28s cubic-bezier(.22,1,.36,1) both; }
-        .nl-back { animation: nl-slide-in-left  .28s cubic-bezier(.22,1,.36,1) both; }
-        .nl-field-in { animation: nl-field-in .24s cubic-bezier(.22,1,.36,1) both; }
+        @keyframes nl-reveal-in { from { opacity:0; } to { opacity:1; } }
+        .nl-fwd  { animation: nl-slide-in-right .25s cubic-bezier(.25,.46,.45,.94) both; }
+        .nl-back { animation: nl-slide-in-left  .25s cubic-bezier(.25,.46,.45,.94) both; }
+        .nl-reveal-in { animation: nl-reveal-in .2s ease both; }
         @media (prefers-reduced-motion: reduce) {
-          .nl-fwd, .nl-back, .nl-field-in { animation: none !important; }
+          .nl-fwd, .nl-back, .nl-reveal-in { animation: none !important; }
         }
 
         .win-slider { -webkit-appearance:none; appearance:none; height:22px; border-radius:99px; outline:none; cursor:pointer; display:block; width:100%; background:transparent; }
@@ -1214,17 +1214,15 @@ export const NewLeadScreen = ({
                       />
                     </div>
                     {newLeadData.vertical === 'Other' && (
-                      <Reveal show reduceMotion={prefersReducedMotion} className="min-w-0 flex-1">
-                        <input
-                          type="text"
-                          value={newLeadData.otherVertical || ''}
-                          onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
-                          placeholder="What kind?"
-                          autoFocus
-                          className="w-full text-sm placeholder-theme-secondary focus:outline-none"
-                          style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
-                        />
-                      </Reveal>
+                      <input
+                        type="text"
+                        value={newLeadData.otherVertical || ''}
+                        onChange={(e) => { upd('otherVertical', e.target.value); markTouched('otherVertical'); }}
+                        placeholder="What kind?"
+                        autoFocus
+                        className="min-w-0 flex-1 text-sm placeholder-theme-secondary focus:outline-none"
+                        style={{ height: 40, padding: '0 16px', borderRadius: 9999, backgroundColor: c.surface, border: `1px solid ${subtleBorder}`, color: c.textPrimary }}
+                      />
                     )}
                   </div>
                   <FieldError show={!!visibleError('vertical')} message={visibleError('vertical')} />
@@ -1232,7 +1230,7 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Install Location" theme={theme} inline>
-                <Reveal show={locationInputOpen || !!newLeadData.installationLocation} reduceMotion={prefersReducedMotion}>
+                {(locationInputOpen || newLeadData.installationLocation) ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <AutoCompleteCombobox
@@ -1254,8 +1252,7 @@ export const NewLeadScreen = ({
                       Unknown
                     </QuickPickButton>
                   </div>
-                </Reveal>
-                <Reveal show={!locationInputOpen && !newLeadData.installationLocation} reduceMotion={prefersReducedMotion}>
+                ) : (
                   <button
                     type="button"
                     onClick={() => setLocationInputOpen(true)}
@@ -1268,11 +1265,11 @@ export const NewLeadScreen = ({
                     </div>
                     <span className="text-xs font-semibold" style={{ color: c.accent }}>Set location</span>
                   </button>
-                </Reveal>
+                )}
               </Row>
 
               <Row label="Install Date" theme={theme} inline>
-                <Reveal show={dateInputOpen || !!newLeadData.expectedInstallDate} reduceMotion={prefersReducedMotion}>
+                {(dateInputOpen || newLeadData.expectedInstallDate) ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <DatePickerInput
@@ -1289,8 +1286,7 @@ export const NewLeadScreen = ({
                       Unknown
                     </QuickPickButton>
                   </div>
-                </Reveal>
-                <Reveal show={!dateInputOpen && !newLeadData.expectedInstallDate} reduceMotion={prefersReducedMotion}>
+                ) : (
                   <button
                     type="button"
                     onClick={() => setDateInputOpen(true)}
@@ -1303,7 +1299,7 @@ export const NewLeadScreen = ({
                     </div>
                     <span className="text-xs font-semibold" style={{ color: c.accent }}>Set date</span>
                   </button>
-                </Reveal>
+                )}
               </Row>
             </Section>
 
@@ -1473,7 +1469,7 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Discount" theme={theme} inline>
-                <Reveal show={discountCustom} reduceMotion={prefersReducedMotion}>
+                {discountCustom ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
                       <FormInput
@@ -1493,8 +1489,7 @@ export const NewLeadScreen = ({
                       List
                     </QuickPickButton>
                   </div>
-                </Reveal>
-                <Reveal show={!discountCustom} reduceMotion={prefersReducedMotion}>
+                ) : (
                   <PortalNativeSelect
                     value={newLeadData.discount || ''}
                     onChange={(e) => {
@@ -1514,7 +1509,7 @@ export const NewLeadScreen = ({
                     size="sm"
                     mutedValues={['Unknown', '__discount_other__']}
                   />
-                </Reveal>
+                )}
               </Row>
 
               <Row label="Contract" theme={theme} inline>
@@ -1536,15 +1531,14 @@ export const NewLeadScreen = ({
             <Section title="Stakeholders & Competition" theme={theme}>
               <Row label="End User" theme={theme} inline>
                 <div>
-                  <Reveal show={showEndUserCollapsed} reduceMotion={prefersReducedMotion}>
+                  {showEndUserCollapsed ? (
                     <StakeholderCollapsedPill
                       label="Unknown"
                       hint="Add end user"
                       onExpand={() => setEndUserFieldExpanded(true)}
                       theme={theme}
                     />
-                  </Reveal>
-                  <Reveal show={!showEndUserCollapsed} reduceMotion={prefersReducedMotion}>
+                  ) : (
                     <div className="flex items-center gap-2">
                       <div
                         className="flex-1 min-w-0 transition-opacity duration-200"
@@ -1580,22 +1574,21 @@ export const NewLeadScreen = ({
                         Unknown
                       </QuickPickButton>
                     </div>
-                  </Reveal>
+                  )}
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
               </Row>
 
               <Row label="Dealer(s)" theme={theme} inline>
                 <div>
-                  <Reveal show={showDealerCollapsed} reduceMotion={prefersReducedMotion}>
+                  {showDealerCollapsed ? (
                     <StakeholderCollapsedPill
                       label="Out to Bid"
                       hint="Add dealers"
                       onExpand={() => setDealerFieldExpanded(true)}
                       theme={theme}
                     />
-                  </Reveal>
-                  <Reveal show={!showDealerCollapsed} reduceMotion={prefersReducedMotion}>
+                  ) : (
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <SpotlightMultiSelect
@@ -1635,22 +1628,21 @@ export const NewLeadScreen = ({
                         Out to Bid
                       </QuickPickButton>
                     </div>
-                  </Reveal>
+                  )}
                   <FieldError show={!!visibleError('dealers')} message={visibleError('dealers')} />
                 </div>
               </Row>
 
               <Row label="A&D Firm(s)" theme={theme} inline>
                 <div>
-                  <Reveal show={showDesignFirmCollapsed} reduceMotion={prefersReducedMotion}>
+                  {showDesignFirmCollapsed ? (
                     <StakeholderCollapsedPill
                       label="Unknown"
                       hint="Add A&D firms"
                       onExpand={() => setDesignFirmFieldExpanded(true)}
                       theme={theme}
                     />
-                  </Reveal>
-                  <Reveal show={!showDesignFirmCollapsed} reduceMotion={prefersReducedMotion}>
+                  ) : (
                     <div className="flex items-center gap-2">
                       <div
                         className="flex-1 min-w-0 transition-opacity duration-200"
@@ -1681,33 +1673,32 @@ export const NewLeadScreen = ({
                         Unknown
                       </QuickPickButton>
                     </div>
-                  </Reveal>
+                  )}
                 </div>
               </Row>
 
-              <Reveal show={specifierOptions.length > 0} reduceMotion={prefersReducedMotion}>
+              {specifierOptions.length > 0 && (
                 <SpecifierPicker
                   options={specifierOptions}
                   value={newLeadData.drivingSpecs}
                   onSelect={toggleDrivingSpecs}
                   theme={theme}
                 />
-              </Reveal>
+              )}
 
               <Row label="Competition" theme={theme} inline>
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
-                      <Reveal show={!!newLeadData.competitionPresent} reduceMotion={prefersReducedMotion}>
-                        <Reveal show={showCompetitionCollapsed} reduceMotion={prefersReducedMotion}>
+                      {newLeadData.competitionPresent && (
+                        showCompetitionCollapsed ? (
                           <StakeholderCollapsedPill
                             label="Unknown"
                             hint="Add competitor"
                             onExpand={() => setCompetitionFieldExpanded(true)}
                             theme={theme}
                           />
-                        </Reveal>
-                        <Reveal show={!showCompetitionCollapsed} reduceMotion={prefersReducedMotion}>
+                        ) : (
                           <div className="flex items-center gap-2">
                             <div
                               className="flex-1 min-w-0 transition-opacity duration-200"
@@ -1742,8 +1733,8 @@ export const NewLeadScreen = ({
                               Unknown
                             </QuickPickButton>
                           </div>
-                        </Reveal>
-                      </Reveal>
+                        )
+                      )}
                     </div>
                     <ToggleField
                       label="Active"
@@ -1812,17 +1803,19 @@ export const NewLeadScreen = ({
                     >
                       No Quote Needed
                     </PillButton>
-                    <Reveal show={quoteMode === 'existing'} reduceMotion={prefersReducedMotion} className="flex-1 min-w-[190px]">
-                      <FormInput
-                        value={newLeadData.jsiQuoteNumber || ''}
-                        onChange={(e) => { upd('jsiQuoteNumber', e.target.value); markTouched('jsiQuoteNumber'); }}
-                        onBlur={() => markTouched('jsiQuoteNumber')}
-                        placeholder="e.g. Q-12345"
-                        theme={theme}
-                        size="sm"
-                        surfaceBg
-                      />
-                    </Reveal>
+                    {quoteMode === 'existing' && (
+                      <div className="flex-1 min-w-[190px]">
+                        <FormInput
+                          value={newLeadData.jsiQuoteNumber || ''}
+                          onChange={(e) => { upd('jsiQuoteNumber', e.target.value); markTouched('jsiQuoteNumber'); }}
+                          onBlur={() => markTouched('jsiQuoteNumber')}
+                          placeholder="e.g. Q-12345"
+                          theme={theme}
+                          size="sm"
+                          surfaceBg
+                        />
+                      </div>
+                    )}
                   </div>
                   <FieldError show={!!visibleError('jsiQuoteNumber')} message={visibleError('jsiQuoteNumber')} />
                 </div>
@@ -1838,7 +1831,7 @@ export const NewLeadScreen = ({
                   available={JSI_SERIES}
                   theme={theme}
                 />
-                <Reveal show={(newLeadData.products || []).length > 0} reduceMotion={prefersReducedMotion}>
+                {(newLeadData.products || []).length > 0 && (
                   <div className="mt-3 space-y-2">
                     {(newLeadData.products || []).map((product, idx) => {
                       const prompts = getSeriesProcurementPrompts(product.series);
@@ -1880,7 +1873,7 @@ export const NewLeadScreen = ({
                       );
                     })}
                   </div>
-                </Reveal>
+                )}
               </div>
             </Section>
 

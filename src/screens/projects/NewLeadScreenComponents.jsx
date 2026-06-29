@@ -133,23 +133,18 @@ export const SpecifierPicker = ({ options, value, onSelect, theme }) => {
   );
 };
 
-/* — animated reveal wrapper — uses CSS grid-row trick for smooth height — */
-export const Reveal = ({ show, children, reduceMotion = false, className = '' }) => (
-  <div
-    className={className}
-    style={{
-      display: 'grid',
-      gridTemplateRows: show ? '1fr' : '0fr',
-      opacity: show ? 1 : 0,
-      transition: reduceMotion
-        ? 'none'
-        : 'grid-template-rows .28s cubic-bezier(.22,1,.36,1), opacity .24s cubic-bezier(.22,1,.36,1)',
-    }}
-    aria-hidden={!show ? true : undefined}
-  >
-    <div style={{ overflow: 'hidden', minHeight: 0 }}>{children}</div>
-  </div>
-);
+/* — height reveal for static content only (never wrap dropdowns / Spotlight) — */
+export const Reveal = ({ show, children, reduceMotion = false, className = '' }) => {
+  if (!show) return null;
+  return (
+    <div
+      className={`nl-reveal-in ${className}`.trim()}
+      style={{ animation: reduceMotion ? 'none' : undefined }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const normalizeSpotlightText = (value) => String(value || '').toLowerCase().trim().replace(/\s+/g, ' ');
 const getOpportunityName = (opp) => String(opp?.name || opp?.project || '').trim();
