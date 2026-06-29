@@ -16,7 +16,7 @@ import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
-import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section } from './NewLeadScreenComponents.jsx';
+import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section, StakeholderDrivingSpecsControl } from './NewLeadScreenComponents.jsx';
 
 const WIN_PRESETS = [10, 25, 50, 75, 90];
 const WIN_MIN = 5;
@@ -149,45 +149,6 @@ const getHealthBand = (ratio) => {
 const FieldError = ({ show, message }) => {
   if (!show || !message) return null;
   return <p className="nl-field-error text-xs mt-1.5" style={{ color: 'var(--theme-error)' }}>{message}</p>;
-};
-
-const DrivingSpecsBadge = ({ accent }) => (
-  <span
-    className="text-[0.625rem] font-semibold leading-none px-1.5 py-0.5 rounded-full whitespace-nowrap"
-    style={{ color: accent, backgroundColor: `${accent}18` }}
-  >
-    Driving Specs
-  </span>
-);
-
-const EndUserSelectedChip = ({ label, isDrivingSpecs, onToggleDrivingSpecs, onClear, theme }) => {
-  const c = theme.colors;
-  const border = isDarkTheme(theme) ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-full text-xs font-medium border"
-      style={{ background: isDarkTheme(theme) ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.04)', borderColor: border, color: c.textPrimary }}
-    >
-      <button
-        type="button"
-        onClick={() => onToggleDrivingSpecs(label)}
-        className="truncate max-w-[180px] text-left hover:opacity-80 transition-opacity"
-        aria-pressed={isDrivingSpecs}
-        title={isDrivingSpecs ? 'Driving specs contact' : 'Mark as driving specs'}
-      >
-        {label}
-      </button>
-      {isDrivingSpecs ? <DrivingSpecsBadge accent={c.accent} /> : null}
-      <button
-        type="button"
-        onClick={onClear}
-        className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-colors"
-        aria-label={`Remove ${label}`}
-      >
-        <X className="w-3 h-3" style={{ color: c.textSecondary }} />
-      </button>
-    </span>
-  );
 };
 
 // Compact secondary "quick pick" button shown beside a field (e.g. Unknown / Out to Bid).
@@ -531,9 +492,15 @@ export const NewLeadScreen = ({
     markTouched('endUser');
   }, [markTouched, newLeadData.drivingSpecs, onNewLeadChange]);
 
-  const drivingSpecsForType = useCallback((type) => (
-    newLeadData.drivingSpecs?.type === type ? newLeadData.drivingSpecs.name : null
-  ), [newLeadData.drivingSpecs]);
+  const drivingSpecsLabelExtra = useCallback((stakeholderType, items) => (
+    <StakeholderDrivingSpecsControl
+      stakeholderType={stakeholderType}
+      items={items}
+      drivingSpecs={newLeadData.drivingSpecs}
+      onToggle={toggleDrivingSpecs}
+      theme={theme}
+    />
+  ), [newLeadData.drivingSpecs, theme, toggleDrivingSpecs]);
 
   const handleProjectInputChange = useCallback((nextValue) => {
     const currentSelectedProject = (opportunities || []).find((opp) => String(opp?.id) === String(newLeadData.pastProjectRef || ''));
@@ -1386,10 +1353,12 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Stakeholders & Competition" theme={theme}>
-              <p className="text-[0.6875rem] px-1 -mt-1 mb-2" style={{ color: c.textSecondary, opacity: 0.65 }}>
-                Tap a selected contact to mark as Driving Specs.
-              </p>
-              <Row label="End User" theme={theme} inline>
+              <Row
+                label="End User"
+                labelExtra={drivingSpecsLabelExtra('endUser', newLeadData.endUser ? [newLeadData.endUser] : [])}
+                theme={theme}
+                inline
+              >
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
@@ -1413,25 +1382,16 @@ export const NewLeadScreen = ({
                       Unknown
                     </QuickPickButton>
                   </div>
-                  {String(newLeadData.endUser || '').trim() ? (
-                    <div className="flex flex-wrap gap-1.5 pt-2">
-                      <EndUserSelectedChip
-                        label={newLeadData.endUser}
-                        isDrivingSpecs={drivingSpecsForType('endUser') === newLeadData.endUser}
-                        onToggleDrivingSpecs={(name) => toggleDrivingSpecs('endUser', name)}
-                        onClear={() => {
-                          clearDrivingSpecsIfMatch('endUser', newLeadData.endUser);
-                          setEndUser('');
-                        }}
-                        theme={theme}
-                      />
-                    </div>
-                  ) : null}
                   <FieldError show={!!visibleError('endUser')} message={visibleError('endUser')} />
                 </div>
               </Row>
 
-              <Row label="Dealer(s)" theme={theme} inline>
+              <Row
+                label="Dealer(s)"
+                labelExtra={dealerOutToBid ? null : drivingSpecsLabelExtra('dealer', newLeadData.dealers || [])}
+                theme={theme}
+                inline
+              >
                 <div>
                   {dealerOutToBid ? (
                     <button
@@ -1465,8 +1425,6 @@ export const NewLeadScreen = ({
                           theme={theme}
                           compact={false}
                           integratedChips
-                          drivingSpecsItem={drivingSpecsForType('dealer')}
-                          onToggleDrivingSpecs={(name) => toggleDrivingSpecs('dealer', name)}
                         />
                       </div>
                       <QuickPickButton
@@ -1481,7 +1439,12 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              <Row label="A&D Firm(s)" theme={theme} inline>
+              <Row
+                label="A&D Firm(s)"
+                labelExtra={drivingSpecsLabelExtra('designFirm', newLeadData.designFirms || [])}
+                theme={theme}
+                inline
+              >
                 <div className="flex items-center gap-2">
                   <div className="flex-1 min-w-0">
                     <SpotlightMultiSelect
@@ -1501,8 +1464,6 @@ export const NewLeadScreen = ({
                       theme={theme}
                       compact={false}
                       integratedChips
-                      drivingSpecsItem={drivingSpecsForType('designFirm')}
-                      onToggleDrivingSpecs={(name) => toggleDrivingSpecs('designFirm', name)}
                     />
                   </div>
                   <QuickPickButton

@@ -42,19 +42,67 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 };
 
 /* Compact field row */
-export const Row = ({ label, children, theme, tip, inline }) => {
-  const rowLayout = inline ? 'grid items-start gap-1.5 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-3' : '';
+export const Row = ({ label, labelExtra, children, theme, tip, inline }) => {
+  const rowLayout = inline ? 'grid items-start gap-x-3 gap-y-1.5 sm:grid-cols-[112px_minmax(0,1fr)]' : '';
   return (
   <div className={`${rowLayout} py-2`}>
     {label && (
-      <div className={`flex items-center gap-1.5 ${inline ? 'sm:min-h-[34px] sm:pt-1' : 'mb-1'}`}>
-        <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
-          style={{ color: theme.colors.textSecondary }}>{label}</label>
-        {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
+      <div className={`${inline ? 'sm:pt-0.5' : 'mb-1'}`}>
+        <div className={`flex items-center gap-1.5 ${inline ? 'sm:min-h-[34px]' : ''}`}>
+          <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+            style={{ color: theme.colors.textSecondary }}>{label}</label>
+          {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
+        </div>
+        {labelExtra}
       </div>
     )}
     {inline ? <div className="min-w-0 w-full">{children}</div> : children}
   </div>
+  );
+};
+
+const DRIVING_SPECS_SKIP = new Set(['unknown', 'undecided', 'out to bid', 'n/a']);
+
+/* Discrete driving-specs picker shown under stakeholder row labels */
+export const StakeholderDrivingSpecsControl = ({ stakeholderType, items, drivingSpecs, onToggle, theme }) => {
+  const dark = isDarkTheme(theme);
+  const border = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
+  const selectable = [...new Set((items || []).map((item) => String(item || '').trim()).filter(Boolean))]
+    .filter((name) => !DRIVING_SPECS_SKIP.has(name.toLowerCase()));
+
+  if (!selectable.length) return null;
+
+  return (
+    <div className="mt-1.5">
+      <p
+        className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] mb-1"
+        style={{ color: theme.colors.textSecondary, opacity: 0.5 }}
+      >
+        Driving Specs
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {selectable.map((name) => {
+          const active = drivingSpecs?.type === stakeholderType && drivingSpecs?.name === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onToggle(stakeholderType, name)}
+              className="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium border max-w-[96px] truncate transition-all"
+              style={{
+                backgroundColor: active ? `${theme.colors.accent}16` : 'transparent',
+                borderColor: active ? theme.colors.accent : border,
+                color: active ? theme.colors.accent : theme.colors.textSecondary,
+              }}
+              aria-pressed={active}
+              title={active ? `${name} is driving specs` : `Mark ${name} as driving specs`}
+            >
+              {name}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
