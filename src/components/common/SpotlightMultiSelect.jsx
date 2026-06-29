@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Search, Plus, X } from "lucide-react";
-import { isDarkTheme } from "../../design-system/tokens.js";
+import { DESIGN_TOKENS, isDarkTheme } from "../../design-system/tokens.js";
+import { getNoAutofillName, NO_AUTOFILL_INPUT_PROPS } from "../../utils/noAutofillInput.js";
 
 export function SpotlightMultiSelect({
   label,
@@ -14,14 +16,18 @@ export function SpotlightMultiSelect({
   compact = false,
   integratedChips = false,
   bordered = true,
+  dimmed = false,
 }) {
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
+  const [menuPos, setMenuPos] = useState(null);
   const [q, setQ] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [inputLocked, setInputLocked] = useState(true);
+  const [inputName] = useState(() => getNoAutofillName("spotlight"));
 
-  const wrapperRef = useRef(null);  // outside-click detection (whole component)
-  const triggerRef = useRef(null);  // inner input bar — used for dropUp measurement only
+  const wrapperRef = useRef(null);
+  const triggerRef = useRef(null);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
   const listboxId = useMemo(() => `listbox-${Math.random().toString(36).substr(2, 9)}`, []);
@@ -36,29 +42,44 @@ export function SpotlightMultiSelect({
     accent: theme.colors.accent,
     chipBg: theme.colors.surface,
   };
+  const dimmedFieldBg = dark ? "rgba(255,255,255,0.04)" : "rgba(53,53,53,0.03)";
+  const dimmedBorder = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
 
-  // Anchors to triggerRef (input bar) not wrapperRef (input + chips below)
-  // so chip height doesn't skew the available-space calculation.
-  const calcDropUp = useCallback(() => {
-    if (!triggerRef.current) return;
+  const measure = useCallback(() => {
+    if (!triggerRef.current) return null;
     const rect = triggerRef.current.getBoundingClientRect();
     const chrome = document.querySelector("[data-bottom-chrome]");
     const bottomOccupied = chrome ? window.innerHeight - chrome.getBoundingClientRect().top : 0;
-    setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 300);
+    const spaceBelow = window.innerHeight - rect.bottom - bottomOccupied;
+    setDropUp(spaceBelow < 300);
+    setMenuPos({ top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width });
+    return rect;
   }, []);
 
-  useLayoutEffect(() => { if (open) calcDropUp(); }, [open, calcDropUp]);
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuPos(null);
+      return;
+    }
+    measure();
+  }, [open, measure]);
 
   useEffect(() => {
     if (!open) return;
-    window.addEventListener("resize", calcDropUp);
-    return () => window.removeEventListener("resize", calcDropUp);
-  }, [open, calcDropUp]);
+    const sync = () => measure();
+    window.addEventListener("resize", sync);
+    window.addEventListener("scroll", sync, true);
+    return () => {
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("scroll", sync, true);
+    };
+  }, [open, measure]);
 
   useEffect(() => {
     if (!open) return;
     const close = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+      if (wrapperRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", close);
     document.addEventListener("touchstart", close, { passive: true });
@@ -87,7 +108,6 @@ export function SpotlightMultiSelect({
 
   useEffect(() => { setActiveIndex(-1); }, [q, open]);
 
-  // Scroll active item into view
   useEffect(() => {
     if (open && activeIndex >= 0 && menuRef.current) {
       const el = menuRef.current.querySelector(`[data-index="${activeIndex}"]`);
@@ -134,7 +154,23 @@ export function SpotlightMultiSelect({
     }
   };
 
+  const openMenu = useCallback(() => {
+    setInputLocked(false);
+    setOpen(true);
+    inputRef.current?.focus();
+  }, []);
+
   const showMenu = open && (filtered.length > 0 || canCreate);
+
+  const menuStyle = menuPos ? {
+    position: "fixed",
+    left: menuPos.left,
+    width: menuPos.width,
+    zIndex: DESIGN_TOKENS.zIndex.popover,
+    ...(dropUp
+      ? { bottom: window.innerHeight - menuPos.top + 6 }
+      : { top: menuPos.bottom + 6 }),
+  } : {};
 
   return (
     <div className="w-full" ref={wrapperRef}>
@@ -144,41 +180,39 @@ export function SpotlightMultiSelect({
         </label>
       ) : null}
 
-      {/* Input bar + inline absolute dropdown — triggerRef anchors the dropdown position */}
       <div className="relative" ref={triggerRef}>
         <div
           className="flex items-center gap-2 px-4 cursor-text"
           style={{
             height: 40,
             borderRadius: showIntegratedChips ? "16px 16px 0 0" : 9999,
-            background: palette.field,
-            border: bordered ? `1px solid ${palette.border}` : "none",
+            background: dimmed ? dimmedFieldBg : palette.field,
+            border: bordered ? `1px solid ${dimmed ? dimmedBorder : palette.border}` : "none",
             borderBottomWidth: bordered && showIntegratedChips ? 0 : (bordered ? 1 : 0),
           }}
-          onClick={() => { setOpen(true); inputRef.current?.focus(); }}
+          onClick={openMenu}
         >
-          <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint }} />
+          <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: palette.hint, opacity: dimmed ? 0.65 : 1 }} />
           <input
             ref={inputRef}
-            type="search"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
+            type="text"
+            inputMode="text"
+            name={inputName}
+            readOnly={inputLocked}
+            {...NO_AUTOFILL_INPUT_PROPS}
             value={q}
             onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-            onFocus={() => setOpen(true)}
+            onFocus={() => { setInputLocked(false); setOpen(true); }}
             onKeyDown={handleKeyDown}
             placeholder={selectedItems.length > 0 && compact ? "" : placeholder}
             className={`flex-1 bg-transparent outline-none min-w-[60px] ${compact ? "text-[0.8125rem]" : "text-sm"}`}
-            style={{ color: palette.text }}
+            style={{ color: palette.text, opacity: dimmed ? 0.75 : 1 }}
             role="combobox"
             aria-expanded={open}
             aria-controls={open ? listboxId : undefined}
             aria-autocomplete="list"
             aria-activedescendant={activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined}
           />
-          {/* Compact mode: chips live inside the input bar */}
           {compact && selectedItems.length > 0 && (
             <div className="flex items-center gap-1 flex-shrink-0 overflow-x-auto max-w-[72%] scrollbar-hide">
               {selectedItems.map((s) => (
@@ -202,15 +236,14 @@ export function SpotlightMultiSelect({
           )}
         </div>
 
-        {/* Dropdown — inline absolute, no portal, no scroll-close */}
-        {showMenu && (
+        {showMenu && menuPos && createPortal(
           <div
             ref={menuRef}
             id={listboxId}
             role="listbox"
-            className="absolute left-0 right-0 z-50 rounded-2xl border overflow-y-auto"
+            className="rounded-2xl border overflow-y-auto"
             style={{
-              ...(dropUp ? { bottom: "calc(100% + 6px)" } : { top: "calc(100% + 6px)" }),
+              ...menuStyle,
               backgroundColor: palette.bg,
               borderColor: palette.border,
               boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.45)" : "0 8px 24px rgba(0,0,0,0.12)",
@@ -260,11 +293,11 @@ export function SpotlightMultiSelect({
                 <div className="px-4 py-3 text-[0.8125rem]" style={{ color: palette.hint }}>No matches</div>
               )}
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
 
-      {/* Non-compact chips below the input bar */}
       {!compact && selectedItems.length > 0 && (
         <div
           className={

@@ -1132,7 +1132,7 @@ export const NewLeadScreen = ({
   }, [animateToStep, canSubmit, errors, markStepFieldsTouched, newLeadData, onSuccess]);
 
   return (
-    <form onSubmit={handleSubmit} className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
+    <form onSubmit={handleSubmit} autoComplete="off" className="min-h-full flex flex-col" style={{ backgroundColor: c.background }}>
       {/* Invisible focus sink — prevents AnimatedScreenWrapper from focusing a heading on mount */}
       <div data-autofocus tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', outline: 'none' }} />
       <div className={`px-4 sm:px-6 pb-32 ${NEW_LEAD_MAX_WIDTH} mx-auto w-full`} style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
@@ -1535,15 +1535,15 @@ export const NewLeadScreen = ({
                     <StakeholderCollapsedPill
                       label="Unknown"
                       hint="Add end user"
-                      onExpand={() => setEndUserFieldExpanded(true)}
+                      onExpand={() => {
+                        setEndUserFieldExpanded(true);
+                        if (newLeadData.endUserUnknown) onNewLeadChange({ endUserUnknown: false });
+                      }}
                       theme={theme}
                     />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div
-                        className="flex-1 min-w-0 transition-opacity duration-200"
-                        style={{ opacity: isEndUserUnknown && !realEndUser ? 0.55 : 1 }}
-                      >
+                      <div className="flex-1 min-w-0">
                         <SpotlightMultiSelect
                           selectedItems={realEndUser ? [realEndUser] : []}
                           onAddItem={addEndUser}
@@ -1557,11 +1557,11 @@ export const NewLeadScreen = ({
                           ))}
                           onAddNew={addEndUserOption}
                           placeholder={isEndUserUnknown && !realEndUser ? 'Add end user name' : 'Search or add end user'}
+                          dimmed={isEndUserUnknown && !realEndUser}
                           theme={theme}
                           compact={false}
                           integratedChips
                         />
-                      </div>
                       <QuickPickButton
                         active={isEndUserUnknown && !realEndUser}
                         theme={theme}
@@ -1639,15 +1639,15 @@ export const NewLeadScreen = ({
                     <StakeholderCollapsedPill
                       label="Unknown"
                       hint="Add A&D firms"
-                      onExpand={() => setDesignFirmFieldExpanded(true)}
+                      onExpand={() => {
+                        setDesignFirmFieldExpanded(true);
+                        if (newLeadData.designFirmUnknown) onNewLeadChange({ designFirmUnknown: false });
+                      }}
                       theme={theme}
                     />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <div
-                        className="flex-1 min-w-0 transition-opacity duration-200"
-                        style={{ opacity: isDesignFirmUnknown && realDesignFirms.length === 0 ? 0.55 : 1 }}
-                      >
+                      <div className="flex-1 min-w-0">
                         <SpotlightMultiSelect
                           selectedItems={realDesignFirms}
                           onAddItem={addDesignFirm}
@@ -1657,11 +1657,11 @@ export const NewLeadScreen = ({
                           options={(designFirms || []).filter((firm) => !isUnknownStakeholderValue(firm))}
                           onAddNew={(firm) => { const norm = firm.trim(); setDesignFirms((prev) => prev.some((f) => f.toLowerCase() === norm.toLowerCase()) ? prev : [norm, ...prev]); }}
                           placeholder={isDesignFirmUnknown && realDesignFirms.length === 0 ? 'Add firm name' : 'Search or create firm'}
+                          dimmed={isDesignFirmUnknown && realDesignFirms.length === 0}
                           theme={theme}
                           compact={false}
                           integratedChips
                         />
-                      </div>
                       <QuickPickButton
                         active={isDesignFirmUnknown && realDesignFirms.length === 0}
                         theme={theme}
@@ -1695,15 +1695,15 @@ export const NewLeadScreen = ({
                           <StakeholderCollapsedPill
                             label="Unknown"
                             hint="Add competitor"
-                            onExpand={() => setCompetitionFieldExpanded(true)}
+                            onExpand={() => {
+                              setCompetitionFieldExpanded(true);
+                              if (newLeadData.competitionUnknown) onNewLeadChange({ competitionUnknown: false });
+                            }}
                             theme={theme}
                           />
                         ) : (
                           <div className="flex items-center gap-2">
-                            <div
-                              className="flex-1 min-w-0 transition-opacity duration-200"
-                              style={{ opacity: isCompetitionUnknown ? 0.55 : 1 }}
-                            >
+                            <div className="flex-1 min-w-0">
                               <SpotlightMultiSelect
                                 selectedItems={realCompetitors}
                                 onAddItem={addCompetitor}
@@ -1716,6 +1716,7 @@ export const NewLeadScreen = ({
                                   : COMPETITORS.filter((name) => name !== 'None' && name !== 'Unknown')}
                                 onAddNew={(name) => { addCompetitor(name); }}
                                 placeholder={isCompetitionUnknown ? 'Add competitor name' : 'Search or add competitor'}
+                                dimmed={isCompetitionUnknown}
                                 theme={theme}
                                 compact={false}
                                 integratedChips

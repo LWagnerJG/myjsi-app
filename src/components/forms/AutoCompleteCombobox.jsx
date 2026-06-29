@@ -1,6 +1,8 @@
-import React, { useState, useRef, useMemo, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useLayoutEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
-import { inputSurface, isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
+import { DESIGN_TOKENS, inputSurface, isDarkTheme, subtleBorder } from '../../design-system/tokens.js';
+import { getNoAutofillName, NO_AUTOFILL_INPUT_PROPS } from '../../utils/noAutofillInput.js';
 
 export const AutoCompleteCombobox = React.memo(({
     label,
@@ -19,28 +21,23 @@ export const AutoCompleteCombobox = React.memo(({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [dropUp, setDropUp] = useState(false);
+    const [menuPos, setMenuPos] = useState(null);
+    const [inputLocked, setInputLocked] = useState(true);
+    const [inputName] = useState(() => getNoAutofillName('combobox'));
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
+    const menuRef = useRef(null);
     const dark = isDarkTheme(theme);
 
-    // Flip dropdown above the input when there isn't enough space below.
-    // Also re-checks on resize so the iOS keyboard opening (which shrinks innerHeight) is handled.
-    const calcDropUp = () => {
-        if (!wrapperRef.current) return;
+    const measure = useCallback(() => {
+        if (!wrapperRef.current) return null;
         const rect = wrapperRef.current.getBoundingClientRect();
         const chrome = document.querySelector('[data-bottom-chrome]');
         const bottomOccupied = chrome ? (window.innerHeight - chrome.getBoundingClientRect().top) : 0;
         setDropUp(window.innerHeight - rect.bottom - bottomOccupied < 260);
-    };
-    useLayoutEffect(() => {
-        if (!isOpen) return;
-        calcDropUp();
-    }, [isOpen]);
-    useEffect(() => {
-        if (!isOpen) return;
-        window.addEventListener('resize', calcDropUp);
-        return () => window.removeEventListener('resize', calcDropUp);
-    }, [isOpen]);
+        setMenuPos({ top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width });
+        return rect;
+    }, []);
 
     const filtered = useMemo(() => {
         if (!showDropdown) return [];
@@ -58,13 +55,12 @@ export const AutoCompleteCombobox = React.memo(({
     const sharedInputSurface = inputSurface(theme);
     const inputBg = dark ? theme.colors.background : sharedInputSurface.backgroundColor;
 
-    // Close on outside click/tap — option buttons are inside wrapperRef so they won't trigger this
+    // Close on outside click/tap
     useEffect(() => {
         if (!isOpen) return;
         const close = (e) => {
-            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-                setIsOpen(false);
-            }
+            if (wrapperRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
+            setIsOpen(false);
         };
         document.addEventListener('mousedown', close);
         document.addEventListener('touchstart', close, { passive: true });
@@ -73,6 +69,25 @@ export const AutoCompleteCombobox = React.memo(({
             document.removeEventListener('touchstart', close);
         };
     }, [isOpen]);
+
+    useLayoutEffect(() => {
+        if (!isOpen) {
+            setMenuPos(null);
+            return;
+        }
+        measure();
+    }, [isOpen, measure]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const sync = () => measure();
+        window.addEventListener('resize', sync);
+        window.addEventListener('scroll', sync, true);
+        return () => {
+            window.removeEventListener('resize', sync);
+            window.removeEventListener('scroll', sync, true);
+        };
+    }, [isOpen, measure]);
 
     const handleSelect = (opt) => {
         onSelect?.(opt);
@@ -99,7 +114,6 @@ export const AutoCompleteCombobox = React.memo(({
                     {label}
                 </label>
             )}
-            {/* Wrapper is position:relative so the dropdown anchors to it — no portal needed */}
             <div className="relative" ref={wrapperRef}>
                 <Search
                     className={`absolute top-1/2 -translate-y-1/2 pointer-events-none ${compact ? 'left-3 w-3.5 h-3.5' : 'left-3.5 w-4 h-4'}`}
@@ -107,13 +121,16 @@ export const AutoCompleteCombobox = React.memo(({
                 />
                 <input
                     ref={inputRef}
-                    type="search"
-                    spellCheck={false}
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    autoComplete="off"
+                    type="text"
+                    inputMode="text"
+                    name={inputName}
+                    readOnly={inputLocked}
+                    {...NO_AUTOFILL_INPUT_PROPS}
                     value={value || ''}
-                    onFocus={() => { if (showDropdown) setIsOpen(true); }}
+                    onFocus={() => {
+                        setInputLocked(false);
+                        if (showDropdown) setIsOpen(true);
+                    }}
                     onChange={(e) => {
                         onChange(e.target.value);
                         if (showDropdown) setIsOpen(true);
@@ -131,12 +148,18 @@ export const AutoCompleteCombobox = React.memo(({
                     }}
                 />
 
-                {/* Inline dropdown — flips above when near bottom of viewport */}
-                {showList && (
+                {showList && menuPos && createPortal(
                     <div
-                        className={`absolute left-0 right-0 z-50 rounded-2xl border overflow-hidden ${dropdownClassName}`}
+                        ref={menuRef}
+                        className={`rounded-2xl border overflow-hidden ${dropdownClassName}`}
                         style={{
-                            ...(dropUp ? { bottom: 'calc(100% + 6px)' } : { top: 'calc(100% + 6px)' }),
+                            position: 'fixed',
+                            left: menuPos.left,
+                            width: menuPos.width,
+                            zIndex: DESIGN_TOKENS.zIndex.popover,
+                            ...(dropUp
+                                ? { bottom: window.innerHeight - menuPos.top + 6 }
+                                : { top: menuPos.bottom + 6 }),
                             backgroundColor: theme.colors.surface,
                             borderColor,
                             boxShadow: dark
@@ -149,9 +172,7 @@ export const AutoCompleteCombobox = React.memo(({
                                 <button
                                     key={opt}
                                     type="button"
-                                    // onMouseDown prevents input blur before click fires on desktop
                                     onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
-                                    // onClick handles touch tap on mobile
                                     onClick={() => handleSelect(opt)}
                                     className="w-full text-left px-4 py-2.5 text-[0.8125rem] font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.09] active:bg-black/[0.06]"
                                     style={{ color: theme.colors.textPrimary }}
@@ -160,7 +181,8 @@ export const AutoCompleteCombobox = React.memo(({
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </div>,
+                    document.body,
                 )}
             </div>
 

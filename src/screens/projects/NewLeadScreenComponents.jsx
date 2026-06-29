@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, Search, Check } from 'lucide-react';
 import { InfoTooltip } from '../../components/common/InfoTooltip.jsx';
 import { DESIGN_TOKENS, isDarkTheme } from '../../design-system/tokens.js';
+import { getNoAutofillName, NO_AUTOFILL_INPUT_PROPS } from '../../utils/noAutofillInput.js';
 import { VisionOptions, KnoxOptions, WinkHoopzOptions } from './product-options.jsx';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -178,6 +179,8 @@ export const ProjectSpotlight = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [hlIdx, setHlIdx] = useState(0);
+  const [inputLocked, setInputLocked] = useState(true);
+  const [inputName] = useState(() => getNoAutofillName('project'));
   const anchorRef = useRef(null);
   const menuRef = useRef(null);
   const inputRef = useRef(null);
@@ -334,17 +337,19 @@ export const ProjectSpotlight = ({
         <input
           ref={inputRef}
           type="text"
+          inputMode="text"
+          name={inputName}
+          readOnly={inputLocked}
           value={value || ''}
           onChange={(event) => {
             onChange?.(event.target.value);
             if (!open) doOpen();
           }}
-          onFocus={doOpen}
+          onFocus={() => { setInputLocked(false); doOpen(); }}
           onBlur={onBlur}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          autoComplete="off"
-          spellCheck={false}
+          {...NO_AUTOFILL_INPUT_PROPS}
           aria-autocomplete="list"
           aria-expanded={open}
           aria-controls="project-spotlight-listbox"
