@@ -42,18 +42,15 @@ export const Section = ({ title, subtitle, titleRight, children, theme, classNam
 };
 
 /* Compact field row */
-export const Row = ({ label, labelExtra, children, theme, tip, inline }) => {
+export const Row = ({ label, children, theme, tip, inline }) => {
   const rowLayout = inline ? 'grid items-start gap-x-3 gap-y-1.5 sm:grid-cols-[112px_minmax(0,1fr)]' : '';
   return (
   <div className={`${rowLayout} py-2`}>
     {label && (
-      <div className={`${inline ? 'sm:pt-0.5' : 'mb-1'}`}>
-        <div className={`flex items-center gap-1.5 ${inline ? 'sm:min-h-[34px]' : ''}`}>
-          <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
-            style={{ color: theme.colors.textSecondary }}>{label}</label>
-          {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
-        </div>
-        {labelExtra}
+      <div className={`flex items-center gap-1.5 ${inline ? 'sm:min-h-[34px] sm:pt-0.5' : 'mb-1'}`}>
+        <label className={`text-[0.8125rem] font-semibold ${inline ? 'whitespace-nowrap' : ''}`}
+          style={{ color: theme.colors.textSecondary }}>{label}</label>
+        {tip && <InfoTooltip content={tip} theme={theme} position="right" size="sm" />}
       </div>
     )}
     {inline ? <div className="min-w-0 w-full">{children}</div> : children}
@@ -61,48 +58,67 @@ export const Row = ({ label, labelExtra, children, theme, tip, inline }) => {
   );
 };
 
-const DRIVING_SPECS_SKIP = new Set(['unknown', 'undecided', 'out to bid', 'n/a']);
+const SPECIFIER_SKIP = new Set(['unknown', 'undecided', 'out to bid', 'n/a']);
 
-/* Discrete driving-specs picker shown under stakeholder row labels */
-export const StakeholderDrivingSpecsControl = ({ stakeholderType, items, drivingSpecs, onToggle, theme }) => {
+export const buildSpecifierOptions = (lead = {}) => {
+  const options = [];
+  const seen = new Set();
+  const add = (type, name, group) => {
+    const trimmed = String(name || '').trim();
+    if (!trimmed || SPECIFIER_SKIP.has(trimmed.toLowerCase())) return;
+    const key = `${type}:${trimmed.toLowerCase()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    options.push({ type, name: trimmed, group });
+  };
+
+  add('endUser', lead.endUser, 'End user');
+  (lead.dealers || []).forEach((name) => add('dealer', name, 'Dealer'));
+  (lead.designFirms || []).forEach((name) => add('designFirm', name, 'A&D'));
+  return options;
+};
+
+/* Unified specifier picker — appears once real stakeholders exist */
+export const SpecifierPicker = ({ options, value, onSelect, theme }) => {
+  if (!options.length) return null;
+
   const dark = isDarkTheme(theme);
   const border = dark ? 'rgba(255,255,255,0.11)' : 'rgba(0,0,0,0.07)';
-  const selectable = [...new Set((items || []).map((item) => String(item || '').trim()).filter(Boolean))]
-    .filter((name) => !DRIVING_SPECS_SKIP.has(name.toLowerCase()));
-
-  if (!selectable.length) return null;
 
   return (
-    <div className="mt-1.5">
-      <p
-        className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] mb-1"
-        style={{ color: theme.colors.textSecondary, opacity: 0.5 }}
-      >
-        Driving Specs
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {selectable.map((name) => {
-          const active = drivingSpecs?.type === stakeholderType && drivingSpecs?.name === name;
-          return (
-            <button
-              key={name}
-              type="button"
-              onClick={() => onToggle(stakeholderType, name)}
-              className="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium border max-w-[96px] truncate transition-all"
-              style={{
-                backgroundColor: active ? `${theme.colors.accent}16` : 'transparent',
-                borderColor: active ? theme.colors.accent : border,
-                color: active ? theme.colors.accent : theme.colors.textSecondary,
-              }}
-              aria-pressed={active}
-              title={active ? `${name} is driving specs` : `Mark ${name} as driving specs`}
-            >
-              {name}
-            </button>
-          );
-        })}
+    <div className="mt-1 pt-3 border-t" style={{ borderColor: border }}>
+        <p className="text-[0.8125rem] font-semibold mb-2.5" style={{ color: theme.colors.textPrimary }}>
+          Specifier
+        </p>
+        <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Specifier">
+          {options.map((opt) => {
+            const active = value?.type === opt.type && value?.name === opt.name;
+            return (
+              <button
+                key={`${opt.type}:${opt.name}`}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => onSelect(opt.type, opt.name)}
+                className="rounded-full px-3 py-1.5 text-xs font-medium border transition-all inline-flex items-center gap-1.5 min-w-0 max-w-full"
+                style={{
+                  backgroundColor: active ? theme.colors.accent : (dark ? 'rgba(255,255,255,0.04)' : '#fff'),
+                  borderColor: active ? theme.colors.accent : border,
+                  color: active ? theme.colors.accentText : theme.colors.textPrimary,
+                }}
+              >
+                <span
+                  className="text-[0.625rem] font-semibold uppercase tracking-[0.04em] shrink-0"
+                  style={{ color: active ? theme.colors.accentText : theme.colors.textSecondary, opacity: active ? 0.8 : 0.55 }}
+                >
+                  {opt.group}
+                </span>
+                <span className="truncate">{opt.name}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
   );
 };
 

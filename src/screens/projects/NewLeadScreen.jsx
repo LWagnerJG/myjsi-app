@@ -16,7 +16,7 @@ import { DISCOUNT_OPTIONS_WITH_UNKNOWN } from '../../constants/discounts.js';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
-import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section, StakeholderDrivingSpecsControl } from './NewLeadScreenComponents.jsx';
+import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section, SpecifierPicker, buildSpecifierOptions } from './NewLeadScreenComponents.jsx';
 
 const WIN_PRESETS = [10, 25, 50, 75, 90];
 const WIN_MIN = 5;
@@ -469,38 +469,30 @@ export const NewLeadScreen = ({
   const toggleDrivingSpecs = useCallback((type, name) => {
     const normalized = String(name || '').trim();
     if (!normalized) return;
-    const current = newLeadData.drivingSpecs;
-    const isSame = current?.type === type && current?.name === normalized;
-    onNewLeadChange({ drivingSpecs: isSame ? null : { type, name: normalized } });
-  }, [newLeadData.drivingSpecs, onNewLeadChange]);
+    onNewLeadChange({ drivingSpecs: { type, name: normalized } });
+  }, [onNewLeadChange]);
 
-  const clearDrivingSpecsIfMatch = useCallback((type, name) => {
+  const specifierOptions = useMemo(
+    () => buildSpecifierOptions(newLeadData),
+    [newLeadData.endUser, newLeadData.dealers, newLeadData.designFirms],
+  );
+
+  useEffect(() => {
     const current = newLeadData.drivingSpecs;
-    if (current?.type === type && current?.name === name) {
-      onNewLeadChange({ drivingSpecs: null });
+    if (!specifierOptions.length) {
+      if (current) onNewLeadChange({ drivingSpecs: null });
+      return;
     }
-  }, [newLeadData.drivingSpecs, onNewLeadChange]);
+    const match = current && specifierOptions.find((option) => option.type === current.type && option.name === current.name);
+    if (!match) {
+      onNewLeadChange({ drivingSpecs: { type: specifierOptions[0].type, name: specifierOptions[0].name } });
+    }
+  }, [specifierOptions, newLeadData.drivingSpecs, onNewLeadChange]);
 
   const setEndUser = useCallback((value) => {
-    const normalized = String(value || '').trim();
-    const updates = { endUser: value };
-    const current = newLeadData.drivingSpecs;
-    if (current?.type === 'endUser' && current.name !== normalized) {
-      updates.drivingSpecs = null;
-    }
-    onNewLeadChange(updates);
+    onNewLeadChange({ endUser: value });
     markTouched('endUser');
-  }, [markTouched, newLeadData.drivingSpecs, onNewLeadChange]);
-
-  const drivingSpecsLabelExtra = useCallback((stakeholderType, items) => (
-    <StakeholderDrivingSpecsControl
-      stakeholderType={stakeholderType}
-      items={items}
-      drivingSpecs={newLeadData.drivingSpecs}
-      onToggle={toggleDrivingSpecs}
-      theme={theme}
-    />
-  ), [newLeadData.drivingSpecs, theme, toggleDrivingSpecs]);
+  }, [markTouched, onNewLeadChange]);
 
   const handleProjectInputChange = useCallback((nextValue) => {
     const currentSelectedProject = (opportunities || []).find((opp) => String(opp?.id) === String(newLeadData.pastProjectRef || ''));
@@ -784,8 +776,8 @@ export const NewLeadScreen = ({
       add('Competition', 'None', 1);
     }
     if (newLeadData.drivingSpecs?.name) {
-      const typeLabels = { endUser: 'End User', dealer: 'Dealer', designFirm: 'A&D Firm' };
-      add('Driving Specs', `${typeLabels[newLeadData.drivingSpecs.type] || newLeadData.drivingSpecs.type}: ${newLeadData.drivingSpecs.name}`, 1);
+      const typeLabels = { endUser: 'End user', dealer: 'Dealer', designFirm: 'A&D' };
+      add('Specifier', `${typeLabels[newLeadData.drivingSpecs.type] || newLeadData.drivingSpecs.type} · ${newLeadData.drivingSpecs.name}`, 1);
     }
     add('Rewards', [salesRewardEnabled ? 'Sales 3%' : null, designerRewardEnabled ? 'Designer 1%' : null].filter(Boolean).join(' · ') || 'None', 1);
     if (quoteMode === 'existing' && newLeadData.jsiQuoteNumber) add('JSI Quote #', newLeadData.jsiQuoteNumber, 2);
@@ -1353,12 +1345,7 @@ export const NewLeadScreen = ({
             </Section>
 
             <Section title="Stakeholders & Competition" theme={theme}>
-              <Row
-                label="End User"
-                labelExtra={drivingSpecsLabelExtra('endUser', newLeadData.endUser ? [newLeadData.endUser] : [])}
-                theme={theme}
-                inline
-              >
+              <Row label="End User" theme={theme} inline>
                 <div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 min-w-0">
@@ -1386,12 +1373,7 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              <Row
-                label="Dealer(s)"
-                labelExtra={dealerOutToBid ? null : drivingSpecsLabelExtra('dealer', newLeadData.dealers || [])}
-                theme={theme}
-                inline
-              >
+              <Row label="Dealer(s)" theme={theme} inline>
                 <div>
                   {dealerOutToBid ? (
                     <button
@@ -1415,7 +1397,6 @@ export const NewLeadScreen = ({
                             markTouched('dealers');
                           }}
                           onRemoveItem={(dealer) => {
-                            clearDrivingSpecsIfMatch('dealer', dealer);
                             upd('dealers', (newLeadData.dealers || []).filter((item) => item !== dealer));
                             markTouched('dealers');
                           }}
@@ -1439,12 +1420,7 @@ export const NewLeadScreen = ({
                 </div>
               </Row>
 
-              <Row
-                label="A&D Firm(s)"
-                labelExtra={drivingSpecsLabelExtra('designFirm', newLeadData.designFirms || [])}
-                theme={theme}
-                inline
-              >
+              <Row label="A&D Firm(s)" theme={theme} inline>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 min-w-0">
                     <SpotlightMultiSelect
@@ -1455,7 +1431,6 @@ export const NewLeadScreen = ({
                         if (!current.some((f) => f.toLowerCase() === norm.toLowerCase())) upd('designFirms', [...current, norm]);
                       }}
                       onRemoveItem={(firm) => {
-                        clearDrivingSpecsIfMatch('designFirm', firm);
                         upd('designFirms', (newLeadData.designFirms || []).filter((item) => item !== firm));
                       }}
                       options={['Unknown', ...(designFirms || []).filter((f) => f !== 'Unknown')]}
@@ -1478,6 +1453,13 @@ export const NewLeadScreen = ({
                   </QuickPickButton>
                 </div>
               </Row>
+
+              <SpecifierPicker
+                options={specifierOptions}
+                value={newLeadData.drivingSpecs}
+                onSelect={toggleDrivingSpecs}
+                theme={theme}
+              />
 
               <Row label="Competition" theme={theme} inline>
                 <div>
