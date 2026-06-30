@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import { OpportunityDetail } from './OpportunityDetail.jsx';
 import { lightTheme } from '../../../../data/theme/themeData.js';
-
+import { INITIAL_OPPORTUNITIES } from '../../data.js';
 const baseOpp = {
   id: 99,
   name: 'Test Project',
@@ -64,6 +64,14 @@ describe('OpportunityDetail', () => {
 
     fireEvent.keyDown(slider, { key: 'End' });
     expect(screen.getByRole('slider', { name: /win probability/i })).toHaveAttribute('aria-valuenow', '100');
+  });
+
+  it('renders seeded project id 1 with full stakeholder data', () => {
+    const opp = INITIAL_OPPORTUNITIES.find(o => o.id === 1);
+    render(<Harness initial={opp} />);
+    expect(screen.getByRole('textbox', { name: 'Project name' })).toHaveValue('New Office Furnishings');
+    expect(screen.getByText('Stakeholders & Competition')).toBeInTheDocument();
+    expect(screen.getByText('Specs & Quote')).toBeInTheDocument();
   });
 
   it('keeps a manually enabled reward on after the autosave round-trip', () => {

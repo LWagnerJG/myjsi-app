@@ -1512,7 +1512,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={handleDelete}
               className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
-              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: CONTROL_RADIUS }}
+              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: '14px' }}
             >
               <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold" style={{ color: c.error }}>
                 <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
