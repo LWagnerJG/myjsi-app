@@ -44,10 +44,18 @@ export const SuggestInputPill = ({ placeholder, suggestions, onAdd, theme, colla
         type="button"
         aria-label={placeholder}
         onClick={() => setExpanded(true)}
-        className="inline-flex items-center justify-center flex-shrink-0 transition-all active:scale-[0.95] focus-ring"
-        style={{ width: 44, height: 44, borderRadius: 9999, backgroundColor: fieldBg, color: theme.colors.textSecondary }}
+        className="inline-flex items-center justify-center flex-shrink-0 transition-all active:scale-[0.9] focus-ring hover:opacity-100"
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 9999,
+          backgroundColor: 'transparent',
+          border: `1px dashed ${isDark ? 'rgba(255,255,255,0.22)' : 'rgba(53,53,53,0.22)'}`,
+          color: theme.colors.textSecondary,
+          opacity: 0.7,
+        }}
       >
-        <Plus className="w-4 h-4" aria-hidden="true" />
+        <Plus className="w-3.5 h-3.5" aria-hidden="true" />
       </button>
     );
   }

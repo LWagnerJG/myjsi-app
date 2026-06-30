@@ -1,10 +1,12 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
-import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { CONTRACTS_DATA } from '../../../resources/contracts/data.js';
 import { buildSpecifierOptions, getDefaultSpecifierOption } from '../../NewLeadScreenComponents.jsx';
+import { getSeriesSpecPrompts } from '../../seriesSpecOptions.js';
+import { DEALER_CONTACTS } from './utils.js';
 import { ORDER_DATA, STATUS_COLORS } from '../../../orders/data.js';
 import { JSI_SERIES } from '../../../products/data.js';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from '../../../resources/lead-times/data.js';
@@ -15,7 +17,6 @@ import { RequestQuoteModal } from '../../../../components/common/RequestQuoteMod
 import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quoteRequests.js';
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
-import { ContactSearchSelector } from './ContactSearchSelector.jsx';
 import { buildOpportunityProjectContacts, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
 
 /* helpers */
@@ -92,22 +93,6 @@ const formatSampleOrderDate = (value) => {
   const date = parseProjectDateValue(value);
   if (!date) return value;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
-
-/* Per-series manufacturing-context prompts (mirrors the New Lead intake). */
-const getSeriesProcurementPrompts = (series) => {
-  const name = String(series || '').toLowerCase();
-  const isWorksurface = /(table|desk|bench|case|storage|training|conference|lok|native|poet|indie|vision|knox|wink|hoopz)/.test(name);
-  if (isWorksurface) {
-    return {
-      first: { label: 'Power / Data', key: 'procurementCheckpoint', options: ['Unknown', 'Defined', 'Likely Needed', 'Not Needed'] },
-      second: { label: 'Finish Readiness', key: 'productionReadiness', options: ['Unknown', 'Standard Finishes Finalized', 'Custom Finish Pending', 'Needs Design Review'] },
-    };
-  }
-  return {
-    first: { label: 'Upholstery / Textile', key: 'procurementCheckpoint', options: ['Unknown', 'Grade Selected', 'COM/COL Required', 'Needs Dealer Input'] },
-    second: { label: 'Production Priority', key: 'productionReadiness', options: ['Unknown', 'Standard Lead Time', 'Expedite Request', 'Phased Delivery'] },
-  };
 };
 
 const SPECIFIER_TYPE_LABELS = { endUser: 'End user', dealer: 'Dealer', designFirm: 'A&D' };
@@ -662,6 +647,25 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const setContacts = useCallback((next) => {
     setDraft(p => { dirty.current = true; return { ...p, contacts: next, contact: next[0] || '' }; });
   }, []);
+  const addProjectContact = useCallback((name) => {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) return;
+    setDraft(p => {
+      const current = Array.isArray(p.contacts) ? p.contacts : (p.contact ? [p.contact] : []);
+      if (current.some(x => x.toLowerCase() === trimmed.toLowerCase())) return p;
+      dirty.current = true;
+      const next = [...current, trimmed];
+      return { ...p, contacts: next, contact: next[0] || '' };
+    });
+  }, []);
+  const removeProjectContact = useCallback((name) => {
+    setDraft(p => {
+      const current = Array.isArray(p.contacts) ? p.contacts : (p.contact ? [p.contact] : []);
+      const next = current.filter(x => x !== name);
+      dirty.current = true;
+      return { ...p, contacts: next, contact: next[0] || '' };
+    });
+  }, []);
 
   useEffect(() => {
     if (!dirty.current) return;
@@ -847,6 +851,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
   const [hubModal, setHubModal] = useState(null); // 'quotes' | 'samples' | 'documents' | 'contacts' | 'related-orders' | null
+  const [newContactName, setNewContactName] = useState('');
+  /* Contacts you can pull straight from the dealers / A&D firms on this project. */
+  const companyContactGroups = useMemo(() => {
+    const companies = [...(draft.dealers || []), ...(draft.designFirms || [])];
+    const seen = new Set();
+    return companies
+      .filter(co => { const k = String(co).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+      .map(co => ({ company: co, contacts: DEALER_CONTACTS[co] || [] }))
+      .filter(g => g.contacts.length > 0);
+  }, [draft.dealers, draft.designFirms]);
   const enrichedQuotes = useMemo(() => (draft.quotes || []).map((q, i) => ({ ...q, status: q.status || (i === 0 ? 'complete' : 'in-progress') })), [draft.quotes]);
   const relatedSampleOrders = useMemo(
     () => getSampleOrdersForOpportunity(draft, sampleOrders, opportunities)
@@ -1042,24 +1056,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </Row>
                 </div>
 
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
                   <span className={FIELD_LABEL_CLASS} style={labelStyle}>Rewards</span>
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <RewardTogglePill
-                      label="Sales"
-                      sublabel={salesRewardEnabled ? '3%' : 'off'}
-                      checked={salesRewardEnabled}
-                      onChange={e => setRewardEnabled('salesReward', e.target.checked)}
-                      theme={theme}
-                    />
-                    <RewardTogglePill
-                      label="Designer"
-                      sublabel={designerRewardEnabled ? '1%' : 'off'}
-                      checked={designerRewardEnabled}
-                      onChange={e => setRewardEnabled('designerReward', e.target.checked)}
-                      theme={theme}
-                    />
-                  </div>
+                  <RewardTogglePill
+                    label="Sales"
+                    sublabel={salesRewardEnabled ? '3%' : 'off'}
+                    checked={salesRewardEnabled}
+                    onChange={e => setRewardEnabled('salesReward', e.target.checked)}
+                    theme={theme}
+                  />
+                  <RewardTogglePill
+                    label="Designer"
+                    sublabel={designerRewardEnabled ? '1%' : 'off'}
+                    checked={designerRewardEnabled}
+                    onChange={e => setRewardEnabled('designerReward', e.target.checked)}
+                    theme={theme}
+                  />
                 </div>
 
                 {rewardDefaultOff && (
@@ -1169,8 +1181,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   )}
 
                   <div className="space-y-2 sm:col-span-2">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
                       <SegmentToggle
                         value={competitionValue}
                         onChange={v => setCompetition(v)}
@@ -1178,23 +1190,24 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         ariaLabel="Competition present"
                         options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
                       />
-                      {competitionValue === true && (draft.competitors || []).map(comp => (
-                        <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
-                      ))}
-                      {competitionValue === true && (
-                        <SuggestInputPill collapsible placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && x !== 'Unknown' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
-                      )}
                     </div>
-                  </div>
-
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Contacts</span>
-                    {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
-                      <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
-                    ) : (
-                      <p className="flex min-h-[44px] items-center px-3.5 text-[0.75rem]" style={{ ...fieldSurface(theme), color: c.textSecondary, opacity: 0.7 }}>
-                        Add a dealer partner to sync their contacts.
-                      </p>
+                    {competitionValue === true && (
+                      <div className="space-y-2 rounded-[16px] p-3" style={{ backgroundColor: insetBg(theme) }}>
+                        {(draft.competitors || []).length > 0 && (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {(draft.competitors || []).map(comp => (
+                              <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
+                            ))}
+                          </div>
+                        )}
+                        <SuggestInputPill
+                          collapsible={false}
+                          placeholder={(draft.competitors || []).length ? 'Add another competitor…' : 'Search competitors or type to add…'}
+                          suggestions={COMPETITORS.filter(x => x !== 'None' && x !== 'Unknown' && !(draft.competitors || []).includes(x))}
+                          onAdd={v => addUnique('competitors', v)}
+                          theme={theme}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -1206,7 +1219,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   {(draft.products || []).length > 0 && (
                     <div className="space-y-2 mb-2">
                       {(draft.products || []).map(p => {
-                        const prompts = getSeriesProcurementPrompts(p.series);
+                        const prompts = getSeriesSpecPrompts(p.series);
                         const leadLabel = getSeriesLeadLabel(p.series);
                         return (
                           <div key={p.series} className="rounded-[16px] overflow-hidden" style={{ backgroundColor: insetBg(theme) }}>
@@ -1221,7 +1234,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                               </button>
                             </div>
                             <div className="grid gap-2 px-3 pb-3 sm:grid-cols-2">
-                              {[prompts.first, prompts.second].map(prompt => (
+                              {prompts.map(prompt => (
                                 <div key={prompt.key} className="space-y-1">
                                   <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>{prompt.label}</span>
                                   <CompactSelect
@@ -1230,8 +1243,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                                     onChange={v => updateProductOption(p.series, prompt.key, v)}
                                     theme={theme}
                                     ariaLabel={`${p.series} ${prompt.label}`}
-                                    placeholder="Unknown"
-                                    mutedValues={['Unknown']}
+                                    placeholder="TBD"
                                     surfaceStyle={{ minHeight: '38px' }}
                                   />
                                 </div>
@@ -1584,48 +1596,105 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
           e.target.value = '';
         }} />
 
-      {/* CONTACTS HUB MODAL */}
-      <Modal show={hubModal === 'contacts'} onClose={() => setHubModal(null)} title="Project Contacts" theme={theme} maxWidth="max-w-lg">
-        <div className="space-y-3.5">
-          <div className="px-3.5 py-3" style={fieldSurface(theme)}>
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <label htmlFor="opportunity-customer-link" className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Linked customer profile</label>
-              {draft.customerId ? (
-                <button type="button" onClick={() => update('customerId', null)} className="text-[0.6875rem] font-semibold focus-ring rounded-full" style={{ color: c.accent }}>
-                  Clear link
-                </button>
-              ) : null}
-            </div>
-            <select id="opportunity-customer-link" value={draft.customerId ? String(draft.customerId) : ''} onChange={(event) => update('customerId', event.target.value || null)}
-              className="w-full bg-transparent outline-none text-[0.8125rem] font-medium focus-ring rounded-md" style={{ color: c.textPrimary }}>
-              <option value="">Select customer profile...</option>
-              {(customers || []).map((customer) => (
-                <option key={customer.id} value={customer.id}>{customer.name}</option>
-              ))}
-            </select>
-            <p className="mt-2 text-[0.6875rem] leading-snug" style={{ color: c.textSecondary, opacity: 0.78 }}>
-              {draft.customerId
-                ? 'This project is explicitly pinned to a customer profile.'
-                : customerLinkSource === 'inferred'
-                  ? 'A customer is matched from the project account. Lock it to keep contacts in sync.'
-                  : 'Link a customer profile to surface contacts, rep context, and quick navigation.'}
-            </p>
+      {/* CONTACTS HUB MODAL — pull people straight from this project's dealers / A&D firms */}
+      <Modal show={hubModal === 'contacts'} onClose={() => { setHubModal(null); setNewContactName(''); }} title="Contacts" theme={theme} maxWidth="max-w-lg">
+        <div className="space-y-4">
+          {/* Current contacts */}
+          <div className="space-y-2">
+            <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>On this project</span>
+            {contactList.length > 0 ? (
+              <div className="space-y-1.5">
+                {contactList.map((name) => {
+                  const meta = companyContactGroups
+                    .flatMap(g => g.contacts.map(ct => ({ ...ct, company: g.company })))
+                    .find(ct => ct.name.toLowerCase() === String(name).toLowerCase());
+                  return (
+                    <div key={name} className="flex items-center gap-2.5 px-3 py-2.5" style={fieldSurface(theme)}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: `${c.accent}16`, color: c.accent }}>
+                        {getInitials(name)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>{name}</div>
+                        {meta ? <div className="text-[0.6875rem] truncate" style={{ color: c.textSecondary, opacity: 0.75 }}>{meta.title} · {meta.company}</div> : null}
+                      </div>
+                      <button type="button" onClick={() => removeProjectContact(name)} aria-label={`Remove ${name}`}
+                        className="w-7 h-7 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity focus-ring">
+                        <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} aria-hidden="true" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="px-3.5 py-3 text-[0.75rem]" style={{ ...fieldSurface(theme), color: c.textSecondary, opacity: 0.75 }}>
+                No contacts yet. Add people from the dealers or A&amp;D firms below.
+              </p>
+            )}
           </div>
 
-          {projectContacts.length > 0 ? (
-            <div className="space-y-2">
-              {projectContacts.map((contact) => (
-                <ContactSummaryCard key={`${contact.kind}-${contact.id}`} contact={contact} theme={theme} />
+          {/* Pick from project companies */}
+          {companyContactGroups.length > 0 && (
+            <div className="space-y-3">
+              <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Add from project companies</span>
+              {companyContactGroups.map((group) => (
+                <div key={group.company} className="rounded-[16px] p-3" style={{ backgroundColor: insetBg(theme) }}>
+                  <div className="text-[0.75rem] font-semibold mb-2" style={{ color: c.textPrimary }}>{group.company}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {group.contacts.map((ct) => {
+                      const added = contactList.some(n => n.toLowerCase() === ct.name.toLowerCase());
+                      return (
+                        <button
+                          key={ct.name}
+                          type="button"
+                          disabled={added}
+                          onClick={() => addProjectContact(ct.name)}
+                          className="inline-flex items-center gap-1.5 rounded-full pl-1 pr-3 h-8 text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring disabled:opacity-50 disabled:cursor-default"
+                          style={{ backgroundColor: theme.colors.surface, color: c.textPrimary, border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.1)'}` }}
+                          title={ct.title}
+                        >
+                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-[0.5625rem] font-bold flex-shrink-0" style={{ backgroundColor: `${c.accent}16`, color: c.accent }}>
+                            {getInitials(ct.name)}
+                          </span>
+                          <span className="truncate max-w-[160px]">{ct.name}</span>
+                          {added ? <Check className="w-3 h-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" /> : <Plus className="w-3 h-3 flex-shrink-0" style={{ opacity: 0.6 }} aria-hidden="true" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               ))}
             </div>
-          ) : (
-            <div className="flex items-center gap-2.5 px-3.5 py-3" style={fieldSurface(theme)}>
-              <Users className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
-              <span className="text-[0.75rem]" style={{ color: c.textSecondary }}>
-                Add a primary contact or link a customer profile to surface project contacts here.
-              </span>
-            </div>
           )}
+
+          {/* Add someone else */}
+          <div className="space-y-1.5">
+            <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Add someone else</span>
+            <div className="flex items-center gap-2">
+              <input
+                value={newContactName}
+                onChange={e => setNewContactName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && newContactName.trim()) { addProjectContact(newContactName); setNewContactName(''); } }}
+                className={`${TEXT_INPUT_CLASS} flex-1 min-w-0`}
+                style={{ color: c.textPrimary, ...fieldSurface(theme) }}
+                placeholder="Type a contact name"
+              />
+              <button
+                type="button"
+                onClick={() => { if (newContactName.trim()) { addProjectContact(newContactName); setNewContactName(''); } }}
+                disabled={!newContactName.trim()}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 h-[44px] text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring disabled:opacity-40"
+                style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
+              >
+                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                Add
+              </button>
+            </div>
+            {(draft.dealers || []).length === 0 && (draft.designFirms || []).length === 0 ? (
+              <p className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.7 }}>
+                Add a dealer or A&amp;D firm in Stakeholders to pull in their contacts automatically.
+              </p>
+            ) : null}
+          </div>
         </div>
       </Modal>
 
