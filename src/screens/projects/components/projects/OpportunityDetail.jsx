@@ -36,7 +36,7 @@ const REWARD_AUTO_OFF_DISCOUNT_MIN = 0.64;
 const CHIP_BG_LIGHT = 'rgba(53,53,53,0.05)';
 const CHIP_BG_DARK = 'rgba(255,255,255,0.07)';
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
-const DETAIL_SECTION_TITLE_CLASS = 'text-[0.8125rem] font-semibold tracking-tight leading-none';
+const DETAIL_SECTION_TITLE_CLASS = 'text-[0.875rem] font-semibold tracking-[-0.01em] leading-none';
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
 const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3 bg-transparent outline-none text-[0.875rem] font-medium focus-ring';
 
@@ -117,13 +117,20 @@ const CONTRACT_OPTIONS = [
 ];
 
 /* ---- section primitives ---- */
-const Section = ({ title, subtitle, children, theme, right, className = '', showDivider = true }) => {
-  const isDark = isDarkTheme(theme);
+const cardSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.035)' : '#FFFFFF',
+    border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.09)'}`,
+    borderRadius: '20px',
+  };
+};
+
+/* Contained card. A titled section renders a header; a bare card (no title)
+   is used for the hero so the whole screen shares one grounded surface system. */
+const Section = ({ title, subtitle, children, theme, right, className = '' }) => {
   return (
-    <section
-      className={`py-5 sm:py-6 ${showDivider ? 'border-t' : ''} ${className}`}
-      style={showDivider ? { borderColor: dividerColor(isDark) } : undefined}
-    >
+    <section className={`p-4 sm:p-5 ${className}`} style={cardSurface(theme)}>
       {title && (
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
@@ -197,7 +204,7 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
 const SegmentToggle = ({ value, onChange, theme, options, ariaLabel }) => {
   const c = theme.colors;
   return (
-    <div className="flex rounded-full p-0.5" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
+    <div className="inline-flex rounded-full p-0.5" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
       {options.map(opt => {
         const active = value === opt.val;
         return (
@@ -897,9 +904,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-28 sm:pb-6">
         <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 max-w-content mx-auto w-full">
 
-          {/* HERO — flat header, no card boxing */}
-          <header className="pb-5 sm:pb-6 border-b" style={{ borderColor: dividerColor(isDark) }}>
-            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+          {/* HERO — grounded in its own card, consistent with the sections below */}
+          <Section theme={theme} className="mb-4">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-center lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
               <div className="min-w-0">
                 <span className={`${FIELD_LABEL_CLASS} mb-1 block`} style={labelStyle}>Project Name</span>
                 <EditableIdentityField
@@ -978,11 +985,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </div>
             </div>
-          </header>
+          </Section>
 
-          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-10 xl:gap-14 lg:items-start">
-            <div className="min-w-0">
-              <Section title="Commercial" theme={theme} showDivider={false}>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
+            <div className="min-w-0 space-y-4">
+              <Section title="Commercial" theme={theme}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="min-w-0 space-y-1.5">
                     <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
@@ -1102,16 +1109,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     )}
                   </Row>
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 min-h-[44px]">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Bid Project</span>
-                      <SegmentToggle
-                        value={!!draft.isBid}
-                        onChange={v => update('isBid', v)}
-                        theme={theme}
-                        ariaLabel="Bid project"
-                        options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
-                      />
-                    </div>
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Bid Project</span>
+                    <SegmentToggle
+                      value={!!draft.isBid}
+                      onChange={v => update('isBid', v)}
+                      theme={theme}
+                      ariaLabel="Bid project"
+                      options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
+                    />
                   </div>
                 </div>
               </Section>
@@ -1163,9 +1168,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     </div>
                   )}
 
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <div className="flex items-center justify-between gap-2 min-h-[20px]">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
+                  <div className="space-y-2 sm:col-span-2">
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
+                    <div className="flex flex-wrap items-center gap-2">
                       <SegmentToggle
                         value={competitionValue}
                         onChange={v => setCompetition(v)}
@@ -1173,15 +1178,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         ariaLabel="Competition present"
                         options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
                       />
-                    </div>
-                    {competitionValue === true && (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {(draft.competitors || []).map(comp => (
-                          <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
-                        ))}
+                      {competitionValue === true && (draft.competitors || []).map(comp => (
+                        <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
+                      ))}
+                      {competitionValue === true && (
                         <SuggestInputPill collapsible placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && x !== 'Unknown' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-1.5 sm:col-span-2">
@@ -1274,7 +1277,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
             </div>
 
-            <div className="min-w-0 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
+            <div className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
               <Section title="Project Hub" theme={theme}>
                 <div className="space-y-0.5 -mx-2">
                   <DetailHubCard
