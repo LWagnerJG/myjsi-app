@@ -1562,6 +1562,7 @@ export const NewLeadScreen = ({
                           compact={false}
                           integratedChips
                         />
+                      </div>
                       <QuickPickButton
                         active={isEndUserUnknown && !realEndUser}
                         theme={theme}
@@ -1662,6 +1663,7 @@ export const NewLeadScreen = ({
                           compact={false}
                           integratedChips
                         />
+                      </div>
                       <QuickPickButton
                         active={isDesignFirmUnknown && realDesignFirms.length === 0}
                         theme={theme}

@@ -3,6 +3,8 @@ import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Papercli
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
+import { CONTRACTS_DATA } from '../../../resources/contracts/data.js';
+import { buildSpecifierOptions, getDefaultSpecifierOption } from '../../NewLeadScreenComponents.jsx';
 import { ORDER_DATA, STATUS_COLORS } from '../../../orders/data.js';
 import { JSI_SERIES } from '../../../products/data.js';
 import { LEAD_TIMES_DATA, QUICKSHIP_SERIES } from '../../../resources/lead-times/data.js';
@@ -92,6 +94,28 @@ const formatSampleOrderDate = (value) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
+/* Per-series manufacturing-context prompts (mirrors the New Lead intake). */
+const getSeriesProcurementPrompts = (series) => {
+  const name = String(series || '').toLowerCase();
+  const isWorksurface = /(table|desk|bench|case|storage|training|conference|lok|native|poet|indie|vision|knox|wink|hoopz)/.test(name);
+  if (isWorksurface) {
+    return {
+      first: { label: 'Power / Data', key: 'procurementCheckpoint', options: ['Unknown', 'Defined', 'Likely Needed', 'Not Needed'] },
+      second: { label: 'Finish Readiness', key: 'productionReadiness', options: ['Unknown', 'Standard Finishes Finalized', 'Custom Finish Pending', 'Needs Design Review'] },
+    };
+  }
+  return {
+    first: { label: 'Upholstery / Textile', key: 'procurementCheckpoint', options: ['Unknown', 'Grade Selected', 'COM/COL Required', 'Needs Dealer Input'] },
+    second: { label: 'Production Priority', key: 'productionReadiness', options: ['Unknown', 'Standard Lead Time', 'Expedite Request', 'Phased Delivery'] },
+  };
+};
+
+const SPECIFIER_TYPE_LABELS = { endUser: 'End user', dealer: 'Dealer', designFirm: 'A&D' };
+const CONTRACT_OPTIONS = [
+  { label: 'None', value: 'none' },
+  ...Object.keys(CONTRACTS_DATA).map((key) => ({ label: CONTRACTS_DATA[key].name, value: key })),
+];
+
 /* ---- section primitives ---- */
 const Section = ({ title, subtitle, children, theme, right, className = '', showDivider = true }) => {
   const isDark = isDarkTheme(theme);
@@ -144,7 +168,9 @@ const Row = ({ label, children, theme, className = '' }) => {
   );
 };
 
-const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surfaceStyle }) => {
+const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surfaceStyle, placeholder = 'Select', mutedValues = [], allowEmpty = true }) => {
+  const normalized = options.map(opt => (typeof opt === 'string' ? { label: opt, value: opt } : opt));
+  const isMuted = !value || mutedValues.includes(value);
   return (
     <div className="relative">
       <select
@@ -155,14 +181,38 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
         className="w-full appearance-none bg-transparent outline-none min-h-[44px] px-3 pr-9 text-[0.875rem] font-semibold focus-ring"
         style={{
           ...fieldSurface(theme),
-          color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
+          color: isMuted ? theme.colors.textSecondary : theme.colors.textPrimary,
           ...surfaceStyle,
         }}
       >
-        <option value="" disabled>Select</option>
-        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        {allowEmpty && <option value="" disabled>{placeholder}</option>}
+        {normalized.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
       </select>
       <ChevronDown className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-3 h-3.5 w-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+    </div>
+  );
+};
+
+/* Compact Yes/No (or labeled) segmented pill toggle. */
+const SegmentToggle = ({ value, onChange, theme, options, ariaLabel }) => {
+  const c = theme.colors;
+  return (
+    <div className="flex rounded-full p-0.5" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
+      {options.map(opt => {
+        const active = value === opt.val;
+        return (
+          <button
+            key={opt.label}
+            type="button"
+            onClick={() => onChange(opt.val)}
+            aria-pressed={active}
+            className="min-h-[28px] px-3.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+            style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 };
@@ -691,8 +741,44 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const setCompetition = (on) => { setDraft(p => { dirty.current = true; return { ...p, competitionPresent: on, competitors: on ? (p.competitors || []) : [] }; }); };
   const addProductSeries = (series) => { if (!series) return; const list = draft.products || []; if (!list.some(p => p.series === series)) update('products', [...list, { series }]); };
   const removeProductSeries = (series) => update('products', (draft.products || []).filter(p => p.series !== series));
+  const updateProductOption = (series, key, val) => update('products', (draft.products || []).map(p => (p.series === series ? { ...p, [key]: val } : p)));
   const removeFrom = (key, val) => update(key, (draft[key] || []).filter(x => x !== val));
   const addUnique = (key, val) => { if (!val) return; const list = draft[key] || []; if (!list.includes(val)) update(key, [...list, val]); };
+
+  /* Who is leading the specifications? — derived from real stakeholders. */
+  const specifierOptions = useMemo(() => buildSpecifierOptions(draft), [draft.endUser, draft.designFirms, draft.dealers]);
+  const setDrivingSpecs = useCallback((type, name) => {
+    const normalized = String(name || '').trim();
+    if (!normalized) return;
+    update('drivingSpecs', { type, name: normalized });
+  }, [update]);
+  useEffect(() => {
+    const current = draftRef.current?.drivingSpecs;
+    if (!specifierOptions.length) {
+      if (current) update('drivingSpecs', null);
+      return;
+    }
+    const match = current && specifierOptions.find(o => o.type === current.type && o.name === current.name);
+    if (!match) {
+      const fallback = getDefaultSpecifierOption(specifierOptions);
+      if (fallback) update('drivingSpecs', { type: fallback.type, name: fallback.name });
+    }
+  }, [specifierOptions, update]);
+
+  /* JSI quote intake mode (separate from the live quotes in the hub). */
+  const quoteMode = draft.jsiQuoteExists ? 'existing' : draft.quoteNeeded ? 'needed' : (draft.noQuoteNeeded ? 'not-needed' : null);
+  const setQuoteMode = useCallback((mode) => {
+    setDraft(p => {
+      dirty.current = true;
+      return {
+        ...p,
+        jsiQuoteExists: mode === 'existing',
+        quoteNeeded: mode === 'needed',
+        noQuoteNeeded: mode === 'not-needed',
+        ...(mode !== 'existing' ? { jsiQuoteNumber: '' } : {}),
+      };
+    });
+  }, []);
 
   const fileInputRef = useRef(null);
 
@@ -886,6 +972,15 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </button>
                 </div>
 
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <Row label="PO Timeframe" theme={theme}>
+                    {(id) => <CompactSelect id={id} options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} mutedValues={['Unknown']} />}
+                  </Row>
+                  <Row label="Contract" theme={theme}>
+                    {(id) => <CompactSelect id={id} options={CONTRACT_OPTIONS} value={draft.contractType || ''} onChange={v => update('contractType', v)} theme={theme} ariaLabel="Contract" placeholder="Select contract" mutedValues={['none']} />}
+                  </Row>
+                </div>
+
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <span className={FIELD_LABEL_CLASS} style={labelStyle}>Rewards</span>
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -922,14 +1017,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
               <Section title="Project Details" theme={theme}>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Row label="Customer Account" theme={theme} className="sm:col-span-2">
+                  <Row label="Customer Account" theme={theme}>
                     {(id) => (
                       <div className="flex flex-wrap items-center gap-2">
                         <input
                           id={id}
                           value={draft.company || ''}
                           onChange={e => update('company', e.target.value)}
-                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px]`}
+                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-[160px]`}
                           style={{ color: c.textPrimary, ...fieldSurface(theme) }}
                           placeholder="Customer account name"
                         />
@@ -953,11 +1048,50 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       </div>
                     )}
                   </Row>
-                  <Row label="Vertical" theme={theme}>
-                    {(id) => <CompactSelect id={id} options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />}
+                  <Row label="End User" theme={theme}>
+                    {(id) => (
+                      <div className="flex items-center gap-2">
+                        <input
+                          id={id}
+                          value={draft.endUserUnknown ? '' : (draft.endUser || '')}
+                          onChange={e => update('endUser', e.target.value)}
+                          onFocus={() => { if (draft.endUserUnknown) update('endUserUnknown', false); }}
+                          className={`${TEXT_INPUT_CLASS} flex-1 min-w-0`}
+                          style={{ color: c.textPrimary, ...fieldSurface(theme) }}
+                          placeholder={draft.endUserUnknown ? 'Unknown' : 'Add end user'}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (draft.endUserUnknown) update('endUserUnknown', false);
+                            else setDraft(p => { dirty.current = true; return { ...p, endUserUnknown: true, endUser: '' }; });
+                          }}
+                          aria-pressed={!!draft.endUserUnknown}
+                          className="shrink-0 min-h-[36px] px-3 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                          style={draft.endUserUnknown ? { backgroundColor: `${c.accent}14`, color: c.accent } : { ...fieldSurface(theme), color: c.textSecondary }}
+                        >
+                          Unknown
+                        </button>
+                      </div>
+                    )}
                   </Row>
-                  <Row label="PO Timeframe" theme={theme}>
-                    {(id) => <CompactSelect id={id} options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} />}
+                  <Row label="Vertical" theme={theme} className={draft.vertical === 'Other' ? 'sm:col-span-2' : ''}>
+                    {(id) => (
+                      <div className={draft.vertical === 'Other' ? 'flex items-center gap-2' : ''}>
+                        <div className={draft.vertical === 'Other' ? 'w-[44%] flex-shrink-0' : 'w-full'}>
+                          <CompactSelect id={id} options={VERTICALS} value={draft.vertical} onChange={v => update('vertical', v)} theme={theme} />
+                        </div>
+                        {draft.vertical === 'Other' && (
+                          <input
+                            value={draft.otherVertical || ''}
+                            onChange={e => update('otherVertical', e.target.value)}
+                            className={`${TEXT_INPUT_CLASS} flex-1 min-w-0`}
+                            style={{ color: c.textPrimary, ...fieldSurface(theme) }}
+                            placeholder="What kind?"
+                          />
+                        )}
+                      </div>
+                    )}
                   </Row>
                   <Row label="Install Date" theme={theme}>
                     {(id) => (
@@ -974,25 +1108,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2 min-h-[44px]">
                       <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Bid Project</span>
-                      <div className="flex rounded-full p-0.5" style={fieldSurface(theme)}>
-                        {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
-                          const active = !!draft.isBid === opt.val;
-                          return (
-                            <button
-                              key={opt.label}
-                              type="button"
-                              onClick={() => update('isBid', opt.val)}
-                              aria-pressed={active}
-                              className="min-h-[28px] px-3.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
-                              style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <SegmentToggle
+                        value={!!draft.isBid}
+                        onChange={v => update('isBid', v)}
+                        theme={theme}
+                        ariaLabel="Bid project"
+                        options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
+                      />
                     </div>
                   </div>
+                </div>
+              </Section>
+
+              <Section title="Stakeholders & Competition" theme={theme}>
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1010,7 +1139,56 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       <SuggestInputPill collapsible placeholder="Add firm" suggestions={INITIAL_DESIGN_FIRMS.filter(x => !(draft.designFirms || []).includes(x))} onAdd={v => addUnique('designFirms', v)} theme={theme} />
                     </div>
                   </Row>
-                  <div className="space-y-1.5">
+
+                  {specifierOptions.length > 0 && (
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Who is leading the specifications?</span>
+                      <div className="flex flex-wrap gap-1.5" role="listbox" aria-label="Who is leading the specifications?">
+                        {specifierOptions.map(opt => {
+                          const active = draft.drivingSpecs?.type === opt.type && draft.drivingSpecs?.name === opt.name;
+                          return (
+                            <button
+                              key={`${opt.type}:${opt.name}`}
+                              type="button"
+                              role="option"
+                              aria-selected={active}
+                              onClick={() => setDrivingSpecs(opt.type, opt.name)}
+                              className="inline-flex items-center gap-1.5 rounded-full px-3 h-8 text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                              style={active
+                                ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }
+                                : { ...fieldSurface(theme), color: c.textPrimary }}
+                            >
+                              <span className="text-[0.5625rem] font-bold uppercase tracking-[0.05em]" style={{ opacity: active ? 0.8 : 0.5 }}>{opt.group}</span>
+                              <span className="truncate max-w-[140px]">{opt.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <div className="flex items-center justify-between gap-2 min-h-[20px]">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
+                      <SegmentToggle
+                        value={competitionValue}
+                        onChange={v => setCompetition(v)}
+                        theme={theme}
+                        ariaLabel="Competition present"
+                        options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
+                      />
+                    </div>
+                    {competitionValue === true && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {(draft.competitors || []).map(comp => (
+                          <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
+                        ))}
+                        <SuggestInputPill collapsible placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && x !== 'Unknown' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Contacts</span>
                     {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
                       <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
@@ -1023,51 +1201,77 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Specs & Competition" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Row label={`Specified Series (${(draft.products || []).length})`} theme={theme}>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {(draft.products || []).map(p => (
-                        <RemovableChip
-                          key={p.series}
-                          label={p.series}
-                          detail={getSeriesLeadLabel(p.series)}
-                          onRemove={() => removeProductSeries(p.series)}
-                          theme={theme}
-                          size="small"
-                        />
-                      ))}
-                      <SuggestInputPill collapsible placeholder="Add series..." suggestions={JSI_SERIES.filter(s => !(draft.products || []).some(p => p.series === s))} onAdd={addProductSeries} theme={theme} />
+              <Section title="Specs & Quote" theme={theme}>
+                <div className="space-y-1.5">
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Specified Series ({(draft.products || []).length})</span>
+                  {(draft.products || []).length > 0 && (
+                    <div className="space-y-2 mb-2">
+                      {(draft.products || []).map(p => {
+                        const prompts = getSeriesProcurementPrompts(p.series);
+                        const leadLabel = getSeriesLeadLabel(p.series);
+                        return (
+                          <div key={p.series} className="rounded-[16px] overflow-hidden" style={{ backgroundColor: insetBg(theme) }}>
+                            <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>{p.series}</span>
+                                {leadLabel ? <span className="text-[0.5625rem] font-semibold tabular-nums" style={{ color: c.textSecondary, opacity: 0.5 }}>{leadLabel}</span> : null}
+                              </div>
+                              <button type="button" onClick={() => removeProductSeries(p.series)} aria-label={`Remove ${p.series}`}
+                                className="flex h-6 w-6 items-center justify-center rounded-full focus-ring transition-all active:scale-[0.95]" style={{ color: c.textSecondary }}>
+                                <X className="h-3.5 w-3.5" aria-hidden="true" />
+                              </button>
+                            </div>
+                            <div className="grid gap-2 px-3 pb-3 sm:grid-cols-2">
+                              {[prompts.first, prompts.second].map(prompt => (
+                                <div key={prompt.key} className="space-y-1">
+                                  <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>{prompt.label}</span>
+                                  <CompactSelect
+                                    options={prompt.options}
+                                    value={p[prompt.key] || ''}
+                                    onChange={v => updateProductOption(p.series, prompt.key, v)}
+                                    theme={theme}
+                                    ariaLabel={`${p.series} ${prompt.label}`}
+                                    placeholder="Unknown"
+                                    mutedValues={['Unknown']}
+                                    surfaceStyle={{ minHeight: '38px' }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </Row>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 min-h-[20px]">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
-                      <div className="flex rounded-full p-0.5" style={fieldSurface(theme)}>
-                        {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
-                          const active = competitionValue === opt.val;
-                          return (
-                            <button
-                              key={opt.label}
-                              type="button"
-                              onClick={() => setCompetition(opt.val)}
-                              aria-pressed={active}
-                              className="min-h-[28px] px-3.5 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
-                              style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {competitionValue === true && (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {(draft.competitors || []).map(comp => (
-                          <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
-                        ))}
-                        <SuggestInputPill collapsible placeholder="Add competitor..." suggestions={COMPETITORS.filter(x => x !== 'None' && !(draft.competitors || []).includes(x))} onAdd={v => addUnique('competitors', v)} theme={theme} />
-                      </div>
+                  )}
+                  <SuggestInputPill collapsible placeholder="Add series..." suggestions={JSI_SERIES.filter(s => !(draft.products || []).some(p => p.series === s))} onAdd={addProductSeries} theme={theme} />
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>JSI Quote</span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[{ key: 'existing', label: 'Existing Quote' }, { key: 'needed', label: 'Quote Needed' }, { key: 'not-needed', label: 'No Quote Needed' }].map(opt => {
+                      const active = quoteMode === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setQuoteMode(active ? null : opt.key)}
+                          aria-pressed={active}
+                          className="inline-flex items-center rounded-full px-3.5 h-9 text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                          style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { ...fieldSurface(theme), color: c.textSecondary }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                    {quoteMode === 'existing' && (
+                      <input
+                        value={draft.jsiQuoteNumber || ''}
+                        onChange={e => update('jsiQuoteNumber', e.target.value)}
+                        className={`${TEXT_INPUT_CLASS} flex-1 min-w-[160px]`}
+                        style={{ color: c.textPrimary, ...fieldSurface(theme) }}
+                        placeholder="Quote # e.g. Q-12345"
+                      />
                     )}
                   </div>
                 </div>
