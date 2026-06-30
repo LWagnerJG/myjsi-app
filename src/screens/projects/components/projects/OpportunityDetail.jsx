@@ -1,6 +1,6 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
 import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2 } from 'lucide-react';
-import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, sectionCardSurface, FIELD_LABEL_CLASSNAME } from '../../../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { ORDER_DATA, STATUS_COLORS } from '../../../orders/data.js';
@@ -30,21 +30,25 @@ const SPIFF_502010_MIN_LIST = 10000;
 const REWARD_AUTO_OFF_NET_LIMIT = 150000;
 const REWARD_AUTO_OFF_DISCOUNT_MIN = 0.64;
 
-/* Shared surface values for every field-like control on this page. */
-const FIELD_BG_LIGHT = 'rgba(240,237,232,0.5)';
-const FIELD_BG_DARK = 'rgba(255,255,255,0.065)';
-const CHIP_BG_LIGHT = 'rgba(240,237,232,0.62)';
-const CHIP_BG_DARK = 'rgba(255,255,255,0.08)';
-const CONTROL_RADIUS = '16px';
+/* Shared surface values — minimal fills, no heavy borders. */
+const CHIP_BG_LIGHT = 'rgba(53,53,53,0.05)';
+const CHIP_BG_DARK = 'rgba(255,255,255,0.07)';
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
-const DETAIL_SECTION_TITLE_CLASS = 'text-sm font-semibold tracking-tight leading-none';
+const DETAIL_SECTION_TITLE_CLASS = 'text-[0.8125rem] font-semibold tracking-tight leading-none';
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
-const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3.5 bg-transparent outline-none text-[0.875rem] font-medium focus-ring';
+const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3 bg-transparent outline-none text-[0.875rem] font-medium focus-ring';
 
-const fieldSurface = (isDark) => ({
-  backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT,
-  borderRadius: CONTROL_RADIUS,
-});
+const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)');
+
+const fieldSurface = (theme) => {
+  const tile = fieldTileSurface(theme);
+  return {
+    ...tile,
+    borderRadius: '14px',
+  };
+};
+
+const insetBg = (theme) => fieldTileSurface(theme).backgroundColor;
 
 const getSeriesLeadLabel = (series) => {
   if (QUICKSHIP_SERIES.includes(series)) return 'QS';
@@ -89,12 +93,15 @@ const formatSampleOrderDate = (value) => {
 };
 
 /* ---- section primitives ---- */
-const Section = ({ title, subtitle, children, theme, right }) => {
-  const surface = sectionCardSurface(theme);
+const Section = ({ title, subtitle, children, theme, right, className = '', showDivider = true }) => {
+  const isDark = isDarkTheme(theme);
   return (
-    <section className="p-4 sm:p-5" style={surface}>
+    <section
+      className={`py-5 sm:py-6 ${showDivider ? 'border-t' : ''} ${className}`}
+      style={showDivider ? { borderColor: dividerColor(isDark) } : undefined}
+    >
       {title && (
-        <div className="flex items-start justify-between gap-3 mb-3.5">
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
             <h2 className={DETAIL_SECTION_TITLE_CLASS} style={{ color: theme.colors.textPrimary }}>{title}</h2>
             {subtitle ? (
@@ -119,7 +126,7 @@ const Section = ({ title, subtitle, children, theme, right }) => {
 const Row = ({ label, children, theme, className = '' }) => {
   const fieldId = useId();
   const isRenderProp = typeof children === 'function';
-  const labelStyle = { color: theme.colors.textSecondary, opacity: 0.78 };
+  const labelStyle = { color: theme.colors.textSecondary, opacity: 0.72 };
   return (
     <div className={`space-y-1.5 ${className}`}>
       {label && (
@@ -138,7 +145,6 @@ const Row = ({ label, children, theme, className = '' }) => {
 };
 
 const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surfaceStyle }) => {
-  const isDark = isDarkTheme(theme);
   return (
     <div className="relative">
       <select
@@ -146,9 +152,9 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
         aria-label={ariaLabel}
         value={value || ''}
         onChange={e => onChange(e.target.value)}
-        className="w-full appearance-none bg-transparent outline-none min-h-[44px] px-3.5 pr-9 text-[0.875rem] font-semibold focus-ring"
+        className="w-full appearance-none bg-transparent outline-none min-h-[44px] px-3 pr-9 text-[0.875rem] font-semibold focus-ring"
         style={{
-          ...fieldSurface(isDark),
+          ...fieldSurface(theme),
           color: value ? theme.colors.textPrimary : theme.colors.textSecondary,
           ...surfaceStyle,
         }}
@@ -258,7 +264,7 @@ const ContactSummaryCard = ({ contact, theme }) => {
       : c.textSecondary;
 
   return (
-    <div className="flex items-start gap-3 px-3.5 py-3" style={fieldSurface(isDark)}>
+    <div className="flex items-start gap-3 px-3.5 py-3" style={fieldSurface(theme)}>
       <div className="w-9 h-9 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: avatarBg, color: avatarColor }}>
         {getInitials(contact.name)}
       </div>
@@ -347,7 +353,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         const StIcon = meta.icon;
         const requestedLabel = formatQuoteMoment(q.requestedAt);
         return (
-          <div key={q.id || qi} className="flex items-start gap-3 px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT }}>
+          <div key={q.id || qi} className="flex items-start gap-3 px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
             <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
               <StIcon className="w-3 h-3" style={{ color: meta.color }} />
             </div>
@@ -439,7 +445,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
       maxWidth="max-w-lg"
     >
       <div className="space-y-4">
-        <div className="px-4 py-3.5 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT }}>
+        <div className="px-4 py-3.5 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
               <StatusIcon className="w-4 h-4" style={{ color: meta.color }} />
@@ -461,25 +467,25 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ordered</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{formatSampleOrderTimestamp(order.date)}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Fulfillment</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{deliveryLabel}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ship to</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.shipTo || 'TBD'}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Requested by</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.orderedBy?.name || 'Unknown'}</p>
           </div>
         </div>
 
-        <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+        <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
           <div className="flex items-start gap-2.5">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }} />
             <div>
@@ -490,7 +496,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
         </div>
 
         {order.tracking ? (
-          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
             <div className="flex items-start gap-2.5">
               <Truck className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }} />
               <div>
@@ -505,7 +511,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
           <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Sample contents</span>
           <div className="space-y-1.5">
             {(order.items || []).map((item, index) => (
-              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: isDark ? FIELD_BG_DARK : FIELD_BG_LIGHT }}>
+              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
                 <div className="min-w-0">
                   <p className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{item.name}</p>
                   <p className="mt-0.5 text-[0.625rem]" style={{ color: c.textSecondary }}>{item.code || 'Sample'}</p>
@@ -521,31 +527,26 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
 };
 
 const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, accentColor }) => {
-  const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const accent = accentColor || c.accent;
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-1.5 py-2.5 text-left transition-all active:scale-[0.99] focus-ring rounded-[14px]"
-      style={{
-        backgroundColor: 'transparent',
-        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'}`,
-      }}
+      className="w-full flex items-center gap-3 px-2 py-3 text-left transition-colors rounded-[14px] active:scale-[0.99] focus-ring"
     >
-      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.055)' : 'rgba(53,53,53,0.045)', color: accent }}>
-        <Icon className="w-3.5 h-3.5" strokeWidth={1.9} />
+      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${accent}12`, color: accent }}>
+        <Icon className="w-4 h-4" strokeWidth={1.9} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[0.8125rem] font-semibold tracking-[-0.01em] truncate" style={{ color: c.textPrimary }}>{title}</span>
           {count != null ? (
-            <span className="text-[0.625rem] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)', color: c.textSecondary }}>{count}</span>
+            <span className="text-[0.625rem] font-bold tabular-nums" style={{ color: c.textSecondary, opacity: 0.7 }}>{count}</span>
           ) : null}
         </div>
         {summary ? (
-          <p className="mt-0.5 text-[0.6875rem] truncate" style={{ color: c.textSecondary, opacity: 0.78 }}>{summary}</p>
+          <p className="mt-0.5 text-[0.6875rem] truncate" style={{ color: c.textSecondary, opacity: 0.72 }}>{summary}</p>
         ) : null}
       </div>
       <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.35 }} />
@@ -785,21 +786,18 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     : customerLinkSource === 'inferred'
       ? 'Matched'
       : 'Open';
-  const heroControlSurface = {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : c.surface,
-  };
-  const commercialDivider = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)';
+  const labelStyle = { color: c.textSecondary, opacity: 0.72 };
 
   return (
     <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 max-w-content mx-auto w-full space-y-3.5">
+      <div className="flex-1 overflow-y-auto scrollbar-hide pb-28 sm:pb-6">
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 max-w-content mx-auto w-full">
 
-          {/* HERO — project identity + at-a-glance summary */}
-          <div className="p-4 sm:p-5" style={sectionCardSurface(theme)}>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:items-center">
+          {/* HERO — flat header, no card boxing */}
+          <header className="pb-5 sm:pb-6 border-b" style={{ borderColor: dividerColor(isDark) }}>
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
               <div className="min-w-0">
-                <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Project Name</span>
+                <span className={`${FIELD_LABEL_CLASS} mb-1 block`} style={labelStyle}>Project Name</span>
                 <EditableIdentityField
                   value={draft.name}
                   onChange={v => update('name', v)}
@@ -810,118 +808,112 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   className="max-w-[34rem]"
                 />
                 {heroSummaryParts.length > 0 && (
-                  <p className="mt-1.5 truncate text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }} title={heroSummaryParts.join('  \u00b7  ')}>
+                  <p className="mt-1.5 truncate text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.65 }} title={heroSummaryParts.join('  \u00b7  ')}>
                     {heroSummaryParts.join('  \u00b7  ')}
                   </p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:items-end lg:grid-cols-1">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1">
                 <div className="min-w-0">
-                  <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Stage</span>
+                  <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={labelStyle}>Stage</span>
                   <CompactSelect
                     options={STAGES}
                     value={draft.stage}
                     onChange={v => update('stage', v)}
                     theme={theme}
                     ariaLabel="Project stage"
-                    surfaceStyle={heroControlSurface}
                   />
                 </div>
                 <div className="min-w-0">
                   <div className="mb-1 flex items-center justify-between gap-3">
-                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Win Probability</span>
+                    <span className={FIELD_LABEL_CLASS} style={labelStyle}>Win Probability</span>
                     <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{currentProbability}%</span>
                   </div>
                   <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} showValueBubble={false} compact />
                 </div>
               </div>
             </div>
-          </div>
+          </header>
 
-          <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
-            <div className="space-y-3.5 min-w-0">
-              <Section title="Commercial" theme={theme}>
-                <div className="rounded-[20px] overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(240,237,232,0.4)' }}>
-                  <div className="grid sm:grid-cols-2">
-                    {/* List price — editable */}
-                    <div className="min-w-0 px-4 py-3.5">
-                      <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>List Price</label>
-                      <div className="mt-2 flex items-baseline gap-0">
-                        <span aria-hidden="true" className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none" style={{ color: c.textPrimary }}>$</span>
-                        <input
-                          id={listPriceId}
-                          inputMode="numeric"
-                          value={formatListPriceInput(draft.value)}
-                          onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                          className="commercial-value-input w-full bg-transparent outline-none font-semibold tracking-[-0.02em] leading-none tabular-nums focus-ring rounded-md"
-                          style={{ color: c.textPrimary }}
-                          placeholder="0"
-                        />
-                      </div>
-                      {rawNumeric > 0 && discountPct > 0 && (
-                        <p className="mt-1.5 text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.48 }}>
-                          → {netValueLabel} net
-                        </p>
-                      )}
+          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-10 xl:gap-14 lg:items-start">
+            <div className="min-w-0">
+              <Section title="Commercial" theme={theme} showDivider={false}>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="min-w-0">
+                    <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
+                    <div className="mt-2 flex items-baseline gap-0 px-3 py-2.5" style={fieldSurface(theme)}>
+                      <span aria-hidden="true" className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none" style={{ color: c.textPrimary }}>$</span>
+                      <input
+                        id={listPriceId}
+                        inputMode="numeric"
+                        value={formatListPriceInput(draft.value)}
+                        onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                        className="commercial-value-input w-full bg-transparent outline-none font-semibold tracking-[-0.02em] leading-none tabular-nums focus-ring"
+                        style={{ color: c.textPrimary }}
+                        placeholder="0"
+                      />
                     </div>
-
-                    {/* Discount — dropdown */}
-                    <button
-                      type="button"
-                      ref={discBtn}
-                      onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
-                      aria-haspopup="listbox"
-                      aria-expanded={discountOpen}
-                      className="min-w-0 px-4 py-3.5 text-left transition-all active:scale-[0.99] focus-ring border-t sm:border-t-0 sm:border-l"
-                      style={{
-                        borderColor: commercialDivider,
-                        ...(discountOpen ? { boxShadow: `inset 0 0 0 1.5px ${c.accent}` } : {}),
-                      }}
-                    >
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Discount</span>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="text-[1.25rem] font-semibold tracking-[-0.02em] leading-none truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.7 }}>
-                          {discountSummaryLabel}
-                        </span>
-                        <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
-                      </div>
-                      <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.68 }}>
-                        {discountDetailLabel}
+                    {rawNumeric > 0 && discountPct > 0 && (
+                      <p className="mt-1.5 text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.5 }}>
+                        → {netValueLabel} net
                       </p>
-                    </button>
+                    )}
                   </div>
 
-                  {/* Rewards — simple inline row */}
-                  <div className="flex items-center justify-between px-4 py-2.5 border-t" style={{ borderColor: commercialDivider }}>
-                    <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.78 }}>Rewards</span>
-                    <div className="flex items-center gap-4">
-                      <RewardTogglePill
-                        label="Sales"
-                        sublabel={salesRewardEnabled ? '3%' : 'off'}
-                        checked={salesRewardEnabled}
-                        onChange={e => setRewardEnabled('salesReward', e.target.checked)}
-                        theme={theme}
-                      />
-                      <RewardTogglePill
-                        label="Designer"
-                        sublabel={designerRewardEnabled ? '1%' : 'off'}
-                        checked={designerRewardEnabled}
-                        onChange={e => setRewardEnabled('designerReward', e.target.checked)}
-                        theme={theme}
-                      />
+                  <button
+                    type="button"
+                    ref={discBtn}
+                    onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
+                    aria-haspopup="listbox"
+                    aria-expanded={discountOpen}
+                    className="min-w-0 text-left transition-all active:scale-[0.99] focus-ring rounded-[14px] px-3 py-2.5"
+                    style={{
+                      ...fieldSurface(theme),
+                      ...(discountOpen ? { boxShadow: `inset 0 0 0 1.5px ${c.accent}` } : {}),
+                    }}
+                  >
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Discount</span>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span className="text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-[-0.02em] leading-none truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.65 }}>
+                        {discountSummaryLabel}
+                      </span>
+                      <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
                     </div>
+                    <p className="mt-1.5 text-[0.6875rem] font-medium leading-snug" style={{ color: c.textSecondary, opacity: 0.6 }}>
+                      {discountDetailLabel}
+                    </p>
+                  </button>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <span className={FIELD_LABEL_CLASS} style={labelStyle}>Rewards</span>
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                    <RewardTogglePill
+                      label="Sales"
+                      sublabel={salesRewardEnabled ? '3%' : 'off'}
+                      checked={salesRewardEnabled}
+                      onChange={e => setRewardEnabled('salesReward', e.target.checked)}
+                      theme={theme}
+                    />
+                    <RewardTogglePill
+                      label="Designer"
+                      sublabel={designerRewardEnabled ? '1%' : 'off'}
+                      checked={designerRewardEnabled}
+                      onChange={e => setRewardEnabled('designerReward', e.target.checked)}
+                      theme={theme}
+                    />
                   </div>
                 </div>
 
                 {rewardDefaultOff && (
-                  <div className="flex items-center gap-2 px-3.5 py-2.5 mt-2.5 rounded-[16px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[14px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
                     <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>{rewardsDetailLabel}</span>
                   </div>
                 )}
                 {showSpiffWarning && (
-                  <div className="flex items-center gap-2 px-3.5 py-2.5 mt-2.5 rounded-[16px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[14px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
                     <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
                   </div>
@@ -929,7 +921,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Project Details" theme={theme}>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <Row label="Customer Account" theme={theme} className="sm:col-span-2">
                     {(id) => (
                       <div className="flex flex-wrap items-center gap-2">
@@ -938,7 +930,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           value={draft.company || ''}
                           onChange={e => update('company', e.target.value)}
                           className={`${TEXT_INPUT_CLASS} flex-1 min-w-[180px]`}
-                          style={{ color: c.textPrimary, ...fieldSurface(isDark) }}
+                          style={{ color: c.textPrimary, ...fieldSurface(theme) }}
                           placeholder="Customer account name"
                         />
                         {customerConnectionLabel !== 'Open' ? (
@@ -970,19 +962,19 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <Row label="Install Date" theme={theme}>
                     {(id) => (
                       <input id={id} type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                        className={TEXT_INPUT_CLASS} style={{ color: draft.expectedInstallDate ? c.textPrimary : c.textSecondary, colorScheme: isDark ? 'dark' : 'light', ...fieldSurface(isDark) }} />
+                        className={TEXT_INPUT_CLASS} style={{ color: draft.expectedInstallDate ? c.textPrimary : c.textSecondary, colorScheme: isDark ? 'dark' : 'light', ...fieldSurface(theme) }} />
                     )}
                   </Row>
                   <Row label="Location" theme={theme}>
                     {(id) => (
                       <input id={id} value={draft.installationLocation || ''} onChange={e => update('installationLocation', e.target.value)}
-                        className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(isDark) }} placeholder="City, State" />
+                        className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, ...fieldSurface(theme) }} placeholder="City, State" />
                     )}
                   </Row>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2 min-h-[44px]">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Bid Project</span>
-                      <div className="flex rounded-full p-0.5" style={fieldSurface(isDark)}>
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Bid Project</span>
+                      <div className="flex rounded-full p-0.5" style={fieldSurface(theme)}>
                         {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
                           const active = !!draft.isBid === opt.val;
                           return (
@@ -1002,7 +994,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Dealer Partners</span>
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {(draft.dealers || []).map(f => (
                         <RemovableChip key={f} label={f} onRemove={() => removeFrom('dealers', f)} theme={theme} />
@@ -1019,11 +1011,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     </div>
                   </Row>
                   <div className="space-y-1.5">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Contacts</span>
+                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Contacts</span>
                     {((draft.dealers || []).length > 0 || contactList.length > 0) ? (
                       <ContactSearchSelector value={contactList} onChange={setContacts} dealers={draft.dealers || []} theme={theme} multiple />
                     ) : (
-                      <p className="flex min-h-[44px] items-center px-3.5 text-[0.75rem]" style={{ ...fieldSurface(isDark), color: c.textSecondary, opacity: 0.7 }}>
+                      <p className="flex min-h-[44px] items-center px-3.5 text-[0.75rem]" style={{ ...fieldSurface(theme), color: c.textSecondary, opacity: 0.7 }}>
                         Add a dealer partner to sync their contacts.
                       </p>
                     )}
@@ -1050,8 +1042,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </Row>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2 min-h-[20px]">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={{ color: c.textSecondary, opacity: 0.78 }}>Competition</span>
-                      <div className="flex rounded-full p-0.5" style={fieldSurface(isDark)}>
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
+                      <div className="flex rounded-full p-0.5" style={fieldSurface(theme)}>
                         {[{ label: 'No', val: false }, { label: 'Yes', val: true }].map(opt => {
                           const active = competitionValue === opt.val;
                           return (
@@ -1082,9 +1074,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
             </div>
 
-            <div className="space-y-3.5 min-w-0">
+            <div className="min-w-0 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
               <Section title="Project Hub" theme={theme}>
-                <div className="-mt-1">
+                <div className="space-y-0.5 -mx-2">
                   <DetailHubCard
                     icon={Users}
                     title="Contacts"
@@ -1145,14 +1137,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Notes" theme={theme}>
-                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={3}
+                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
                   aria-label="Project notes"
-                  className="w-full resize-none p-3.5 text-[0.8125rem] leading-relaxed outline-none focus-ring"
-                  style={{ ...fieldSurface(isDark), color: c.textPrimary }}
+                  className="w-full resize-y min-h-[7rem] p-3 text-[0.8125rem] leading-relaxed outline-none focus-ring sm:resize-none"
+                  style={{ ...fieldSurface(theme), color: c.textPrimary }}
                   placeholder="Notes, constraints, next steps..." />
                 <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                   {(draft.documents || []).map(doc => (
-                    <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(isDark), color: c.textPrimary }}>
+                    <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
                       <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
                       <span className="truncate">{doc.fileName}</span>
                       <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
@@ -1160,7 +1152,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       </button>
                     </span>
                   ))}
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(isDark), color: c.textSecondary }}>
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
                     <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
                     Attach documents
                   </button>
@@ -1169,23 +1161,34 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </div>
           </div>
 
-          {/* SAVE + STATUS */}
-          <div className="space-y-3 pt-1 pb-2">
-            {onDone ? (
-              <button
-                type="button"
-                onClick={handleDone}
-                className="flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:mx-auto sm:w-auto sm:min-w-[260px]"
-                style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
-              >
-                <Check className="h-4 w-4" aria-hidden="true" />
-                Save &amp; Close
-              </button>
-            ) : null}
-            <div className="flex justify-center">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.5 }} />
-                <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.45 }}>Changes saved automatically</span>
+          {/* SAVE + STATUS — pinned on mobile, inline on desktop */}
+          <div
+            className="fixed inset-x-0 bottom-0 z-20 border-t px-4 py-3 sm:static sm:z-auto sm:border-0 sm:px-0 sm:py-0 sm:pt-8"
+            style={{
+              borderColor: dividerColor(isDark),
+              backgroundColor: isDark ? 'rgba(36,36,36,0.92)' : 'rgba(240,237,232,0.92)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+            }}
+          >
+            <div className="max-w-content mx-auto space-y-2 sm:space-y-3">
+              {onDone ? (
+                <button
+                  type="button"
+                  onClick={handleDone}
+                  className="flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:mx-auto sm:w-auto sm:min-w-[260px]"
+                  style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
+                >
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                  Save &amp; Close
+                </button>
+              ) : null}
+              <div className="flex justify-center">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.5 }} />
+                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.45 }}>Changes saved automatically</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1241,7 +1244,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             This will change the discount on this project. Authorize the update to apply the new pricing basis.
           </p>
 
-          <div className="p-3.5 space-y-2" style={fieldSurface(isDark)}>
+          <div className="p-3.5 space-y-2" style={fieldSurface(theme)}>
             <div className="flex items-center justify-between gap-3">
               <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Current</span>
               <span className="text-[0.75rem] font-semibold text-right" style={{ color: c.textPrimary }}>{formatDiscountLabel(draft.discount)}</span>
@@ -1291,7 +1294,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={handleMarkLost}
               className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
-              style={fieldSurface(isDark)}
+              style={fieldSurface(theme)}
             >
               <span className="block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>Move to Lost</span>
               <span className="mt-1 block text-[0.6875rem] leading-snug" style={{ color: c.textSecondary }}>
@@ -1370,7 +1373,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       {/* CONTACTS HUB MODAL */}
       <Modal show={hubModal === 'contacts'} onClose={() => setHubModal(null)} title="Project Contacts" theme={theme} maxWidth="max-w-lg">
         <div className="space-y-3.5">
-          <div className="px-3.5 py-3" style={fieldSurface(isDark)}>
+          <div className="px-3.5 py-3" style={fieldSurface(theme)}>
             <div className="flex items-center justify-between gap-3 mb-2">
               <label htmlFor="opportunity-customer-link" className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Linked customer profile</label>
               {draft.customerId ? (
@@ -1402,7 +1405,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               ))}
             </div>
           ) : (
-            <div className="flex items-center gap-2.5 px-3.5 py-3" style={fieldSurface(isDark)}>
+            <div className="flex items-center gap-2.5 px-3.5 py-3" style={fieldSurface(theme)}>
               <Users className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
               <span className="text-[0.75rem]" style={{ color: c.textSecondary }}>
                 Add a primary contact or link a customer profile to surface project contacts here.
@@ -1445,7 +1448,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   type="button"
                   onClick={() => { setHubModal(null); setSelectedSampleOrder(order); }}
                   className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98] focus-ring"
-                  style={fieldSurface(isDark)}
+                  style={fieldSurface(theme)}
                 >
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
                     <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
@@ -1485,7 +1488,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             const sc = STATUS_COLORS[order.status] || '#8B8680';
             return (
               <div key={order.orderNumber} className="flex items-center gap-3 px-3.5 py-3 rounded-[24px]"
-                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : FIELD_BG_LIGHT }}>
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : insetBg(theme) }}>
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>{order.details}</p>
@@ -1509,7 +1512,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       <Modal show={hubModal === 'documents'} onClose={() => setHubModal(null)} title="Documents" theme={theme} maxWidth="max-w-lg">
         <div className="space-y-3">
           <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-2.5 py-3 px-3.5 transition-all hover:opacity-80 focus-ring"
-            style={{ ...fieldSurface(isDark), color: c.textSecondary }}>
+            style={{ ...fieldSurface(theme), color: c.textSecondary }}>
             <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
               <Upload className="w-4 h-4" />
             </div>
@@ -1522,7 +1525,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             <div className="space-y-2">
               {(draft.documents || []).map(doc => (
                 <div key={doc.id} className="group flex items-center gap-2.5 px-3.5 py-3 transition-colors"
-                  style={fieldSurface(isDark)}>
+                  style={fieldSurface(theme)}>
                   <FileText className="w-4 h-4 flex-shrink-0" style={{ color: c.accent }} />
                   <div className="flex-1 min-w-0">
                     <div className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
