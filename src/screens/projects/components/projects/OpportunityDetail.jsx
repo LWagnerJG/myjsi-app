@@ -1,4 +1,6 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
+import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
@@ -113,24 +115,49 @@ const cardSurface = (theme) => {
 
 /* Contained card. A titled section renders a header; a bare card (no title)
    is used for the hero so the whole screen shares one grounded surface system. */
-const Section = ({ title, subtitle, children, theme, right, className = '' }) => {
+const Section = ({ title, subtitle, children, theme, right, className = '', collapsible = false, defaultOpen = true }) => {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className={`p-4 sm:p-5 ${className}`} style={cardSurface(theme)}>
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className={`p-4 sm:p-5 ${className}`}
+      style={cardSurface(theme)}
+    >
       {title && (
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="min-w-0">
-            <h2 className={DETAIL_SECTION_TITLE_CLASS} style={{ color: theme.colors.textPrimary }}>{title}</h2>
-            {subtitle ? (
-              <p className={DETAIL_SECTION_SUBTITLE_CLASS} style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
-                {subtitle}
-              </p>
+        <div className="flex items-start justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => collapsible && setOpen(o => !o)}
+            className="min-w-0 flex items-center gap-2 text-left focus-ring rounded-lg"
+            style={{ cursor: collapsible ? 'pointer' : 'default' }}
+            aria-expanded={collapsible ? open : undefined}
+          >
+            {collapsible ? (
+              <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.55, transition: 'transform 0.2s ease', transform: open ? 'none' : 'rotate(-90deg)' }} aria-hidden="true" />
             ) : null}
-          </div>
+            <span className="min-w-0">
+              <span className={`block ${DETAIL_SECTION_TITLE_CLASS}`} style={{ color: theme.colors.textPrimary }}>{title}</span>
+              {subtitle ? (
+                <span className={`block ${DETAIL_SECTION_SUBTITLE_CLASS}`} style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
+                  {subtitle}
+                </span>
+              ) : null}
+            </span>
+          </button>
           {right ? <div className="flex-shrink-0 pt-0.5">{right}</div> : null}
         </div>
       )}
-      {children}
-    </section>
+      <motion.div
+        initial={false}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+        style={{ overflow: 'hidden' }}
+      >
+        <div className={title ? 'pt-4' : ''}>{children}</div>
+      </motion.div>
+    </motion.section>
   );
 };
 
@@ -160,27 +187,105 @@ const Row = ({ label, children, theme, className = '' }) => {
   );
 };
 
-const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surfaceStyle, placeholder = 'Select', mutedValues = [], allowEmpty = true }) => {
+const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surfaceStyle, placeholder = 'Select', mutedValues = [], disabled = false }) => {
+  const isDark = isDarkTheme(theme);
+  const c = theme.colors;
   const normalized = options.map(opt => (typeof opt === 'string' ? { label: opt, value: opt } : opt));
-  const isMuted = !value || mutedValues.includes(value);
+  const selected = normalized.find(o => o.value === value && o.value !== '');
+  const isMuted = !selected || mutedValues.includes(value);
+  const btnRef = useRef(null);
+  const menuRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0, openUp: false });
+  const recalc = () => {
+    if (!btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    const maxH = 300;
+    const openUp = (window.innerHeight - r.bottom) < (maxH + 16) && r.top > maxH;
+    setPos({ top: openUp ? r.top + window.scrollY : r.bottom + window.scrollY + 6, left: r.left + window.scrollX, width: r.width, openUp });
+  };
+  const openMenu = () => { if (disabled) return; recalc(); setOpen(true); };
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = e => { if (menuRef.current?.contains(e.target) || btnRef.current?.contains(e.target)) return; setOpen(false); };
+    const close = () => setOpen(false);
+    const onKey = e => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    window.addEventListener('resize', close);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
   return (
     <div className="relative">
-      <select
+      <button
         id={id}
+        ref={btnRef}
+        type="button"
         aria-label={ariaLabel}
-        value={value || ''}
-        onChange={e => onChange(e.target.value)}
-        className="w-full appearance-none bg-transparent outline-none min-h-[44px] px-3 pr-9 text-[0.875rem] font-semibold focus-ring"
-        style={{
-          ...fieldSurface(theme),
-          color: isMuted ? theme.colors.textSecondary : theme.colors.textPrimary,
-          ...surfaceStyle,
-        }}
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => (open ? setOpen(false) : openMenu())}
+        className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 text-[0.875rem] font-semibold text-left outline-none focus-ring transition-all"
+        style={{ ...fieldSurface(theme), color: isMuted ? c.textSecondary : c.textPrimary, outline: open ? `1px solid ${c.accent}` : undefined, outlineOffset: '-1px', ...surfaceStyle }}
       >
-        {allowEmpty && <option value="" disabled>{placeholder}</option>}
-        {normalized.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-      </select>
-      <ChevronDown className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-3 h-3.5 w-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+        <span className="truncate">{selected ? selected.label : placeholder}</span>
+        <ChevronDown className="flex-shrink-0 h-3.5 w-3.5" style={{ color: c.textSecondary, opacity: 0.5, transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'none' }} aria-hidden="true" />
+      </button>
+      {open && createPortal(
+        <motion.ul
+          ref={menuRef}
+          role="listbox"
+          initial={{ opacity: 0, y: pos.openUp ? 6 : -6, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed m-0 list-none p-1"
+          style={{
+            top: pos.openUp ? undefined : pos.top,
+            bottom: pos.openUp ? (window.innerHeight - pos.top) : undefined,
+            left: pos.left,
+            width: pos.width,
+            minWidth: 168,
+            maxHeight: 300,
+            overflowY: 'auto',
+            background: c.surface,
+            boxShadow: DESIGN_TOKENS.shadows.modal,
+            zIndex: DESIGN_TOKENS.zIndex.popover,
+            borderRadius: '18px',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+          }}
+        >
+          {normalized.map(opt => {
+            const active = opt.value === value;
+            const optMuted = mutedValues.includes(opt.value);
+            return (
+              <li key={opt.value || opt.label}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  onClick={() => { onChange(opt.value); setOpen(false); }}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-[12px] text-[0.8125rem] flex items-center justify-between gap-2 transition-colors ${active ? 'font-bold' : 'font-medium'}`}
+                  style={{ color: optMuted ? c.textSecondary : c.textPrimary, backgroundColor: active ? `${c.accent}0F` : 'transparent' }}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = active ? `${c.accent}0F` : 'transparent'; }}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {active && <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />}
+                </button>
+              </li>
+            );
+          })}
+        </motion.ul>,
+        document.body
+      )}
     </div>
   );
 };
@@ -605,6 +710,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const listPriceId = useId();
 
   const [draft, setDraft] = useState(opp);
+  const [unlocked, setUnlocked] = useState(false);
   const dirty = useRef(false);
   const saveRef = useRef(null);
   const draftRef = useRef(opp);
@@ -614,6 +720,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const rewardAutoManagedRef = useRef({ salesReward: true, designerReward: true });
   useEffect(() => {
     setDraft(opp);
+    setUnlocked(false);
     rewardAutoManagedRef.current = {
       salesReward: opp.salesRewardManual !== true && opp.salesReward !== false,
       designerReward: opp.designerRewardManual !== true && opp.designerReward !== false,
@@ -622,10 +729,17 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   useEffect(() => { draftRef.current = draft; }, [draft]);
   useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
 
+  // Won/Lost deals lock into a read-only historical record until reopened.
+  const isClosed = draft.stage === 'Won' || draft.stage === 'Lost';
+  const readOnly = isClosed && !unlocked;
+  const readOnlyRef = useRef(readOnly);
+  readOnlyRef.current = readOnly;
+
   /* Delineate a project whose name simply duplicates the end-user name.
      Runs once per loaded opportunity so "ABC Corporation" becomes
      "ABC Corporation (Project 1)" — keeping reps from confusing the two. */
   useEffect(() => {
+    if (readOnlyRef.current) return;
     const eu = String(opp?.endUser || '').trim();
     const nm = String(opp?.name || '').trim();
     if (!eu || !nm || nm.toLowerCase() !== eu.toLowerCase()) return;
@@ -637,6 +751,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   }, [opp?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = useCallback((k, v) => {
+    if (readOnlyRef.current) return;
     setDraft(p => { const n = { ...p, [k]: v }; dirty.current = true; return n; });
   }, []);
 
@@ -645,9 +760,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     [draft.contacts, draft.contact],
   );
   const setContacts = useCallback((next) => {
+    if (readOnlyRef.current) return;
     setDraft(p => { dirty.current = true; return { ...p, contacts: next, contact: next[0] || '' }; });
   }, []);
   const addProjectContact = useCallback((name) => {
+    if (readOnlyRef.current) return;
     const trimmed = String(name || '').trim();
     if (!trimmed) return;
     setDraft(p => {
@@ -659,6 +776,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     });
   }, []);
   const removeProjectContact = useCallback((name) => {
+    if (readOnlyRef.current) return;
     setDraft(p => {
       const current = Array.isArray(p.contacts) ? p.contacts : (p.contact ? [p.contact] : []);
       const next = current.filter(x => x !== name);
@@ -823,6 +941,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const currentProbability = typeof draft.winProbability === 'number' ? draft.winProbability : 0;
 
   useEffect(() => {
+    if (readOnlyRef.current) return;
     setDraft((prev) => {
       let changed = false;
       const next = { ...prev };
@@ -918,8 +1037,37 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-28 sm:pb-6">
         <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 max-w-content mx-auto w-full">
 
+          {isClosed && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.24 }}
+              className="mb-4 flex items-center justify-between gap-3 px-4 py-3"
+              style={{
+                backgroundColor: draft.stage === 'Won' ? 'rgba(74,124,89,0.10)' : 'rgba(184,92,92,0.10)',
+                border: `1px solid ${draft.stage === 'Won' ? 'rgba(74,124,89,0.22)' : 'rgba(184,92,92,0.22)'}`,
+                borderRadius: '20px',
+              }}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Lock className="w-4 h-4 flex-shrink-0" style={{ color: draft.stage === 'Won' ? JSI_COLORS.success : JSI_COLORS.error }} aria-hidden="true" />
+                <span className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>
+                  {draft.stage === 'Won' ? 'Won' : 'Lost'} {'\u00b7'} {readOnly ? 'locked historical record' : 'editing unlocked'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUnlocked(u => !u)}
+                className="px-3 py-1.5 rounded-full text-[0.6875rem] font-semibold flex-shrink-0 transition-all active:scale-[0.97] focus-ring"
+                style={{ ...fieldSurface(theme), color: c.textPrimary }}
+              >
+                {readOnly ? 'Reopen to edit' : 'Lock again'}
+              </button>
+            </motion.div>
+          )}
+
           {/* HERO — grounded in its own card, consistent with the sections below */}
-          <Section theme={theme} className="mb-4">
+          <Section theme={theme} className={`mb-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
             <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-center lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
               <div className="min-w-0">
                 <span className={`${FIELD_LABEL_CLASS} mb-1 block`} style={labelStyle}>Project Name</span>
@@ -1002,7 +1150,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
           </Section>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
-            <div className="min-w-0 space-y-4">
+            <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
               <Section title="Commercial" theme={theme}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="min-w-0 space-y-1.5">
@@ -1213,7 +1361,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Specs & Quote" theme={theme}>
+              <Section title="Specs & Quote" theme={theme} collapsible>
                 <div className="space-y-1.5">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Specified Series ({(draft.products || []).length})</span>
                   {(draft.products || []).length > 0 && (
@@ -1351,7 +1499,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Notes" theme={theme}>
+              <Section title="Notes" theme={theme} collapsible>
                 <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
                   aria-label="Project notes"
                   className="w-full resize-y min-h-[7rem] p-3 text-[0.8125rem] leading-relaxed outline-none focus-ring sm:resize-none"

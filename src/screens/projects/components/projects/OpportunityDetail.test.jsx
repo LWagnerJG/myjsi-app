@@ -46,7 +46,7 @@ describe('OpportunityDetail', () => {
     render(<Harness initial={baseOpp} />);
 
     expect(screen.getByRole('textbox', { name: 'Project name' })).toHaveValue('Test Project');
-    expect(screen.getByRole('combobox', { name: 'Project stage' })).toHaveValue('Specifying');
+    expect(screen.getByRole('combobox', { name: 'Project stage' })).toHaveTextContent('Specifying');
 
     const slider = screen.getByRole('slider', { name: /win probability/i });
     expect(slider).toHaveAttribute('aria-valuenow', '50');
