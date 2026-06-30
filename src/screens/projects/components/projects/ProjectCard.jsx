@@ -1,10 +1,13 @@
 import React from 'react';
-import { Building2 } from 'lucide-react';
+import { Building2, Clock, Package } from 'lucide-react';
 import { isDarkTheme } from '../../../../design-system/tokens.js';
 import { getOpportunityCustomerDisplayName } from '../../../../utils/projectLinks.js';
+import { getLeadTimeImageUrl } from '../../../resources/lead-times/cloudinaryImages.js';
+import { formatRelativeTime } from '../../../../utils/format.js';
 
 export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkSource }) => {
   const dark = isDarkTheme(theme);
+  const c = theme.colors;
   const border = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
   const displayCustomerName = getOpportunityCustomerDisplayName(opp, linkedCustomer);
   const linkedStatus = linkedCustomer
@@ -26,47 +29,65 @@ export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkS
     displayValue = '—';
   }
 
+  const firstSeries = (opp.products || []).find(p => p?.series)?.series;
+  const thumb = firstSeries ? getLeadTimeImageUrl({}, firstSeries) : '';
+  const modified = opp.updatedAt ? formatRelativeTime(opp.updatedAt) : '';
+
   return (
-    <button onClick={onClick} className="w-full text-left focus-ring rounded-2xl" style={{ WebkitTapHighlightColor: 'transparent' }}>
+    <button onClick={onClick} className="w-full text-left focus-ring rounded-2xl h-full" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <div
-        className="rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
-        style={{ backgroundColor: theme.colors.surface, border: `1px solid ${border}` }}
+        className="rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+        style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
       >
-        <div className="px-5 pt-4 pb-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: theme.colors.textPrimary }}>
-                {opp.name}
-              </p>
-              <p className="mt-0.5 text-xs font-medium" style={{ color: theme.colors.textSecondary, opacity: 0.7 }}>
-                {opp.vertical || 'Active project'}
-              </p>
-              <div className="mt-2 flex min-w-0 items-center gap-1.5" title={customerTitle}>
-                <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.45 }} />
-                <span
-                  className="truncate text-[0.6875rem] font-medium"
-                  style={{ color: theme.colors.textSecondary, opacity: 0.92 }}
-                >
-                  {displayCustomerName}
-                </span>
-                <span
-                  className="shrink-0 text-[0.5625rem] font-semibold uppercase tracking-[0.08em]"
-                  style={{ color: theme.colors.textSecondary, opacity: dark ? 0.42 : 0.5 }}
-                >
-                  {customerStatus}
-                </span>
-              </div>
-            </div>
-            <div className="text-right shrink-0 pt-0.5">
-              <p className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] mb-0.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
-                List
-              </p>
-              <p className="font-bold text-lg tabular-nums tracking-tight leading-none" style={{ color: theme.colors.textPrimary }}>
-                {displayValue}
-              </p>
+        <div className="px-4 pt-4 pb-3 flex items-start gap-3.5">
+          <div
+            className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+            style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.045)' }}
+            aria-hidden="true"
+          >
+            {thumb ? (
+              <img src={thumb} alt="" className="w-full h-full object-contain p-1" loading="lazy" />
+            ) : (
+              <Package className="w-5 h-5" style={{ color: c.textSecondary, opacity: 0.4 }} />
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: c.textPrimary }}>
+              {opp.name}
+            </p>
+            <p className="mt-0.5 text-xs font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>
+              {opp.vertical || 'Active project'}
+            </p>
+            <div className="mt-2 flex min-w-0 items-center gap-1.5" title={customerTitle}>
+              <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+              <span className="truncate text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.92 }}>
+                {displayCustomerName}
+              </span>
+              <span className="shrink-0 text-[0.5625rem] font-semibold uppercase tracking-[0.08em]" style={{ color: c.textSecondary, opacity: dark ? 0.42 : 0.5 }}>
+                {customerStatus}
+              </span>
             </div>
           </div>
+
+          <div className="text-right shrink-0 pt-0.5">
+            <p className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>
+              List
+            </p>
+            <p className="font-bold text-lg tabular-nums tracking-tight leading-none" style={{ color: c.textPrimary }}>
+              {displayValue}
+            </p>
+          </div>
         </div>
+
+        {modified ? (
+          <div className="mt-auto px-4 py-2 flex items-center gap-1.5" style={{ borderTop: `1px solid ${border}` }}>
+            <Clock className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+            <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>
+              Modified {modified}
+            </span>
+          </div>
+        ) : null}
       </div>
     </button>
   );

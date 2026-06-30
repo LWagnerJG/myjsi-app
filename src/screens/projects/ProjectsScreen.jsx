@@ -14,6 +14,7 @@ import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.j
 import { formatCompanyName } from '../../utils/format.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
+import { ProjectSpotlight } from './components/projects/ProjectSpotlight.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
 import { resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
@@ -417,7 +418,8 @@ export const ProjectsScreen = forwardRef(({
   );
 
   const updateOpportunity = useCallback(updated => {
-    setOpportunities(prev => prev.map(o => o.id === updated.id ? updated : o));
+    const stamped = { ...updated, updatedAt: new Date().toISOString() };
+    setOpportunities(prev => prev.map(o => o.id === stamped.id ? stamped : o));
   }, [setOpportunities]);
 
   const deleteOpportunity = useCallback(id => {
@@ -562,18 +564,27 @@ export const ProjectsScreen = forwardRef(({
               />
             </div>
           </div>
-          {cta && (
-            <button
-              type="button"
-              aria-label={cta.ariaLabel}
-              onClick={cta.action}
-              className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] gap-1.5 text-sm leading-none px-3"
-              style={{ height: 'var(--jsi-ctrl-h)', backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-            >
-              <Plus size={14} strokeWidth={2.5} />
-              {cta.label}
-            </button>
-          )}
+          <div className="order-2 ml-auto flex-shrink-0 flex items-center gap-2">
+            {projectsTab === 'pipeline' && (
+              <ProjectSpotlight
+                opportunities={opportunities}
+                theme={theme}
+                onOpenProject={(id) => onNavigate(`projects/${id}`)}
+              />
+            )}
+            {cta && (
+              <button
+                type="button"
+                aria-label={cta.ariaLabel}
+                onClick={cta.action}
+                className="flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] gap-1.5 text-sm leading-none px-3"
+                style={{ height: 'var(--jsi-ctrl-h)', backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+              >
+                <Plus size={14} strokeWidth={2.5} />
+                {cta.label}
+              </button>
+            )}
+          </div>
 
           <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
             <div ref={projectsStandardMeasureRef} className="inline-block">
