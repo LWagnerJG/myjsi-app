@@ -44,36 +44,35 @@ const AD_FIRMS_LIST = [
 
 /* ─── inline primitives ─── */
 
-const SectionLabel = ({ children, accent }) => (
-    <span className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`}
-        style={{ color: accent, opacity: 0.78 }}>{children}</span>
+const LABEL_STYLE = { opacity: 0.72 };
+
+const SectionLabel = ({ children, textSecondary }) => (
+    <span className={`${FIELD_LABEL_CLASSNAME} mb-1.5 block`}
+        style={{ color: textSecondary, ...LABEL_STYLE }}>{children}</span>
 );
 
-const SelectPill = ({ on, onClick, children, accent, accentText, textSecondary, isDark }) => (
+const SelectPill = ({ on, onClick, children, accent, accentText, textSecondary, tileBg }) => (
     <button type="button" onClick={onClick}
-        className="px-3.5 py-[7px] rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.97]"
+        className="rounded-full px-3.5 py-2 text-[0.6875rem] font-semibold transition-all active:scale-[0.97] focus-ring"
         style={{
-            backgroundColor: on ? accent : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(240,237,232,0.88)'),
+            backgroundColor: on ? accent : tileBg,
             color: on ? (accentText || '#fff') : textSecondary,
-            border: 'none',
-            boxShadow: on ? (isDark ? '0 10px 20px rgba(0,0,0,0.18)' : '0 10px 18px rgba(53,53,53,0.08)') : 'none',
         }}>
         {children}
     </button>
 );
 
-const SegToggle = ({ value, options, onChange, subtle, textPrimary, isDark, layoutId }) => (
-    <div className="inline-flex rounded-full p-[3px] w-full"
-        style={{ backgroundColor: subtle || (isDark ? 'rgba(255,255,255,0.10)' : '#E3E0D8') }}>
+const SegToggle = ({ value, options, onChange, textPrimary, textSecondary, tileBg, layoutId, isDark }) => (
+    <div className="inline-flex w-full gap-1 rounded-full p-1" style={{ backgroundColor: tileBg }}>
         {options.map(opt => {
             const sel = opt.value === value;
             return (
                 <button key={opt.value} type="button" onClick={() => onChange(opt.value)}
-                    className="relative flex-1 rounded-full py-[7px] text-[0.6875rem] font-semibold transition-colors whitespace-nowrap"
-                    style={{ color: sel ? textPrimary : (isDark ? 'rgba(240,240,240,0.5)' : '#6A6762') }}>
+                    className="relative flex-1 rounded-full py-2 text-[0.75rem] font-semibold transition-colors whitespace-nowrap focus-ring"
+                    style={{ color: sel ? textPrimary : textSecondary }}>
                     {sel && (
                         <motion.span layoutId={layoutId} className="absolute inset-0 rounded-full"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : '#fff' }}
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.95)' }}
                             transition={{ type: 'spring', stiffness: 420, damping: 32 }} />
                     )}
                     <span className="relative z-10">{opt.label}</span>
@@ -178,16 +177,29 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 
     if (!show) return null;
 
+    const tileBg = fieldTileSurface(theme).backgroundColor;
+
     const inputStyle = {
         ...fieldTileSurface(theme),
-        height: 44,
-        border: '1px solid transparent',
-        borderRadius: DESIGN_TOKENS.borderRadius.lg,
+        minHeight: 44,
         color: c.textPrimary,
         padding: '0 14px',
-        fontSize: '0.75rem',
+        fontSize: '0.8125rem',
+        fontWeight: 600,
+        outline: 'none',
+        width: '100%',
+    };
+
+    const multilineStyle = {
+        backgroundColor: tileBg,
+        borderRadius: '16px',
+        color: c.textPrimary,
+        padding: '12px 14px',
+        fontSize: '0.8125rem',
         fontWeight: 500,
-        outline: 'none', width: '100%',
+        outline: 'none',
+        width: '100%',
+        lineHeight: 1.55,
     };
 
     return ReactDOM.createPortal(
@@ -230,39 +242,39 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                         <h2 className="text-[0.9375rem] font-bold tracking-tight" style={{ color: c.textPrimary }}>
                             Request Quote
                         </h2>
-                        <button onClick={onClose} aria-label="Close"
-                            className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }}>
+                        <button type="button" onClick={onClose} aria-label="Close"
+                            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-ring"
+                            style={{ backgroundColor: tileBg, color: c.textSecondary }}>
                             <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto scrollbar-hide">
-                        <div className="px-5 py-4 space-y-4">
+                    <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+                        <div className="flex-1 overflow-y-auto scrollbar-hide px-5 py-5 space-y-5">
 
-                            {/* Project Name */}
                             <div>
-                                <SectionLabel accent={c.accent}>Project Name *</SectionLabel>
+                                <SectionLabel textSecondary={c.textSecondary}>Project Name *</SectionLabel>
                                 <input type="text" value={formData.projectName}
                                     onChange={e => updateField('projectName', e.target.value)}
                                     placeholder="Enter project name"
-                                    style={{ ...inputStyle, borderColor: errors.projectName ? (c.error || '#B85C5C') : 'transparent' }} />
-                                {errors.projectName && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.projectName}</p>}
+                                    className="focus-ring"
+                                    style={{ ...inputStyle, outline: errors.projectName ? `2px solid ${c.error || '#B85C5C'}` : undefined, outlineOffset: '-2px' }} />
+                                {errors.projectName && <p className="mt-1.5 text-[0.6875rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.projectName}</p>}
                             </div>
 
-                            {/* Type + Needed By */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <SectionLabel accent={c.accent}>Type</SectionLabel>
+                                    <SectionLabel textSecondary={c.textSecondary}>Type</SectionLabel>
                                     <SegToggle value={formData.quoteType} layoutId={`qt-type-${toggleId}`}
                                         options={[{ value: 'new', label: 'New' }, { value: 'revision', label: 'Revision' }]}
                                         onChange={v => updateField('quoteType', v)}
-                                        subtle={c.subtle} textPrimary={c.textPrimary} isDark={isDark} />
+                                        tileBg={tileBg} textPrimary={c.textPrimary} textSecondary={c.textSecondary} isDark={isDark} />
                                 </div>
                                 <div>
-                                    <SectionLabel accent={c.accent}>Needed By</SectionLabel>
+                                    <SectionLabel textSecondary={c.textSecondary}>Needed By</SectionLabel>
                                     <input type="date" value={formData.neededByDate}
                                         onChange={e => updateField('neededByDate', e.target.value)}
+                                        className="focus-ring"
                                         style={inputStyle} />
                                 </div>
                             </div>
@@ -273,28 +285,28 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                         transition={{ duration: 0.15 }} className="overflow-hidden">
                                         <div>
-                                            <SectionLabel accent={c.accent}>Previous Quote #</SectionLabel>
+                                            <SectionLabel textSecondary={c.textSecondary}>Previous Quote #</SectionLabel>
                                             <input type="text" value={formData.previousQuoteRef}
                                                 onChange={e => updateField('previousQuoteRef', e.target.value)}
                                                 placeholder="Enter quote number or attach below"
-                                                style={{ ...inputStyle, borderColor: errors.previousQuoteRef ? (c.error || '#B85C5C') : 'transparent' }} />
-                                            {errors.previousQuoteRef && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.previousQuoteRef}</p>}
+                                                className="focus-ring"
+                                                style={{ ...inputStyle, outline: errors.previousQuoteRef ? `2px solid ${c.error || '#B85C5C'}` : undefined, outlineOffset: '-2px' }} />
+                                            {errors.previousQuoteRef && <p className="mt-1.5 text-[0.6875rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.previousQuoteRef}</p>}
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            {/* Team Members */}
                             {teamMembers.length > 0 && (
                                 <div>
-                                    <SectionLabel accent={c.accent}>Team Members</SectionLabel>
+                                    <SectionLabel textSecondary={c.textSecondary}>Team Members</SectionLabel>
                                     <div className="flex flex-wrap gap-1.5">
                                         {teamMembers.map(m => {
                                             const sel = formData.selectedTeamMembers.includes(m.id);
                                             const name = `${m?.firstName || ''} ${m?.lastName || ''}`.trim() || m?.email;
                                             return (
                                                 <SelectPill key={m.id} on={sel} onClick={() => toggleTeamMember(m.id)}
-                                                    accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} isDark={isDark}>
+                                                    accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} tileBg={tileBg}>
                                                     {name}
                                                 </SelectPill>
                                             );
@@ -303,19 +315,19 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 </div>
                             )}
 
-                            {/* Project Type */}
                             <div>
-                                <SectionLabel accent={c.accent}>Project Type</SectionLabel>
+                                <SectionLabel textSecondary={c.textSecondary}>Project Type</SectionLabel>
                                 <SegToggle value={formData.projectType} layoutId={`qt-ptype-${toggleId}`}
                                     options={[{ value: 'commercial', label: 'Commercial' }, { value: 'contract', label: 'Contract' }]}
                                     onChange={v => { updateField('projectType', v); if (v === 'commercial') updateField('contractName', ''); }}
-                                    subtle={c.subtle} textPrimary={c.textPrimary} isDark={isDark} />
+                                    tileBg={tileBg} textPrimary={c.textPrimary} textSecondary={c.textSecondary} isDark={isDark} />
                                 <AnimatePresence>
                                     {formData.projectType === 'contract' && (
                                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                             transition={{ duration: 0.15 }} className="overflow-hidden">
-                                            <div className="relative mt-2">
+                                            <div className="relative mt-3">
                                                 <select value={formData.contractName} onChange={e => updateField('contractName', e.target.value)}
+                                                    className="focus-ring"
                                                     style={{ ...inputStyle, appearance: 'none', WebkitAppearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                                                     <option value="">Select contract</option>
                                                     {Object.keys(CONTRACTS_DATA).map(k => <option key={k} value={k}>{CONTRACTS_DATA[k].name}</option>)}
@@ -327,79 +339,74 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 </AnimatePresence>
                             </div>
 
-                            {/* Dealer & A&D */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <SectionLabel accent={c.accent}>Dealer *</SectionLabel>
+                                    <SectionLabel textSecondary={c.textSecondary}>Dealer *</SectionLabel>
                                     <SearchSelect value={formData.dealerName} onChange={v => updateField('dealerName', v)}
-                                        options={DEALERS_LIST} placeholder="Search..." theme={theme} onAddNew={() => {}} />
-                                    {errors.dealerName && <p className="mt-1 text-[0.625rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.dealerName}</p>}
+                                        options={DEALERS_LIST} placeholder="Search dealers…" theme={theme} />
+                                    {errors.dealerName && <p className="mt-1.5 text-[0.6875rem] font-semibold" style={{ color: c.error || '#B85C5C' }}>{errors.dealerName}</p>}
                                 </div>
                                 <div>
-                                    <SectionLabel accent={c.accent}>A&D Firm</SectionLabel>
+                                    <SectionLabel textSecondary={c.textSecondary}>A&D Firm</SectionLabel>
                                     <SearchSelect value={formData.adName} onChange={v => updateField('adName', v)}
-                                        options={AD_FIRMS_LIST} placeholder="Search..." theme={theme} onAddNew={() => {}} />
+                                        options={AD_FIRMS_LIST} placeholder="Search firms…" theme={theme} />
                                 </div>
                             </div>
 
-                            {/* Items Needed + Formats */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <SectionLabel accent={c.accent}>Items Needed</SectionLabel>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {QUOTE_ITEMS.map(item => (
-                                            <SelectPill key={item.id} on={formData.itemsNeeded.includes(item.id)} onClick={() => toggleItem(item.id)}
-                                                accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} isDark={isDark}>
-                                                {item.label}
-                                            </SelectPill>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <SectionLabel accent={c.accent}>Formats</SectionLabel>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {FORMAT_OPTIONS.map(fmt => (
-                                            <SelectPill key={fmt.id} on={formData.formats.includes(fmt.id)} onClick={() => toggleFormat(fmt.id, !formData.formats.includes(fmt.id))}
-                                                accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} isDark={isDark}>
-                                                {fmt.label}
-                                            </SelectPill>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Notes */}
                             <div>
-                                <SectionLabel accent={c.accent}>Notes</SectionLabel>
+                                <SectionLabel textSecondary={c.textSecondary}>Items Needed</SectionLabel>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {QUOTE_ITEMS.map(item => (
+                                        <SelectPill key={item.id} on={formData.itemsNeeded.includes(item.id)} onClick={() => toggleItem(item.id)}
+                                            accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} tileBg={tileBg}>
+                                            {item.label}
+                                        </SelectPill>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <SectionLabel textSecondary={c.textSecondary}>Formats</SectionLabel>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {FORMAT_OPTIONS.map(fmt => (
+                                        <SelectPill key={fmt.id} on={formData.formats.includes(fmt.id)} onClick={() => toggleFormat(fmt.id, !formData.formats.includes(fmt.id))}
+                                            accent={c.accent} accentText={c.accentText} textSecondary={c.textSecondary} tileBg={tileBg}>
+                                            {fmt.label}
+                                        </SelectPill>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <SectionLabel textSecondary={c.textSecondary}>Notes</SectionLabel>
                                 <textarea value={formData.projectInfo}
                                     onChange={e => updateField('projectInfo', e.target.value)}
-                                    placeholder="Additional details..."
-                                    rows={2}
-                                    className="w-full resize-none outline-none text-xs leading-relaxed"
-                                    style={{ ...fieldTileSurface(theme), border: '1px solid transparent', color: c.textPrimary,
-                                        borderRadius: DESIGN_TOKENS.borderRadius.lg, padding: '10px 12px' }} />
+                                    placeholder="Additional details…"
+                                    rows={3}
+                                    className="w-full resize-y focus-ring sm:resize-none"
+                                    style={multilineStyle} />
                             </div>
 
-                            {/* Attachments */}
                             <div>
-                                <SectionLabel accent={c.accent}>Attachments</SectionLabel>
+                                <SectionLabel textSecondary={c.textSecondary}>Attachments</SectionLabel>
                                 <button type="button"
                                     onClick={() => document.getElementById('rfq-file-upload')?.click()}
-                                    className="w-full flex items-center gap-3 py-3 px-3 rounded-xl transition-colors hover:opacity-80"
-                                    style={{ border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)'}`, color: c.textSecondary }}>
-                                    <Upload className="w-3.5 h-3.5 flex-shrink-0" style={{ opacity: 0.4 }} />
-                                    <span className="text-[0.6875rem] font-semibold">Click to upload files</span>
+                                    className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-full px-4 py-3 transition-opacity hover:opacity-80 focus-ring"
+                                    style={{ backgroundColor: tileBg, color: c.textSecondary }}>
+                                    <Upload className="w-3.5 h-3.5 flex-shrink-0" style={{ opacity: 0.5 }} aria-hidden="true" />
+                                    <span className="text-[0.8125rem] font-semibold">Upload files</span>
                                     <input type="file" multiple onChange={handleFileChange} className="hidden" id="rfq-file-upload" />
                                 </button>
                                 {formData.files.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                    <div className="mt-2.5 flex flex-wrap gap-1.5">
                                         {formData.files.map((file, idx) => (
-                                            <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[0.6875rem] font-medium"
-                                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)', color: c.textPrimary }}>
-                                                <FileText className="w-3 h-3 flex-shrink-0" style={{ color: c.accent }} />
-                                                <span className="max-w-[90px] truncate">{file.name}</span>
-                                                <button type="button" onClick={() => removeFile(idx)} className="ml-0.5 opacity-40 hover:opacity-80 transition-opacity">
-                                                    <X className="w-3 h-3" />
+                                            <div key={idx} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold"
+                                                style={{ backgroundColor: tileBg, color: c.textPrimary }}>
+                                                <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+                                                <span className="max-w-[120px] truncate">{file.name}</span>
+                                                <button type="button" onClick={() => removeFile(idx)} aria-label={`Remove ${file.name}`}
+                                                    className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }}>
+                                                    <X className="w-3 h-3" aria-hidden="true" />
                                                 </button>
                                             </div>
                                         ))}
@@ -407,33 +414,33 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                                 )}
                             </div>
                         </div>
-                    </form>
 
-                    <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 flex-shrink-0"
-                        style={{ borderTop: `1px solid ${divider}` }}>
-                        <SecondaryButton
-                            type="button"
-                            onClick={onClose}
-                            theme={theme}
-                            className="h-10 !py-0 px-5 text-[0.75rem]"
-                        >
-                            Cancel
-                        </SecondaryButton>
-                        <PrimaryButton
-                            type="submit"
-                            disabled={isSubmitting}
-                            theme={theme}
-                            icon={isSubmitting ? (
-                                <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                </svg>
-                            ) : <Send className="w-3.5 h-3.5" />}
-                            className="h-10 !py-0 px-5 text-[0.75rem] disabled:cursor-not-allowed"
-                        >
-                            {isSubmitting ? 'Sending…' : 'Submit Request'}
-                        </PrimaryButton>
-                    </div>
+                        <div className="flex flex-shrink-0 items-center justify-end gap-2.5 border-t px-5 py-4"
+                            style={{ borderColor: divider }}>
+                            <SecondaryButton
+                                type="button"
+                                onClick={onClose}
+                                theme={theme}
+                                className="!py-0 min-h-[44px] px-5 text-[0.8125rem]"
+                            >
+                                Cancel
+                            </SecondaryButton>
+                            <PrimaryButton
+                                type="submit"
+                                disabled={isSubmitting}
+                                theme={theme}
+                                icon={isSubmitting ? (
+                                    <svg className="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                ) : <Send className="w-3.5 h-3.5" />}
+                                className="!py-0 min-h-[44px] px-6 text-[0.8125rem] disabled:cursor-not-allowed"
+                            >
+                                {isSubmitting ? 'Sending…' : 'Submit Request'}
+                            </PrimaryButton>
+                        </div>
+                    </form>
                 </motion.div>
             </motion.div>
         </AnimatePresence>
