@@ -72,6 +72,16 @@ describe('OpportunityDetail', () => {
     expect(screen.getByRole('textbox', { name: 'Project name' })).toHaveValue('New Office Furnishings');
     expect(screen.getByText('Stakeholders & Competition')).toBeInTheDocument();
     expect(screen.getByText('Specs & Quote')).toBeInTheDocument();
+    expect(screen.getByText('Pricing')).toBeInTheDocument();
+  });
+
+  it('logs a note entry with timestamp in the activity log', () => {
+    vi.useFakeTimers();
+    render(<Harness initial={baseOpp} />);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Log an update' }), { target: { value: 'Follow up on test fit' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
+    act(() => { vi.advanceTimersByTime(700); });
+    expect(screen.getByText('Follow up on test fit')).toBeInTheDocument();
   });
 
   it('keeps a manually enabled reward on after the autosave round-trip', () => {

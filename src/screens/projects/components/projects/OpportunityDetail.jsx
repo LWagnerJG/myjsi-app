@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
-import { formatCurrency } from '../../../../utils/format.js';
+import { formatCurrency, formatRelativeTime } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { CONTRACTS_DATA } from '../../../resources/contracts/data.js';
 import { buildSpecifierOptions, getDefaultSpecifierOption } from '../../NewLeadScreenComponents.jsx';
@@ -54,6 +54,11 @@ const fieldSurface = (theme) => fieldTileSurface(theme);
 const multilineSurface = (theme) => ({
   backgroundColor: detailTileBg(theme),
   borderRadius: DETAIL_RADIUS_MULTILINE,
+});
+
+const compoundFieldSurface = (theme) => ({
+  backgroundColor: detailTileBg(theme),
+  borderRadius: DETAIL_RADIUS_INSET,
 });
 
 const insetBg = (theme) => detailTileBg(theme);
@@ -157,9 +162,9 @@ const Section = ({ title, subtitle, children, theme, right, className = '', coll
         initial={false}
         animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-        style={{ overflow: 'hidden' }}
+        style={{ overflow: open ? 'visible' : 'hidden' }}
       >
-        <div className={title ? 'pt-4' : ''}>{children}</div>
+        <div className={`${title ? 'pt-4' : ''} px-[3px] pb-[3px]`}>{children}</div>
       </motion.div>
     </motion.section>
   );
@@ -678,6 +683,101 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
   );
 };
 
+const ProjectNoteLog = ({
+  entries,
+  documents,
+  composer,
+  onComposerChange,
+  onLog,
+  onAttach,
+  pendingDocIds,
+  onRemovePendingDoc,
+  theme,
+  readOnly,
+}) => {
+  const c = theme.colors;
+  const docById = useMemo(
+    () => Object.fromEntries((documents || []).map(d => [d.id, d])),
+    [documents],
+  );
+  const pendingDocs = (pendingDocIds || []).map(id => docById[id]).filter(Boolean);
+
+  return (
+    <div className="space-y-4">
+      {!readOnly ? (
+        <div className="space-y-2">
+          <div className="flex items-start gap-2">
+            <input
+              value={composer}
+              onChange={e => onComposerChange(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onLog(); } }}
+              placeholder="Log an update…"
+              aria-label="Log an update"
+              className="min-h-[44px] flex-1 px-3.5 text-[0.8125rem] font-medium outline-none focus-ring"
+              style={{ ...fieldSurface(theme), color: c.textPrimary }}
+            />
+            <button
+              type="button"
+              onClick={onLog}
+              disabled={!composer.trim() && pendingDocs.length === 0}
+              className="inline-flex min-h-[44px] flex-shrink-0 items-center justify-center rounded-full px-4 text-[0.8125rem] font-semibold transition-all active:scale-[0.98] focus-ring disabled:opacity-40"
+              style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
+            >
+              Log
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {pendingDocs.map(doc => (
+              <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1 pl-2.5 pr-1.5 text-[0.6875rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
+                <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+                <span className="truncate max-w-[140px]">{doc.fileName}</span>
+                <button type="button" onClick={() => onRemovePendingDoc(doc.id)} aria-label={`Remove ${doc.fileName} from this log entry`} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }}>
+                  <X className="h-3 w-3" aria-hidden="true" />
+                </button>
+              </span>
+            ))}
+            <button type="button" onClick={onAttach} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
+              <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
+              Attach
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {entries.length > 0 ? (
+        <ol className="m-0 list-none space-y-3 p-0" aria-label="Project activity log">
+          {entries.map(entry => (
+            <li key={entry.id} className="space-y-1.5">
+              {entry.text ? (
+                <p className="text-[0.8125rem] leading-relaxed" style={{ color: c.textPrimary }}>{entry.text}</p>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <time className="text-[0.625rem] font-medium tabular-nums" style={{ color: c.textSecondary, opacity: 0.55 }} dateTime={entry.at}>
+                  {formatRelativeTime(entry.at)}
+                </time>
+                {(entry.docIds || []).map(id => {
+                  const doc = docById[id];
+                  if (!doc) return null;
+                  return (
+                    <span key={id} className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold" style={{ backgroundColor: detailTileBg(theme), color: c.textSecondary }}>
+                      <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+                      <span className="truncate max-w-[120px]">{doc.fileName}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.55 }}>
+          {readOnly ? 'No updates logged.' : 'Updates and attachments will appear here.'}
+        </p>
+      )}
+    </div>
+  );
+};
+
 const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, accentColor }) => {
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
@@ -933,6 +1033,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   }, []);
 
   const fileInputRef = useRef(null);
+  const notesFileInputRef = useRef(null);
+  const [noteComposer, setNoteComposer] = useState('');
+  const [pendingNoteDocIds, setPendingNoteDocIds] = useState([]);
 
   /* computed */
   const rawNumeric = parseCurrency(draft.value);
@@ -1027,6 +1130,91 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const heroSummaryParts = [draft.vertical === 'Other' ? (draft.otherVertical || 'Other') : draft.vertical, draft.installationLocation]
     .map(v => String(v || '').trim())
     .filter(Boolean);
+
+  const noteEntries = useMemo(() => {
+    if (Array.isArray(draft.noteLog) && draft.noteLog.length) {
+      return [...draft.noteLog].sort((a, b) => new Date(a.at) - new Date(b.at));
+    }
+    const legacy = String(draft.notes || '').trim();
+    if (!legacy) return [];
+    return [{
+      id: 'legacy',
+      text: legacy,
+      at: draft.updatedAt || opp?.updatedAt || new Date().toISOString(),
+      docIds: (draft.documents || []).map(d => d.id),
+    }];
+  }, [draft.noteLog, draft.notes, draft.updatedAt, draft.documents, opp?.updatedAt]);
+
+  useEffect(() => {
+    if (readOnlyRef.current) return;
+    const legacy = String(draft.notes || '').trim();
+    if (!legacy || (Array.isArray(draft.noteLog) && draft.noteLog.length)) return;
+    setDraft(p => {
+      dirty.current = true;
+      return {
+        ...p,
+        noteLog: [{
+          id: 'legacy',
+          text: legacy,
+          at: p.updatedAt || new Date().toISOString(),
+          docIds: (p.documents || []).map(d => d.id),
+        }],
+        notes: '',
+      };
+    });
+  }, [opp?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const logNoteEntry = useCallback(() => {
+    if (readOnlyRef.current) return;
+    const text = noteComposer.trim();
+    if (!text && pendingNoteDocIds.length === 0) return;
+    setDraft(p => {
+      const prior = Array.isArray(p.noteLog)
+        ? p.noteLog
+        : (String(p.notes || '').trim()
+          ? [{ id: 'legacy', text: String(p.notes).trim(), at: p.updatedAt || new Date().toISOString(), docIds: [] }]
+          : []);
+      dirty.current = true;
+      return {
+        ...p,
+        noteLog: [...prior, {
+          id: `n${Date.now()}`,
+          text: text || 'Attached files',
+          at: new Date().toISOString(),
+          docIds: [...pendingNoteDocIds],
+        }],
+        notes: '',
+      };
+    });
+    setNoteComposer('');
+    setPendingNoteDocIds([]);
+  }, [noteComposer, pendingNoteDocIds]);
+
+  const handleNotesFileUpload = useCallback((e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newDocs = files.map(f => ({
+      id: `${Date.now()}_${f.name}`,
+      fileName: f.name,
+      type: f.type.includes('pdf') ? 'PDF' : f.type.includes('image') ? 'Image' : 'Document',
+      size: f.size < 1024 * 1024 ? `${Math.round(f.size / 1024)}KB` : `${(f.size / (1024 * 1024)).toFixed(1)}MB`,
+      date: new Date().toLocaleDateString(),
+    }));
+    setDraft(p => {
+      dirty.current = true;
+      return { ...p, documents: [...(p.documents || []), ...newDocs] };
+    });
+    setPendingNoteDocIds(ids => [...ids, ...newDocs.map(d => d.id)]);
+    e.target.value = '';
+  }, []);
+
+  const removePendingNoteDoc = useCallback((docId) => {
+    setPendingNoteDocIds(ids => ids.filter(id => id !== docId));
+    setDraft(p => {
+      dirty.current = true;
+      return { ...p, documents: (p.documents || []).filter(d => d.id !== docId) };
+    });
+  }, []);
   /* End User is the canonical customer; it's set at project creation and
      reviewed (locked) here. Fall back to legacy `company` for older records. */
   const endUserDisplay = String(draft.endUser || draft.company || '').trim();
@@ -1165,93 +1353,101 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
-              <Section title="Commercial" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="min-w-0 space-y-1.5">
-                    <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
-                    <div className="flex items-center gap-0.5 min-h-[44px] px-3" style={fieldSurface(theme)}>
-                      <span aria-hidden="true" className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: draft.value ? c.textPrimary : c.textSecondary, opacity: draft.value ? 1 : 0.55 }}>$</span>
-                      <input
-                        id={listPriceId}
-                        inputMode="numeric"
-                        value={formatListPriceInput(draft.value)}
-                        onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                        className="w-full bg-transparent outline-none text-[0.9375rem] font-semibold tabular-nums focus-ring"
-                        style={{ color: c.textPrimary }}
-                        placeholder="0"
+              <Section title="Pricing" theme={theme}>
+                <div className="space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="min-w-0 space-y-1.5">
+                      <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
+                      <div className="px-3.5 py-2.5" style={compoundFieldSurface(theme)}>
+                        <div className="flex min-h-[28px] items-center gap-0.5">
+                          <span aria-hidden="true" className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: draft.value ? c.textPrimary : c.textSecondary, opacity: draft.value ? 1 : 0.55 }}>$</span>
+                          <input
+                            id={listPriceId}
+                            inputMode="numeric"
+                            value={formatListPriceInput(draft.value)}
+                            onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                            className="w-full bg-transparent text-[0.9375rem] font-semibold tabular-nums outline-none focus-ring"
+                            style={{ color: c.textPrimary }}
+                            placeholder="0"
+                          />
+                        </div>
+                        {rawNumeric > 0 && discountPct > 0 ? (
+                          <p className="mt-1 text-[0.6875rem] font-medium tabular-nums" style={{ color: c.textSecondary, opacity: 0.62 }}>
+                            {netValueLabel} net
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 space-y-1.5">
+                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Discount</span>
+                      <div className="px-3.5 py-2.5" style={compoundFieldSurface(theme)}>
+                        <button
+                          type="button"
+                          ref={discBtn}
+                          onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
+                          aria-haspopup="listbox"
+                          aria-expanded={discountOpen}
+                          className="flex w-full min-h-[28px] items-center justify-between gap-2 text-left outline-none focus-ring"
+                        >
+                          <span className="truncate text-[0.9375rem] font-semibold" style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.55 }}>
+                            {discountSummaryLabel}
+                          </span>
+                          <ChevronDown className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
+                        </button>
+                        {discountPct > 0 ? (
+                          <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.62 }}>
+                            {discountDetailLabel}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <Row label="PO Timeframe" theme={theme}>
+                      {(id) => <CompactSelect id={id} options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} mutedValues={['Unknown']} />}
+                    </Row>
+                    <Row label="Contract" theme={theme}>
+                      {(id) => <CompactSelect id={id} options={CONTRACT_OPTIONS} value={draft.contractType || ''} onChange={v => update('contractType', v)} theme={theme} ariaLabel="Contract" placeholder="Select contract" mutedValues={['none']} />}
+                    </Row>
+                  </div>
+
+                  <div className="rounded-[20px] px-3.5 py-3" style={{ backgroundColor: detailTileBg(theme) }}>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                      <span className={`${FIELD_LABEL_CLASS}`} style={labelStyle}>Rewards</span>
+                      <RewardTogglePill
+                        label="Sales"
+                        sublabel={salesRewardEnabled ? '3%' : 'off'}
+                        checked={salesRewardEnabled}
+                        onChange={e => setRewardEnabled('salesReward', e.target.checked)}
+                        theme={theme}
+                      />
+                      <RewardTogglePill
+                        label="Designer"
+                        sublabel={designerRewardEnabled ? '1%' : 'off'}
+                        checked={designerRewardEnabled}
+                        onChange={e => setRewardEnabled('designerReward', e.target.checked)}
+                        theme={theme}
                       />
                     </div>
-                    <p className="text-[0.6875rem] font-medium min-h-[0.95rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>
-                      {rawNumeric > 0 && discountPct > 0 ? `${netValueLabel} net` : '\u00a0'}
-                    </p>
                   </div>
 
-                  <div className="min-w-0 space-y-1.5">
-                    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Discount</span>
-                    <button
-                      type="button"
-                      ref={discBtn}
-                      onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
-                      aria-haspopup="listbox"
-                      aria-expanded={discountOpen}
-                      className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 text-left transition-all active:scale-[0.99] focus-ring"
-                      style={{
-                        ...fieldSurface(theme),
-                        ...(discountOpen ? { boxShadow: `inset 0 0 0 1.5px ${c.accent}` } : {}),
-                      }}
-                    >
-                      <span className="text-[0.9375rem] font-semibold truncate" style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.55 }}>
-                        {discountSummaryLabel}
-                      </span>
-                      <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
-                    </button>
-                    <p className="text-[0.6875rem] font-medium min-h-[0.95rem]" style={{ color: c.textSecondary, opacity: 0.55 }}>
-                      {discountPct > 0 ? discountDetailLabel : '\u00a0'}
-                    </p>
-                  </div>
-
-                  <Row label="PO Timeframe" theme={theme}>
-                    {(id) => <CompactSelect id={id} options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} mutedValues={['Unknown']} />}
-                  </Row>
-                  <Row label="Contract" theme={theme}>
-                    {(id) => <CompactSelect id={id} options={CONTRACT_OPTIONS} value={draft.contractType || ''} onChange={v => update('contractType', v)} theme={theme} ariaLabel="Contract" placeholder="Select contract" mutedValues={['none']} />}
-                  </Row>
+                  {rewardDefaultOff ? (
+                    <div className="flex items-center gap-2 rounded-[20px] px-3.5 py-2.5" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                      <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
+                      <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>{rewardsDetailLabel}</span>
+                    </div>
+                  ) : null}
+                  {showSpiffWarning ? (
+                    <div className="flex items-center gap-2 rounded-[20px] px-3.5 py-2.5" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                      <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
+                      <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
+                    </div>
+                  ) : null}
                 </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  <span className={FIELD_LABEL_CLASS} style={labelStyle}>Rewards</span>
-                  <RewardTogglePill
-                    label="Sales"
-                    sublabel={salesRewardEnabled ? '3%' : 'off'}
-                    checked={salesRewardEnabled}
-                    onChange={e => setRewardEnabled('salesReward', e.target.checked)}
-                    theme={theme}
-                  />
-                  <RewardTogglePill
-                    label="Designer"
-                    sublabel={designerRewardEnabled ? '1%' : 'off'}
-                    checked={designerRewardEnabled}
-                    onChange={e => setRewardEnabled('designerReward', e.target.checked)}
-                    theme={theme}
-                  />
-                </div>
-
-                {rewardDefaultOff && (
-                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
-                    <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>{rewardsDetailLabel}</span>
-                  </div>
-                )}
-                {showSpiffWarning && (
-                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
-                    <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
-                  </div>
-                )}
               </Section>
 
               <Section title="Project Details" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <Row label="Vertical" theme={theme} className={draft.vertical === 'Other' ? 'sm:col-span-2' : ''}>
                     {(id) => (
                       <div className={draft.vertical === 'Other' ? 'flex items-center gap-2' : ''}>
@@ -1526,27 +1722,27 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Notes" theme={theme} collapsible>
-                <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
-                  aria-label="Project notes"
-                  className="w-full resize-y min-h-[7rem] p-3 text-[0.8125rem] leading-relaxed outline-none focus-ring sm:resize-none"
-                  style={{ ...multilineSurface(theme), color: c.textPrimary }}
-                  placeholder="Notes, constraints, next steps..." />
-                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                  {(draft.documents || []).map(doc => (
-                    <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
-                      <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
-                      <span className="truncate">{doc.fileName}</span>
-                      <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
-                        <X className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                    </span>
-                  ))}
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
-                    <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
-                    Attach documents
-                  </button>
-                </div>
+              <Section title="Activity" theme={theme} collapsible>
+                <ProjectNoteLog
+                  entries={noteEntries}
+                  documents={draft.documents || []}
+                  composer={noteComposer}
+                  onComposerChange={setNoteComposer}
+                  onLog={logNoteEntry}
+                  onAttach={() => notesFileInputRef.current?.click()}
+                  pendingDocIds={pendingNoteDocIds}
+                  onRemovePendingDoc={removePendingNoteDoc}
+                  theme={theme}
+                  readOnly={readOnly}
+                />
+                <input
+                  ref={notesFileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                  className="hidden"
+                  onChange={handleNotesFileUpload}
+                />
               </Section>
             </div>
           </div>
