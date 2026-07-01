@@ -18,6 +18,7 @@ import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlide
 import { RequestQuoteModal } from '../../../../components/common/RequestQuoteModal.jsx';
 import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quoteRequests.js';
 import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
+import { SegmentedToggle } from '../../../../components/common/GroupedToggle.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { buildOpportunityProjectContacts, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
 
@@ -344,31 +345,6 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
         </motion.ul>,
         document.body
       )}
-    </div>
-  );
-};
-
-/* Compact Yes/No (or labeled) segmented pill toggle. */
-const SegmentToggle = ({ value, onChange, theme, options, ariaLabel, allowDeselect = false }) => {
-  const c = theme.colors;
-  return (
-    <div className="inline-flex flex-wrap gap-1 rounded-full p-0.5" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
-      {options.map(opt => {
-        const active = value === opt.val;
-        return (
-          <button
-            key={`${opt.label}:${String(opt.val)}`}
-            type="button"
-            onClick={() => onChange(allowDeselect && active ? null : opt.val)}
-            aria-pressed={active}
-            className="inline-flex min-h-[40px] items-center gap-1.5 px-4 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97] focus-ring"
-            style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
-          >
-            {opt.group ? <span className="text-[0.5625rem] font-bold uppercase tracking-[0.05em]" style={{ opacity: active ? 0.85 : 0.5 }}>{opt.group}</span> : null}
-            <span className="truncate max-w-[170px]">{opt.label}</span>
-          </button>
-        );
-      })}
     </div>
   );
 };
@@ -782,34 +758,16 @@ const ProjectNotesField = ({ value, onChange, onAttach, documents, onRemoveDoc, 
   );
 };
 
-/* Project Type selector. Picking "Contract" reveals an attached program picker;
-   picking "State Contracts" fans out to a state → contract-number chooser. */
-const ProjectTypeField = ({
-  projectType,
-  contractProgram,
-  contractState,
-  contractNumber,
-  onProjectType,
-  onContractProgram,
-  onContractState,
-  onContractNumber,
-  theme,
-  error,
-  labelStyle,
-}) => {
+/* Project Type selector. Choosing "Contract" reveals the flat contract fields
+   (rendered separately, full-width) rather than a deep nested cascade. */
+const ProjectTypeField = ({ projectType, onProjectType, theme, error, labelStyle }) => {
   const c = theme.colors;
   const isContract = projectType === 'contract';
-  const isStateProgram = isContract && contractProgram === 'state';
-  const stateContractOptions = isStateProgram ? getStateContractOptions(contractState) : [];
   const errorColor = c.error || '#B85C5C';
-  const selection = { projectType, contractProgram, contractState, contractNumber };
-  const summary = isContract && isProjectTypeComplete(selection) ? describeProjectType(selection) : '';
+  const summary = projectType && !isContract ? describeProjectType({ projectType }) : '';
   return (
     <div className="min-w-0 space-y-1.5">
-      <div className="flex items-center gap-1">
-        <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Project Type</span>
-        <span aria-hidden="true" style={{ color: errorColor }}>*</span>
-      </div>
+      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Project Type</span>
       <CompactSelect
         options={PROJECT_TYPE_OPTIONS}
         value={projectType || ''}
@@ -824,86 +782,89 @@ const ProjectTypeField = ({
           Choose a project type before you finish.
         </p>
       ) : null}
-
-      <AnimatePresence initial={false}>
-        {isContract ? (
-          <motion.div
-            key="contract-panel"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <div
-              className="mt-2 space-y-3 rounded-[20px] p-3.5"
-              style={{ backgroundColor: detailTileBg(theme), border: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}` }}
-            >
-              <div className="space-y-1.5">
-                <span className={FIELD_LABEL_CLASS} style={labelStyle}>Contract Program</span>
-                <CompactSelect
-                  options={CONTRACT_PROGRAM_OPTIONS}
-                  value={contractProgram || ''}
-                  onChange={onContractProgram}
-                  theme={theme}
-                  ariaLabel="Contract program"
-                  placeholder="Select contract program"
-                  surfaceStyle={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.05)' : '#FFFFFF' }}
-                />
-              </div>
-
-              <AnimatePresence initial={false}>
-                {isStateProgram ? (
-                  <motion.div
-                    key="state-panel"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <span className={FIELD_LABEL_CLASS} style={labelStyle}>State</span>
-                        <CompactSelect
-                          options={STATE_OPTIONS}
-                          value={contractState || ''}
-                          onChange={onContractState}
-                          theme={theme}
-                          ariaLabel="Contract state"
-                          placeholder="Select state"
-                          surfaceStyle={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.05)' : '#FFFFFF' }}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <span className={FIELD_LABEL_CLASS} style={labelStyle}>Contract Number</span>
-                        <CompactSelect
-                          options={stateContractOptions}
-                          value={contractNumber || ''}
-                          onChange={onContractNumber}
-                          theme={theme}
-                          ariaLabel="State contract number"
-                          placeholder={contractState ? 'Select contract' : 'Choose a state first'}
-                          disabled={!contractState}
-                          surfaceStyle={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.05)' : '#FFFFFF' }}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
-      {summary ? (
+      {summary && !isContract ? (
         <div className="flex items-center gap-1.5 pl-1 pt-0.5">
           <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
           <span className={FIELD_HELPER_CLASS} style={{ color: c.textSecondary }}>{summary}</span>
         </div>
       ) : null}
     </div>
+  );
+};
+
+/* Contract program / state / number — kept flat and full-width so the contract
+   flow reads across, not as a deep vertical cascade. */
+const ProjectContractFields = ({
+  contractProgram,
+  contractState,
+  contractNumber,
+  onContractProgram,
+  onContractState,
+  onContractNumber,
+  theme,
+  labelStyle,
+}) => {
+  const c = theme.colors;
+  const isStateProgram = contractProgram === 'state';
+  const stateContractOptions = isStateProgram ? getStateContractOptions(contractState) : [];
+  const summary = isProjectTypeComplete({ projectType: 'contract', contractProgram, contractState, contractNumber })
+    ? describeProjectType({ projectType: 'contract', contractProgram, contractState, contractNumber })
+    : '';
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      className="overflow-hidden"
+    >
+      <div className="grid gap-3 pt-1 sm:grid-cols-3">
+        <div className="space-y-1.5">
+          <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Contract Program</span>
+          <CompactSelect
+            options={CONTRACT_PROGRAM_OPTIONS}
+            value={contractProgram || ''}
+            onChange={onContractProgram}
+            theme={theme}
+            ariaLabel="Contract program"
+            placeholder="Select program"
+          />
+        </div>
+        {isStateProgram ? (
+          <>
+            <div className="space-y-1.5">
+              <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>State</span>
+              <CompactSelect
+                options={STATE_OPTIONS}
+                value={contractState || ''}
+                onChange={onContractState}
+                theme={theme}
+                ariaLabel="Contract state"
+                placeholder="Select state"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Contract Number</span>
+              <CompactSelect
+                options={stateContractOptions}
+                value={contractNumber || ''}
+                onChange={onContractNumber}
+                theme={theme}
+                ariaLabel="State contract number"
+                placeholder={contractState ? 'Select contract' : 'Choose a state first'}
+                disabled={!contractState}
+              />
+            </div>
+          </>
+        ) : null}
+      </div>
+      {summary ? (
+        <div className="flex items-center gap-1.5 pl-1 pt-2">
+          <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+          <span className={FIELD_HELPER_CLASS} style={{ color: c.textSecondary }}>{summary}</span>
+        </div>
+      ) : null}
+    </motion.div>
   );
 };
 
@@ -1535,19 +1496,29 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     <div ref={projectTypeRef} className="scroll-mt-24">
                       <ProjectTypeField
                         projectType={draft.projectType}
-                        contractProgram={draft.contractProgram}
-                        contractState={draft.contractState}
-                        contractNumber={draft.contractNumber}
                         onProjectType={setProjectType}
-                        onContractProgram={setContractProgram}
-                        onContractState={setContractState}
-                        onContractNumber={setContractNumber}
                         theme={theme}
                         error={projectTypeError}
                         labelStyle={labelStyle}
                       />
                     </div>
                   </div>
+
+                  <AnimatePresence initial={false}>
+                    {draft.projectType === 'contract' ? (
+                      <ProjectContractFields
+                        key="contract-fields"
+                        contractProgram={draft.contractProgram}
+                        contractState={draft.contractState}
+                        contractNumber={draft.contractNumber}
+                        onContractProgram={setContractProgram}
+                        onContractState={setContractState}
+                        onContractNumber={setContractNumber}
+                        theme={theme}
+                        labelStyle={labelStyle}
+                      />
+                    ) : null}
+                  </AnimatePresence>
 
                   <div className="rounded-[20px] px-3.5 py-3" style={{ backgroundColor: detailTileBg(theme) }}>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -1618,12 +1589,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </Row>
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Bid Project</span>
-                    <SegmentToggle
+                    <SegmentedToggle
                       value={!!draft.isBid}
                       onChange={v => update('isBid', v)}
                       theme={theme}
+                      size="sm"
                       ariaLabel="Bid project"
-                      options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
+                      options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
                     />
                   </div>
                 </div>
@@ -1652,12 +1624,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   {specifierOptions.length > 0 && (
                     <div className="space-y-1.5 sm:col-span-2">
                       <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Who is leading the specifications?</span>
-                      <SegmentToggle
+                      <SegmentedToggle
                         theme={theme}
+                        size="sm"
+                        wrap
                         ariaLabel="Who is leading the specifications?"
                         value={specifierOptions.findIndex(o => draft.drivingSpecs?.type === o.type && draft.drivingSpecs?.name === o.name)}
                         onChange={(i) => { const o = specifierOptions[i]; if (o) setDrivingSpecs(o.type, o.name); }}
-                        options={specifierOptions.map((o, i) => ({ label: o.name, val: i, group: o.group }))}
+                        options={specifierOptions.map((o, i) => ({ label: o.name, value: i, group: o.group }))}
                       />
                     </div>
                   )}
@@ -1665,12 +1639,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <div className="space-y-2 sm:col-span-2">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                       <span className={`${FIELD_LABEL_CLASS} flex-shrink-0`} style={labelStyle}>Competition</span>
-                      <SegmentToggle
+                      <SegmentedToggle
                         value={competitionValue}
                         onChange={v => setCompetition(v)}
                         theme={theme}
+                        size="sm"
                         ariaLabel="Competition present"
-                        options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
+                        options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
                       />
                       {competitionValue === true ? (
                         <SuggestInputPill
@@ -1761,15 +1736,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 <div className="mt-6 space-y-3">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>JSI Quote</span>
                   <div className="flex flex-wrap items-center gap-2">
-                    <SegmentToggle
+                    <SegmentedToggle
                       theme={theme}
+                      size="sm"
                       ariaLabel="JSI Quote status"
                       value={quoteMode === 'existing' ? 'existing' : quoteMode === 'not-needed' ? 'not-needed' : null}
                       allowDeselect
                       onChange={(mode) => setQuoteMode(mode || null)}
                       options={[
-                        { label: 'Existing Quote', val: 'existing' },
-                        { label: 'No Quote Needed', val: 'not-needed' },
+                        { label: 'Existing Quote', value: 'existing' },
+                        { label: 'No Quote Needed', value: 'not-needed' },
                       ]}
                     />
                     {quoteMode === 'existing' && (

@@ -1,5 +1,5 @@
 // RequestQuoteModal — On-brand quote request using shared design system
-import React, { useState, useCallback, useMemo, useId } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { X, Send, CheckCircle2, Upload, FileText, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,7 @@ import { PrimaryButton, SecondaryButton } from './JSIButtons.jsx';
 import { INITIAL_MEMBERS } from '../../screens/members/data.js';
 import { CONTRACTS_DATA } from '../../screens/resources/contracts/data.js';
 import { SearchSelect } from './RequestQuoteModalComponents.jsx';
+import { SegmentedToggle } from './GroupedToggle.jsx';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from './modalUtils.js';
 
 const FORMAT_OPTIONS = [
@@ -62,26 +63,6 @@ const SelectPill = ({ on, onClick, children, accent, accentText, textSecondary, 
     </button>
 );
 
-const SegToggle = ({ value, options, onChange, textPrimary, textSecondary, tileBg, layoutId, isDark }) => (
-    <div className="inline-flex w-full gap-1 rounded-full p-1" style={{ backgroundColor: tileBg }}>
-        {options.map(opt => {
-            const sel = opt.value === value;
-            return (
-                <button key={opt.value} type="button" onClick={() => onChange(opt.value)}
-                    className="relative flex-1 rounded-full py-2 text-[0.75rem] font-semibold transition-colors whitespace-nowrap focus-ring"
-                    style={{ color: sel ? textPrimary : textSecondary }}>
-                    {sel && (
-                        <motion.span layoutId={layoutId} className="absolute inset-0 rounded-full"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.95)' }}
-                            transition={{ type: 'spring', stiffness: 420, damping: 32 }} />
-                    )}
-                    <span className="relative z-10">{opt.label}</span>
-                </button>
-            );
-        })}
-    </div>
-);
-
 /* ─── main component ─── */
 
 export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = INITIAL_MEMBERS, initialData, currentUserId = 1 }) => {
@@ -109,7 +90,6 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
     const c = theme?.colors || {};
     const prefersReducedMotion = usePrefersReducedMotion();
     const modalMotion = getModalMotion(prefersReducedMotion);
-    const toggleId = useId();
 
     const divider = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
@@ -265,10 +245,9 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <SectionLabel textSecondary={c.textSecondary}>Type</SectionLabel>
-                                    <SegToggle value={formData.quoteType} layoutId={`qt-type-${toggleId}`}
+                                    <SegmentedToggle value={formData.quoteType} theme={theme} fullWidth size="sm" ariaLabel="Quote type"
                                         options={[{ value: 'new', label: 'New' }, { value: 'revision', label: 'Revision' }]}
-                                        onChange={v => updateField('quoteType', v)}
-                                        tileBg={tileBg} textPrimary={c.textPrimary} textSecondary={c.textSecondary} isDark={isDark} />
+                                        onChange={v => updateField('quoteType', v)} />
                                 </div>
                                 <div>
                                     <SectionLabel textSecondary={c.textSecondary}>Needed By</SectionLabel>
@@ -317,10 +296,9 @@ export const RequestQuoteModal = ({ show, onClose, theme, onSubmit, members = IN
 
                             <div>
                                 <SectionLabel textSecondary={c.textSecondary}>Project Type</SectionLabel>
-                                <SegToggle value={formData.projectType} layoutId={`qt-ptype-${toggleId}`}
+                                <SegmentedToggle value={formData.projectType} theme={theme} fullWidth size="sm" ariaLabel="Project type"
                                     options={[{ value: 'commercial', label: 'Commercial' }, { value: 'contract', label: 'Contract' }]}
-                                    onChange={v => { updateField('projectType', v); if (v === 'commercial') updateField('contractName', ''); }}
-                                    tileBg={tileBg} textPrimary={c.textPrimary} textSecondary={c.textSecondary} isDark={isDark} />
+                                    onChange={v => { updateField('projectType', v); if (v === 'commercial') updateField('contractName', ''); }} />
                                 <AnimatePresence>
                                     {formData.projectType === 'contract' && (
                                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
