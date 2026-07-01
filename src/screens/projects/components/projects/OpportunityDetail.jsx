@@ -1,6 +1,6 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
@@ -117,42 +117,52 @@ const cardSurface = (theme) => {
    is used for the hero so the whole screen shares one grounded surface system. */
 const Section = ({ title, subtitle, children, theme, right, className = '', collapsible = false, defaultOpen = true }) => {
   const [open, setOpen] = useState(defaultOpen);
+  const reduceMotion = useReducedMotion();
+  const bodyId = useId();
+  const TitleText = (
+    <span className="min-w-0">
+      <span className={`block ${DETAIL_SECTION_TITLE_CLASS}`} style={{ color: theme.colors.textPrimary }}>{title}</span>
+      {subtitle ? (
+        <span className={`block ${DETAIL_SECTION_SUBTITLE_CLASS}`} style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
+          {subtitle}
+        </span>
+      ) : null}
+    </span>
+  );
   return (
     <motion.section
-      initial={{ opacity: 0, y: 10 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className={`p-4 sm:p-5 ${className}`}
+      transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className={`pd-card p-4 sm:p-5 ${className}`}
       style={cardSurface(theme)}
     >
       {title && (
         <div className="flex items-start justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => collapsible && setOpen(o => !o)}
-            className="min-w-0 flex items-center gap-2 text-left focus-ring rounded-lg"
-            style={{ cursor: collapsible ? 'pointer' : 'default' }}
-            aria-expanded={collapsible ? open : undefined}
-          >
+          <h2 className="m-0 min-w-0 p-0 text-base font-normal leading-none">
             {collapsible ? (
-              <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.55, transition: 'transform 0.2s ease', transform: open ? 'none' : 'rotate(-90deg)' }} aria-hidden="true" />
-            ) : null}
-            <span className="min-w-0">
-              <span className={`block ${DETAIL_SECTION_TITLE_CLASS}`} style={{ color: theme.colors.textPrimary }}>{title}</span>
-              {subtitle ? (
-                <span className={`block ${DETAIL_SECTION_SUBTITLE_CLASS}`} style={{ color: theme.colors.textSecondary, opacity: 0.82 }}>
-                  {subtitle}
-                </span>
-              ) : null}
-            </span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                className="min-w-0 flex items-center gap-2 text-left focus-ring rounded-lg"
+                aria-expanded={open}
+                aria-controls={bodyId}
+              >
+                <ChevronDown className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.55, transition: reduceMotion ? 'none' : 'transform 0.2s ease', transform: open ? 'none' : 'rotate(-90deg)' }} aria-hidden="true" />
+                {TitleText}
+              </button>
+            ) : (
+              <span className="min-w-0 flex items-center gap-2">{TitleText}</span>
+            )}
+          </h2>
           {right ? <div className="flex-shrink-0 pt-0.5">{right}</div> : null}
         </div>
       )}
       <motion.div
+        id={bodyId}
         initial={false}
         animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
-        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
         style={{ overflow: 'hidden' }}
       >
         <div className={title ? 'pt-4' : ''}>{children}</div>
@@ -293,16 +303,34 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
 /* Compact Yes/No (or labeled) segmented pill toggle. */
 const SegmentToggle = ({ value, onChange, theme, options, ariaLabel, allowDeselect = false }) => {
   const c = theme.colors;
+  const groupRef = useRef(null);
+  const selectedIndex = options.findIndex(opt => opt.val === value);
+  const moveFocus = (fromIndex, dir) => {
+    const count = options.length;
+    if (!count) return;
+    const nextIndex = (fromIndex + dir + count) % count;
+    const btns = groupRef.current?.querySelectorAll('[role="radio"]');
+    if (btns && btns[nextIndex]) btns[nextIndex].focus();
+    onChange(options[nextIndex].val);
+  };
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); moveFocus(index, 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); moveFocus(index, -1); }
+  };
   return (
-    <div className="inline-flex flex-wrap gap-1 rounded-[16px] p-1" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
-      {options.map(opt => {
+    <div ref={groupRef} className="inline-flex flex-wrap gap-1 rounded-[16px] p-1" style={fieldSurface(theme)} role="radiogroup" aria-label={ariaLabel}>
+      {options.map((opt, index) => {
         const active = value === opt.val;
+        const tabIndex = active ? 0 : (selectedIndex < 0 && index === 0 ? 0 : -1);
         return (
           <button
             key={`${opt.label}:${String(opt.val)}`}
             type="button"
+            role="radio"
+            aria-checked={active}
+            tabIndex={tabIndex}
+            onKeyDown={(e) => handleKeyDown(e, index)}
             onClick={() => onChange(allowDeselect && active ? null : opt.val)}
-            aria-pressed={active}
             className="inline-flex min-h-[40px] items-center gap-1.5 px-4 rounded-[12px] text-[0.75rem] font-semibold transition-all active:scale-[0.97] focus-ring"
             style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
           >
@@ -326,7 +354,7 @@ const RemovableChip = ({ label, detail, onRemove, theme, size = 'default' }) => 
       type="button"
       onClick={onRemove}
       aria-label={`Remove ${label}`}
-      className={`inline-flex max-w-full items-center gap-1 rounded-full font-medium transition-all active:scale-[0.97] focus-ring ${sizeClass}`}
+      className={`hit-44 inline-flex max-w-full items-center gap-1 rounded-full font-medium transition-all active:scale-[0.97] focus-ring ${sizeClass}`}
       style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)', color: theme.colors.textPrimary }}
     >
       <span className="truncate">{label}</span>
@@ -755,6 +783,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     setDraft(p => { dirty.current = true; return { ...p, name: `${eu} (Project ${n})` }; });
   }, [opp?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [saveState, setSaveState] = useState('idle');
   const update = useCallback((k, v) => {
     if (readOnlyRef.current) return;
     setDraft(p => { const n = { ...p, [k]: v }; dirty.current = true; return n; });
@@ -792,8 +821,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   useEffect(() => {
     if (!dirty.current) return;
+    setSaveState('saving');
     clearTimeout(saveRef.current);
-    saveRef.current = setTimeout(() => { onUpdate(draft); dirty.current = false; }, 500);
+    saveRef.current = setTimeout(() => {
+      try { onUpdate(draft); setSaveState('saved'); }
+      catch { setSaveState('error'); }
+      dirty.current = false;
+    }, 500);
     return () => clearTimeout(saveRef.current);
   }, [draft, onUpdate]);
 
@@ -1037,10 +1071,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       : 'Open';
   const labelStyle = { color: c.textSecondary, opacity: 0.72 };
 
+  const specCompleteness = useMemo(() => {
+    let set = 0, total = 0;
+    (draft.products || []).forEach(p => {
+      getSeriesSpecPrompts(p.series).forEach(pr => { total += 1; if (p[pr.key]) set += 1; });
+    });
+    return { set, total, incomplete: total > 0 && set < total };
+  }, [draft.products]);
+
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
+    <div className="project-detail-root flex flex-col h-full app-header-offset" style={{ background: c.background }}>
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-28 sm:pb-6">
         <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 max-w-content mx-auto w-full">
+          <a href="#project-detail-main" className="sr-only focus:not-sr-only focus:absolute focus:z-30 focus:left-4 focus:top-4 focus:rounded-full focus:px-4 focus:py-2 focus:text-[0.8125rem] focus:font-semibold focus-ring" style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}>
+            Skip to project form
+          </a>
+          <h1 className="sr-only">{draft.name || 'Project detail'}</h1>
 
           {isClosed && (
             <motion.div
@@ -1071,6 +1117,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </motion.div>
           )}
 
+          <main id="project-detail-main" tabIndex={-1} className="focus:outline-none">
           {/* HERO — grounded in its own card, consistent with the sections below */}
           <Section theme={theme} className={`mb-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
             <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-center lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
@@ -1158,7 +1205,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
               <Section title="Commercial" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="pd-pair gap-4">
                   <div className="min-w-0 space-y-1.5">
                     <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
                     <div className="flex items-center gap-0.5 min-h-[44px] px-3" style={fieldSurface(theme)}>
@@ -1243,7 +1290,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Project Details" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="pd-pair gap-4">
                   <Row label="Vertical" theme={theme} className={draft.vertical === 'Other' ? 'sm:col-span-2' : ''}>
                     {(id) => (
                       <div className={draft.vertical === 'Other' ? 'flex items-center gap-2' : ''}>
@@ -1288,7 +1335,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Stakeholders & Competition" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="pd-pair gap-4">
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1353,13 +1400,23 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Specs & Quote" theme={theme} collapsible>
+              <Section
+                title="Specs & Quote"
+                theme={theme}
+                collapsible
+                right={specCompleteness.total > 0 ? (
+                  <span className="text-[0.625rem] font-semibold tabular-nums" style={{ color: specCompleteness.incomplete ? c.textSecondary : JSI_COLORS.success, opacity: specCompleteness.incomplete ? 0.7 : 1 }}>
+                    {specCompleteness.set} of {specCompleteness.total} set
+                  </span>
+                ) : undefined}
+              >
                 <div className="space-y-1.5">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Specified Series ({(draft.products || []).length})</span>
                   {(draft.products || []).length > 0 && (
                     <div className="space-y-2 mb-2">
                       {(draft.products || []).map(p => {
                         const prompts = getSeriesSpecPrompts(p.series);
+                        const setCount = prompts.filter(pr => p[pr.key]).length;
                         const leadLabel = getSeriesLeadLabel(p.series);
                         return (
                           <div key={p.series} className="rounded-[16px] overflow-hidden" style={{ backgroundColor: insetBg(theme) }}>
@@ -1376,13 +1433,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                                     {leadLabel === 'QS' ? 'Quick ship' : `${leadLabel} lead`}
                                   </span>
                                 ) : null}
+                                {prompts.length > 0 ? (
+                                  <span
+                                    className="inline-flex flex-shrink-0 items-center rounded-full px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-[0.04em] tabular-nums"
+                                    style={{ backgroundColor: setCount === prompts.length ? 'rgba(74,124,89,0.14)' : insetBg(theme), color: setCount === prompts.length ? JSI_COLORS.success : c.textSecondary }}
+                                    aria-label={`${setCount} of ${prompts.length} specs set`}
+                                  >
+                                    {setCount}/{prompts.length}
+                                  </span>
+                                ) : null}
                               </div>
                               <button type="button" onClick={() => removeProductSeries(p.series)} aria-label={`Remove ${p.series}`}
-                                className="flex h-6 w-6 items-center justify-center rounded-full focus-ring transition-all active:scale-[0.95]" style={{ color: c.textSecondary }}>
+                                className="hit-44 flex h-6 w-6 items-center justify-center rounded-full focus-ring transition-all active:scale-[0.95]" style={{ color: c.textSecondary }}>
                                 <X className="h-3.5 w-3.5" aria-hidden="true" />
                               </button>
                             </div>
-                            <div className="grid gap-2 px-3 pb-3 sm:grid-cols-2">
+                            <div className="pd-pair gap-2 px-3 pb-3">
                               {prompts.map(prompt => (
                                 <div key={prompt.key} className="space-y-1">
                                   <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>{prompt.label}</span>
@@ -1432,7 +1498,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
             </div>
 
-            <div className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
+            <aside aria-label="Project Hub and notes" className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
               <Section title="Project Hub" theme={theme}>
                 <div className="space-y-0.5 -mx-2">
                   <DetailHubCard
@@ -1505,7 +1571,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-[0.75rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
                       <FileText className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
                       <span className="truncate">{doc.fileName}</span>
-                      <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
+                      <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="hit-44 flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} aria-label={`Remove ${doc.fileName}`}>
                         <X className="h-3 w-3" aria-hidden="true" />
                       </button>
                     </span>
@@ -1516,8 +1582,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </button>
                 </div>
               </Section>
-            </div>
+            </aside>
           </div>
+          </main>
 
           {/* SAVE + STATUS — pinned on mobile, inline on desktop */}
           <div
@@ -1535,7 +1602,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 <button
                   type="button"
                   onClick={() => setQuoteModalOpen(true)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
+                  aria-describedby={specCompleteness.incomplete ? 'spec-incomplete-hint' : undefined}
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
                   style={{ ...fieldSurface(theme), borderRadius: 9999, color: c.textPrimary }}
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
@@ -1545,7 +1613,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <button
                     type="button"
                     onClick={handleDone}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
+                    className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
                     style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
                   >
                     <Check className="h-4 w-4" aria-hidden="true" />
@@ -1553,11 +1621,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </button>
                 ) : null}
               </div>
-              <div className="flex justify-center">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.5 }} />
-                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.45 }}>Changes saved automatically</span>
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="flex items-center gap-1.5" role="status" aria-live="polite">
+                  <span
+                    className={`pd-save-dot h-1.5 w-1.5 rounded-full ${saveState === 'saving' ? 'pd-save-dot--saving' : ''}`}
+                    style={{ backgroundColor: saveState === 'error' ? c.error : JSI_COLORS.success, opacity: saveState === 'saving' ? 0.9 : 0.55 }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.55 }}>
+                    {saveState === 'saving' ? 'Saving' : saveState === 'error' ? 'Save failed' : saveState === 'saved' ? 'Saved' : 'All changes saved'}
+                  </span>
                 </div>
+                {specCompleteness.incomplete ? (
+                  <p id="spec-incomplete-hint" className="text-center text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.75 }}>
+                    {specCompleteness.total - specCompleteness.set} of {specCompleteness.total} series specs are still TBD. You can still request a quote.
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>

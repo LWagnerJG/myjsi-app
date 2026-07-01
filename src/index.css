@@ -106,6 +106,7 @@ input.commercial-value-input {
     --theme-hover: rgba(0, 0, 0, 0.05);
     --theme-active: rgba(0, 0, 0, 0.08);
     --theme-focus-ring: rgba(53, 53, 53, 0.2);
+    --jsi-placeholder: #6B6862; /* explicit placeholder color, WCAG AA vs light field surfaces */
     --theme-success: #4A7C59;
     --theme-success-light: rgba(74, 124, 89, 0.12);
     --theme-warning: #C4956A;
@@ -153,6 +154,7 @@ input.commercial-value-input {
     --theme-hover: rgba(255, 255, 255, 0.038);
     --theme-active: rgba(255, 255, 255, 0.065);
     --theme-focus-ring: rgba(255, 255, 255, 0.3);
+    --jsi-placeholder: #9A948C; /* explicit placeholder color, WCAG AA vs dark field surfaces */
     --theme-success: #6B9B7A;
     --theme-success-light: rgba(107, 155, 122, 0.2);
     --theme-warning: #D4A87A;
@@ -209,10 +211,13 @@ body.jsi-modal-backdrop-active [data-app-header-scrim] {
     opacity: 0 !important;
 }
 
-/* Universal search input placeholder — consistent muted style */
-input[type="search"]::placeholder,
-input::placeholder {
-    opacity: 0.62;
+/* Universal placeholder: explicit color token with a known contrast ratio
+   against the field surface in each theme, rather than opacity that depends on
+   whatever sits behind it. */
+input::placeholder,
+textarea::placeholder {
+    color: var(--jsi-placeholder);
+    opacity: 1;
 }
 
 /* FormInput placeholder color driven by CSS custom property (set via JS, never innerHTML) */
@@ -836,5 +841,70 @@ button, a, [role="button"] {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   Project Detail R3: depth pass utilities
+   ============================================================ */
+
+/* Expand the interactive hit area of a small icon-only control to at least
+   44x44px without changing its visual size. The transparent ::before overlay
+   is part of the button, so pointer events inside it register on the button. */
+.hit-44 {
+    position: relative;
+}
+.hit-44::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+}
+
+/* Container-query reflow: paired two-column field rows stack based on the
+   card's own available width, not the viewport. This handles mid widths where
+   the right rail narrows the main column below what a viewport breakpoint sees. */
+.pd-card {
+    container-type: inline-size;
+}
+.pd-pair {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+@container (min-width: 30rem) {
+    .pd-pair {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Autosave indicator: subtle saving pulse, settling to a steady saved dot. */
+.pd-save-dot {
+    transition: background-color var(--motion-duration-standard, 220ms) var(--motion-ease-standard, ease),
+        opacity var(--motion-duration-standard, 220ms) var(--motion-ease-standard, ease);
+}
+.pd-save-dot--saving {
+    animation: pdSavePulse 900ms ease-in-out infinite;
+}
+@keyframes pdSavePulse {
+    0%, 100% { opacity: 0.9; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.72); }
+}
+
+/* Motion, gated by preference: fully disable transitions/animations inside the
+   Project Detail screen for users who ask for reduced motion. Framer Motion JS
+   animations are gated separately via useReducedMotion. */
+@media (prefers-reduced-motion: reduce) {
+    .project-detail-root *,
+    .project-detail-root *::before,
+    .project-detail-root *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
     }
 }
