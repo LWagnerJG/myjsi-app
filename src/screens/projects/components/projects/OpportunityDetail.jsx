@@ -40,6 +40,7 @@ const DETAIL_RADIUS_CARD = '28px';
 const DETAIL_RADIUS_INSET = '24px';
 const DETAIL_RADIUS_MENU = '24px';
 const DETAIL_RADIUS_HUB = '20px';
+const DETAIL_RADIUS_MULTILINE = '16px';
 const detailTileBg = (theme) => fieldTileSurface(theme).backgroundColor;
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 const DETAIL_SECTION_TITLE_CLASS = 'text-[0.875rem] font-semibold tracking-[-0.01em] leading-none';
@@ -49,6 +50,11 @@ const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3 bg-transparent outline-none t
 const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)');
 
 const fieldSurface = (theme) => fieldTileSurface(theme);
+
+const multilineSurface = (theme) => ({
+  backgroundColor: detailTileBg(theme),
+  borderRadius: DETAIL_RADIUS_MULTILINE,
+});
 
 const insetBg = (theme) => detailTileBg(theme);
 
@@ -971,6 +977,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   }, []);
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const handleRequestQuote = useCallback(() => {
+    setQuoteMode('needed');
+    setQuoteModalOpen(true);
+  }, [setQuoteMode]);
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
   const [hubModal, setHubModal] = useState(null); // 'quotes' | 'samples' | 'documents' | 'contacts' | 'related-orders' | null
   const [newContactName, setNewContactName] = useState('');
@@ -1355,19 +1365,19 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 <div className="space-y-1.5">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Specified Series ({(draft.products || []).length})</span>
                   {(draft.products || []).length > 0 && (
-                    <div className="space-y-2 mb-2">
+                    <div className="mb-3 space-y-4">
                       {(draft.products || []).map(p => {
                         const prompts = getSeriesSpecPrompts(p.series);
                         const leadLabel = getSeriesLeadLabel(p.series);
                         return (
-                          <div key={p.series} className="rounded-[24px] overflow-hidden" style={{ backgroundColor: insetBg(theme) }}>
-                            <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
-                              <div className="flex items-center gap-2 min-w-0">
+                          <div key={p.series}>
+                            <div className="mb-2.5 flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-2">
                                 <span className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>{p.series}</span>
                                 {leadLabel ? (
                                   <span
-                                    className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-[0.04em]"
-                                    style={{ backgroundColor: insetBg(theme), color: c.textSecondary }}
+                                    className="flex-shrink-0 text-[0.5625rem] font-bold uppercase tracking-[0.05em] tabular-nums"
+                                    style={{ color: c.textSecondary, opacity: 0.65 }}
                                     title={leadLabel === 'QS' ? 'Quick ship' : `${leadLabel} lead time`}
                                     aria-label={leadLabel === 'QS' ? 'Quick ship' : `${leadLabel} lead time`}
                                   >
@@ -1375,12 +1385,17 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                                   </span>
                                 ) : null}
                               </div>
-                              <button type="button" onClick={() => removeProductSeries(p.series)} aria-label={`Remove ${p.series}`}
-                                className="flex h-6 w-6 items-center justify-center rounded-full focus-ring transition-all active:scale-[0.95]" style={{ color: c.textSecondary }}>
+                              <button
+                                type="button"
+                                onClick={() => removeProductSeries(p.series)}
+                                aria-label={`Remove ${p.series}`}
+                                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full focus-ring transition-all active:scale-[0.95]"
+                                style={{ color: c.textSecondary, opacity: 0.55 }}
+                              >
                                 <X className="h-3.5 w-3.5" aria-hidden="true" />
                               </button>
                             </div>
-                            <div className="grid gap-2 px-3 pb-3 sm:grid-cols-2">
+                            <div className="grid gap-3 sm:grid-cols-2">
                               {prompts.map(prompt => (
                                 <div key={prompt.key} className="space-y-1">
                                   <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>{prompt.label}</span>
@@ -1404,16 +1419,19 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <SuggestInputPill collapsible placeholder="Add series..." suggestions={JSI_SERIES.filter(s => !(draft.products || []).some(p => p.series === s))} onAdd={addProductSeries} theme={theme} />
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-5 space-y-3">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>JSI Quote</span>
                   <div className="flex flex-wrap items-center gap-2">
                     <SegmentToggle
                       theme={theme}
-                      ariaLabel="JSI Quote"
-                      value={quoteMode}
+                      ariaLabel="JSI Quote status"
+                      value={quoteMode === 'existing' ? 'existing' : quoteMode === 'not-needed' ? 'not-needed' : null}
                       allowDeselect
-                      onChange={setQuoteMode}
-                      options={[{ label: 'Existing Quote', val: 'existing' }, { label: 'Quote Needed', val: 'needed' }, { label: 'No Quote Needed', val: 'not-needed' }]}
+                      onChange={(mode) => setQuoteMode(mode || null)}
+                      options={[
+                        { label: 'Existing Quote', val: 'existing' },
+                        { label: 'No Quote Needed', val: 'not-needed' },
+                      ]}
                     />
                     {quoteMode === 'existing' && (
                       <input
@@ -1426,6 +1444,28 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       />
                     )}
                   </div>
+                  {quoteMode !== 'not-needed' ? (
+                    <div className="space-y-1.5">
+                      <button
+                        type="button"
+                        onClick={handleRequestQuote}
+                        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:w-auto sm:min-w-[220px]"
+                        style={{
+                          backgroundColor: c.accent,
+                          color: c.accentText || '#FFFFFF',
+                          boxShadow: quoteMode === 'needed' ? `0 0 0 2px ${c.accent}33` : 'none',
+                        }}
+                      >
+                        <Send className="h-4 w-4" aria-hidden="true" />
+                        Request Quote
+                      </button>
+                      {quoteMode === 'needed' ? (
+                        <p className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.72 }}>
+                          Flagged for quoting. Submit details to send to the team.
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </Section>
             </div>
@@ -1496,7 +1536,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 <textarea value={draft.notes || ''} onChange={e => update('notes', e.target.value)} rows={4}
                   aria-label="Project notes"
                   className="w-full resize-y min-h-[7rem] p-3 text-[0.8125rem] leading-relaxed outline-none focus-ring sm:resize-none"
-                  style={{ ...fieldSurface(theme), color: c.textPrimary }}
+                  style={{ ...multilineSurface(theme), color: c.textPrimary }}
                   placeholder="Notes, constraints, next steps..." />
                 <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                   {(draft.documents || []).map(doc => (
@@ -1530,20 +1570,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
           >
             <div className="max-w-content mx-auto space-y-2 sm:space-y-3">
               <div className="flex items-center gap-2 sm:justify-center">
-                <button
-                  type="button"
-                  onClick={() => setQuoteModalOpen(true)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
-                  style={{ ...fieldSurface(theme), color: c.textPrimary }}
-                >
-                  <Send className="h-4 w-4" aria-hidden="true" />
-                  Request Quote
-                </button>
                 {onDone ? (
                   <button
                     type="button"
                     onClick={handleDone}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
+                    className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[240px]"
                     style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
                   >
                     <Check className="h-4 w-4" aria-hidden="true" />
@@ -1718,6 +1749,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
           });
           const newQuote = createQuoteListItem(record, data.projectName || draft.name || 'Untitled');
           update('quotes', [...(draft.quotes || []), newQuote]);
+          setQuoteMode('needed');
           setQuoteModalOpen(false);
         }}
         initialData={{ projectName: draft.name || '', dealerName: (draft.dealers || [])[0] || '', adFirm: (draft.designFirms || [])[0] || '' }} />
@@ -1844,7 +1876,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
         <QuoteTracker
           quotes={enrichedQuotes}
           theme={theme}
-          onRequestQuote={() => { setHubModal(null); setQuoteModalOpen(true); }}
+          onRequestQuote={() => { setHubModal(null); handleRequestQuote(); }}
         />
       </Modal>
 
