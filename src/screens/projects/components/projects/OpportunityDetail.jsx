@@ -745,9 +745,13 @@ const ProjectNoteLog = ({
       ) : null}
 
       {entries.length > 0 ? (
-        <ol className="m-0 list-none space-y-3 p-0" aria-label="Project activity log">
+        <ol className="m-0 list-none space-y-2 p-0" aria-label="Project activity log">
           {entries.map(entry => (
-            <li key={entry.id} className="space-y-1.5">
+            <li
+              key={entry.id}
+              className="space-y-1.5 px-3.5 py-2.5"
+              style={compoundFieldSurface(theme)}
+            >
               {entry.text ? (
                 <p className="text-[0.8125rem] leading-relaxed" style={{ color: c.textPrimary }}>{entry.text}</p>
               ) : null}
@@ -759,7 +763,7 @@ const ProjectNoteLog = ({
                   const doc = docById[id];
                   if (!doc) return null;
                   return (
-                    <span key={id} className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold" style={{ backgroundColor: detailTileBg(theme), color: c.textSecondary }}>
+                    <span key={id} className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold" style={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.72)', color: c.textSecondary }}>
                       <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
                       <span className="truncate max-w-[120px]">{doc.fileName}</span>
                     </span>
@@ -787,7 +791,8 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
     <button
       type="button"
       onClick={onClick}
-      className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left rounded-[24px] transition-colors active:scale-[0.99] focus-ring"
+      className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left transition-colors active:scale-[0.99] focus-ring"
+      style={{ borderRadius: DETAIL_RADIUS_INSET }}
       onMouseEnter={e => { e.currentTarget.style.backgroundColor = hoverBg; }}
       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
@@ -1353,7 +1358,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
-              <Section title="Pricing" theme={theme}>
+              <Section title="Pricing" subtitle="List price, discount, and contract terms" theme={theme}>
                 <div className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="min-w-0 space-y-1.5">
@@ -1492,7 +1497,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Stakeholders & Competition" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1662,7 +1667,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
             <div className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
               <Section title="Project Hub" theme={theme}>
-                <div className="space-y-0.5 -mx-2">
+                <div className="space-y-1 px-[2px]">
                   <DetailHubCard
                     icon={Users}
                     title="Contacts"
