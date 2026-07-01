@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, act, cleanup, within } from '@testing-library/react';
 import { OpportunityDetail } from './OpportunityDetail.jsx';
 import { lightTheme } from '../../../../data/theme/themeData.js';
 import { INITIAL_OPPORTUNITIES } from '../../data.js';
@@ -72,6 +72,59 @@ describe('OpportunityDetail', () => {
     expect(screen.getByRole('textbox', { name: 'Project name' })).toHaveValue('New Office Furnishings');
     expect(screen.getByText('Stakeholders & Competition')).toBeInTheDocument();
     expect(screen.getByText('Specs & Quote')).toBeInTheDocument();
+  });
+
+  it('exposes the No/Yes control as a radiogroup with correct radio semantics', () => {
+    render(<Harness initial={baseOpp} />);
+
+    const group = screen.getByRole('radiogroup', { name: 'Competition present' });
+    expect(group).toBeInTheDocument();
+
+    const noOption = within(group).getByRole('radio', { name: 'No' });
+    const yesOption = within(group).getByRole('radio', { name: 'Yes' });
+    expect(noOption).toHaveAttribute('aria-checked', 'true');
+    expect(yesOption).toHaveAttribute('aria-checked', 'false');
+    // Roving tabindex: selected option is tabbable, the other is not.
+    expect(noOption).toHaveAttribute('tabindex', '0');
+    expect(yesOption).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('moves the radiogroup selection with the arrow keys', () => {
+    render(<Harness initial={baseOpp} />);
+    const group = screen.getByRole('radiogroup', { name: 'Competition present' });
+    const noOption = within(group).getByRole('radio', { name: 'No' });
+
+    noOption.focus();
+    fireEvent.keyDown(noOption, { key: 'ArrowRight' });
+
+    expect(within(group).getByRole('radio', { name: 'Yes' })).toHaveAttribute('aria-checked', 'true');
+    expect(within(group).getByRole('radio', { name: 'No' })).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('reflects real autosave activity through a polite status region', () => {
+    vi.useFakeTimers();
+    render(<Harness initial={baseOpp} />);
+    const status = screen.getByRole('status');
+
+    // Let any mount-time normalization settle to the saved state.
+    act(() => { vi.advanceTimersByTime(700); });
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Project name' }), {
+      target: { value: 'Renamed Project' },
+    });
+    expect(status).toHaveTextContent(/saving/i);
+
+    act(() => { vi.advanceTimersByTime(700); });
+    expect(status).toHaveTextContent(/^saved$/i);
+  });
+
+  it('exposes page landmarks, an h1, and a skip link', () => {
+    render(<Harness initial={baseOpp} />);
+
+    expect(screen.getByRole('main')).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Project Hub and notes' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Project');
+    expect(screen.getByRole('link', { name: /skip to project form/i })).toHaveAttribute('href', '#project-detail-main');
   });
 
   it('keeps a manually enabled reward on after the autosave round-trip', () => {
