@@ -75,13 +75,45 @@ describe('OpportunityDetail', () => {
     expect(screen.getByText('Pricing')).toBeInTheDocument();
   });
 
-  it('logs a note entry with timestamp in the activity log', () => {
-    vi.useFakeTimers();
+  it('keeps free-form project notes in a multi-row Notes field', () => {
     render(<Harness initial={baseOpp} />);
-    fireEvent.change(screen.getByRole('textbox', { name: 'Log an update' }), { target: { value: 'Follow up on test fit' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Log' }));
-    act(() => { vi.advanceTimersByTime(700); });
-    expect(screen.getByText('Follow up on test fit')).toBeInTheDocument();
+    const notes = screen.getByRole('textbox', { name: 'Project notes' });
+    expect(notes.tagName).toBe('TEXTAREA');
+    fireEvent.change(notes, { target: { value: 'Main HQ expansion; awaiting test fit.' } });
+    expect(screen.getByRole('textbox', { name: 'Project notes' })).toHaveValue('Main HQ expansion; awaiting test fit.');
+  });
+
+  it('requires a project type selection before Done fires', () => {
+    const onDone = vi.fn();
+    render(
+      <OpportunityDetail
+        opp={{ ...baseOpp, projectType: undefined }}
+        theme={lightTheme}
+        onUpdate={() => {}}
+        onDone={onDone}
+        members={[]}
+        currentUserId="u1"
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(onDone).not.toHaveBeenCalled();
+    expect(screen.getByText(/choose a project type/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Project type' }));
+    fireEvent.click(screen.getByRole('option', { name: 'General Commercial' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('reveals the contract program picker when Project Type is Contract', () => {
+    render(<Harness initial={baseOpp} />);
+    fireEvent.click(screen.getByRole('combobox', { name: 'Project type' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Contract' }));
+    expect(screen.getByRole('combobox', { name: 'Contract program' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Contract program' }));
+    fireEvent.click(screen.getByRole('option', { name: 'State Contracts' }));
+    expect(screen.getByRole('combobox', { name: 'Contract state' })).toBeInTheDocument();
   });
 
   it('keeps a manually enabled reward on after the autosave round-trip', () => {

@@ -1,9 +1,9 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
-import { formatCurrency, formatRelativeTime } from '../../../../utils/format.js';
+import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { CONTRACTS_DATA } from '../../../resources/contracts/data.js';
 import { buildSpecifierOptions, getDefaultSpecifierOption } from '../../NewLeadScreenComponents.jsx';
@@ -45,7 +45,12 @@ const detailTileBg = (theme) => fieldTileSurface(theme).backgroundColor;
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 const DETAIL_SECTION_TITLE_CLASS = 'text-[0.875rem] font-semibold tracking-[-0.01em] leading-none';
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
-const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3 bg-transparent outline-none text-[0.875rem] font-medium focus-ring';
+/* One shared type scale for every editable field on this screen so inputs,
+   selects, and toggles read at a single, consistent size. */
+const FIELD_CONTROL_MINH = 'min-h-[44px]';
+const FIELD_VALUE_CLASS = 'text-[0.8125rem] font-semibold';
+const FIELD_HELPER_CLASS = 'text-[0.6875rem] font-medium';
+const TEXT_INPUT_CLASS = `w-full ${FIELD_CONTROL_MINH} px-3.5 bg-transparent outline-none ${FIELD_VALUE_CLASS} focus-ring`;
 
 const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)');
 
@@ -54,11 +59,6 @@ const fieldSurface = (theme) => fieldTileSurface(theme);
 const multilineSurface = (theme) => ({
   backgroundColor: detailTileBg(theme),
   borderRadius: DETAIL_RADIUS_MULTILINE,
-});
-
-const compoundFieldSurface = (theme) => ({
-  backgroundColor: detailTileBg(theme),
-  borderRadius: DETAIL_RADIUS_INSET,
 });
 
 const insetBg = (theme) => detailTileBg(theme);
@@ -106,10 +106,59 @@ const formatSampleOrderDate = (value) => {
 };
 
 const SPECIFIER_TYPE_LABELS = { endUser: 'End user', dealer: 'Dealer', designFirm: 'A&D' };
-const CONTRACT_OPTIONS = [
-  { label: 'None', value: 'none' },
-  ...Object.keys(CONTRACTS_DATA).map((key) => ({ label: CONTRACTS_DATA[key].name, value: key })),
+
+/* Project Type replaces the old free-standing "Contract" field. There is no
+   default — the user must choose one, and picking "Contract" reveals the
+   attached contract-program picker (and, for State Contracts, a state list). */
+const PROJECT_TYPE_OPTIONS = [
+  { label: 'General Commercial', value: 'general' },
+  { label: 'Mock-Up Commercial', value: 'mockup' },
+  { label: 'Replacement Commercial', value: 'replacement' },
+  { label: 'Standards Program Commercial', value: 'standards' },
+  { label: 'Promotion Commercial', value: 'promotion' },
+  { label: 'Contract', value: 'contract' },
 ];
+const PROJECT_TYPE_LABELS = Object.fromEntries(PROJECT_TYPE_OPTIONS.map((o) => [o.value, o.label]));
+
+/* Contract programs come straight from the contracts resource so this stays
+   in sync with the rest of the app. State Contracts fan out to a state list. */
+const CONTRACT_PROGRAM_OPTIONS = Object.keys(CONTRACTS_DATA).map((key) => ({
+  label: CONTRACTS_DATA[key].name,
+  value: key,
+}));
+const CONTRACT_PROGRAM_LABELS = Object.fromEntries(
+  CONTRACT_PROGRAM_OPTIONS.map((o) => [o.value, o.label]),
+);
+const STATE_CONTRACT_ENTRIES = CONTRACTS_DATA.state?.entries || [];
+const STATE_OPTIONS = STATE_CONTRACT_ENTRIES.map((e) => ({ label: e.state, value: e.state }));
+const getStateContractOptions = (stateName) => {
+  const entry = STATE_CONTRACT_ENTRIES.find((e) => e.state === stateName);
+  return (entry?.contracts || []).map((ct) => ({
+    label: ct.label ? `${ct.label} · ${ct.number}` : ct.number,
+    value: ct.number,
+  }));
+};
+
+/* Whether the Project Type selection is fully specified enough to submit. */
+const isProjectTypeComplete = (d) => {
+  if (!d || !d.projectType) return false;
+  if (d.projectType !== 'contract') return true;
+  if (!d.contractProgram) return false;
+  if (d.contractProgram === 'state') return !!d.contractState && !!d.contractNumber;
+  return true;
+};
+
+/* Human-readable summary of a completed Project Type for chips/labels. */
+const describeProjectType = (d) => {
+  if (!d?.projectType) return '';
+  if (d.projectType !== 'contract') return PROJECT_TYPE_LABELS[d.projectType] || '';
+  const program = CONTRACT_PROGRAM_LABELS[d.contractProgram];
+  if (!program) return 'Contract';
+  if (d.contractProgram === 'state' && d.contractNumber) {
+    return `State Contract · ${d.contractState} · ${d.contractNumber}`;
+  }
+  return `Contract · ${program}`;
+};
 
 /* ---- section primitives ---- */
 const cardSurface = (theme) => {
@@ -242,7 +291,7 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
         aria-expanded={open}
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openMenu())}
-        className="w-full flex items-center justify-between gap-2 min-h-[44px] px-3 text-[0.875rem] font-semibold text-left outline-none focus-ring transition-all"
+        className={`w-full flex items-center justify-between gap-2 ${FIELD_CONTROL_MINH} px-3.5 ${FIELD_VALUE_CLASS} text-left outline-none focus-ring transition-all`}
         style={{ ...fieldSurface(theme), color: isMuted ? c.textSecondary : c.textPrimary, outline: open ? `1px solid ${c.accent}` : undefined, outlineOffset: '-1px', ...surfaceStyle }}
       >
         <span className="truncate">{selected ? selected.label : placeholder}</span>
@@ -281,7 +330,7 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
                   role="option"
                   aria-selected={active}
                   onClick={() => { onChange(opt.value); setOpen(false); }}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-full text-[0.8125rem] flex items-center justify-between gap-2 transition-colors ${active ? 'font-bold' : 'font-medium'}`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-full ${FIELD_VALUE_CLASS} flex items-center justify-between gap-2 transition-colors ${active ? '!font-bold' : ''}`}
                   style={{ color: optMuted ? c.textSecondary : c.textPrimary, backgroundColor: active ? `${c.accent}0F` : 'transparent' }}
                   onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : '#E8EBEE'; }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = active ? `${c.accent}0F` : 'transparent'; }}
@@ -303,7 +352,7 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
 const SegmentToggle = ({ value, onChange, theme, options, ariaLabel, allowDeselect = false }) => {
   const c = theme.colors;
   return (
-    <div className="inline-flex flex-wrap gap-1 rounded-full p-1" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
+    <div className="inline-flex flex-wrap gap-1 rounded-full p-0.5" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
       {options.map(opt => {
         const active = value === opt.val;
         return (
@@ -683,97 +732,177 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
   );
 };
 
-const ProjectNoteLog = ({
-  entries,
-  documents,
-  composer,
-  onComposerChange,
-  onLog,
-  onAttach,
-  pendingDocIds,
-  onRemovePendingDoc,
-  theme,
-  readOnly,
-}) => {
+/* Free-form project notes — not a data-capturing log. A quiet multi-row field
+   that grows with the text, plus an optional discreet document attach. */
+const ProjectNotesField = ({ value, onChange, onAttach, documents, onRemoveDoc, theme, readOnly }) => {
   const c = theme.colors;
-  const docById = useMemo(
-    () => Object.fromEntries((documents || []).map(d => [d.id, d])),
-    [documents],
-  );
-  const pendingDocs = (pendingDocIds || []).map(id => docById[id]).filter(Boolean);
-
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.max(el.scrollHeight, 88)}px`;
+  }, [value]);
+  const docs = documents || [];
   return (
-    <div className="space-y-4">
-      {!readOnly ? (
-        <div className="space-y-2">
-          <div className="flex items-start gap-2">
-            <input
-              value={composer}
-              onChange={e => onComposerChange(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onLog(); } }}
-              placeholder="Log an update…"
-              aria-label="Log an update"
-              className="min-h-[44px] flex-1 px-3.5 text-[0.8125rem] font-medium outline-none focus-ring"
-              style={{ ...fieldSurface(theme), color: c.textPrimary }}
-            />
-            <button
-              type="button"
-              onClick={onLog}
-              disabled={!composer.trim() && pendingDocs.length === 0}
-              className="inline-flex min-h-[44px] flex-shrink-0 items-center justify-center rounded-full px-4 text-[0.8125rem] font-semibold transition-all active:scale-[0.98] focus-ring disabled:opacity-40"
-              style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
-            >
-              Log
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {pendingDocs.map(doc => (
-              <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1 pl-2.5 pr-1.5 text-[0.6875rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
-                <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
-                <span className="truncate max-w-[140px]">{doc.fileName}</span>
-                <button type="button" onClick={() => onRemovePendingDoc(doc.id)} aria-label={`Remove ${doc.fileName} from this log entry`} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }}>
+    <div className="space-y-2.5">
+      <textarea
+        ref={ref}
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        readOnly={readOnly}
+        rows={3}
+        placeholder="Add a note about this project — anything good to know."
+        aria-label="Project notes"
+        className="w-full resize-none px-3.5 py-3 text-[0.8125rem] leading-relaxed outline-none focus-ring"
+        style={{ ...multilineSurface(theme), color: c.textPrimary, minHeight: 88 }}
+      />
+      {docs.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {docs.map(doc => (
+            <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1 pl-2.5 pr-1.5 text-[0.6875rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
+              <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+              <span className="truncate max-w-[160px]">{doc.fileName}</span>
+              {!readOnly ? (
+                <button type="button" onClick={() => onRemoveDoc(doc.id)} aria-label={`Remove ${doc.fileName}`} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }}>
                   <X className="h-3 w-3" aria-hidden="true" />
                 </button>
-              </span>
-            ))}
-            <button type="button" onClick={onAttach} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
-              <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
-              Attach
-            </button>
-          </div>
+              ) : null}
+            </span>
+          ))}
         </div>
       ) : null}
+      {!readOnly ? (
+        <button type="button" onClick={onAttach} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
+          <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
+          Attach documents
+        </button>
+      ) : null}
+    </div>
+  );
+};
 
-      {entries.length > 0 ? (
-        <ol className="m-0 list-none space-y-3 p-0" aria-label="Project activity log">
-          {entries.map(entry => (
-            <li key={entry.id} className="space-y-1.5">
-              {entry.text ? (
-                <p className="text-[0.8125rem] leading-relaxed" style={{ color: c.textPrimary }}>{entry.text}</p>
-              ) : null}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <time className="text-[0.625rem] font-medium tabular-nums" style={{ color: c.textSecondary, opacity: 0.55 }} dateTime={entry.at}>
-                  {formatRelativeTime(entry.at)}
-                </time>
-                {(entry.docIds || []).map(id => {
-                  const doc = docById[id];
-                  if (!doc) return null;
-                  return (
-                    <span key={id} className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold" style={{ backgroundColor: detailTileBg(theme), color: c.textSecondary }}>
-                      <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
-                      <span className="truncate max-w-[120px]">{doc.fileName}</span>
-                    </span>
-                  );
-                })}
-              </div>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p className="text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.55 }}>
-          {readOnly ? 'No updates logged.' : 'Updates and attachments will appear here.'}
+/* Project Type selector. Picking "Contract" reveals an attached program picker;
+   picking "State Contracts" fans out to a state → contract-number chooser. */
+const ProjectTypeField = ({
+  projectType,
+  contractProgram,
+  contractState,
+  contractNumber,
+  onProjectType,
+  onContractProgram,
+  onContractState,
+  onContractNumber,
+  theme,
+  error,
+  labelStyle,
+}) => {
+  const c = theme.colors;
+  const isContract = projectType === 'contract';
+  const isStateProgram = isContract && contractProgram === 'state';
+  const stateContractOptions = isStateProgram ? getStateContractOptions(contractState) : [];
+  const errorColor = c.error || '#B85C5C';
+  const selection = { projectType, contractProgram, contractState, contractNumber };
+  const summary = isContract && isProjectTypeComplete(selection) ? describeProjectType(selection) : '';
+  return (
+    <div className="min-w-0 space-y-1.5">
+      <div className="flex items-center gap-1">
+        <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Project Type</span>
+        <span aria-hidden="true" style={{ color: errorColor }}>*</span>
+      </div>
+      <CompactSelect
+        options={PROJECT_TYPE_OPTIONS}
+        value={projectType || ''}
+        onChange={onProjectType}
+        theme={theme}
+        ariaLabel="Project type"
+        placeholder="Select project type"
+        surfaceStyle={error ? { outline: `1px solid ${errorColor}`, outlineOffset: '-1px' } : undefined}
+      />
+      {error ? (
+        <p className={`${FIELD_HELPER_CLASS}`} style={{ color: errorColor }}>
+          Choose a project type before you finish.
         </p>
-      )}
+      ) : null}
+
+      <AnimatePresence initial={false}>
+        {isContract ? (
+          <motion.div
+            key="contract-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="mt-2 space-y-3 rounded-[20px] p-3.5"
+              style={{ backgroundColor: detailTileBg(theme), border: `1px solid ${isDarkTheme(theme) ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}` }}
+            >
+              <div className="space-y-1.5">
+                <span className={FIELD_LABEL_CLASS} style={labelStyle}>Contract Program</span>
+                <CompactSelect
+                  options={CONTRACT_PROGRAM_OPTIONS}
+                  value={contractProgram || ''}
+                  onChange={onContractProgram}
+                  theme={theme}
+                  ariaLabel="Contract program"
+                  placeholder="Select contract program"
+                  surfaceStyle={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.05)' : '#FFFFFF' }}
+                />
+              </div>
+
+              <AnimatePresence initial={false}>
+                {isStateProgram ? (
+                  <motion.div
+                    key="state-panel"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <span className={FIELD_LABEL_CLASS} style={labelStyle}>State</span>
+                        <CompactSelect
+                          options={STATE_OPTIONS}
+                          value={contractState || ''}
+                          onChange={onContractState}
+                          theme={theme}
+                          ariaLabel="Contract state"
+                          placeholder="Select state"
+                          surfaceStyle={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.05)' : '#FFFFFF' }}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className={FIELD_LABEL_CLASS} style={labelStyle}>Contract Number</span>
+                        <CompactSelect
+                          options={stateContractOptions}
+                          value={contractNumber || ''}
+                          onChange={onContractNumber}
+                          theme={theme}
+                          ariaLabel="State contract number"
+                          placeholder={contractState ? 'Select contract' : 'Choose a state first'}
+                          disabled={!contractState}
+                          surfaceStyle={{ backgroundColor: isDarkTheme(theme) ? 'rgba(255,255,255,0.05)' : '#FFFFFF' }}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {summary ? (
+        <div className="flex items-center gap-1.5 pl-1 pt-0.5">
+          <CheckCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+          <span className={FIELD_HELPER_CLASS} style={{ color: c.textSecondary }}>{summary}</span>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -787,7 +916,8 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
     <button
       type="button"
       onClick={onClick}
-      className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left rounded-[24px] transition-colors active:scale-[0.99] focus-ring"
+      className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left transition-colors active:scale-[0.99] focus-ring"
+      style={{ borderRadius: DETAIL_RADIUS_INSET }}
       onMouseEnter={e => { e.currentTarget.style.backgroundColor = hoverBg; }}
       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
@@ -864,6 +994,50 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     setDraft(p => { const n = { ...p, [k]: v }; dirty.current = true; return n; });
   }, []);
 
+  /* Project Type — required, with a connected contract/state picker. Selections
+     also mirror to the legacy contractType/isContract fields for downstream
+     consumers (quote intake, Excel export). */
+  const [projectTypeError, setProjectTypeError] = useState(false);
+  const projectTypeRef = useRef(null);
+  const setProjectType = useCallback((v) => {
+    if (readOnlyRef.current) return;
+    setProjectTypeError(false);
+    setDraft(p => {
+      dirty.current = true;
+      const isContract = v === 'contract';
+      return {
+        ...p,
+        projectType: v,
+        isContract,
+        ...(isContract ? {} : { contractProgram: '', contractState: '', contractNumber: '', contractType: '' }),
+      };
+    });
+  }, []);
+  const setContractProgram = useCallback((v) => {
+    if (readOnlyRef.current) return;
+    setProjectTypeError(false);
+    setDraft(p => {
+      dirty.current = true;
+      const isState = v === 'state';
+      return {
+        ...p,
+        contractProgram: v,
+        contractType: v,
+        ...(isState ? {} : { contractState: '', contractNumber: '' }),
+      };
+    });
+  }, []);
+  const setContractState = useCallback((v) => {
+    if (readOnlyRef.current) return;
+    setProjectTypeError(false);
+    setDraft(p => { dirty.current = true; return { ...p, contractState: v, contractNumber: '' }; });
+  }, []);
+  const setContractNumber = useCallback((v) => {
+    if (readOnlyRef.current) return;
+    setProjectTypeError(false);
+    setDraft(p => { dirty.current = true; return { ...p, contractNumber: v }; });
+  }, []);
+
   const contactList = useMemo(
     () => Array.isArray(draft.contacts) ? draft.contacts : (draft.contact ? [draft.contact] : []),
     [draft.contacts, draft.contact],
@@ -926,6 +1100,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     onDelete?.(draftRef.current.id);
   }, [cancelPendingSave, onDelete]);
   const handleDone = useCallback(() => {
+    if (!readOnlyRef.current && !isProjectTypeComplete(draftRef.current)) {
+      setProjectTypeError(true);
+      if (typeof projectTypeRef.current?.scrollIntoView === 'function') {
+        projectTypeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
     clearTimeout(saveRef.current);
     if (dirty.current) { onUpdateRef.current(draftRef.current); dirty.current = false; }
     onDone?.();
@@ -1034,8 +1215,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   const fileInputRef = useRef(null);
   const notesFileInputRef = useRef(null);
-  const [noteComposer, setNoteComposer] = useState('');
-  const [pendingNoteDocIds, setPendingNoteDocIds] = useState([]);
+  /* Documents attached from the Notes field this session, so they can be shown
+     inline for quick review/removal without duplicating the whole hub list. */
+  const [notesDocIds, setNotesDocIds] = useState([]);
 
   /* computed */
   const rawNumeric = parseCurrency(draft.value);
@@ -1131,64 +1313,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     .map(v => String(v || '').trim())
     .filter(Boolean);
 
-  const noteEntries = useMemo(() => {
-    if (Array.isArray(draft.noteLog) && draft.noteLog.length) {
-      return [...draft.noteLog].sort((a, b) => new Date(a.at) - new Date(b.at));
-    }
-    const legacy = String(draft.notes || '').trim();
-    if (!legacy) return [];
-    return [{
-      id: 'legacy',
-      text: legacy,
-      at: draft.updatedAt || opp?.updatedAt || new Date().toISOString(),
-      docIds: (draft.documents || []).map(d => d.id),
-    }];
-  }, [draft.noteLog, draft.notes, draft.updatedAt, draft.documents, opp?.updatedAt]);
-
-  useEffect(() => {
-    if (readOnlyRef.current) return;
-    const legacy = String(draft.notes || '').trim();
-    if (!legacy || (Array.isArray(draft.noteLog) && draft.noteLog.length)) return;
-    setDraft(p => {
-      dirty.current = true;
-      return {
-        ...p,
-        noteLog: [{
-          id: 'legacy',
-          text: legacy,
-          at: p.updatedAt || new Date().toISOString(),
-          docIds: (p.documents || []).map(d => d.id),
-        }],
-        notes: '',
-      };
-    });
-  }, [opp?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const logNoteEntry = useCallback(() => {
-    if (readOnlyRef.current) return;
-    const text = noteComposer.trim();
-    if (!text && pendingNoteDocIds.length === 0) return;
-    setDraft(p => {
-      const prior = Array.isArray(p.noteLog)
-        ? p.noteLog
-        : (String(p.notes || '').trim()
-          ? [{ id: 'legacy', text: String(p.notes).trim(), at: p.updatedAt || new Date().toISOString(), docIds: [] }]
-          : []);
-      dirty.current = true;
-      return {
-        ...p,
-        noteLog: [...prior, {
-          id: `n${Date.now()}`,
-          text: text || 'Attached files',
-          at: new Date().toISOString(),
-          docIds: [...pendingNoteDocIds],
-        }],
-        notes: '',
-      };
-    });
-    setNoteComposer('');
-    setPendingNoteDocIds([]);
-  }, [noteComposer, pendingNoteDocIds]);
+  const notesDocuments = useMemo(
+    () => (draft.documents || []).filter(d => notesDocIds.includes(d.id)),
+    [draft.documents, notesDocIds],
+  );
 
   const handleNotesFileUpload = useCallback((e) => {
     const files = Array.from(e.target.files || []);
@@ -1204,12 +1332,12 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       dirty.current = true;
       return { ...p, documents: [...(p.documents || []), ...newDocs] };
     });
-    setPendingNoteDocIds(ids => [...ids, ...newDocs.map(d => d.id)]);
+    setNotesDocIds(ids => [...ids, ...newDocs.map(d => d.id)]);
     e.target.value = '';
   }, []);
 
-  const removePendingNoteDoc = useCallback((docId) => {
-    setPendingNoteDocIds(ids => ids.filter(id => id !== docId));
+  const removeNotesDoc = useCallback((docId) => {
+    setNotesDocIds(ids => ids.filter(id => id !== docId));
     setDraft(p => {
       dirty.current = true;
       return { ...p, documents: (p.documents || []).filter(d => d.id !== docId) };
@@ -1353,62 +1481,72 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
-              <Section title="Pricing" theme={theme}>
+              <Section title="Pricing" subtitle="List price, discount, and project type" theme={theme}>
                 <div className="space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="min-w-0 space-y-1.5">
                       <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
-                      <div className="px-3.5 py-2.5" style={compoundFieldSurface(theme)}>
-                        <div className="flex min-h-[28px] items-center gap-0.5">
-                          <span aria-hidden="true" className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: draft.value ? c.textPrimary : c.textSecondary, opacity: draft.value ? 1 : 0.55 }}>$</span>
-                          <input
-                            id={listPriceId}
-                            inputMode="numeric"
-                            value={formatListPriceInput(draft.value)}
-                            onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
-                            className="w-full bg-transparent text-[0.9375rem] font-semibold tabular-nums outline-none focus-ring"
-                            style={{ color: c.textPrimary }}
-                            placeholder="0"
-                          />
-                        </div>
-                        {rawNumeric > 0 && discountPct > 0 ? (
-                          <p className="mt-1 text-[0.6875rem] font-medium tabular-nums" style={{ color: c.textSecondary, opacity: 0.62 }}>
-                            {netValueLabel} net
-                          </p>
-                        ) : null}
+                      <div className={`flex items-center gap-0.5 ${FIELD_CONTROL_MINH} px-3.5`} style={fieldSurface(theme)}>
+                        <span aria-hidden="true" className={`${FIELD_VALUE_CLASS} tabular-nums`} style={{ color: draft.value ? c.textPrimary : c.textSecondary, opacity: draft.value ? 1 : 0.55 }}>$</span>
+                        <input
+                          id={listPriceId}
+                          inputMode="numeric"
+                          value={formatListPriceInput(draft.value)}
+                          onChange={e => { const val = e.target.value.replace(/[^0-9]/g, ''); update('value', val ? ('$' + parseInt(val, 10).toLocaleString()) : ''); }}
+                          className={`w-full bg-transparent ${FIELD_VALUE_CLASS} tabular-nums outline-none focus-ring`}
+                          style={{ color: c.textPrimary }}
+                          placeholder="0"
+                        />
                       </div>
+                      {rawNumeric > 0 && discountPct > 0 ? (
+                        <p className={`${FIELD_HELPER_CLASS} tabular-nums pl-1`} style={{ color: c.textSecondary, opacity: 0.62 }}>
+                          {netValueLabel} net
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="min-w-0 space-y-1.5">
                       <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Discount</span>
-                      <div className="px-3.5 py-2.5" style={compoundFieldSurface(theme)}>
-                        <button
-                          type="button"
-                          ref={discBtn}
-                          onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
-                          aria-haspopup="listbox"
-                          aria-expanded={discountOpen}
-                          className="flex w-full min-h-[28px] items-center justify-between gap-2 text-left outline-none focus-ring"
-                        >
-                          <span className="truncate text-[0.9375rem] font-semibold" style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.55 }}>
-                            {discountSummaryLabel}
-                          </span>
-                          <ChevronDown className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
-                        </button>
-                        {discountPct > 0 ? (
-                          <p className="mt-1 text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.62 }}>
-                            {discountDetailLabel}
-                          </p>
-                        ) : null}
-                      </div>
+                      <button
+                        type="button"
+                        ref={discBtn}
+                        onClick={() => discountOpen ? setDiscountOpen(false) : openDiscount()}
+                        aria-haspopup="listbox"
+                        aria-expanded={discountOpen}
+                        className={`flex w-full items-center justify-between gap-2 ${FIELD_CONTROL_MINH} px-3.5 text-left outline-none focus-ring transition-all`}
+                        style={{ ...fieldSurface(theme), outline: discountOpen ? `1px solid ${c.accent}` : undefined, outlineOffset: '-1px' }}
+                      >
+                        <span className={`truncate ${FIELD_VALUE_CLASS}`} style={{ color: draft.discount ? c.textPrimary : c.textSecondary, opacity: draft.discount ? 1 : 0.55 }}>
+                          {discountSummaryLabel}
+                        </span>
+                        <ChevronDown className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
+                      </button>
+                      {discountPct > 0 ? (
+                        <p className={`${FIELD_HELPER_CLASS} pl-1`} style={{ color: c.textSecondary, opacity: 0.62 }}>
+                          {discountDetailLabel}
+                        </p>
+                      ) : null}
                     </div>
 
                     <Row label="PO Timeframe" theme={theme}>
                       {(id) => <CompactSelect id={id} options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} mutedValues={['Unknown']} />}
                     </Row>
-                    <Row label="Contract" theme={theme}>
-                      {(id) => <CompactSelect id={id} options={CONTRACT_OPTIONS} value={draft.contractType || ''} onChange={v => update('contractType', v)} theme={theme} ariaLabel="Contract" placeholder="Select contract" mutedValues={['none']} />}
-                    </Row>
+
+                    <div ref={projectTypeRef} className="scroll-mt-24">
+                      <ProjectTypeField
+                        projectType={draft.projectType}
+                        contractProgram={draft.contractProgram}
+                        contractState={draft.contractState}
+                        contractNumber={draft.contractNumber}
+                        onProjectType={setProjectType}
+                        onContractProgram={setContractProgram}
+                        onContractState={setContractState}
+                        onContractNumber={setContractNumber}
+                        theme={theme}
+                        error={projectTypeError}
+                        labelStyle={labelStyle}
+                      />
+                    </div>
                   </div>
 
                   <div className="rounded-[20px] px-3.5 py-3" style={{ backgroundColor: detailTileBg(theme) }}>
@@ -1492,7 +1630,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Stakeholders & Competition" theme={theme}>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1662,7 +1800,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
             <div className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
               <Section title="Project Hub" theme={theme}>
-                <div className="space-y-0.5 -mx-2">
+                <div className="space-y-1 px-[2px]">
                   <DetailHubCard
                     icon={Users}
                     title="Contacts"
@@ -1722,16 +1860,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Activity" theme={theme} collapsible>
-                <ProjectNoteLog
-                  entries={noteEntries}
-                  documents={draft.documents || []}
-                  composer={noteComposer}
-                  onComposerChange={setNoteComposer}
-                  onLog={logNoteEntry}
+              <Section title="Notes" subtitle="Context worth remembering — not tracked as data" theme={theme}>
+                <ProjectNotesField
+                  value={draft.notes}
+                  onChange={v => update('notes', v)}
                   onAttach={() => notesFileInputRef.current?.click()}
-                  pendingDocIds={pendingNoteDocIds}
-                  onRemovePendingDoc={removePendingNoteDoc}
+                  documents={notesDocuments}
+                  onRemoveDoc={removeNotesDoc}
                   theme={theme}
                   readOnly={readOnly}
                 />
