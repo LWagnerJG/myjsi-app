@@ -35,9 +35,12 @@ const SPIFF_502010_MIN_LIST = 10000;
 const REWARD_AUTO_OFF_NET_LIMIT = 150000;
 const REWARD_AUTO_OFF_DISCOUNT_MIN = 0.64;
 
-/* Shared surface values — minimal fills, no heavy borders. */
-const CHIP_BG_LIGHT = 'rgba(53,53,53,0.05)';
-const CHIP_BG_DARK = 'rgba(255,255,255,0.07)';
+/* Shared surface values — one cool-grey tile (#F2F4F6 light) and pill radii everywhere. */
+const DETAIL_RADIUS_CARD = '28px';
+const DETAIL_RADIUS_INSET = '24px';
+const DETAIL_RADIUS_MENU = '24px';
+const DETAIL_RADIUS_HUB = '20px';
+const detailTileBg = (theme) => fieldTileSurface(theme).backgroundColor;
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 const DETAIL_SECTION_TITLE_CLASS = 'text-[0.875rem] font-semibold tracking-[-0.01em] leading-none';
 const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
@@ -45,15 +48,9 @@ const TEXT_INPUT_CLASS = 'w-full min-h-[44px] px-3 bg-transparent outline-none t
 
 const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)');
 
-const fieldSurface = (theme) => {
-  const tile = fieldTileSurface(theme);
-  return {
-    ...tile,
-    borderRadius: '14px',
-  };
-};
+const fieldSurface = (theme) => fieldTileSurface(theme);
 
-const insetBg = (theme) => fieldTileSurface(theme).backgroundColor;
+const insetBg = (theme) => detailTileBg(theme);
 
 const getSeriesLeadLabel = (series) => {
   if (QUICKSHIP_SERIES.includes(series)) return 'QS';
@@ -108,8 +105,9 @@ const cardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
     backgroundColor: dark ? 'rgba(255,255,255,0.035)' : '#FFFFFF',
-    border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.09)'}`,
-    borderRadius: '20px',
+    border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'}`,
+    borderRadius: DETAIL_RADIUS_CARD,
+    boxShadow: dark ? 'none' : '0 2px 14px rgba(53,53,53,0.04)',
   };
 };
 
@@ -130,7 +128,7 @@ const Section = ({ title, subtitle, children, theme, right, className = '', coll
           <button
             type="button"
             onClick={() => collapsible && setOpen(o => !o)}
-            className="min-w-0 flex items-center gap-2 text-left focus-ring rounded-lg"
+            className="min-w-0 flex items-center gap-2 text-left focus-ring rounded-full"
             style={{ cursor: collapsible ? 'pointer' : 'default' }}
             aria-expanded={collapsible ? open : undefined}
           >
@@ -258,7 +256,7 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
             background: c.surface,
             boxShadow: DESIGN_TOKENS.shadows.modal,
             zIndex: DESIGN_TOKENS.zIndex.popover,
-            borderRadius: '18px',
+            borderRadius: DETAIL_RADIUS_MENU,
             border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
           }}
         >
@@ -272,9 +270,9 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
                   role="option"
                   aria-selected={active}
                   onClick={() => { onChange(opt.value); setOpen(false); }}
-                  className={`w-full text-left px-3.5 py-2.5 rounded-[12px] text-[0.8125rem] flex items-center justify-between gap-2 transition-colors ${active ? 'font-bold' : 'font-medium'}`}
+                  className={`w-full text-left px-3.5 py-2.5 rounded-full text-[0.8125rem] flex items-center justify-between gap-2 transition-colors ${active ? 'font-bold' : 'font-medium'}`}
                   style={{ color: optMuted ? c.textSecondary : c.textPrimary, backgroundColor: active ? `${c.accent}0F` : 'transparent' }}
-                  onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'; }}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : '#E8EBEE'; }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = active ? `${c.accent}0F` : 'transparent'; }}
                 >
                   <span className="truncate">{opt.label}</span>
@@ -294,7 +292,7 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
 const SegmentToggle = ({ value, onChange, theme, options, ariaLabel, allowDeselect = false }) => {
   const c = theme.colors;
   return (
-    <div className="inline-flex flex-wrap gap-1 rounded-[16px] p-1" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
+    <div className="inline-flex flex-wrap gap-1 rounded-full p-1" style={fieldSurface(theme)} role="group" aria-label={ariaLabel}>
       {options.map(opt => {
         const active = value === opt.val;
         return (
@@ -303,7 +301,7 @@ const SegmentToggle = ({ value, onChange, theme, options, ariaLabel, allowDesele
             type="button"
             onClick={() => onChange(allowDeselect && active ? null : opt.val)}
             aria-pressed={active}
-            className="inline-flex min-h-[40px] items-center gap-1.5 px-4 rounded-[12px] text-[0.75rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+            className="inline-flex min-h-[40px] items-center gap-1.5 px-4 rounded-full text-[0.75rem] font-semibold transition-all active:scale-[0.97] focus-ring"
             style={active ? { backgroundColor: c.accent, color: c.accentText || '#FFFFFF' } : { color: c.textSecondary }}
           >
             {opt.group ? <span className="text-[0.5625rem] font-bold uppercase tracking-[0.05em]" style={{ opacity: active ? 0.85 : 0.5 }}>{opt.group}</span> : null}
@@ -327,7 +325,7 @@ const RemovableChip = ({ label, detail, onRemove, theme, size = 'default' }) => 
       onClick={onRemove}
       aria-label={`Remove ${label}`}
       className={`inline-flex max-w-full items-center gap-1 rounded-full font-medium transition-all active:scale-[0.97] focus-ring ${sizeClass}`}
-      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)', color: theme.colors.textPrimary }}
+      style={{ backgroundColor: detailTileBg(theme), color: theme.colors.textPrimary }}
     >
       <span className="truncate">{label}</span>
       {detail ? <span className="flex-shrink-0 text-[0.5625rem] tabular-nums" style={{ opacity: 0.4 }}>{detail}</span> : null}
@@ -501,7 +499,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         const StIcon = meta.icon;
         const requestedLabel = formatQuoteMoment(q.requestedAt);
         return (
-          <div key={q.id || qi} className="flex items-start gap-3 px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div key={q.id || qi} className="flex items-start gap-3 px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
             <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
               <StIcon className="w-3 h-3" style={{ color: meta.color }} />
             </div>
@@ -593,7 +591,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
       maxWidth="max-w-lg"
     >
       <div className="space-y-4">
-        <div className="px-4 py-3.5 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+        <div className="px-4 py-3.5 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
               <StatusIcon className="w-4 h-4" style={{ color: meta.color }} />
@@ -615,19 +613,19 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ordered</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{formatSampleOrderTimestamp(order.date)}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Fulfillment</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{deliveryLabel}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ship to</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.shipTo || 'TBD'}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Requested by</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.orderedBy?.name || 'Unknown'}</p>
           </div>
@@ -659,7 +657,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
           <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Sample contents</span>
           <div className="space-y-1.5">
             {(order.items || []).map((item, index) => (
-              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[20px]" style={{ backgroundColor: insetBg(theme) }}>
+              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
                 <div className="min-w-0">
                   <p className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{item.name}</p>
                   <p className="mt-0.5 text-[0.625rem]" style={{ color: c.textSecondary }}>{item.code || 'Sample'}</p>
@@ -678,12 +676,12 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const accent = accentColor || c.accent;
-  const hoverBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)';
+  const hoverBg = detailTileBg(theme);
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left rounded-[14px] transition-colors active:scale-[0.99] focus-ring"
+      className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left rounded-[24px] transition-colors active:scale-[0.99] focus-ring"
       onMouseEnter={e => { e.currentTarget.style.backgroundColor = hoverBg; }}
       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
@@ -694,7 +692,7 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
         <div className="flex items-center gap-2">
           <span className="text-[0.8125rem] font-semibold tracking-[-0.01em] truncate" style={{ color: c.textPrimary }}>{title}</span>
           {count != null ? (
-            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[0.625rem] font-bold tabular-nums" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.07)', color: c.textSecondary }}>{count}</span>
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[0.625rem] font-bold tabular-nums" style={{ backgroundColor: detailTileBg(theme), color: c.textSecondary }}>{count}</span>
           ) : null}
         </div>
         {summary ? (
@@ -1051,7 +1049,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               style={{
                 backgroundColor: draft.stage === 'Won' ? 'rgba(74,124,89,0.10)' : 'rgba(184,92,92,0.10)',
                 border: `1px solid ${draft.stage === 'Won' ? 'rgba(74,124,89,0.22)' : 'rgba(184,92,92,0.22)'}`,
-                borderRadius: '20px',
+                borderRadius: DETAIL_RADIUS_CARD,
               }}
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -1097,7 +1095,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   {endUserLocked ? (
                     <span
                       className="inline-flex items-center gap-1.5 rounded-full pl-3 pr-2.5 py-1"
-                      style={{ ...fieldSurface(theme), borderRadius: 9999 }}
+                      style={fieldSurface(theme)}
                       title="End user is set when the project is created and can't be changed here"
                       aria-label={`End user ${endUserDisplay}. Locked: set at project creation and not editable here.`}
                     >
@@ -1109,7 +1107,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       value={draft.endUser || ''}
                       onChange={e => update('endUser', e.target.value)}
                       className="min-h-[32px] rounded-full px-3 text-[0.8125rem] font-semibold outline-none focus-ring"
-                      style={{ ...fieldSurface(theme), borderRadius: 9999, color: c.textPrimary }}
+                      style={{ ...fieldSurface(theme), color: c.textPrimary }}
                       placeholder="Add end user"
                     />
                   )}
@@ -1229,13 +1227,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
 
                 {rewardDefaultOff && (
-                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[14px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
                     <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>{rewardsDetailLabel}</span>
                   </div>
                 )}
                 {showSpiffWarning && (
-                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[14px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                  <div className="flex items-center gap-2 mt-3 px-3 py-2.5 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
                     <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
                   </div>
@@ -1332,7 +1330,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       />
                     </div>
                     {competitionValue === true && (
-                      <div className="space-y-2 rounded-[16px] p-3" style={{ backgroundColor: insetBg(theme) }}>
+                      <div className="space-y-2 rounded-[24px] p-3" style={{ backgroundColor: insetBg(theme) }}>
                         {(draft.competitors || []).length > 0 && (
                           <div className="flex flex-wrap items-center gap-1.5">
                             {(draft.competitors || []).map(comp => (
@@ -1362,7 +1360,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         const prompts = getSeriesSpecPrompts(p.series);
                         const leadLabel = getSeriesLeadLabel(p.series);
                         return (
-                          <div key={p.series} className="rounded-[16px] overflow-hidden" style={{ backgroundColor: insetBg(theme) }}>
+                          <div key={p.series} className="rounded-[24px] overflow-hidden" style={{ backgroundColor: insetBg(theme) }}>
                             <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
                               <div className="flex items-center gap-2 min-w-0">
                                 <span className="text-[0.8125rem] font-semibold truncate" style={{ color: c.textPrimary }}>{p.series}</span>
@@ -1536,7 +1534,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   type="button"
                   onClick={() => setQuoteModalOpen(true)}
                   className="flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
-                  style={{ ...fieldSurface(theme), borderRadius: 9999, color: c.textPrimary }}
+                  style={{ ...fieldSurface(theme), color: c.textPrimary }}
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
                   Request Quote
@@ -1582,7 +1580,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       {/* discount dropdown */}
       {discountOpen && (
         <div ref={discMenu} role="listbox" aria-label="Discount options" className="fixed overflow-hidden"
-          style={{ top: discPos.top, left: discPos.left, width: discPos.width, background: theme?.colors?.surface || (isDark ? '#2a2a2a' : '#fff'), boxShadow: DESIGN_TOKENS.shadows.modal, zIndex: DESIGN_TOKENS.zIndex.popover, borderRadius: '20px' }}>
+          style={{ top: discPos.top, left: discPos.left, width: discPos.width, background: theme?.colors?.surface || (isDark ? '#2a2a2a' : '#fff'), boxShadow: DESIGN_TOKENS.shadows.modal, zIndex: DESIGN_TOKENS.zIndex.popover, borderRadius: DETAIL_RADIUS_MENU }}>
           <div className="max-h-[320px] overflow-y-auto scrollbar-hide py-1.5">
             {DISCOUNT_OPTIONS.map(opt => {
               const selected = opt === draft.discount;
@@ -1630,7 +1628,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={closeDiscountConfirm}
               className="px-4 py-2 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
-              style={{ backgroundColor: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}
+              style={{ backgroundColor: detailTileBg(theme), color: c.textPrimary }}
             >
               Cancel
             </button>
@@ -1677,7 +1675,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={handleDelete}
               className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
-              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: '14px' }}
+              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: DETAIL_RADIUS_INSET }}
             >
               <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold" style={{ color: c.error }}>
                 <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1694,7 +1692,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={() => setRemoveOpen(false)}
               className="px-4 py-2 rounded-full text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
-              style={{ backgroundColor: isDark ? CHIP_BG_DARK : CHIP_BG_LIGHT, color: c.textPrimary }}
+              style={{ backgroundColor: detailTileBg(theme), color: c.textPrimary }}
             >
               Cancel
             </button>
@@ -1780,7 +1778,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             <div className="space-y-3">
               <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Add from project companies</span>
               {companyContactGroups.map((group) => (
-                <div key={group.company} className="rounded-[16px] p-3" style={{ backgroundColor: insetBg(theme) }}>
+                <div key={group.company} className="rounded-[24px] p-3" style={{ backgroundColor: insetBg(theme) }}>
                   <div className="text-[0.75rem] font-semibold mb-2" style={{ color: c.textPrimary }}>{group.company}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {group.contacts.map((ct) => {
