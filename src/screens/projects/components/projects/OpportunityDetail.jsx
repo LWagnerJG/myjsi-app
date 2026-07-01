@@ -1319,8 +1319,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   )}
 
                   <div className="space-y-2 sm:col-span-2">
-                    <div className="flex items-center gap-3">
-                      <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Competition</span>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className={`${FIELD_LABEL_CLASS} flex-shrink-0`} style={labelStyle}>Competition</span>
                       <SegmentToggle
                         value={competitionValue}
                         onChange={v => setCompetition(v)}
@@ -1328,25 +1328,25 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         ariaLabel="Competition present"
                         options={[{ label: 'No', val: false }, { label: 'Yes', val: true }]}
                       />
-                    </div>
-                    {competitionValue === true && (
-                      <div className="space-y-2 rounded-[24px] p-3" style={{ backgroundColor: insetBg(theme) }}>
-                        {(draft.competitors || []).length > 0 && (
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {(draft.competitors || []).map(comp => (
-                              <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
-                            ))}
-                          </div>
-                        )}
+                      {competitionValue === true ? (
                         <SuggestInputPill
+                          className="flex-1 min-w-[160px] sm:min-w-[200px]"
+                          compact
                           collapsible={false}
-                          placeholder={(draft.competitors || []).length ? 'Add another competitor…' : 'Search competitors or type to add…'}
+                          placeholder={(draft.competitors || []).length ? 'Add competitor…' : 'Search or type competitor…'}
                           suggestions={COMPETITORS.filter(x => x !== 'None' && x !== 'Unknown' && !(draft.competitors || []).includes(x))}
                           onAdd={v => addUnique('competitors', v)}
                           theme={theme}
                         />
+                      ) : null}
+                    </div>
+                    {competitionValue === true && (draft.competitors || []).length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {(draft.competitors || []).map(comp => (
+                          <RemovableChip key={comp} label={comp} onRemove={() => toggleCompetitor(comp)} theme={theme} size="small" />
+                        ))}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </Section>
