@@ -166,11 +166,18 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     ];
     return Array.from(new Set(candidates.filter(Boolean).map((item) => String(item).trim()))).slice(0, 6);
   }, [userSettings?.homeAddress, userSettings?.streetAddress]);
-  const fieldTile = fieldTileSurface(theme);
   const rowDivider = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)';
+  // Grouped settings rows need a card radius — fieldTileSurface is pill (9999px)
+  // and with overflow-hidden that clips tall blocks into a stadium mask.
   const groupedTileSurface = {
-    ...fieldTile,
     backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(240,237,232,0.72)',
+    border: 'none',
+    borderRadius: DESIGN_TOKENS.borderRadius.lg,
+  };
+  const insetTileSurface = {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(240,237,232,0.92)',
+    border: 'none',
+    borderRadius: DESIGN_TOKENS.borderRadius.lg,
   };
   const settingsCardStyle = isDark ? {} : { border: 'none' };
   const settingsInputStyle = {
@@ -242,8 +249,8 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     <AppScreenLayout
       theme={theme}
       showTitle={false}
-      maxWidthClass="max-w-content"
-      horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
+      maxWidthClass="max-w-[560px]"
+      horizontalPaddingClass="px-4 sm:px-6"
       contentPaddingBottomClass="pb-24 lg:pb-12"
       contentClassName="pt-4 space-y-4"
     >
@@ -368,7 +375,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                     </div>
                     {k === 'leadTimeChange' && notif.leadTimeChange && (
                       <div className="px-4 pb-4">
-                        <div className="rounded-2xl p-3.5" style={{ ...fieldTile, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(240,237,232,0.92)' }}>
+                        <div className="rounded-2xl p-3.5" style={insetTileSurface}>
                           <div className={`${FIELD_LABEL_CLASSNAME} mb-2`} style={{ color: theme.colors.textSecondary }}>
                             Lead time series alerts
                           </div>
@@ -380,7 +387,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                                   key={series}
                                   type="button"
                                   onClick={() => setLeadTimeFavorites(prev => (active ? prev.filter(s => s !== series) : [...prev, series]))}
-                                  className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                                  className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 min-h-[36px]"
                                   style={{
                                     backgroundColor: active ? theme.colors.accent : (isDark ? 'rgba(255,255,255,0.12)' : '#FFFFFF'),
                                     color: active ? (isDark ? '#1A1A1A' : '#FFFFFF') : theme.colors.textSecondary,
