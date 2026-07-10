@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Send, Share2 } from 'lucide-react';
 import { Modal } from '../../components/common/Modal.jsx';
-import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { useToast } from '../../components/common/toastContext.js';
 import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
 import { cardSurface, fieldTileSurface, isDarkTheme } from '../../design-system/tokens.js';
 import { CUSTOMS_CATEGORIES, CUSTOM_OPPORTUNITIES } from './data.js';
+import { ProductsViewToolbar, productViewPath } from './productsChrome.jsx';
 
 const extractPriceNumber = (priceLabel = '') => {
     const match = String(priceLabel).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
@@ -134,7 +134,7 @@ const InquireForm = ({ item, theme, dark, onClose }) => {
     );
 };
 
-export const CustomsScreen = ({ theme }) => {
+export const CustomsScreen = ({ theme, onNavigate }) => {
     const dark = isDarkTheme(theme);
     const toast = useToast();
     const [activeCategory, setActiveCategory] = useState('all');
@@ -171,6 +171,11 @@ export const CustomsScreen = ({ theme }) => {
         setActiveCategory('all');
     }, []);
 
+    const handleViewChange = useCallback((view) => {
+        if (view === 'custom') return;
+        onNavigate?.(productViewPath(view));
+    }, [onNavigate]);
+
     const handleShare = useCallback(async (item) => {
         const shareData = {
             title: `${item.title} — JSI Customs`,
@@ -194,32 +199,15 @@ export const CustomsScreen = ({ theme }) => {
             style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}
         >
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-                <ScreenTopChrome theme={theme} fade={false} contentClassName="pt-2.5 pb-1.5">
+                <ScreenTopChrome theme={theme} fade={false} contentClassName="pt-3 pb-2">
                     <div className="space-y-2.5">
-                        <div className="flex items-baseline justify-between gap-3">
-                            <h1 className="text-[1.45rem] sm:text-[1.65rem] font-semibold tracking-[-0.02em] leading-tight">
-                                Customs
-                            </h1>
-                            <span
-                                className="text-[0.75rem] font-semibold whitespace-nowrap"
-                                style={{ color: theme.colors.textSecondary, opacity: 0.72 }}
-                            >
-                                {items.length} shown
-                            </span>
-                        </div>
-
-                        <StandardSearchBar
-                            value={searchTerm}
-                            onChange={setSearchTerm}
-                            placeholder="Search concepts or keywords"
+                        <ProductsViewToolbar
                             theme={theme}
-                            style={{
-                                height: 52,
-                                boxShadow: 'none',
-                                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.04)',
-                                backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.62)',
-                            }}
-                            inputClassName="text-[0.95rem]"
+                            activeView="custom"
+                            onViewChange={handleViewChange}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            searchPlaceholder="Search custom concepts..."
                         />
 
                         <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
@@ -233,6 +221,7 @@ export const CustomsScreen = ({ theme }) => {
                                             onClick={() => setActiveCategory(category.id)}
                                             className="px-3.5 py-1.5 rounded-full text-[0.8125rem] font-semibold whitespace-nowrap transition-all duration-150 active:scale-95"
                                             style={{
+                                                height: 'var(--jsi-ctrl-h)',
                                                 backgroundColor: isActive
                                                     ? (dark ? 'rgba(255,255,255,0.16)' : theme.colors.textPrimary)
                                                     : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'),
@@ -251,6 +240,18 @@ export const CustomsScreen = ({ theme }) => {
 
                 <div className="px-4 sm:px-6 lg:px-8 pb-12">
                     <div className="max-w-content mx-auto w-full">
+                        <div className="flex items-baseline justify-between gap-3 px-0.5 pb-3">
+                            <p className="text-[0.8125rem] font-medium" style={{ color: theme.colors.textSecondary }}>
+                                Modifications & non-standard builds
+                            </p>
+                            <span
+                                className="text-[0.75rem] font-semibold whitespace-nowrap"
+                                style={{ color: theme.colors.textSecondary, opacity: 0.72 }}
+                            >
+                                {items.length} shown
+                            </span>
+                        </div>
+
                         {items.length === 0 ? (
                             <div className="rounded-[24px] p-8 text-center" style={cardSurface(theme)}>
                                 <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
@@ -274,7 +275,7 @@ export const CustomsScreen = ({ theme }) => {
                                 )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 pt-2">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
                                 {items.map((item) => (
                                     <GalleryCard
                                         key={item.id}

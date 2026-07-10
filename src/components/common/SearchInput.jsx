@@ -147,6 +147,8 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 
 // SearchInput — universal search pill used across all non-home screens.
 // Uses the same frosted-glass language as the home screen pill and app header.
+// size="md" (default): 56px standalone search
+// size="control": matches SegmentedToggle / CTA height via --jsi-ctrl-h
 export const SearchInput = React.memo(function SearchInput({
     id,
     value = '',
@@ -158,8 +160,10 @@ export const SearchInput = React.memo(function SearchInput({
     inputClassName = '',
     autoFocus = false,
     inputRef,
+    size = 'md',
 }) {
     const dark = isDarkTheme(theme);
+    const isControl = size === 'control';
     // Match homeChrome primary palette — frosted glass pill
     const bg  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';
     const bdr = dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.80)';
@@ -167,29 +171,32 @@ export const SearchInput = React.memo(function SearchInput({
       ? '0 2px 10px rgba(0,0,0,0.25)'
       : '0 2px 10px rgba(53,53,53,0.08)';
     const iconColor = theme?.colors?.textSecondary || '#666';
+    const iconSize = isControl ? 15 : 18;
+    const clearSize = isControl ? 18 : 22;
+    const clearIcon = isControl ? 10 : 11;
 
     return (
         <div
             id={id}
-            className={`flex items-center gap-2.5 ${className}`}
+            className={`flex items-center ${isControl ? 'gap-2' : 'gap-2.5'} ${className}`}
             role="search"
             style={{
-                height: 56,
+                height: isControl ? 'var(--jsi-ctrl-h)' : 56,
                 borderRadius: 9999,
                 backgroundColor: bg,
                 border: bdr,
                 boxShadow: shadow,
                 backdropFilter: 'blur(12px) saturate(1.4)',
                 WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
-                paddingLeft: 14,
-                paddingRight: value ? 8 : 14,
+                paddingLeft: isControl ? 12 : 14,
+                paddingRight: value ? (isControl ? 6 : 8) : (isControl ? 12 : 14),
                 transition: 'border-color 150ms ease, box-shadow 150ms ease',
                 ...style,
             }}
         >
             <Search
                 aria-hidden="true"
-                style={{ width: 18, height: 18, color: iconColor, opacity: 0.6, flexShrink: 0 }}
+                style={{ width: iconSize, height: iconSize, color: iconColor, opacity: 0.6, flexShrink: 0 }}
             />
             <input
                 type="search"
@@ -197,7 +204,11 @@ export const SearchInput = React.memo(function SearchInput({
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
                 className={`flex-1 h-full bg-transparent outline-none ${inputClassName}`}
-                style={{ color: theme?.colors?.textPrimary || '#111', fontSize: "1rem" }}
+                style={{
+                    color: theme?.colors?.textPrimary || '#111',
+                    fontSize: isControl ? '0.875rem' : '1rem',
+                    lineHeight: 1,
+                }}
                 aria-label={placeholder}
                 autoComplete="off"
                 autoFocus={autoFocus}
@@ -207,11 +218,15 @@ export const SearchInput = React.memo(function SearchInput({
                 <button
                     type="button"
                     onClick={() => onChange('')}
-                    className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-90"
-                    style={{ backgroundColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.10)' }}
+                    className="flex-shrink-0 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-90"
+                    style={{
+                        width: clearSize,
+                        height: clearSize,
+                        backgroundColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.10)',
+                    }}
                     aria-label="Clear search"
                 >
-                    <X style={{ width: 11, height: 11, color: iconColor }} />
+                    <X style={{ width: clearIcon, height: clearIcon, color: iconColor }} />
                 </button>
             )}
         </div>
