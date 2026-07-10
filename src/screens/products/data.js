@@ -25,6 +25,7 @@ export const PRODUCT_DATA = {
         ],
         competition: [],
         competitionByProduct: {
+            'americana-bench': [comp('OFS Rowen Bench', '$1480', '-3%'), comp('Kimball EverySpace', '$1550', '-2%'), comp('Indiana Clutch', '$1460', '+4%')],
             'native': [comp('OFS Rowen Bench', '$1250', '-4%'), comp('Kimball EverySpace', '$1325', '-9%'), comp('Indiana Clutch', '$1180', '+2%')],
             'poet': [comp('OFS Lite', '$790', '-1%'), comp('Kimball Pep Bench', '$770', '+1%'), comp('SitOnIt Nomad', '$730', '+6%')],
             'indie': [comp('OFS Modern Amenity', '$950', '-3%'), comp('Kimball Alterna', '$935', '-2%'), comp('Global Duet', '$905', '+2%')]
@@ -154,6 +155,7 @@ export const PRODUCT_DATA = {
         ],
         competition: [],
         competitionByProduct: {
+            'americana-swivel': [comp('SitOnIt Wit Task', '$840', '-2%'), comp('Kimball Pep Task', '$855', '-1%'), comp('OFS Lite Task', '$825', '+4%')],
             'arwyn-swivel': [comp('SitOnIt Focus Task', '$1350', '-4%'), comp('Kimball Joya Task', '$1365', '-5%'), comp('OFS Rally Task', '$1310', '-1%')],
             'wink': [comp('SitOnIt Wit Task', '$520', '-4%'), comp('Kimball Pep Task', '$515', '-3%'), comp('OFS Lite Task', '$505', '-1%')],
             'protocol': [comp('SitOnIt Amplify', '$835', '-4%'), comp('Kimball Task Pro', '$825', '-3%'), comp('OFS Rally Lite', '$810', '-1%')]
@@ -348,25 +350,17 @@ export const PRODUCTS_CATEGORIES_DATA = [
             '/category-images/bench-images/api_indie.jpg'
         ].map(localImage)
     },
-    {
-        name: 'Customs',
-        description: 'Tailored builds and spec-driven concepts',
-        nav: 'products/category/customs',
-        images: [
-            '/category-images/casegood-images/api_finale.jpg',
-            '/category-images/conference-images/api_reef.jpg',
-            '/category-images/lounge-images/api_bespace.jpg'
-        ].map(localImage)
-    }
 ];
 
 export const CUSTOMS_CATEGORIES = [
     { id: 'all', label: 'All' },
     { id: 'reception', label: 'Reception' },
     { id: 'conference', label: 'Conference' },
-    { id: 'casegoods', label: 'Casegoods' },
-    { id: 'seating', label: 'Seating' },
+    { id: 'desks', label: 'Desks' },
+    { id: 'planters', label: 'Planters' },
     { id: 'lounge', label: 'Lounge' },
+    { id: 'seating', label: 'Seating' },
+    { id: 'casegoods', label: 'Casegoods' },
 ];
 
 export const CUSTOM_OPPORTUNITIES = [
@@ -477,6 +471,51 @@ export const CUSTOM_OPPORTUNITIES = [
         image: localImage('/category-images/lounge-images/jsi_poet_component_00008.jpg'),
         summary: 'A modular Poet cluster spec\u2019d with a custom upholstery palette and inset accent table arrangement.',
         details: 'Custom upholstery palette, inset accent tables, paired ottoman scale. Lead time 5–7 weeks.',
+    },
+    {
+        id: 'executive-desk-run',
+        title: 'Executive Desk Run',
+        category: 'desks',
+        priceLabel: 'Under $16,800 NET',
+        image: localImage('/category-images/casegood-images/api_vision.jpg'),
+        summary: 'A private-office desk composition with custom return length, integrated power, and a tuned pedestal package.',
+        details: 'Custom return scale, power/data routing, mixed pull hardware. Lead time 6–8 weeks.',
+    },
+    {
+        id: 'benching-desk-spine',
+        title: 'Benching Desk Spine',
+        category: 'desks',
+        priceLabel: 'Under $22,500 NET',
+        image: localImage('/category-images/casegood-images/api_flux-private-office.jpg'),
+        summary: 'A multi-station desk run organized around a shared spine with privacy screens and accessory rails.',
+        details: 'Shared power spine, screen heights tuned per station, accessory rail package. Lead time 7–9 weeks.',
+    },
+    {
+        id: 'lobby-planter-bench',
+        title: 'Lobby Planter Bench',
+        category: 'planters',
+        priceLabel: 'Under $8,400 NET',
+        image: localImage('/category-images/bench-images/api_native.jpg'),
+        summary: 'A waiting-area bench that integrates planter volumes and soft surface drops for casual touchdown.',
+        details: 'Integrated planter liners, mixed laminate faces, optional power. Lead time 4–6 weeks.',
+    },
+    {
+        id: 'corridor-planter-screen',
+        title: 'Corridor Planter Screen',
+        category: 'planters',
+        priceLabel: 'Under $12,200 NET',
+        image: localImage('/category-images/lounge-images/api_bespace.jpg'),
+        summary: 'A freestanding planter screen that softens circulation without full construction — greenery plus acoustic mass.',
+        details: 'Double-sided planter pockets, acoustic core, finish-matched end caps. Lead time 5–7 weeks.',
+    },
+    {
+        id: 'arrival-desk-composition',
+        title: 'Arrival Desk Composition',
+        category: 'reception',
+        priceLabel: 'Under $28,000 NET',
+        image: localImage('/category-images/casegood-images/api_finale.jpg'),
+        summary: 'A reception desk built as an architectural composition — transaction height, guest ledge, and branded return.',
+        details: 'Transaction / ADA heights, branded return panel, integrated cable management. Lead time 8–10 weeks.',
     },
 ];
 

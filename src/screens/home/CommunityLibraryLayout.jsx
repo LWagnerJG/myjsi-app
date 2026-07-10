@@ -15,6 +15,14 @@ import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion.js'
 import { CreateOnePagerModal } from '../studio/CreateOnePagerModal.jsx';
 import { useToast } from '../../components/common/toastContext.js';
 
+const communitySearchSurface = (dark) => ({
+  backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
+  border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
+  boxShadow: dark ? '0 1px 6px rgba(0,0,0,0.18)' : '0 1px 4px rgba(53,53,53,0.05)',
+  backdropFilter: 'none',
+  WebkitBackdropFilter: 'none',
+});
+
 const buildCommunityTabOptions = (hasBoardContent, compact = false) => {
   const base = [
     { value: 'community', label: compact ? 'Feed' : 'Community' },
@@ -197,13 +205,10 @@ export const CommunityLibraryLayout = ({
     ? `Search ${activeSubreddit?.name}...`
     : activeTab === 'library' ? 'Search library' : 'Search posts, people, tags...';
   const communityTransitionClassName = prefersReducedMotion ? '' : 'animate-fade-in motion-fade-up';
-  const communitySearchStyle = useMemo(() => ({
-    backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
-    border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.05)',
-    boxShadow: dark ? '0 1px 6px rgba(0,0,0,0.18)' : '0 1px 4px rgba(53,53,53,0.05)',
-    backdropFilter: 'none',
-    WebkitBackdropFilter: 'none',
-  }), [dark]);
+  const communitySearchStyle = useMemo(() => communitySearchSurface(dark), [dark]);
+  const desktopToolbarCols = activeAction
+    ? (showSearch ? 'md:grid-cols-[auto_minmax(0,1fr)_auto]' : 'md:grid-cols-[auto_auto]')
+    : (showSearch ? 'md:grid-cols-[auto_minmax(0,1fr)]' : 'md:grid-cols-[auto]');
 
   const updateCommunityTabMode = useCallback(() => {
     const viewport = topTabsViewportRef.current;
@@ -277,16 +282,25 @@ export const CommunityLibraryLayout = ({
         <ScreenTopChrome theme={theme} contentClassName="pb-2.5" fade={false}>
           <div className="space-y-3">
 
-            {/* Toggle row — always in layout so the search bar never shifts position */}
-            <div ref={topHeaderControlsRef} className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-              <div ref={topTabsViewportRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
-                <div className="inline-block pr-4">
+            {/* Desktop: toggles | search | CTA. Mobile: toggles+CTA row, search below. */}
+            <div
+              ref={topHeaderControlsRef}
+              className={`grid grid-cols-[minmax(0,1fr)_auto] ${desktopToolbarCols} items-center gap-x-2.5 gap-y-2.5`}
+            >
+              <div
+                ref={topTabsViewportRef}
+                className="min-w-0 col-start-1 row-start-1 overflow-x-auto scrollbar-hide scroll-smooth"
+                style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}
+              >
+                <div className="inline-block min-w-full md:min-w-0 pr-1 md:pr-0">
                   <SegmentedToggle
                     value={activeTab}
                     onChange={switchTab}
                     options={tabs}
                     size={topTabToggleSize}
                     theme={theme}
+                    fullWidth
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -295,7 +309,7 @@ export const CommunityLibraryLayout = ({
                 <button
                   type="button"
                   onClick={activeAction}
-                  className="order-2 ml-auto flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] px-3 text-sm leading-none"
+                  className="col-start-2 row-start-1 md:col-start-3 flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] px-3 text-sm leading-none justify-self-end"
                   style={{
                     height: 'var(--jsi-ctrl-h)',
                     backgroundColor: theme.colors.accent || theme.colors.textPrimary,
@@ -304,6 +318,20 @@ export const CommunityLibraryLayout = ({
                 >
                   {actionLabel}
                 </button>
+              ) : null}
+
+              {showSearch ? (
+                <div className="col-span-2 md:col-span-1 md:col-start-2 row-start-2 md:row-start-1 min-w-0 w-full">
+                  <StandardSearchBar
+                    id="community-main-search"
+                    value={query}
+                    onChange={setQuery}
+                    placeholder={searchPlaceholder}
+                    theme={theme}
+                    size="control"
+                    style={communitySearchStyle}
+                  />
+                </div>
               ) : null}
 
               <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
@@ -370,17 +398,6 @@ export const CommunityLibraryLayout = ({
                 />
               )}
             </div>
-
-            {showSearch ? (
-              <StandardSearchBar
-                id="community-main-search"
-                value={query}
-                onChange={setQuery}
-                placeholder={searchPlaceholder}
-                theme={theme}
-                style={communitySearchStyle}
-              />
-            ) : null}
 
           </div>
         </ScreenTopChrome>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Package } from 'lucide-react';
+import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
 import { HOME_SURFACE_DARK, HOME_SURFACE_LIGHT } from '../../design-system/homeChrome.js';
 
@@ -9,10 +10,37 @@ import { HOME_SURFACE_DARK, HOME_SURFACE_LIGHT } from '../../design-system/homeC
  *
  * Shows a card for each category so the user can pick which one to explore.
  * If a series only has one category, routing skips this screen entirely.
+ * If a series has no mapped categories yet, shows an explicit empty state
+ * instead of silently falling back to the products list.
  */
-export const SeriesCategoryPickerScreen = ({ seriesSlug, categories, onNavigate, theme }) => {
+export const SeriesCategoryPickerScreen = ({ seriesSlug, categories = [], onNavigate, theme }) => {
   const dark = isDarkTheme(theme);
-  const seriesName = categories[0]?.productName || seriesSlug;
+  const seriesName = categories[0]?.productName
+    || String(seriesSlug || '')
+      .split('-')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+
+  if (!categories.length) {
+    return (
+      <div className="flex flex-col h-full app-header-offset">
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
+          <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-8 max-w-content mx-auto w-full">
+            <div className="rounded-[24px]" style={cardSurface(theme)}>
+              <SharedEmptyState
+                icon={Package}
+                title={`${seriesName} isn’t in the catalog yet`}
+                description="This family is listed, but product category pages haven’t been wired up. Browse categories or another series in the meantime."
+                action={{ label: 'Back to Products', onClick: () => onNavigate?.('products/families') }}
+                theme={theme}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full app-header-offset">
@@ -30,7 +58,7 @@ export const SeriesCategoryPickerScreen = ({ seriesSlug, categories, onNavigate,
               className="text-[0.875rem]"
               style={{ color: theme.colors.textSecondary }}
             >
-              Available in {categories.length} categories
+              Available in {categories.length} {categories.length === 1 ? 'category' : 'categories'}
             </p>
           </div>
 
@@ -38,7 +66,8 @@ export const SeriesCategoryPickerScreen = ({ seriesSlug, categories, onNavigate,
           <div className="space-y-3">
             {categories.map((cat) => (
               <button
-                key={cat.categoryId}
+                key={`${cat.categoryId}-${cat.productId}`}
+                type="button"
                 onClick={() => onNavigate(`products/category/${cat.categoryId}`, { initialProductId: cat.productId })}
                 className="w-full rounded-[20px] overflow-hidden transition-transform active:scale-[0.98]"
                 style={{

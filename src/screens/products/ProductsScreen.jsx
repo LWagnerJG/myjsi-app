@@ -2,11 +2,11 @@ import React, {
     useState,
     useMemo,
     useCallback,
-    useRef
+    useRef,
+    useEffect,
 } from 'react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
-import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
-import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
+import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import { TabContent } from '../../components/common/TabContent.jsx';
 import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
 import {
@@ -17,6 +17,12 @@ import {
 } from 'lucide-react';
 import { PRODUCTS_CATEGORIES_DATA, JSI_SERIES } from './data.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
+import {
+    ProductsViewToolbar,
+    productViewPath,
+    productViewFromScreen,
+    toSeriesSlug,
+} from './productsChrome.jsx';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
 const cardStyle = (dark, theme) => cardSurface(theme || { colors: { surface: dark ? '#2A2A2A' : '#FFFFFF', border: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)' } });
@@ -190,8 +196,10 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     return (
         <button
             onClick={onToggle}
-            className="h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center active:scale-95 transition border"
+            className="flex-shrink-0 rounded-full flex items-center justify-center active:scale-95 transition border"
             style={{
+                height: 'var(--jsi-ctrl-h)',
+                width: 'var(--jsi-ctrl-h)',
                 backgroundColor: dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface,
                 borderColor: dark ? 'rgba(255,255,255,0.12)' : theme.colors.border,
             }}
@@ -210,6 +218,7 @@ ViewModeToggle.displayName = 'ViewModeToggle';
 // ─── Series Row ─────────────────────────────────────────────────────────────
 const SeriesRow = React.memo(({ series, theme, isLast, onClick }) => (
     <button
+        type="button"
         onClick={() => onClick(series)}
         className="w-full flex items-center justify-between px-4 md:px-5 py-3.5 md:py-4 text-left transition-colors hover:opacity-80 active:opacity-60"
         style={{
@@ -294,25 +303,27 @@ const FamiliesView = React.memo(({ groupedSeries, theme, onSeriesClick, searchTe
 FamiliesView.displayName = 'FamiliesView';
 
 // ─── Main screen ────────────────────────────────────────────────────────────
-export const ProductsScreen = ({ theme, onNavigate }) => {
+export const ProductsScreen = ({ theme, onNavigate, currentScreen, screenParams }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = usePersistentState('pref.products.viewMode', 'list');
-    const [productView, setProductView] = usePersistentState('pref.products.productView', 'categories');
     const scrollContainerRef = useRef(null);
     const dark = isDarkTheme(theme);
-    const bgRgb = dark ? '26,26,26' : '240,237,232';
     const activeViewMode = viewMode === 'list' ? 'list' : 'grid';
-    const activeProductView = productView === 'families' ? 'families' : 'categories';
+    const activeProductView = productViewFromScreen(currentScreen);
 
-    const productViewOptions = [
-        { value: 'categories', label: 'Categories' },
-        { value: 'families', label: 'Our Families' }
-    ];
+    // Honor deep-link / back-nav params that ask for a specific view.
+    useEffect(() => {
+        const requested = screenParams?.productView;
+        if (!requested || !['categories', 'families', 'custom'].includes(requested)) return;
+        if (requested === activeProductView) return;
+        onNavigate?.(productViewPath(requested));
+    }, [screenParams?.productView, activeProductView, onNavigate]);
 
     const filteredCategories = useMemo(() => {
-        if (!searchTerm.trim()) return PRODUCTS_CATEGORIES_DATA || [];
+        const categories = (PRODUCTS_CATEGORIES_DATA || []).filter((category) => category.nav !== 'products/category/customs');
+        if (!searchTerm.trim()) return categories;
         const lowerSearch = searchTerm.toLowerCase();
-        return PRODUCTS_CATEGORIES_DATA.filter(category =>
+        return categories.filter(category =>
             category.name.toLowerCase().includes(lowerSearch) ||
             category.description?.toLowerCase().includes(lowerSearch)
         );
@@ -337,7 +348,10 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     }, [onNavigate]);
 
     const handleSeriesClick = useCallback((series) => {
-        const slug = series.toLowerCase().replace(/\s+/g, '-');
+        const slug = toSeriesSlug(series);
+        if (!slug) return;
+        // Always navigate — App.jsx routes mapped series to comparison/picker,
+        // and unmapped series to an explicit unavailable state (no silent no-op).
         onNavigate(`products/series/${slug}`);
     }, [onNavigate]);
 
@@ -346,9 +360,10 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
     }, [setViewMode]);
 
     const handleViewChange = useCallback((v) => {
-        setProductView(v);
+        if (v === activeProductView) return;
         setSearchTerm('');
-    }, [setProductView]);
+        onNavigate?.(productViewPath(v));
+    }, [activeProductView, onNavigate]);
 
     const handleSearchChange = useCallback((valueOrEvent) => {
         const value = typeof valueOrEvent === 'string'
@@ -359,60 +374,41 @@ export const ProductsScreen = ({ theme, onNavigate }) => {
 
     const clearSearch = useCallback(() => setSearchTerm(''), []);
 
+    const showFamilies = activeProductView === 'families' || (!!searchTerm.trim() && activeProductView === 'categories');
+    const searchPlaceholder = activeProductView === 'families'
+        ? 'Search series...'
+        : 'Search categories...';
+
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <div
                 ref={scrollContainerRef}
                 className="flex-1 overflow-y-auto scrollbar-hide"
             >
-                <div className="max-w-content mx-auto w-full">
-                    <div className="sticky top-0 z-20" style={{ backgroundColor: theme.colors.background }}>
-                        <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-col gap-2.5">
-                            <StandardSearchBar
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                                placeholder="Search series..."
-                                theme={theme}
-                            />
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="min-w-0">
-                                    <SegmentedToggle
-                                        value={activeProductView}
-                                        onChange={handleViewChange}
-                                        options={productViewOptions}
-                                        theme={theme}
-                                        size="sm"
-                                    />
-                                </div>
-                                <div style={{ visibility: activeProductView !== 'families' ? 'visible' : 'hidden' }}>
-                                    <ViewModeToggle
-                                        viewMode={activeViewMode}
-                                        onToggle={toggleViewMode}
-                                        theme={theme}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            aria-hidden="true"
-                            className="pointer-events-none h-2"
-                            style={{
-                                backdropFilter: 'blur(4px) saturate(1.05)',
-                                WebkitBackdropFilter: 'blur(4px) saturate(1.05)',
-                                background: `linear-gradient(to bottom,
-                                    rgba(${bgRgb},0.42) 0%,
-                                    rgba(${bgRgb},0.18) 58%,
-                                    rgba(${bgRgb},0.04) 84%,
-                                    rgba(${bgRgb},0) 100%)`,
-                            }}
-                        />
-                    </div>
-                </div>
+                <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-2" fade={false}>
+                    <ProductsViewToolbar
+                        theme={theme}
+                        activeView={activeProductView === 'custom' ? 'custom' : activeProductView}
+                        onViewChange={handleViewChange}
+                        searchTerm={searchTerm}
+                        onSearchChange={handleSearchChange}
+                        searchPlaceholder={searchPlaceholder}
+                        trailing={
+                            activeProductView !== 'families' ? (
+                                <ViewModeToggle
+                                    viewMode={activeViewMode}
+                                    onToggle={toggleViewMode}
+                                    theme={theme}
+                                />
+                            ) : null
+                        }
+                    />
+                </ScreenTopChrome>
 
-                <div className="px-4 sm:px-6 lg:px-8 pt-0 pb-8">
+                <div className="px-4 sm:px-6 lg:px-8 pt-1 pb-8">
                     <div className="max-w-content mx-auto w-full">
                         <TabContent activeKey={activeProductView} tabIndex={activeProductView === 'categories' ? 0 : 1}>
-                        {(activeProductView === 'families' || searchTerm.trim()) ? (
+                        {showFamilies ? (
                             <div className="w-full mx-auto xl:max-w-[980px] 2xl:max-w-[920px]">
                                 <FamiliesView
                                     groupedSeries={groupedSeries}

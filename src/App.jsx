@@ -202,18 +202,21 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
     }
 
     if (base === 'products' && parts[1] === 'series' && parts[2]) {
-        const matches = SERIES_CATEGORIES[parts[2]];
-        if (matches?.length === 1) {
+        const matches = SERIES_CATEGORIES[parts[2]] || [];
+        if (matches.length === 1) {
             return lazyWrap(ProductComparisonScreen, { categoryId: matches[0].categoryId, initialProductId: matches[0].productId });
         }
-        if (matches?.length > 1) {
-            return lazyWrap(SeriesCategoryPickerScreen, { seriesSlug: parts[2], categories: matches });
-        }
-        // Fallback: show products screen if slug not recognized
+        // Multi-match picker OR explicit empty state for unmapped series (e.g. Addison).
+        // Never silently fall back to ProductsScreen — that looked like a dead click.
+        return lazyWrap(SeriesCategoryPickerScreen, { seriesSlug: parts[2], categories: matches });
     }
 
-    if (base === 'products' && parts[1] === 'category' && parts[2] === 'customs') {
+    if (base === 'products' && (parts[1] === 'custom' || (parts[1] === 'category' && parts[2] === 'customs'))) {
         return lazyWrap(CustomsScreen);
+    }
+
+    if (base === 'products' && (parts[1] === 'families' || !parts[1])) {
+        return lazyWrap(SCREEN_MAP.products);
     }
 
     if (base === 'products' && parts[1] === 'category' && parts.length === 3) {
