@@ -114,11 +114,12 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
     () => onNavigate(`products/category/${categoryId}/competition/${product.id}`),
     [categoryId, onNavigate, product.id]
   );
-  const isGuestCategory = categoryId === 'guest' || /guest/i.test(categoryName || '');
   const isSeatingLikeCategory = /chair|guest|seating|swivel|lounge|bench|stool/i.test(categoryId) ||
     /chair|guest|seating|swivel|lounge|bench|stool/i.test(categoryName || '');
   const isCasegoods = categoryId === 'casegoods';
-  const aspectClass = isGuestCategory ? 'aspect-[4/3] lg:aspect-[16/10] xl:aspect-[16/9]' : 'aspect-[16/10] xl:aspect-[16/9]';
+  // Keep product-photo proportions — avoid ultra-wide 16:9 frames that stretch
+  // square/portrait studio shots and create a visible crop edge on desktop.
+  const aspectClass = isSeatingLikeCategory ? 'aspect-[4/3]' : 'aspect-[5/4] lg:aspect-[4/3]';
 
   let baseZoom = product.heroScale
     ? Math.min(1.18, Math.max(0.85, product.heroScale))
@@ -135,15 +136,11 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.22, 0.8, 0.12, 0.99] }}
     >
-      {/* Product image with crossfade */}
+      {/* Product image with crossfade — no radial mask (that caused the boxy crop) */}
       <AnimatePresence mode="wait">
         <motion.div
           key={product.id}
-          className="absolute inset-0 w-full h-full"
-          style={{
-            maskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 55%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 55%, transparent 100%)',
-          }}
+          className="absolute inset-0 w-full h-full flex items-center justify-center p-3 sm:p-4 lg:p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -152,27 +149,27 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-700"
+            className="max-w-full max-h-full object-contain group-hover:scale-[1.03] transition-transform duration-700"
             style={{ transform: `scale(${baseZoom})` }}
           />
         </motion.div>
       </AnimatePresence>
 
-      {/* Bottom gradient */}
+      {/* Bottom gradient — kept short so it doesn't fight the product photo */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-x-0 bottom-0 h-[42%] pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.18) 40%, rgba(0,0,0,0.02) 65%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.16) 55%, transparent 100%)',
         }}
       />
 
-      {/* Info overlay — frosted glass pill */}
-      <div className="absolute left-0 right-0 bottom-0 px-4 pb-4 pt-12 flex items-end justify-between">
-        <div className="leading-tight select-none">
+      {/* Info overlay */}
+      <div className="absolute left-0 right-0 bottom-0 px-4 pb-4 pt-10 flex items-end justify-between gap-3">
+        <div className="leading-tight select-none min-w-0">
           <AnimatePresence mode="wait">
             <motion.h2
               key={product.name}
-              className="text-[1.625rem] font-bold text-white drop-shadow-md tracking-tight"
+              className="text-[1.5rem] sm:text-[1.625rem] font-bold text-white drop-shadow-md tracking-tight truncate"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -203,6 +200,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           tone="light"
           size="medium"
           icon={<ArrowRight className="w-3.5 h-3.5" />}
+          className="flex-shrink-0"
           style={{
             backgroundColor: dark ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.72)',
             border: 'none',
@@ -280,7 +278,7 @@ const PricingTable = React.memo(({
 
   return (
     <div
-      className="rounded-[24px] overflow-hidden"
+      className="rounded-[24px] overflow-hidden lg:sticky lg:top-3"
       style={{
         ...cardSurface(theme),
         backgroundColor: dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
@@ -441,7 +439,8 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
   return (
     <div className="flex flex-col h-full app-header-offset">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 max-w-content mx-auto w-full">
+        {/* Cap width below global --content-max-width so product photos don't stretch on xl/2xl */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 mx-auto w-full max-w-[720px] lg:max-w-[960px] xl:max-w-[1000px]">
           {/* Category title */}
           <h1
             className="text-[1.25rem] font-bold tracking-tight px-1"
@@ -459,35 +458,36 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
             categoryName={categoryData.name}
           />
 
-          {/* Hero */}
-          <ProductHero
-            product={activeProduct}
-            theme={theme}
-            categoryId={categoryId}
-            onNavigate={onNavigate}
-            categoryName={categoryData.name}
-          />
+          {/* Stacked on mobile; hero + pricing side-by-side on desktop */}
+          <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:gap-4 lg:items-start">
+            <ProductHero
+              product={activeProduct}
+              theme={theme}
+              categoryId={categoryId}
+              onNavigate={onNavigate}
+              categoryName={categoryData.name}
+            />
 
-          {/* Pricing & config */}
-          <PricingTable
-            products={visibleProducts}
-            activeProduct={activeProduct}
-            onSelectProduct={handleProductSelect}
-            theme={theme}
-            categoryId={categoryId}
-            typicalLayout={typicalLayout}
-            onTypicalLayoutChange={setTypicalLayout}
-            conferenceSize={conferenceSize}
-            onConferenceSizeChange={setConferenceSize}
-            loungeConfig={loungeConfig}
-            onLoungeConfigChange={setLoungeConfig}
-            guestLegType={guestLegType}
-            onGuestLegTypeChange={setGuestLegType}
-            credenzaSize={credenzaSize}
-            onCredenzaSizeChange={setCredenzaSize}
-            materialMode={materialMode}
-            onMaterialModeChange={setMaterialMode}
-          />
+            <PricingTable
+              products={visibleProducts}
+              activeProduct={activeProduct}
+              onSelectProduct={handleProductSelect}
+              theme={theme}
+              categoryId={categoryId}
+              typicalLayout={typicalLayout}
+              onTypicalLayoutChange={setTypicalLayout}
+              conferenceSize={conferenceSize}
+              onConferenceSizeChange={setConferenceSize}
+              loungeConfig={loungeConfig}
+              onLoungeConfigChange={setLoungeConfig}
+              guestLegType={guestLegType}
+              onGuestLegTypeChange={setGuestLegType}
+              credenzaSize={credenzaSize}
+              onCredenzaSizeChange={setCredenzaSize}
+              materialMode={materialMode}
+              onMaterialModeChange={setMaterialMode}
+            />
+          </div>
         </div>
       </div>
     </div>
