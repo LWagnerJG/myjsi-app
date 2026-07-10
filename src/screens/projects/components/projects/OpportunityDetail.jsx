@@ -55,7 +55,11 @@ const TEXT_INPUT_CLASS = `w-full ${FIELD_CONTROL_MINH} px-3.5 bg-transparent out
 
 const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)');
 
-const fieldSurface = (theme) => fieldTileSurface(theme);
+const fieldSurface = (theme) => ({
+  backgroundColor: detailTileBg(theme),
+  // Card radius — pill (9999px) turns multi-row blocks into stadium shapes
+  borderRadius: DETAIL_RADIUS_INSET,
+});
 
 const multilineSurface = (theme) => ({
   backgroundColor: detailTileBg(theme),
@@ -1323,9 +1327,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const labelStyle = { color: c.textSecondary, opacity: 0.72 };
 
   return (
-    <div className="flex flex-col h-full app-header-offset" style={{ background: c.background }}>
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-28 sm:pb-6">
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 max-w-content mx-auto w-full">
+    <div className="min-h-full app-header-offset" style={{ background: c.background }}>
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-28 sm:pb-10 max-w-content mx-auto w-full">
 
           {isClosed && (
             <motion.div
@@ -1906,7 +1909,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </div>
           ) : null}
 
-        </div>
       </div>
 
       {/* discount dropdown */}

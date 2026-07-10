@@ -42,7 +42,9 @@ export const SegmentedToggle = ({
   const s = sizes[size] || sizes.md;
   const containerBg = theme?.colors?.subtle || '#E3E0D8';
   const selectedText = theme?.colors?.textPrimary || '#1a1a1a';
-  const unselectedText = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
+  const unselectedText = theme?.colors?.textSecondary
+    ? (dark ? 'rgba(240,240,240,0.78)' : theme.colors.textSecondary)
+    : (dark ? 'rgba(240,240,240,0.78)' : '#6A6762');
   const badgeBg = theme?.colors?.error || '#B85C5C';
   const selectedPillStyle = dark
     ? { backgroundColor: 'rgba(255,255,255,0.14)' }

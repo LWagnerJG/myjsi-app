@@ -133,7 +133,7 @@ const StandardsProgramDetailModal = ({ program, customer, theme, onClose }) => {
           <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
             <div>
               <h3 className="text-base font-bold" style={{ color: c.textPrimary }}>{program.title}</h3>
-              <p className="text-sm mt-1" style={{ color: c.textSecondary }}>{customer.name} · {customer.location.city}, {customer.location.state}</p>
+              <p className="text-sm mt-1" style={{ color: c.textSecondary }}>{customer.name} · {[customer.location?.city, customer.location?.state].filter(Boolean).join(', ') || 'Location TBD'}</p>
             </div>
 
             {/* PO Requirements */}
@@ -264,7 +264,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onUpdateCustomer }) =
   const activeStandards = (customer.standardsPrograms || []).filter(p => p.status === 'Active' || p.status === 'Expiring').length;
   const currentOrders = (customer.orders?.current || []).length;
   const lastInstall = useMemo(() =>
-    [...allInstalls].sort((a, b) => b.date.localeCompare(a.date))[0]?.date,
+    [...allInstalls].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))[0]?.date,
     [allInstalls]
   );
 
@@ -310,7 +310,7 @@ export const CustomerMicrositeScreen = ({ customer, theme, onUpdateCustomer }) =
                 <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-3 h-3 shrink-0" style={{ color: c.textSecondary }} />
-                    <span className="text-[0.8125rem]" style={{ color: c.textSecondary }}>{customer.location.city}, {customer.location.state}</span>
+                    <span className="text-[0.8125rem]" style={{ color: c.textSecondary }}>{[customer.location?.city, customer.location?.state].filter(Boolean).join(', ') || 'Location TBD'}</span>
                   </div>
                   <span className="text-[0.6875rem] font-bold px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: `${verticalColor}18`, color: verticalColor }}>

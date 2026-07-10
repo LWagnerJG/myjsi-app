@@ -149,6 +149,12 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 // Uses the same frosted-glass language as the home screen pill and app header.
 // size="md" (default): 56px standalone search
 // size="control": matches SegmentedToggle / CTA height via --jsi-ctrl-h
+//
+// Control typography MUST match SegmentedToggle `sm` / `smDense`:
+//   0.8125rem · font-weight 600 · unselected color for placeholders
+const CONTROL_TEXT_SIZE = '0.8125rem';
+const CONTROL_TEXT_WEIGHT = 600;
+
 export const SearchInput = React.memo(function SearchInput({
     id,
     value = '',
@@ -171,9 +177,15 @@ export const SearchInput = React.memo(function SearchInput({
       ? '0 2px 10px rgba(0,0,0,0.25)'
       : '0 2px 10px rgba(53,53,53,0.08)';
     const iconColor = theme?.colors?.textSecondary || '#666';
+    // Match SegmentedToggle unselected label color for placeholder / subtle text
+    const placeholderColor = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
     const iconSize = isControl ? 15 : 18;
     const clearSize = isControl ? 18 : 22;
     const clearIcon = isControl ? 10 : 11;
+    const inputFontSize = isControl ? CONTROL_TEXT_SIZE : '1rem';
+    const inputFontWeight = isControl ? CONTROL_TEXT_WEIGHT : 400;
+    const reactId = React.useId().replace(/:/g, '');
+    const placeholderStyleId = `search-ph-${reactId}`;
 
     return (
         <div
@@ -194,11 +206,27 @@ export const SearchInput = React.memo(function SearchInput({
                 ...style,
             }}
         >
+            <style>{`
+                #${placeholderStyleId}::placeholder {
+                    color: ${placeholderColor};
+                    opacity: 1;
+                    font-size: ${inputFontSize};
+                    font-weight: ${inputFontWeight};
+                    letter-spacing: normal;
+                }
+                #${placeholderStyleId}::-webkit-input-placeholder {
+                    color: ${placeholderColor};
+                    opacity: 1;
+                    font-size: ${inputFontSize};
+                    font-weight: ${inputFontWeight};
+                }
+            `}</style>
             <Search
                 aria-hidden="true"
-                style={{ width: iconSize, height: iconSize, color: iconColor, opacity: 0.6, flexShrink: 0 }}
+                style={{ width: iconSize, height: iconSize, color: placeholderColor, opacity: 1, flexShrink: 0 }}
             />
             <input
+                id={placeholderStyleId}
                 type="search"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
@@ -206,7 +234,8 @@ export const SearchInput = React.memo(function SearchInput({
                 className={`flex-1 h-full bg-transparent outline-none ${inputClassName}`}
                 style={{
                     color: theme?.colors?.textPrimary || '#111',
-                    fontSize: isControl ? '0.875rem' : '1rem',
+                    fontSize: inputFontSize,
+                    fontWeight: inputFontWeight,
                     lineHeight: 1,
                 }}
                 aria-label={placeholder}
