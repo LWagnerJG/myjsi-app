@@ -310,6 +310,9 @@ export const sectionCardSurface = (theme) => {
 
 /**
  * Standard cool-grey inset tile for grouped controls and lightweight data blocks.
+ * NOTE: Uses pill radius — intended for compact controls (search shells, chips,
+ * icon wells). Do NOT spread onto tall multi-row blocks with overflow:hidden;
+ * override borderRadius to lg/xl for card-like groups.
  */
 export const fieldTileSurface = (theme) => {
   const dark = isDarkTheme(theme);
