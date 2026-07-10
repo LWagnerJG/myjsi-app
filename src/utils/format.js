@@ -9,6 +9,28 @@ export const formatCurrency = (n = 0) =>
   `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 
 /**
+ * Parse a currency-ish value ("$50,000", 50000, "$50k") into a number.
+ * @param {string|number|null|undefined} value
+ * @returns {number}
+ */
+export const parseCurrencyAmount = (value) => {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  const raw = String(value ?? '').trim();
+  if (!raw) return 0;
+  const cleaned = raw.replace(/[^0-9.-]/g, '');
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+/**
+ * Format currency or a fallback when missing/non-positive.
+ * @param {number|null|undefined} n
+ * @param {string} [fallback]
+ */
+export const formatCurrencyOrTbd = (n, fallback = 'TBD') =>
+  n == null || Number.isNaN(Number(n)) ? fallback : formatCurrency(n);
+
+/**
  * Format a number as USD currency with 2 decimals
  * @param {number} n - The number to format
  * @returns {string} Formatted currency string (e.g., "$1,234.56")
@@ -31,12 +53,12 @@ export const formatCurrencyCompact = (n = 0) => {
 };
 
 /**
- * Format company name with proper title case
- * @param {string} name - Company name to format
- * @returns {string} Title-cased company name
+ * Format company / org names. Delegates to smartTitleCase so acronyms
+ * (LLC, INC, MSD) stay consistent across sales, orders, and projects.
+ * @param {string} name
+ * @returns {string}
  */
-export const formatCompanyName = (name) =>
-  name ? name.toLowerCase().replace(/\b(\w)/g, (s) => s.toUpperCase()) : '';
+export const formatCompanyName = (name) => smartTitleCase(name);
 
 /**
  * Smart title-case: respects acronyms (LLC, INC, MSD, LECC, etc.),
@@ -107,24 +129,45 @@ export const formatLongDate = (dateStr) =>
   dateStr ? (formatDate(dateStr, { month: 'short', day: 'numeric', year: 'numeric' }) || '—') : '—';
 
 /**
+ * Weekday + short month/day/year (sample order detail headers).
+ * @param {string|Date} dateStr
+ * @returns {string} e.g. "Mon, Jan 15, 2025"
+ */
+export const formatWeekdayDate = (dateStr) =>
+  formatDate(dateStr, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+/**
  * Format a date as a relative time string ("3d ago", "2w ago", "just now").
  * Falls back to a short absolute date once older than 30 days.
  * @param {string|Date} dateStr
+ * @param {{ todayLabel?: string, yesterdayLabel?: string, dayGranularity?: boolean }} [opts]
  * @returns {string}
  */
-export const formatRelativeTime = (dateStr) => {
+export const formatRelativeTime = (dateStr, opts = {}) => {
   if (!dateStr) return '';
   const date = parseDate(dateStr);
   if (!date) return '';
+  const todayLabel = opts.todayLabel ?? 'just now';
+  const yesterdayLabel = opts.yesterdayLabel ?? 'yesterday';
   const diffMs = Date.now() - date.getTime();
-  if (diffMs < 0) return 'just now';
+  if (diffMs < 0) return todayLabel;
+
+  // Day-granularity mode (sample orders): Today / Yesterday / Nd ago
+  if (opts.dayGranularity) {
+    const days = Math.floor(diffMs / 86400000);
+    if (days === 0) return opts.todayLabel || 'Today';
+    if (days === 1) return opts.yesterdayLabel || 'Yesterday';
+    if (days < 7) return `${days}d ago`;
+    return formatShortDate(dateStr);
+  }
+
   const mins = Math.floor(diffMs / 60000);
   const hours = Math.floor(diffMs / 3600000);
   const days = Math.floor(diffMs / 86400000);
-  if (mins < 1) return 'just now';
+  if (mins < 1) return todayLabel;
   if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
-  if (days === 1) return 'yesterday';
+  if (days === 1) return yesterdayLabel;
   if (days < 7) return `${days}d ago`;
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
   return formatShortDate(dateStr);

@@ -20,6 +20,8 @@
 // b_white so any transparency flattens onto a clean white background.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { CLOUDINARY_UPLOAD_BASE, cloudinaryImageUrl } from '../../../utils/cloudinary.js';
+
 export const GBB_SLUG = 'good-better-best';
 export const GBB_ROUTE = `presentations/${GBB_SLUG}`;
 
@@ -29,11 +31,12 @@ export const GBB_TIERS = [
     { id: 'best', label: 'Best', dot: '#4A7C59' },
 ];
 
-export const CLOUDINARY_BASE = 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload';
+/** @deprecated Prefer CLOUDINARY_UPLOAD_BASE from utils/cloudinary.js */
+export const CLOUDINARY_BASE = CLOUDINARY_UPLOAD_BASE;
 // Real JSI product photography. Public IDs match the catalog on jsifurniture.com.
 // b_white guarantees a clean white background even for transparent source PNGs.
 const cl = (publicId, transform = 'c_pad,w_1000,h_820,b_white/f_auto/q_auto') =>
-    `${CLOUDINARY_BASE}/${transform}/v1/${publicId}`;
+    cloudinaryImageUrl(publicId, transform);
 
 const item = (series, model, price, spec, publicId) => ({
     series, model, price, spec, publicId, image: cl(publicId),

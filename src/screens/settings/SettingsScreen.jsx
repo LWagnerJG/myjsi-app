@@ -4,6 +4,7 @@ import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { User, Bell, Palette, ChevronDown, Loader2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
+import { useLeadTimeFavorites } from '../../hooks/useLeadTimeFavorites.js';
 import {
   isDarkTheme,
   DESIGN_TOKENS,
@@ -148,16 +149,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     { label: 'Products and community', keys: ['leadTimeChange', 'communityPost'] },
   ];
   const notifLabels = { newOrder:'New order placed', orderUpdate:'Order status update', samplesShipped:'Samples shipped', leadTimeChange:'Lead time change', replacementApproved:'Replacement approved', commissionPosted:'Commission posted', communityPost:'New JSI community post' };
-  const [leadTimeFavorites, setLeadTimeFavorites] = useState(() => {
-    try { const raw = localStorage.getItem('leadTimeFavorites'); const parsed = raw ? JSON.parse(raw) : []; return Array.isArray(parsed) ? parsed : []; } catch { return []; }
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem('leadTimeFavorites', JSON.stringify(leadTimeFavorites));
-    } catch (_storageError) {
-      return;
-    }
-  }, [leadTimeFavorites]);
+  const [leadTimeFavorites, setLeadTimeFavorites] = useLeadTimeFavorites();
   const leadTimeOptions = useMemo(() => {
     const unique = Array.from(new Set(LEAD_TIMES_DATA.map(item => item.series))).sort();
     return unique.slice(0, 24);

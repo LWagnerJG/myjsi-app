@@ -6,7 +6,7 @@ import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { getUnifiedBackdropStyle, UNIFIED_BACKDROP_TRANSITION, UNIFIED_MODAL_Z } from '../../components/common/modalUtils.js';
 import { INITIAL_SAMPLE_ORDERS } from './sampleOrders.js';
 import { resolveOrderProjectLink, summarizeProjectQuotes } from '../../utils/projectLinks.js';
-import { parseDate } from '../../utils/format.js';
+import { formatShortDate, formatWeekdayDate, formatRelativeTime, parseDate } from '../../utils/format.js';
 
 const STATUS_CONFIG = {
     'processing': { label: 'Processing', color: '#D4A843', icon: Clock, bg: (dk) => dk ? 'rgba(212,168,67,0.12)' : 'rgba(212,168,67,0.08)' },
@@ -30,26 +30,9 @@ const PROJECT_STAGE_BADGE = {
     'Lost': { color: '#B85C5C', bg: 'rgba(184,92,92,0.12)' },
 };
 
-// parseDate treats date-only strings (eta / deliveredDate) as local calendar
-// dates — naive new Date('YYYY-MM-DD') parses UTC and shows the previous day
-// in US timezones.
-function formatDate(iso) {
-    const d = parseDate(iso);
-    return d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-}
-function formatFullDate(iso) {
-    const d = parseDate(iso);
-    return d ? d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : '';
-}
-function relativeDate(iso) {
-    const d = parseDate(iso);
-    if (!d) return '';
-    const days = Math.floor((new Date() - d) / 86400000);
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days > 1 && days < 7) return `${days}d ago`;
-    return formatDate(iso);
-}
+const formatDate = formatShortDate;
+const formatFullDate = formatWeekdayDate;
+const relativeDate = (iso) => formatRelativeTime(iso, { dayGranularity: true });
 
 // ─── Follow-up email builder ────────────────────────────────────────────────
 function buildFollowUp(order) {

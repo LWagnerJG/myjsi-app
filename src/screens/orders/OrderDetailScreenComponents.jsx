@@ -3,12 +3,11 @@ import { createPortal } from 'react-dom';
 import { Share2, X, Play, Download, MapPin } from 'lucide-react';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../components/common/modalUtils.js';
 import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
-import { formatCurrencyDecimal, formatCurrency, formatLongDate, formatShortDate } from '../../utils/format.js';
+import { formatCurrencyDecimal, formatCurrency, formatLongDate, formatShortDate, smartTitleCase } from '../../utils/format.js';
 
 /* ── helpers ────────────────────────────────────────────────── */
-const ABBR = /\b(llc|inc|msd|lecc)\b/gi;
 // eslint-disable-next-line react-refresh/only-export-components
-export const tc = s => s?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(ABBR, m => m.toUpperCase()) ?? '';
+export const tc = (s) => smartTitleCase(s);
 // eslint-disable-next-line react-refresh/only-export-components
 export const fmt$ = (n, cents) => cents ? formatCurrencyDecimal(n) : formatCurrency(n);
 // eslint-disable-next-line react-refresh/only-export-components

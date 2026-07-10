@@ -7,6 +7,7 @@ import { getHomeChromePillStyles, HOME_CHROME_PILL_HEIGHT, HOME_SURFACE_LIGHT, H
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
+import { useLeadTimeFavorites } from '../../hooks/useLeadTimeFavorites.js';
 import { MessageSquarePlus } from 'lucide-react';
 import { FloatingActionCTA } from '../../components/common/FloatingActionCTA.jsx';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
@@ -86,7 +87,7 @@ export const HomeScreen = React.memo(({
     const [homeFeatureMode, setHomeFeatureMode] = usePersistentState('pref.homeFeatureMode.primary', 'activity');
     const [secondaryFeatureMode, setSecondaryFeatureMode] = usePersistentState('pref.homeFeatureMode.secondary', 'community');
     const [recentSpotlightItems, setRecentSpotlightItems] = usePersistentState('home.spotlightRecents', []);
-    const [leadTimeFavorites, setLeadTimeFavorites] = useState([]);
+    const [leadTimeFavorites] = useLeadTimeFavorites();
     const prevHomeResetKeyRef = useRef(homeResetKey);
 
     // Handle quick action selection from dropdown
@@ -207,16 +208,6 @@ export const HomeScreen = React.memo(({
             onUpdateHomeApps(normalized);
         }
     }, [homeApps, normalizeHomeApps, onUpdateHomeApps]);
-
-    useEffect(() => {
-        try {
-            const raw = localStorage.getItem('leadTimeFavorites');
-            const parsed = raw ? JSON.parse(raw) : [];
-            setLeadTimeFavorites(Array.isArray(parsed) ? parsed : []);
-        } catch {
-            setLeadTimeFavorites([]);
-        }
-    }, []);
 
     // Close chat only when homeResetKey actually changes (e.g., clicking MyJSI logo)
     useEffect(() => {

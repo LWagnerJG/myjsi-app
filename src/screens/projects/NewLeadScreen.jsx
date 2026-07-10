@@ -18,6 +18,7 @@ import { CITY_OPTIONS } from '../../constants/locations.js';
 import { JSI_SERIES } from '../products/data.js';
 import { CONTRACTS_DATA } from '../resources/contracts/data.js';
 import { ProductCard, ProductSpotlight, ProjectSpotlight, Reveal, Row, Section, SpecifierPicker, buildSpecifierOptions, getDefaultSpecifierOption, isSpecifierCandidate } from './NewLeadScreenComponents.jsx';
+import { normalizeMatchToken as normalizeText } from '../../utils/normalizeText.js';
 
 const WIN_PRESETS = [10, 25, 50, 75, 90];
 const WIN_MIN = 5;
@@ -70,7 +71,6 @@ const parseCurrency = (raw) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-const normalizeText = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 const formatBytes = (bytes) => {
   if (bytes < 1024) return `${bytes} B`;

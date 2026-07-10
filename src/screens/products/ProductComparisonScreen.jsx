@@ -6,6 +6,7 @@ import { PRODUCT_DATA } from './data.js';
 import { isDarkTheme, cardSurface, subtleBg } from '../../design-system/tokens.js';
 import { HOME_SURFACE_DARK, HOME_SURFACE_LIGHT } from '../../design-system/homeChrome.js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatCurrencyOrTbd } from '../../utils/format.js';
 
 // ─── Configuration option sets ───────────────────────────────────────────────
 const CASEGOODS_TYPICAL_OPTIONS = ['U-Shape','L-Shape','Single Ped','AH Desk'];
@@ -187,7 +188,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              ${product.price?.toLocaleString() || 'TBD'}
+              {formatCurrencyOrTbd(product.price)}
             </motion.p>
           </AnimatePresence>
         </div>
@@ -371,7 +372,7 @@ const PricingTable = React.memo(({
                   fontWeight: active ? 600 : 450,
                 }}
               >
-                ${price?.toLocaleString?.() || 'TBD'}
+                {formatCurrencyOrTbd(price)}
               </span>
             </button>
           );
