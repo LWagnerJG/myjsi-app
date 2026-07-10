@@ -312,7 +312,7 @@ export const sectionCardSurface = (theme) => {
  * Standard cool-grey inset tile for grouped controls and lightweight data blocks.
  * NOTE: Uses pill radius — intended for compact controls (search shells, chips,
  * icon wells). Do NOT spread onto tall multi-row blocks with overflow:hidden;
- * override borderRadius to lg/xl for card-like groups.
+ * use groupedTileSurface() for card-like groups instead.
  */
 export const fieldTileSurface = (theme) => {
   const dark = isDarkTheme(theme);
@@ -320,6 +320,19 @@ export const fieldTileSurface = (theme) => {
     backgroundColor: dark ? 'rgba(255,255,255,0.055)' : '#F2F4F6',
     border: 'none',
     borderRadius: DESIGN_TOKENS.borderRadius.pill,
+  };
+};
+
+/**
+ * Card-radius tile for multi-row grouped settings / detail blocks.
+ * Same fill language as fieldTileSurface without the stadium pill clip.
+ */
+export const groupedTileSurface = (theme, { radius = DESIGN_TOKENS.borderRadius.lg } = {}) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : '#F2F4F6',
+    border: 'none',
+    borderRadius: radius,
   };
 };
 

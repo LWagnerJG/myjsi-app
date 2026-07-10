@@ -12,8 +12,8 @@ import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
 import { formatCurrency, formatCompanyName, formatRelativeTime, formatShortDate } from '../../utils/format.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
-const ORDERS_SHELL_CLASS = 'w-full max-w-[1120px] mx-auto';
-const ORDERS_EDGE_PADDING = 'px-4 sm:px-6 lg:px-8 xl:px-6';
+const ORDERS_SHELL_CLASS = 'w-full max-w-content mx-auto';
+const ORDERS_EDGE_PADDING = 'px-4 sm:px-6 lg:px-8';
 
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [selectedDate, setSelectedDate] = useState(null);

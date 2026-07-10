@@ -10,6 +10,7 @@ import {
   DESIGN_TOKENS,
   inputSurface,
   fieldTileSurface,
+  groupedTileSurface,
   modalCardSurface,
   FIELD_LABEL_CLASSNAME,
   SECTION_TITLE_CLASSNAME,
@@ -167,17 +168,13 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     return Array.from(new Set(candidates.filter(Boolean).map((item) => String(item).trim()))).slice(0, 6);
   }, [userSettings?.homeAddress, userSettings?.streetAddress]);
   const rowDivider = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.035)';
-  // Grouped settings rows need a card radius — fieldTileSurface is pill (9999px)
-  // and with overflow-hidden that clips tall blocks into a stadium mask.
-  const groupedTileSurface = {
+  const groupedRows = {
+    ...groupedTileSurface(theme),
     backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(240,237,232,0.72)',
-    border: 'none',
-    borderRadius: DESIGN_TOKENS.borderRadius.lg,
   };
   const insetTileSurface = {
+    ...groupedTileSurface(theme),
     backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(240,237,232,0.92)',
-    border: 'none',
-    borderRadius: DESIGN_TOKENS.borderRadius.lg,
   };
   const settingsCardStyle = isDark ? {} : { border: 'none' };
   const settingsInputStyle = {
@@ -361,7 +358,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
                   {group.label}
                 </span>
               </div>
-              <div className="rounded-2xl overflow-hidden" style={groupedTileSurface}>
+              <div className="rounded-2xl overflow-hidden" style={groupedRows}>
                 {group.keys.map((k, index) => (
                   <div key={k}>
                     <div className="flex items-center justify-between px-4 py-3 gap-4">
@@ -417,7 +414,7 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
       <GlassCard theme={theme} className="overflow-hidden" style={settingsCardStyle}>
         <SectionHeader icon={Palette} title="Appearance" theme={theme} />
         <div className="px-5 pb-5">
-          <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between gap-4" style={groupedTileSurface}>
+          <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between gap-4" style={groupedRows}>
             <div>
               <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Dark mode</p>
               <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>Use a lower-glare theme throughout the app.</p>

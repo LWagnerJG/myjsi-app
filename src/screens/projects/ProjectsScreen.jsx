@@ -265,13 +265,14 @@ export const ProjectsScreen = forwardRef(({
   projectsInitialTab, clearProjectsInitialTab,
   projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
-  setBackHandler, sampleOrders,
+  setBackHandler, sampleOrders, myProjects = [],
   screenParams,
 }, ref) => {
   const isDark = isDarkTheme(theme);
   const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
   const [selectedPipelineStage, setSelectedPipelineStage] = usePersistentState('pref.projects.pipelineStage', 'Discovery');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [deepLinkResolved, setDeepLinkResolved] = useState(!deepLinkOppId);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const [customerType, setCustomerType] = usePersistentState('pref.projects.customerType', 'end-users');
@@ -319,16 +320,19 @@ export const ProjectsScreen = forwardRef(({
   useEffect(() => {
     if (!deepLinkOppId) {
       setSelectedOpportunity(null);
+      setDeepLinkResolved(true);
       return;
     }
 
     if (!Array.isArray(opportunities)) {
       setSelectedOpportunity(null);
+      setDeepLinkResolved(true);
       return;
     }
 
     const match = opportunities.find(o => String(o.id) === String(deepLinkOppId));
     setSelectedOpportunity(match || null);
+    setDeepLinkResolved(true);
   }, [deepLinkOppId, opportunities]);
 
   useImperativeHandle(ref, () => ({
@@ -520,7 +524,32 @@ export const ProjectsScreen = forwardRef(({
     return () => window.cancelAnimationFrame(frame);
   }, [projectsTab, projectsTabOptions, projectsToggleMode]);
 
-  const allProjects = useMemo(() => getAllProjectsWithMeta(customers), [customers]);
+  const catalogInstalls = useMemo(() => getAllProjectsWithMeta(customers), [customers]);
+  const userInstalls = useMemo(() => (myProjects || []).map((project) => {
+    const location = typeof project.location === 'string'
+      ? project.location
+      : [project.location?.city, project.location?.state].filter(Boolean).join(', ');
+    return {
+      ...project,
+      customerName: project.customerName || project.company || location || 'Install',
+      installCount: project.installCount ?? project.photoCount ?? (Array.isArray(project.photos) ? project.photos.length : 0),
+      image: project.image || (Array.isArray(project.photos) ? project.photos[0] : '') || '',
+      location: location || 'Location TBD',
+    };
+  }), [myProjects]);
+  const allProjects = useMemo(() => {
+    const seen = new Set();
+    const merged = [];
+    for (const project of [...userInstalls, ...catalogInstalls]) {
+      const key = String(project.id);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(project);
+    }
+    return merged;
+  }, [userInstalls, catalogInstalls]);
+
+  const deepLinkMissing = deepLinkResolved && Boolean(deepLinkOppId) && !selectedOpportunity;
 
   if (selectedCustomer) return (
     <CustomerMicrositeScreen
@@ -542,11 +571,27 @@ export const ProjectsScreen = forwardRef(({
       onNavigate={onNavigate}
       onOpenCustomer={setSelectedCustomer}
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
-      onMarkLost={updated => { updateOpportunity(updated); setSelectedOpportunity(null); onNavigate('projects'); }}
-      onDelete={id => { deleteOpportunity(id); setSelectedOpportunity(null); onNavigate('projects'); }}
-      onDone={() => { setSelectedOpportunity(null); onNavigate('projects'); }}
+      onMarkLost={updated => { updateOpportunity(updated); setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('projects'); }}
+      onDelete={id => { deleteOpportunity(id); setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('projects'); }}
+      onDone={() => { setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('projects'); }}
     />
   );
+
+  if (deepLinkMissing) {
+    return (
+      <div className="min-h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
+        <div className="px-4 sm:px-6 lg:px-8 pt-8 max-w-content mx-auto w-full">
+          <SharedEmptyState
+            icon={Briefcase}
+            theme={theme}
+            title="Project not found"
+            description="This project link is invalid or the project was removed."
+            action={{ label: 'Back to Projects', onClick: () => onNavigate('projects') }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
@@ -765,7 +810,7 @@ const CustomerCard = React.memo(({ customer, isDark, onClick }) => {
             <h3 className="text-[0.9375rem] font-bold text-white tracking-tight leading-snug">{customer.name}</h3>
             <div className="flex items-center gap-1 mt-0.5">
               <MapPin className="w-2.5 h-2.5 text-white/80" />
-              <span className="text-xs text-white/80">{customer.location.city}, {customer.location.state}</span>
+              <span className="text-xs text-white/80">{customer.location?.city || '—'}{customer.location?.state ? `, ${customer.location.state}` : ''}</span>
             </div>
             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
               {activeStds > 0 && (
