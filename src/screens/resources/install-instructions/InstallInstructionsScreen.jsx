@@ -1,3 +1,4 @@
+import { normalizeSearchText as normalizeText } from '../../../utils/normalizeText.js';
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { isDarkTheme } from '../../../design-system/tokens.js';
@@ -19,15 +20,6 @@ const TYPE_META = {
   General: { bgLightA: '#DDD9D2', bgLightB: '#C2BCB0', bgDarkA: '#37342F', bgDarkB: '#2A2723' },
 };
 
-const normalizeText = (value) => (
-  String(value || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-);
 
 const toEmbedUrl = (rawUrl) => {
   if (!rawUrl) return null;

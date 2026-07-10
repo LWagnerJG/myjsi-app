@@ -1,9 +1,12 @@
+import { formatCurrency, parseCurrencyAmount } from '../../../../utils/format.js';
+
 export const PROJECTS_TAB_OPTIONS = [
   { value: 'pipeline', label: 'Active Projects' },
   { value: 'customers', label: 'Customers' },
   { value: 'my-projects', label: 'Installations' },
 ];
 
+/** Mock dealer contact directory for project stakeholder pickers. */
 export const DEALER_CONTACTS = {
   'Business Furniture': [
     { name: 'Mike Johnson', title: 'Account Manager' },
@@ -28,4 +31,13 @@ export const DEALER_CONTACTS = {
   ],
 };
 
-export const fmtCurrency = (v) => typeof v === 'string' ? (v.startsWith('$')? v : '$'+v) : (v ?? 0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+/**
+ * Format project pipeline totals. Accepts numeric values or pre-formatted "$…" strings.
+ */
+export const fmtCurrency = (v) => {
+  if (typeof v === 'string') {
+    if (v.startsWith('$')) return v;
+    return formatCurrency(parseCurrencyAmount(v));
+  }
+  return formatCurrency(v ?? 0);
+};

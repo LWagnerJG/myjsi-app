@@ -23,6 +23,7 @@ import {
     productViewFromScreen,
     toSeriesSlug,
 } from './productsChrome.jsx';
+import { CLOUDINARY_THUMB_PREFIX as CLD } from '../../utils/cloudinary.js';
 
 // ─── Clean card helpers ───────────────────────────────────────────────────────────────
 const cardStyle = (dark, theme) => cardSurface(theme || { colors: { surface: dark ? '#2A2A2A' : '#FFFFFF', border: dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)' } });
@@ -31,7 +32,6 @@ const normalizeSeriesKey = (value) => String(value || '').toLowerCase().replace(
 
 // Curated family thumbnails for "Our Families" rows.
 // Uses true cutout/white-space product imagery where available.
-const CLD = 'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/t_thumbnail/c_limit,w_256/f_auto/q_auto/v1';
 const SERIES_THUMBNAILS = Object.freeze({
     'addison': '/series-images/jsi_addison_comp_00015.jpg',
     'americana': '/category-images/swivel-images/api_americana.jpg',

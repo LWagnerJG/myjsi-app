@@ -1,12 +1,10 @@
 // Products feature data
+import { cloudinaryImageUrl } from '../../utils/cloudinary.js';
+import { slugify } from '../../utils/normalizeText.js';
 
 const localImage = (path) => path;
-const jsiImg = (publicId, size = 'medium') => {
-  const t = size === 'thumb' ? 't_thumbnail/c_limit,w_256' : size === 'large' ? 't_large/c_limit,w_1200' : 't_medium/c_fill,w_640,h_640,g_auto';
-  return `https://res.cloudinary.com/jasper-jsi-furniture/image/upload/${t}/f_auto/q_auto/v1/${publicId}`;
-};
-
-const comp = (name, laminate) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-'), name, laminate });
+const jsiImg = (publicId, size = 'medium') => cloudinaryImageUrl(publicId, size);
+const comp = (name, laminate) => ({ id: slugify(name), name, laminate });
 
 export const PRODUCT_DATA = {
     'benches': {
@@ -23,7 +21,6 @@ export const PRODUCT_DATA = {
             { id: 'oxley', name: 'Oxley', price: 1360, image: localImage('/category-images/bench-images/api_oxley.jpg') },
             { id: 'poet', name: 'Poet', price: 1280, image: localImage('/category-images/bench-images/api_poet.jpg') },
         ],
-        competition: [],
         competitionByProduct: {
             'americana-bench': [comp('OFS Rowen Bench', '$1480', '-3%'), comp('Kimball EverySpace', '$1550', '-2%'), comp('Indiana Clutch', '$1460', '+4%')],
             'native': [comp('OFS Rowen Bench', '$1250', '-4%'), comp('Kimball EverySpace', '$1325', '-9%'), comp('Indiana Clutch', '$1180', '+2%')],
@@ -39,7 +36,6 @@ export const PRODUCT_DATA = {
             { id: 'flux', name: 'Flux', price: 3700, image: localImage('/category-images/casegood-images/api_flux-private-office.jpg') },
             { id: 'vision', name: 'Vision', price: 3200, image: localImage('/category-images/casegood-images/api_vision.jpg') },
         ],
-        competition: [],
         competitionByProduct: {
             'vision': [comp('OFS Staks', '$3350', '-5%'), comp('Kimball Narrate', '$3425', '-7%'), comp('Indiana Canvas', '$3180', '+1%'), comp('Hon Abound', '$3050', '+5%')],
             'flux': [comp('OFS ReframE', '$3825', '-3%'), comp('Kimball Alterna', '$3775', '-2%'), comp('Indiana Gesso', '$3650', '+1%')],
@@ -60,7 +56,6 @@ export const PRODUCT_DATA = {
             { id: 'walden-table', name: 'Walden', price: 5100, image: localImage('/category-images/conference-images/api_walden.jpg') },
             { id: 'wellington-table', name: 'Wellington', price: 5400, image: localImage('/category-images/conference-images/api_wellington.jpg') },
         ],
-        competition: [],
         competitionByProduct: {
             'vision-table': [comp('OFS Eleven Table', '$4625', '-3%'), comp('Kimball Dock', '$4550', '-1%'), comp('Indiana Canvas Meet', '$4380', '+3%')],
             'reef': [comp('Kimball KORE', '$4320', '-3%'), comp('OFS Applause', '$4210', '-0%'), comp('Hon Preside', '$4050', '+4%')],
@@ -90,7 +85,6 @@ export const PRODUCT_DATA = {
             { id: 'totem', name: 'Totem', price: 860, legType: 'wood', image: localImage('/category-images/guest-images/jsi_totem_comp_00003.jpg'), thumbScale: 1.5, heroScale: 1.2 },
             { id: 'wink', name: 'Wink', price: 740, legType: 'wood', image: localImage('/category-images/guest-images/jsi_wink_comp_00070.jpg'), thumbScale: 1.9, heroScale: 1.4 }
         ],
-        competition: [],
         competitionByProduct: {
             'ansen': [comp('OFS Rowen Stool', '$775', '-3%'), comp('Kimball Pep Counter', '$760', '-1%'), comp('SitOnIt Wit Counter', '$740', '+1%')],
             'arwyn-guest': [comp('OFS Heya', '$550', '-5%'), comp('Kimball Joya', '$565', '-8%'), comp('Indiana Ovation', '$540', '-3%'), comp('SitOnIt Wit Guest', '$495', '+5%'), comp('Allsteel Aspect', '$590', '-11%')],
@@ -131,7 +125,6 @@ export const PRODUCT_DATA = {
             { id: 'satisse-lounge', name: 'Satisse', price: 1880, image: localImage('/category-images/lounge-images/api_satisse.jpg') },
             { id: 'teekan-lounge', name: 'Teekan', price: 1850, image: localImage('/category-images/lounge-images/api_teekan.jpg') },
         ],
-        competition: [],
         competitionByProduct: {
             'arwyn': [comp('OFS Heya Lounge', '$1580', '-5%'), comp('Kimball Villa Lounge', '$1625', '-7%'), comp('Indiana Ovation Lounge', '$1490', '+1%')],
             'caav': [comp('OFS Eleven Lounge', '$1880', '-4%'), comp('Kimball Axiom Lounge', '$1850', '-3%'), comp('Allsteel Rise', '$1790', '+1%')],
@@ -153,7 +146,6 @@ export const PRODUCT_DATA = {
             { id: 'protocol', name: 'Protocol', price: 1180, image: localImage('/category-images/swivel-images/api_protocol.jpg') },
             { id: 'proxy-swivel', name: 'Proxy', price: 1050, image: localImage('/category-images/swivel-images/api_proxy.jpg') },
         ],
-        competition: [],
         competitionByProduct: {
             'americana-swivel': [comp('SitOnIt Wit Task', '$840', '-2%'), comp('Kimball Pep Task', '$855', '-1%'), comp('OFS Lite Task', '$825', '+4%')],
             'arwyn-swivel': [comp('SitOnIt Focus Task', '$1350', '-4%'), comp('Kimball Joya Task', '$1365', '-5%'), comp('OFS Rally Task', '$1310', '-1%')],
@@ -175,7 +167,6 @@ export const PRODUCT_DATA = {
             { id: 'walden-credenza', name: 'Walden', price: 4000, image: jsiImg('WN2HDP1-2574_pllrs7') },
             { id: 'wellington-credenza', name: 'Wellington', price: 4400, image: jsiImg('CR8071-HD_szybmv') },
         ],
-        competition: [],
         competitionByProduct: {
             'vision-credenza': [comp('OFS Staks Credenza', '$2550', '-6%'), comp('Kimball Narrate Storage', '$2620', '-8%'), comp('Hon Abound Credenza', '$2340', '+3%')],
             'flux-credenza': [comp('OFS ReframE Storage', '$2920', '-4%'), comp('Kimball Alterna Credenza', '$2880', '-3%'), comp('Indiana Gesso Storage', '$2750', '+2%')],
@@ -540,11 +531,5 @@ for (const [catId, cat] of Object.entries(PRODUCT_DATA)) {
 }
 export const SERIES_CATEGORIES = Object.freeze(_seriesMulti);
 
-// Convenience: single-match lookup (first category found) — kept for backwards compat
-export const SERIES_TO_CATEGORY = Object.freeze(
-    Object.fromEntries(Object.entries(_seriesMulti).map(([k, v]) => [k, v[0]]))
-);
-
-// Re-export new hierarchical data + API abstraction
+// Re-export hierarchical catalog (productApi stays opt-in — import from ./productApi.js when wiring live fetch)
 export { PRODUCT_FAMILIES, PRODUCT_SUBCATEGORIES, PRODUCT_MODELS, PRODUCT_CATEGORIES } from './productHierarchy.js';
-export * from './productApi.js';

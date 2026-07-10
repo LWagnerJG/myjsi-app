@@ -7,7 +7,7 @@ import { FloatingSubmitCTA } from '../../../components/common/FloatingSubmitCTA.
 import { X, Plus, Minus, Trash2, Scissors } from 'lucide-react';
 import { FABRICS_DATA, JSI_MODELS } from '../../products/data.js';
 import { hapticSuccess } from '../../../utils/haptics.js';
-import { postJsonToWebhook } from '../../../utils/secureWebhook.js';
+import { submitComYardageRequest } from '../../../utils/submitComYardageRequest.js';
 import { cardSurface, subtleBorder, isDarkTheme } from '../../../design-system/tokens.js';
 
 /* Inline editable qty — tap the number to type directly (opens numpad on mobile) */
@@ -83,14 +83,7 @@ export const RequestComYardageScreen = ({ theme, showAlert, onNavigate, userSett
             models: selectedItems.map(i => ({ name: i.modelName, modelId: i.modelId, quantity: i.quantity, fabric: i.fabric }))
         };
         try {
-            const submitted = await postJsonToWebhook(
-                import.meta.env.VITE_POWER_AUTOMATE_URL,
-                payload,
-                {
-                    envKey: 'VITE_POWER_AUTOMATE_URL',
-                    context: 'RequestComYardageScreen',
-                }
-            );
+            const submitted = await submitComYardageRequest(payload);
 
             if (submitted) {
                 hapticSuccess();
