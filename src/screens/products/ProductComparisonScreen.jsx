@@ -9,14 +9,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrencyOrTbd } from '../../utils/format.js';
 
 // ─── Configuration option sets ───────────────────────────────────────────────
-const CASEGOODS_TYPICAL_OPTIONS = ['U-Shape','L-Shape','Single Ped','AH Desk'];
+const CASEGOODS_TYPICAL_OPTIONS = ['Single Ped','L-Shape','U-Shape','AH Desk'];
 const CONFERENCE_SIZE_OPTIONS = ['30x72','42x90','48x108','54x180','60x210'];
 const LOUNGE_SEATING_BASE = ['Single Seater','Two Seater','Three Seater'];
 const SERIES_WITH_OTTOMAN = new Set(['arwyn','bespace-lounge','indie-lounge','teekan-lounge']);
 const CREDENZA_SIZE_OPTIONS = ['20x60','20x66','20x72','24x72','24x84'];
-const MATERIAL_UPCHARGE = { laminate: 1, veneer: 1.12 };
-const TYPICAL_MULTIPLIERS = { 'U-Shape': 1, 'L-Shape': 0.92, 'Single Ped': 0.85, 'AH Desk': 1.05 };
+// Typical estimates relative to the base single-pedestal desk list price
+// (L adds a return; U adds return + bridge + credenza; AH adds height-adjust mechanism).
+const TYPICAL_MULTIPLIERS = { 'Single Ped': 1, 'L-Shape': 1.65, 'U-Shape': 2.6, 'AH Desk': 1.5 };
 const CREDENZA_SIZE_MULTIPLIERS = { '20x60': 0.82, '20x66': 0.88, '20x72': 1, '24x72': 1.06, '24x84': 1.18 };
+
+/** Real veneer list price when the series publishes one; laminate price otherwise. */
+const materialPrice = (p, materialMode) =>
+  (materialMode === 'veneer' && p.veneerPrice) ? p.veneerPrice : (p.price || 0);
 
 
 
@@ -265,17 +270,18 @@ const PricingTable = React.memo(({
 
   const computePrice = useCallback((p) => {
     if (isCasegoods) {
-      const materialFactor = MATERIAL_UPCHARGE[materialMode] || 1;
       const typicalFactor = TYPICAL_MULTIPLIERS[typicalLayout] || 1;
-      return Math.round((p.price || 0) * materialFactor * typicalFactor / 10) * 10;
+      return Math.round(materialPrice(p, materialMode) * typicalFactor / 10) * 10;
     }
     if (isCredenzas) {
-      const materialFactor = MATERIAL_UPCHARGE[materialMode] || 1;
       const sizeFactor = CREDENZA_SIZE_MULTIPLIERS[credenzaSize] || 1;
-      return Math.round((p.price || 0) * materialFactor * sizeFactor / 10) * 10;
+      return Math.round(materialPrice(p, materialMode) * sizeFactor / 10) * 10;
+    }
+    if (isConference) {
+      return materialPrice(p, materialMode);
     }
     return p.price;
-  }, [isCasegoods, isCredenzas, materialMode, typicalLayout, credenzaSize]);
+  }, [isCasegoods, isCredenzas, isConference, materialMode, typicalLayout, credenzaSize]);
 
   return (
     <div
@@ -414,7 +420,7 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
 
   const [activeProduct, setActiveProduct] = useState(initialProduct);
   const [materialMode, setMaterialMode] = useState(isGuest ? 'wood' : 'laminate');
-  const [typicalLayout, setTypicalLayout] = useState('U-Shape');  // matches TYPICAL_MULTIPLIERS keys
+  const [typicalLayout, setTypicalLayout] = useState('Single Ped');  // matches TYPICAL_MULTIPLIERS keys
   const [conferenceSize, setConferenceSize] = useState('30x72');
   const [loungeConfig, setLoungeConfig] = useState('Single Seater');
   const [guestLegType, setGuestLegType] = useState('wood');

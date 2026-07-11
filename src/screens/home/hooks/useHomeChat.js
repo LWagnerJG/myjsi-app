@@ -13,8 +13,8 @@ const ALL_SERIES = [...new Set(LEAD_TIMES_DATA.map(d => d.series))].sort();
 
 const CATEGORIES = {
     swivel:     ['Arwyn', 'Bourne', 'Cosgrove', 'Connect', 'Garvey RS', 'Gatsby', 'Knox', 'Kyla', 'Mackey', 'Moto', 'Protocol', 'Proxy', 'Satisse', 'Sosa', 'Ziva'],
-    guest:      ['Addison', 'Americana', 'Ansen', 'Boston', 'Bryn', 'Encore', 'Finn', 'Finn Nu', 'Harbor', 'Henley', 'Indie', 'Jude', 'Kindera', 'Madison', 'Millie', 'Mittle', 'Newton', 'Oxley', 'Pillows', 'Ramona', 'Ria', 'Scroll', 'Teekan', 'Totem', 'Trinity', 'Wink'],
-    lounge:     ['Avini', 'BeSPACE', 'Caav', 'Hoopz', 'Poet', 'Somna'],
+    guest:      ['Addison', 'Americana', 'Boston', 'Bryn', 'Encore', 'Finn', 'Finn Nu', 'Harbor', 'Henley', 'Indie', 'Jude', 'Kindera', 'Madison', 'Millie', 'Mittle', 'Newton', 'Oxley', 'Pillows', 'Ramona', 'Ria', 'Scroll', 'Teekan', 'Totem', 'Trinity', 'Wink'],
+    lounge:     ['BeSPACE', 'Caav', 'Hoopz', 'Poet', 'Somna'],
     conference: ['Arwyn', 'Draft', 'Vision'],
     casegoods:  ['Anthology', 'Brogan', 'Copilot', 'Finale', 'Forge', 'Lincoln', 'Lok', 'Nosh', 'Privacy', 'Prost', 'Romy', 'Trail', 'Walden', 'Wellington'],
     benching:   ['Flux', 'Moto', 'Native', 'Reef', 'Vision'],
