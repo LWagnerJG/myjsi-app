@@ -150,10 +150,13 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 // size="md" (default): 56px standalone search
 // size="control": matches SegmentedToggle / CTA height via --jsi-ctrl-h
 //
-// Control typography MUST match SegmentedToggle `sm` / `smDense`:
-//   0.8125rem · font-weight 600 · unselected color for placeholders
+// Typed text (control) matches SegmentedToggle `sm` / `smDense`:
+//   0.8125rem · font-weight 600
+// Placeholder stays the same size/leading but lighter weight + fainter color
+// so it sits on the toggle baseline without competing with selected labels.
 const CONTROL_TEXT_SIZE = '0.8125rem';
 const CONTROL_TEXT_WEIGHT = 600;
+const PLACEHOLDER_TEXT_WEIGHT = 500;
 
 export const SearchInput = React.memo(function SearchInput({
     id,
@@ -177,8 +180,9 @@ export const SearchInput = React.memo(function SearchInput({
       ? '0 2px 10px rgba(0,0,0,0.25)'
       : '0 2px 10px rgba(53,53,53,0.08)';
     const iconColor = theme?.colors?.textSecondary || '#666';
-    // Match SegmentedToggle unselected label color for placeholder / subtle text
-    const placeholderColor = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
+    // Fainter than SegmentedToggle unselected labels — hint, not chrome
+    const placeholderColor = dark ? 'rgba(240,240,240,0.42)' : 'rgba(53,53,53,0.40)';
+    const iconMutedColor = dark ? 'rgba(240,240,240,0.48)' : 'rgba(53,53,53,0.42)';
     // Fixed icon column keeps placeholder/value text on one vertical edge across sizes
     const iconSlot = isControl ? 18 : 22;
     const iconSize = isControl ? 15 : 18;
@@ -186,7 +190,10 @@ export const SearchInput = React.memo(function SearchInput({
     const clearIcon = isControl ? 10 : 11;
     const inputFontSize = isControl ? CONTROL_TEXT_SIZE : '1rem';
     const inputFontWeight = isControl ? CONTROL_TEXT_WEIGHT : 400;
+    const placeholderWeight = isControl ? PLACEHOLDER_TEXT_WEIGHT : 400;
     const controlHeight = isControl ? 'var(--jsi-ctrl-h)' : 56;
+    // Line-height = control height optically centers placeholder with toggle labels
+    const inputLineHeight = isControl ? 'var(--jsi-ctrl-h)' : '56px';
     const reactId = React.useId().replace(/:/g, '');
     const placeholderStyleId = `search-ph-${reactId}`;
 
@@ -218,23 +225,26 @@ export const SearchInput = React.memo(function SearchInput({
                     color: ${placeholderColor} !important;
                     opacity: 1 !important;
                     font-size: ${inputFontSize};
-                    font-weight: ${inputFontWeight};
+                    font-weight: ${placeholderWeight};
                     letter-spacing: -0.01em;
-                    line-height: normal;
+                    line-height: ${inputLineHeight};
                     text-align: left;
+                    vertical-align: middle;
                 }
                 #${placeholderStyleId}::-webkit-input-placeholder {
                     color: ${placeholderColor} !important;
                     opacity: 1 !important;
                     font-size: ${inputFontSize};
-                    font-weight: ${inputFontWeight};
+                    font-weight: ${placeholderWeight};
                     letter-spacing: -0.01em;
-                    line-height: normal;
+                    line-height: ${inputLineHeight};
                     text-align: left;
                 }
                 #${placeholderStyleId}::-moz-placeholder {
                     color: ${placeholderColor} !important;
                     opacity: 1 !important;
+                    font-weight: ${placeholderWeight};
+                    line-height: ${inputLineHeight};
                 }
             `}</style>
             <span
@@ -243,7 +253,7 @@ export const SearchInput = React.memo(function SearchInput({
                 style={{ width: iconSlot, height: iconSlot }}
             >
                 <Search
-                    style={{ width: iconSize, height: iconSize, color: placeholderColor, opacity: 1 }}
+                    style={{ width: iconSize, height: iconSize, color: iconMutedColor, opacity: 1 }}
                 />
             </span>
             <input
@@ -259,7 +269,7 @@ export const SearchInput = React.memo(function SearchInput({
                     fontSize: inputFontSize,
                     fontWeight: inputFontWeight,
                     letterSpacing: '-0.01em',
-                    lineHeight: 'normal',
+                    lineHeight: inputLineHeight,
                     height: '100%',
                     margin: 0,
                     // Optical gap after icon column — matches SegmentedToggle label inset feel
