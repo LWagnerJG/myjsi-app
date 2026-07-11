@@ -179,67 +179,99 @@ export const SearchInput = React.memo(function SearchInput({
     const iconColor = theme?.colors?.textSecondary || '#666';
     // Match SegmentedToggle unselected label color for placeholder / subtle text
     const placeholderColor = dark ? 'rgba(240,240,240,0.78)' : '#6A6762';
+    // Fixed icon column keeps placeholder/value text on one vertical edge across sizes
+    const iconSlot = isControl ? 18 : 22;
     const iconSize = isControl ? 15 : 18;
     const clearSize = isControl ? 18 : 22;
     const clearIcon = isControl ? 10 : 11;
     const inputFontSize = isControl ? CONTROL_TEXT_SIZE : '1rem';
     const inputFontWeight = isControl ? CONTROL_TEXT_WEIGHT : 400;
+    const controlHeight = isControl ? 'var(--jsi-ctrl-h)' : 56;
     const reactId = React.useId().replace(/:/g, '');
     const placeholderStyleId = `search-ph-${reactId}`;
 
     return (
         <div
             id={id}
-            className={`flex items-center ${isControl ? 'gap-2' : 'gap-2.5'} ${className}`}
+            className={`flex items-center ${className}`}
             role="search"
             style={{
-                height: isControl ? 'var(--jsi-ctrl-h)' : 56,
+                height: controlHeight,
                 borderRadius: 9999,
                 backgroundColor: bg,
                 border: bdr,
                 boxShadow: shadow,
                 backdropFilter: 'blur(12px) saturate(1.4)',
                 WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
-                paddingLeft: isControl ? 12 : 14,
+                paddingLeft: isControl ? 10 : 14,
                 paddingRight: value ? (isControl ? 6 : 8) : (isControl ? 12 : 14),
                 transition: 'border-color 150ms ease, box-shadow 150ms ease',
                 ...style,
             }}
         >
             <style>{`
+                #${placeholderStyleId} {
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
                 #${placeholderStyleId}::placeholder {
-                    color: ${placeholderColor};
-                    opacity: 1;
+                    color: ${placeholderColor} !important;
+                    opacity: 1 !important;
                     font-size: ${inputFontSize};
                     font-weight: ${inputFontWeight};
-                    letter-spacing: normal;
+                    letter-spacing: -0.01em;
+                    line-height: normal;
+                    text-align: left;
                 }
                 #${placeholderStyleId}::-webkit-input-placeholder {
-                    color: ${placeholderColor};
-                    opacity: 1;
+                    color: ${placeholderColor} !important;
+                    opacity: 1 !important;
                     font-size: ${inputFontSize};
                     font-weight: ${inputFontWeight};
+                    letter-spacing: -0.01em;
+                    line-height: normal;
+                    text-align: left;
+                }
+                #${placeholderStyleId}::-moz-placeholder {
+                    color: ${placeholderColor} !important;
+                    opacity: 1 !important;
                 }
             `}</style>
-            <Search
+            <span
                 aria-hidden="true"
-                style={{ width: iconSize, height: iconSize, color: placeholderColor, opacity: 1, flexShrink: 0 }}
-            />
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: iconSlot, height: iconSlot }}
+            >
+                <Search
+                    style={{ width: iconSize, height: iconSize, color: placeholderColor, opacity: 1 }}
+                />
+            </span>
             <input
                 id={placeholderStyleId}
-                type="search"
+                type="text"
+                role="searchbox"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`flex-1 h-full bg-transparent outline-none ${inputClassName}`}
+                className={`min-w-0 flex-1 bg-transparent outline-none border-0 ${inputClassName}`}
                 style={{
                     color: theme?.colors?.textPrimary || '#111',
                     fontSize: inputFontSize,
                     fontWeight: inputFontWeight,
-                    lineHeight: 1,
+                    letterSpacing: '-0.01em',
+                    lineHeight: 'normal',
+                    height: '100%',
+                    margin: 0,
+                    // Optical gap after icon column — matches SegmentedToggle label inset feel
+                    paddingLeft: isControl ? 8 : 10,
+                    paddingRight: 0,
+                    paddingTop: 0,
+                    paddingBottom: 0,
                 }}
                 aria-label={placeholder}
                 autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
                 autoFocus={autoFocus}
                 ref={inputRef}
             />
