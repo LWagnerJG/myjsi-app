@@ -1,19 +1,34 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Calendar, List, Building2, Package, X, Layers, MapPin, CheckCircle2, Clock, Truck, ChevronRight } from 'lucide-react';
-import { VERTICAL_COLORS } from '../../constants/verticals.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
-import StandardSearchBar from '../../components/common/StandardSearchBar.jsx';
-import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
+import { VERTICAL_COLORS } from '../../constants/verticals.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
+import { OrdersViewToolbar } from './ordersChrome.jsx';
 import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
 import { formatCurrency, formatCompanyName, formatRelativeTime, formatShortDate } from '../../utils/format.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
 
 const ORDERS_SHELL_CLASS = 'w-full max-w-content mx-auto';
 const ORDERS_EDGE_PADDING = 'px-4 sm:px-6 lg:px-8';
+
+const chromeIconButtonStyle = (theme, active = false) => {
+    const dark = isDarkTheme(theme);
+    return {
+        height: 'var(--jsi-ctrl-h)',
+        width: 'var(--jsi-ctrl-h)',
+        backgroundColor: active
+            ? (dark ? 'rgba(255,255,255,0.16)' : '#FFFFFF')
+            : (dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface),
+        borderColor: active
+            ? (dark ? 'rgba(255,255,255,0.22)' : 'rgba(53,53,53,0.18)')
+            : (dark ? 'rgba(255,255,255,0.12)' : theme.colors.border),
+        boxShadow: active && !dark ? '0 1px 4px rgba(53,53,53,0.08)' : 'none',
+    };
+};
 
 export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => {
     const [selectedDate, setSelectedDate] = useState(null);
@@ -45,8 +60,61 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
         return <span className="text-[0.625rem] leading-none mt-0.5" style={{ color: theme.colors.textSecondary }}>{formatCurrency(total)}</span>;
     }, [ordersByDate, theme.colors.textSecondary]);
 
+    const selectedDayPanel = selectedDate && selectedOrders.length > 0 ? (
+        <div className="space-y-3 animate-fade-in">
+            <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>
+                {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </h3>
+            <div className="space-y-3">
+                {selectedOrders.map((o) => {
+                    const sc = STATUS_COLORS[o.status] || '#8B8680';
+                    return (
+                        <button
+                            key={o.orderNumber}
+                            type="button"
+                            className="w-full rounded-[24px] overflow-hidden text-left cursor-pointer active:scale-[0.99] transition"
+                            style={{ ...cardSurface(theme) }}
+                            onClick={() => onOrderClick(o)}
+                        >
+                            <div className="px-5 py-3.5">
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
+                                        <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
+                                            {formatCompanyName(o.company)}
+                                        </p>
+                                    </div>
+                                    <div className="flex-shrink-0 text-right">
+                                        <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
+                                        <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                                            <span>{o.orderNumber}</span>
+                                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    ) : selectedDate ? (
+        <div className="rounded-[24px] px-5 py-8 text-center" style={{ ...cardSurface(theme) }}>
+            <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>No orders this day</p>
+            <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Pick another date on the calendar.</p>
+        </div>
+    ) : (
+        <div className="hidden lg:flex rounded-[24px] px-5 py-12 text-center items-center justify-center" style={{ ...cardSurface(theme) }}>
+            <div>
+                <Calendar className="w-8 h-8 mx-auto mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.35 }} />
+                <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Select a day</p>
+                <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>Orders for that date show here.</p>
+            </div>
+        </div>
+    );
+
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-4 lg:items-start">
             <GlassCard theme={theme} className="overflow-hidden" variant="elevated">
                 <SwipeCalendar
                     theme={theme}
@@ -56,43 +124,9 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
                 />
             </GlassCard>
 
-            {selectedDate && selectedOrders.length > 0 && (
-                <div className="space-y-3 animate-fade-in">
-                    <h3 className="font-bold" style={{ color: theme.colors.textPrimary }}>
-                        {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </h3>
-                    {selectedOrders.map((o) => {
-                        const sc = STATUS_COLORS[o.status] || '#8B8680';
-                        return (
-                            <button
-                                key={o.orderNumber}
-                                type="button"
-                                className="w-full rounded-[24px] overflow-hidden text-left cursor-pointer active:scale-[0.99] transition"
-                                style={{ ...cardSurface(theme) }}
-                                onClick={() => onOrderClick(o)}
-                            >
-                                <div className="px-5 py-3.5">
-                                    <div className="flex items-center justify-between gap-4">
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[0.9375rem] font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{o.details}</p>
-                                            <p className="text-[0.8125rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>
-                                                {formatCompanyName(o.company)}
-                                            </p>
-                                        </div>
-                                        <div className="flex-shrink-0 text-right">
-                                            <p className="text-[0.9375rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(o.net)}</p>
-                                            <p className="text-[0.6875rem] mt-0.5 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
-                                                <span>{o.orderNumber}</span>
-                                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            )}
+            <div className="lg:sticky lg:top-2">
+                {selectedDayPanel}
+            </div>
         </div>
     );
 };
@@ -142,7 +176,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     const headerDivider = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     return (
-        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
+        <div className="rounded-[24px] overflow-hidden h-full" style={{ ...cardSurface(theme) }}>
             <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2 sm:px-6">
                 <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: metaColor }}>{label}</p>
                 <p className="text-[0.6875rem] font-bold tabular-nums" style={{ color: metaColor }}>{formatCurrency(group.total)}</p>
@@ -168,7 +202,7 @@ const SampleOrderCard = ({ order, theme, dark }) => {
     const totalItems = order.items?.reduce((s, i) => s + (i.qty || 1), 0) ?? 0;
 
     return (
-        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
+        <div className="rounded-[24px] overflow-hidden h-full" style={{ ...cardSurface(theme) }}>
             <div className="px-5 py-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -234,7 +268,7 @@ const SampleOrdersView = ({ theme, dark, searchTerm, sampleOrders }) => {
     );
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 gap-3.5">
             {filtered.map(o => (
                 <SampleOrderCard key={o.id} order={o} theme={theme} dark={dark} />
             ))}
@@ -242,37 +276,36 @@ const SampleOrdersView = ({ theme, dark, searchTerm, sampleOrders }) => {
     );
 };
 
-const filterRailSurface = (theme) => {
+const OrdersSummaryStrip = ({ theme, orderCount, totalNet, dealerCount }) => {
     const dark = isDarkTheme(theme);
-    return {
-        backdropFilter: 'blur(18px) saturate(1.28)',
-        WebkitBackdropFilter: 'blur(18px) saturate(1.28)',
-        backgroundColor: dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.68)',
-        border: dark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.82)',
-        boxShadow: dark ? 'none' : '0 1px 8px rgba(53,53,53,0.045)'
-    };
+    const tiles = [
+        { label: 'Orders', value: String(orderCount) },
+        { label: 'Net value', value: formatCurrency(totalNet) },
+        { label: 'Dealers', value: String(dealerCount) },
+    ];
+
+    return (
+        <div className="hidden lg:grid grid-cols-3 gap-3 mb-4">
+            {tiles.map((tile) => (
+                <div
+                    key={tile.label}
+                    className="rounded-[20px] px-4 py-3.5"
+                    style={{
+                        ...cardSurface(theme),
+                        backgroundColor: dark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.88)',
+                    }}
+                >
+                    <p className={FIELD_LABEL_CLASSNAME} style={{ color: theme.colors.textSecondary }}>{tile.label}</p>
+                    <p className="text-[1.0625rem] font-semibold tabular-nums mt-1 tracking-[-0.02em]" style={{ color: theme.colors.textPrimary }}>
+                        {tile.value}
+                    </p>
+                </div>
+            ))}
+        </div>
+    );
 };
 
-const filterButtonSurface = (theme, active = false) => {
-    const dark = isDarkTheme(theme);
-    if (!active) {
-        return {
-            backgroundColor: 'transparent',
-            border: '1px solid transparent',
-            boxShadow: 'none',
-            color: theme.colors.textPrimary
-        };
-    }
-
-    return {
-        backgroundColor: dark ? 'rgba(255,255,255,0.12)' : '#FFFFFF',
-        border: dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(255,255,255,0.96)',
-        boxShadow: dark ? 'none' : '0 1px 5px rgba(53,53,53,0.06)',
-        color: theme.colors.textPrimary
-    };
-};
-
-const OrdersFilterRail = ({
+const OrdersToolbarActions = ({
     theme,
     dark,
     selectedDealer,
@@ -282,42 +315,33 @@ const OrdersFilterRail = ({
     setSelectedDealer,
     dealerRef,
     viewMode,
-    setViewMode
+    setViewMode,
 }) => {
     const controlTile = fieldTileSurface(theme);
     const dealerActive = selectedDealer !== 'All Dealers';
     const viewActive = viewMode === 'calendar';
-    const dealerLabel = dealerActive ? formatCompanyName(selectedDealer) : 'All Dealers';
 
     return (
-        <div
-            className="flex w-full min-[420px]:w-auto items-center gap-1 rounded-full p-1"
-            style={filterRailSurface(theme)}
-        >
-            <div ref={dealerRef} className="relative min-w-0 flex-1 min-[420px]:flex-none">
+        <div className="flex items-center gap-2">
+            <div ref={dealerRef} className="relative">
                 <button
                     type="button"
                     onClick={() => setDealerMenuOpen((open) => !open)}
-                    className="w-full min-[420px]:w-auto min-w-0 rounded-full flex items-center justify-start active:scale-95 transition px-3 gap-1.5"
-                    style={{
-                        ...filterButtonSurface(theme, dealerActive),
-                        height: 'calc(var(--jsi-ctrl-h) - 8px)'
-                    }}
-                    title={selectedDealer}
+                    className="rounded-full flex items-center justify-center active:scale-95 transition border"
+                    style={chromeIconButtonStyle(theme, dealerActive)}
+                    title={dealerActive ? formatCompanyName(selectedDealer) : 'All Dealers'}
+                    aria-label={dealerActive ? `Dealer filter: ${formatCompanyName(selectedDealer)}` : 'Filter by dealer'}
                     aria-haspopup="listbox"
                     aria-expanded={dealerMenuOpen}
                 >
-                    <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: theme.colors.textPrimary, opacity: dealerActive ? 1 : 0.82 }} />
-                    <span className="hidden sm:inline min-w-0 truncate text-[0.75rem] font-semibold sm:max-w-[8rem]" style={{ color: theme.colors.textPrimary }}>
-                        {dealerLabel}
-                    </span>
+                    <Building2 className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary, opacity: dealerActive ? 1 : 0.85 }} />
                 </button>
                 {dealerMenuOpen && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.96, y: -4 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute right-0 left-0 min-[420px]:left-auto mt-2 w-full min-[420px]:w-60 max-h-72 overflow-y-auto p-2 z-20"
+                        className="absolute right-0 mt-2 w-60 max-h-72 overflow-y-auto p-2 z-20"
                         style={{ ...modalCardSurface(theme), transformOrigin: 'top right' }}
                         role="listbox"
                         aria-label="Dealer filter"
@@ -351,18 +375,15 @@ const OrdersFilterRail = ({
             <button
                 type="button"
                 onClick={() => setViewMode((mode) => mode === 'list' ? 'calendar' : 'list')}
-                className="rounded-full flex items-center justify-center active:scale-95 transition w-9 flex-shrink-0"
-                style={{
-                    ...filterButtonSurface(theme, viewActive),
-                    height: 'calc(var(--jsi-ctrl-h) - 8px)'
-                }}
+                className="rounded-full flex items-center justify-center active:scale-95 transition border"
+                style={chromeIconButtonStyle(theme, viewActive)}
                 title={viewMode === 'list' ? 'Calendar view' : 'List view'}
                 aria-label={viewMode === 'list' ? 'Show calendar view' : 'Show list view'}
                 aria-pressed={viewActive}
             >
                 {viewMode === 'list'
-                    ? <Calendar className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />
-                    : <List className="w-4 h-4" style={{ color: theme.colors.textPrimary }} />}
+                    ? <Calendar className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+                    : <List className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />}
             </button>
         </div>
     );
@@ -418,54 +439,49 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
 
     const groupKeys = useMemo(() => Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)), [grouped]);
 
+    const summary = useMemo(() => {
+        const totalNet = filtered.reduce((sum, o) => sum + (o.net || 0), 0);
+        const dealerCount = new Set(filtered.map((o) => o.company).filter(Boolean)).size;
+        return { orderCount: filtered.length, totalNet, dealerCount };
+    }, [filtered]);
+
+    const toolbarTrailing = dateType !== 'samples' ? (
+        <OrdersToolbarActions
+            theme={theme}
+            dark={dark}
+            selectedDealer={selectedDealer}
+            dealers={dealers}
+            dealerMenuOpen={dealerMenuOpen}
+            setDealerMenuOpen={setDealerMenuOpen}
+            setSelectedDealer={setSelectedDealer}
+            dealerRef={dealerRef}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+        />
+    ) : null;
+
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-            <div className="flex-shrink-0 w-full relative z-10">
-                <div className={`${ORDERS_EDGE_PADDING} ${ORDERS_SHELL_CLASS} pt-4 pb-2.5 flex flex-col gap-2.5`}>
-                    <div className="space-y-2.5">
-                        <div>
-                            <StandardSearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search orders..." theme={theme} />
-                        </div>
-                        <div className={`grid grid-cols-1 ${dateType === 'samples' ? '' : 'min-[420px]:grid-cols-[minmax(0,1fr)_auto]'} items-center gap-2.5`}>
-                            <div className="min-w-0 flex-1">
-                                <SegmentedToggle
-                                    value={dateType}
-                                    onChange={setDateType}
-                                    options={[
-                                        { value: 'shipDate', label: 'Ship Date' },
-                                        { value: 'date', label: 'PO Date' },
-                                        { value: 'samples', label: 'Samples' },
-                                    ]}
-                                    theme={theme}
-                                    size="smDense"
-                                    fullWidth
-                                />
-                            </div>
-                            {dateType !== 'samples' && (
-                                <OrdersFilterRail
-                                    theme={theme}
-                                    dark={dark}
-                                    selectedDealer={selectedDealer}
-                                    dealers={dealers}
-                                    dealerMenuOpen={dealerMenuOpen}
-                                    setDealerMenuOpen={setDealerMenuOpen}
-                                    setSelectedDealer={setSelectedDealer}
-                                    dealerRef={dealerRef}
-                                    viewMode={viewMode}
-                                    setViewMode={setViewMode}
-                                />
-                            )}
-                        </div>
-                    </div>
+            <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-2" fade={false}>
+                <div className="flex flex-col gap-2.5">
+                    <OrdersViewToolbar
+                        theme={theme}
+                        dateType={dateType}
+                        onDateTypeChange={setDateType}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        trailing={toolbarTrailing}
+                    />
+
                     {(selectedVertical || selectedDealer !== 'All Dealers') && (
-                        <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
                             {selectedVertical && (() => {
                                 const vColor = VERTICAL_COLORS[selectedVertical] || '#8B8680';
                                 return (
                                     <button
                                         type="button"
                                         onClick={() => setSelectedVertical(null)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 min-h-[36px]"
                                         style={{ backgroundColor: `${vColor}18`, color: vColor, border: `1px solid ${vColor}30` }}
                                     >
                                         {selectedVertical}
@@ -476,8 +492,23 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                             {selectedDealer !== 'All Dealers' && (
                                 <button
                                     type="button"
+                                    onClick={() => setSelectedDealer('All Dealers')}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 min-h-[36px]"
+                                    style={{
+                                        backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)',
+                                        color: theme.colors.textPrimary,
+                                        border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)'}`,
+                                    }}
+                                >
+                                    {formatCompanyName(selectedDealer)}
+                                    <X className="w-3 h-3" style={{ opacity: 0.7 }} />
+                                </button>
+                            )}
+                            {selectedDealer !== 'All Dealers' && (
+                                <button
+                                    type="button"
                                     onClick={() => onNavigate('projects', { tab: 'pipeline', company: selectedDealer })}
-                                    className="inline-flex items-center gap-1 text-xs font-medium ml-auto transition-opacity hover:opacity-70"
+                                    className="inline-flex items-center gap-1 text-xs font-medium ml-auto transition-opacity hover:opacity-70 min-h-[36px]"
                                     style={{ color: theme.colors.textSecondary }}
                                 >
                                     See pipeline
@@ -486,10 +517,8 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                             )}
                         </div>
                     )}
-
-
                 </div>
-            </div>
+            </ScreenTopChrome>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide">
                 <div className={`${ORDERS_EDGE_PADDING} ${ORDERS_SHELL_CLASS} pt-2 pb-24`}>
@@ -501,13 +530,19 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                       ) : viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
-                            <div className="space-y-3.5">
-                              {groupKeys.map((k) => (
-                                <div key={k}>
-                                  <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
-                                </div>
-                              ))}
-                            </div>
+                            <>
+                              <OrdersSummaryStrip
+                                theme={theme}
+                                orderCount={summary.orderCount}
+                                totalNet={summary.totalNet}
+                                dealerCount={summary.dealerCount}
+                              />
+                              <div className="space-y-3.5 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3.5 lg:items-start">
+                                {groupKeys.map((k) => (
+                                  <DateGroupCard key={k} theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
+                                ))}
+                              </div>
+                            </>
                           ) : (
                             <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
                                 <Package className="w-10 h-10 mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
@@ -529,6 +564,12 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                         </motion.div>
                       ) : (
                         <motion.div key="calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                          <OrdersSummaryStrip
+                            theme={theme}
+                            orderCount={summary.orderCount}
+                            totalNet={summary.totalNet}
+                            dealerCount={summary.dealerCount}
+                          />
                           <OrderCalendarView orders={filtered} theme={theme} dateType={dateType} onOrderClick={(o) => onNavigate(`orders/${o.orderNumber}`)} />
                         </motion.div>
                       )}
