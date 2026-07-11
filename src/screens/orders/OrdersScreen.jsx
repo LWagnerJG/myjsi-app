@@ -276,68 +276,70 @@ const SampleOrdersView = ({ theme, dark, searchTerm, sampleOrders }) => {
     );
 };
 
-const OrdersSummaryStrip = ({ theme, orderCount, totalNet, dealerCount }) => {
+const OrdersStatsRail = ({ theme, summary }) => {
     const dark = isDarkTheme(theme);
     const tiles = [
-        { label: 'Orders', value: String(orderCount) },
-        { label: 'Net value', value: formatCurrency(totalNet) },
-        { label: 'Dealers', value: String(dealerCount) },
+        {
+            label: 'Orders',
+            value: String(summary.orderCount),
+            meta: summary.orderMeta,
+        },
+        {
+            label: 'Net value',
+            value: formatCurrency(summary.totalNet),
+            meta: summary.valueMeta,
+        },
+        {
+            label: 'Dealers',
+            value: String(summary.dealerCount),
+            meta: summary.dealerMeta,
+        },
     ];
 
     return (
-        <div className="hidden lg:grid grid-cols-3 gap-3 mb-4 lg:max-w-[760px]">
+        <aside className="hidden lg:flex lg:flex-col gap-3 lg:sticky lg:top-2 self-start w-full">
             {tiles.map((tile) => (
                 <div
                     key={tile.label}
                     className="rounded-[20px] px-4 py-3.5"
                     style={{
                         ...cardSurface(theme),
-                        backgroundColor: dark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.88)',
+                        backgroundColor: dark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.92)',
                     }}
                 >
                     <p className={FIELD_LABEL_CLASSNAME} style={{ color: theme.colors.textSecondary }}>{tile.label}</p>
-                    <p className="text-[1.0625rem] font-semibold tabular-nums mt-1 tracking-[-0.02em]" style={{ color: theme.colors.textPrimary }}>
+                    <p className="text-[1.25rem] font-semibold tabular-nums mt-1.5 tracking-[-0.025em] leading-none" style={{ color: theme.colors.textPrimary }}>
                         {tile.value}
                     </p>
+                    {tile.meta ? (
+                        <p className="text-[0.75rem] mt-2 leading-snug" style={{ color: theme.colors.textSecondary }}>
+                            {tile.meta}
+                        </p>
+                    ) : null}
                 </div>
             ))}
-        </div>
+        </aside>
     );
 };
 
-/** Chronological single-column timeline — never multi-column zig-zag. */
-const OrdersTimeline = ({ theme, groupKeys, grouped, onNavigate }) => {
-    const dark = isDarkTheme(theme);
-    const spineColor = dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)';
-    const nodeFill = dark ? theme.colors.background : '#F0EDE8';
-    const nodeBorder = dark ? 'rgba(255,255,255,0.28)' : 'rgba(53,53,53,0.22)';
+/** Chronological single-column list — no timeline spine, no multi-column zig-zag. */
+const OrdersList = ({ groupKeys, grouped, onNavigate, theme }) => (
+    <div className="space-y-3.5">
+        {groupKeys.map((k) => (
+            <DateGroupCard key={k} theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
+        ))}
+    </div>
+);
 
-    return (
-        <div className="relative lg:max-w-[760px]">
-            <div
-                aria-hidden="true"
-                className="hidden lg:block absolute left-[7px] top-5 bottom-5 w-px"
-                style={{ backgroundColor: spineColor }}
-            />
-            <div className="space-y-3.5">
-                {groupKeys.map((k) => (
-                    <div key={k} className="relative lg:pl-8">
-                        <span
-                            aria-hidden="true"
-                            className="hidden lg:block absolute left-0 top-5 w-3.5 h-3.5 rounded-full"
-                            style={{
-                                backgroundColor: nodeFill,
-                                border: `2px solid ${nodeBorder}`,
-                                boxShadow: dark ? 'none' : '0 0 0 3px rgba(240,237,232,0.95)',
-                            }}
-                        />
-                        <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
-                    </div>
-                ))}
-            </div>
+/** Desktop: centered shell with list + sticky stats. Mobile: list only. */
+const OrdersDashboard = ({ theme, summary, children }) => (
+    <div className="mx-auto w-full max-w-[1080px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(220px,260px)] xl:grid-cols-[minmax(0,1fr)_minmax(240px,280px)] gap-4 lg:gap-5 items-start">
+            <div className="min-w-0">{children}</div>
+            <OrdersStatsRail theme={theme} summary={summary} />
         </div>
-    );
-};
+    </div>
+);
 
 const OrdersToolbarActions = ({
     theme,
@@ -474,10 +476,57 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
     const groupKeys = useMemo(() => Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)), [grouped]);
 
     const summary = useMemo(() => {
+        const orderCount = filtered.length;
         const totalNet = filtered.reduce((sum, o) => sum + (o.net || 0), 0);
         const dealerCount = new Set(filtered.map((o) => o.company).filter(Boolean)).size;
-        return { orderCount: filtered.length, totalNet, dealerCount };
-    }, [filtered]);
+        const avgNet = orderCount ? totalNet / orderCount : 0;
+        const largest = filtered.reduce((max, o) => Math.max(max, o.net || 0), 0);
+
+        const statusCounts = filtered.reduce((acc, o) => {
+            const key = o.status || 'Unknown';
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {});
+        const statusBits = Object.entries(statusCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 2)
+            .map(([status, count]) => `${count} ${status.toLowerCase()}`);
+
+        const dealerTotals = filtered.reduce((acc, o) => {
+            if (!o.company) return acc;
+            acc[o.company] = (acc[o.company] || 0) + (o.net || 0);
+            return acc;
+        }, {});
+        const topDealerEntry = Object.entries(dealerTotals).sort((a, b) => b[1] - a[1])[0];
+        const verticalCount = new Set(filtered.map((o) => o.vertical).filter(Boolean)).size;
+
+        const dateField = dateType === 'date' ? 'date' : 'shipDate';
+        const dated = filtered
+            .map((o) => o[dateField])
+            .filter(Boolean)
+            .map((raw) => new Date(raw))
+            .filter((d) => !isNaN(d))
+            .sort((a, b) => a - b);
+        const windowLabel = dated.length
+            ? `${dated[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${dated[dated.length - 1].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+            : null;
+
+        return {
+            orderCount,
+            totalNet,
+            dealerCount,
+            orderMeta: [
+                statusBits.length ? statusBits.join(' · ') : null,
+                windowLabel ? `Window ${windowLabel}` : null,
+            ].filter(Boolean).join(' · ') || 'No orders in view',
+            valueMeta: orderCount
+                ? `Avg ${formatCurrency(avgNet)} · Largest ${formatCurrency(largest)}`
+                : 'No net value yet',
+            dealerMeta: topDealerEntry
+                ? `Top ${formatCompanyName(topDealerEntry[0])} · ${verticalCount} vertical${verticalCount === 1 ? '' : 's'}`
+                : 'No dealers in view',
+        };
+    }, [filtered, dateType]);
 
     const toolbarTrailing = dateType !== 'samples' ? (
         <OrdersToolbarActions
@@ -564,20 +613,14 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                       ) : viewMode === 'list' ? (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                           {groupKeys.length ? (
-                            <>
-                              <OrdersSummaryStrip
-                                theme={theme}
-                                orderCount={summary.orderCount}
-                                totalNet={summary.totalNet}
-                                dealerCount={summary.dealerCount}
-                              />
-                              <OrdersTimeline
+                            <OrdersDashboard theme={theme} summary={summary}>
+                              <OrdersList
                                 theme={theme}
                                 groupKeys={groupKeys}
                                 grouped={grouped}
                                 onNavigate={onNavigate}
                               />
-                            </>
+                            </OrdersDashboard>
                           ) : (
                             <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
                                 <Package className="w-10 h-10 mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.3 }} />
@@ -599,13 +642,9 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                         </motion.div>
                       ) : (
                         <motion.div key="calendar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                          <OrdersSummaryStrip
-                            theme={theme}
-                            orderCount={summary.orderCount}
-                            totalNet={summary.totalNet}
-                            dealerCount={summary.dealerCount}
-                          />
-                          <OrderCalendarView orders={filtered} theme={theme} dateType={dateType} onOrderClick={(o) => onNavigate(`orders/${o.orderNumber}`)} />
+                          <OrdersDashboard theme={theme} summary={summary}>
+                            <OrderCalendarView orders={filtered} theme={theme} dateType={dateType} onOrderClick={(o) => onNavigate(`orders/${o.orderNumber}`)} />
+                          </OrdersDashboard>
                         </motion.div>
                       )}
                     </AnimatePresence>
