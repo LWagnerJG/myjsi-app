@@ -209,10 +209,18 @@ body.jsi-modal-backdrop-active [data-app-header-scrim] {
     opacity: 0 !important;
 }
 
-/* Universal search input placeholder — consistent muted style */
-input[type="search"]::placeholder,
+/* Generic placeholders stay softly muted. SearchInput owns its own
+   placeholder color/opacity via scoped ID styles (toggle-matched). */
 input::placeholder {
     opacity: 0.62;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 /* FormInput placeholder color driven by CSS custom property (set via JS, never innerHTML) */

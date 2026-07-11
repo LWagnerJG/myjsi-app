@@ -176,7 +176,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     const headerDivider = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     return (
-        <div className="rounded-[24px] overflow-hidden h-full" style={{ ...cardSurface(theme) }}>
+        <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
             <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2 sm:px-6">
                 <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: metaColor }}>{label}</p>
                 <p className="text-[0.6875rem] font-bold tabular-nums" style={{ color: metaColor }}>{formatCurrency(group.total)}</p>
@@ -285,7 +285,7 @@ const OrdersSummaryStrip = ({ theme, orderCount, totalNet, dealerCount }) => {
     ];
 
     return (
-        <div className="hidden lg:grid grid-cols-3 gap-3 mb-4">
+        <div className="hidden lg:grid grid-cols-3 gap-3 mb-4 lg:max-w-[760px]">
             {tiles.map((tile) => (
                 <div
                     key={tile.label}
@@ -301,6 +301,40 @@ const OrdersSummaryStrip = ({ theme, orderCount, totalNet, dealerCount }) => {
                     </p>
                 </div>
             ))}
+        </div>
+    );
+};
+
+/** Chronological single-column timeline — never multi-column zig-zag. */
+const OrdersTimeline = ({ theme, groupKeys, grouped, onNavigate }) => {
+    const dark = isDarkTheme(theme);
+    const spineColor = dark ? 'rgba(255,255,255,0.12)' : 'rgba(53,53,53,0.12)';
+    const nodeFill = dark ? theme.colors.background : '#F0EDE8';
+    const nodeBorder = dark ? 'rgba(255,255,255,0.28)' : 'rgba(53,53,53,0.22)';
+
+    return (
+        <div className="relative lg:max-w-[760px]">
+            <div
+                aria-hidden="true"
+                className="hidden lg:block absolute left-[7px] top-5 bottom-5 w-px"
+                style={{ backgroundColor: spineColor }}
+            />
+            <div className="space-y-3.5">
+                {groupKeys.map((k) => (
+                    <div key={k} className="relative lg:pl-8">
+                        <span
+                            aria-hidden="true"
+                            className="hidden lg:block absolute left-0 top-5 w-3.5 h-3.5 rounded-full"
+                            style={{
+                                backgroundColor: nodeFill,
+                                border: `2px solid ${nodeBorder}`,
+                                boxShadow: dark ? 'none' : '0 0 0 3px rgba(240,237,232,0.95)',
+                            }}
+                        />
+                        <DateGroupCard theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
@@ -537,11 +571,12 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                                 totalNet={summary.totalNet}
                                 dealerCount={summary.dealerCount}
                               />
-                              <div className="space-y-3.5 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3.5 lg:items-start">
-                                {groupKeys.map((k) => (
-                                  <DateGroupCard key={k} theme={theme} dateKey={k} group={grouped[k]} onNavigate={onNavigate} />
-                                ))}
-                              </div>
+                              <OrdersTimeline
+                                theme={theme}
+                                groupKeys={groupKeys}
+                                grouped={grouped}
+                                onNavigate={onNavigate}
+                              />
                             </>
                           ) : (
                             <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center justify-center py-16 text-center gap-1">
