@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom';
 import { AppScreenLayout } from '../../components/common/AppScreenLayout.jsx';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
+import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
 import { User, Bell, Palette, ChevronDown, Loader2 } from 'lucide-react';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { useLeadTimeFavorites } from '../../hooks/useLeadTimeFavorites.js';
@@ -15,44 +16,6 @@ import {
   FIELD_LABEL_CLASSNAME,
   SECTION_TITLE_CLASSNAME,
 } from '../../design-system/tokens.js';
-import { hapticLight } from '../../utils/haptics.js';
-
-const Toggle = ({ checked, onChange, theme, ariaLabel }) => {
-  const isDark = isDarkTheme(theme);
-  const trackColor = checked
-    ? theme.colors.accent
-    : (isDark ? 'rgba(255,255,255,0.18)' : 'rgba(53,53,53,0.16)');
-  const thumbColor = checked
-    ? (isDark ? '#1D1D1D' : '#FFFFFF')
-    : '#FFFFFF';
-
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-label={ariaLabel}
-      aria-checked={checked}
-      onClick={() => {
-        hapticLight();
-        onChange(!checked);
-      }}
-      className="w-12 h-7 rounded-full transition-all duration-200 relative flex-shrink-0"
-      style={{ backgroundColor: trackColor }}
-    >
-      <span
-        className="rounded-full transition-transform duration-200 absolute top-[3px]"
-        style={{
-          width: 22,
-          height: 22,
-          backgroundColor: thumbColor,
-          transform: checked ? 'translateX(24px)' : 'translateX(3px)',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-          left: 0,
-        }}
-      />
-    </button>
-  );
-};
 
 const Select = ({ value, onChange, options, theme, surfaceStyle }) => {
   const [open, setOpen] = useState(false);
@@ -124,7 +87,7 @@ const SectionHeader = ({ icon: Icon, title, subtitle, theme }) => (
       <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ ...fieldTileSurface(theme), borderRadius: '999px' }}>
         <Icon className="w-4 h-4" style={{ color: theme.colors.accent }} />
       </div>
-      <div>
+      <div className="min-w-0">
         <h2 className={SECTION_TITLE_CLASSNAME} style={{ color: theme.colors.textPrimary }}>{title}</h2>
         {subtitle && <p className="text-[0.75rem] mt-1 leading-relaxed" style={{ color: theme.colors.textSecondary }}>{subtitle}</p>}
       </div>
@@ -242,49 +205,42 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
     return () => clearTimeout(timer);
   }, [streetAddress, fallbackAddressHints]);
 
-  return (
-    <AppScreenLayout
-      theme={theme}
-      showTitle={false}
-      maxWidthClass="max-w-[560px]"
-      horizontalPaddingClass="px-4 sm:px-6"
-      contentPaddingBottomClass="pb-24 lg:pb-12"
-      contentClassName="pt-4 space-y-4"
-    >
-      <GlassCard theme={theme} className="overflow-visible" style={settingsCardStyle}>
-        <SectionHeader icon={User} title="Account" subtitle="Keep your profile details up to date." theme={theme} />
-        <div className="px-5 pb-5 space-y-3.5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>First name</label>
-              <input
-                value={firstName}
-                onChange={e => {
-                  const value = e.target.value;
-                  setFirstName(value);
-                  setUserSettings?.(prev => ({ ...prev, firstName: value }));
-                }}
-                autoComplete="given-name"
-                className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                style={settingsInputStyle}
-              />
-            </div>
-            <div>
-              <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>Last name</label>
-              <input
-                value={lastName}
-                onChange={e => {
-                  const value = e.target.value;
-                  setLastName(value);
-                  setUserSettings?.(prev => ({ ...prev, lastName: value }));
-                }}
-                autoComplete="family-name"
-                className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
-                style={settingsInputStyle}
-              />
-            </div>
+  const accountCard = (
+    <GlassCard theme={theme} className="overflow-visible order-1 lg:order-none" style={settingsCardStyle}>
+      <SectionHeader icon={User} title="Account" subtitle="Keep your profile details up to date." theme={theme} />
+      <div className="px-5 pb-5 space-y-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>First name</label>
+            <input
+              value={firstName}
+              onChange={e => {
+                const value = e.target.value;
+                setFirstName(value);
+                setUserSettings?.(prev => ({ ...prev, firstName: value }));
+              }}
+              autoComplete="given-name"
+              className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+              style={settingsInputStyle}
+            />
           </div>
           <div>
+            <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>Last name</label>
+            <input
+              value={lastName}
+              onChange={e => {
+                const value = e.target.value;
+                setLastName(value);
+                setUserSettings?.(prev => ({ ...prev, lastName: value }));
+              }}
+              autoComplete="family-name"
+              className="w-full px-4 h-11 rounded-2xl text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-offset-1"
+              style={settingsInputStyle}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_7.5rem] gap-3">
+          <div className="min-w-0">
             <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: theme.colors.textSecondary }}>Street address</label>
             <div className="relative">
               <input
@@ -346,13 +302,37 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             />
           </div>
         </div>
-      </GlassCard>
+      </div>
+    </GlassCard>
+  );
 
-      <GlassCard theme={theme} className="overflow-hidden" style={settingsCardStyle}>
-        <SectionHeader icon={Bell} title="Push Notifications" subtitle="Only keep alerts that are useful for your day-to-day." theme={theme} />
-        <div className="px-4 pb-4 space-y-4">
+  const appearanceCard = (
+    <GlassCard theme={theme} className="overflow-hidden order-3 lg:order-none" style={settingsCardStyle}>
+      <SectionHeader icon={Palette} title="Appearance" theme={theme} />
+      <div className="px-5 pb-5">
+        <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between gap-4" style={groupedRows}>
+          <div className="min-w-0">
+            <p className="text-[0.875rem] font-medium leading-tight" style={{ color: theme.colors.textPrimary }}>Dark mode</p>
+            <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>Use a lower-glare theme throughout the app.</p>
+          </div>
+          <ToggleSwitch
+            checked={isDarkMode}
+            onChange={() => onToggleTheme?.()}
+            theme={theme}
+            ariaLabel="Dark mode"
+          />
+        </div>
+      </div>
+    </GlassCard>
+  );
+
+  const notificationsCard = (
+    <GlassCard theme={theme} className="overflow-hidden order-2 lg:order-none lg:col-span-7 xl:col-span-8" style={settingsCardStyle}>
+      <SectionHeader icon={Bell} title="Push Notifications" subtitle="Only keep alerts that are useful for your day-to-day." theme={theme} />
+      <div className="px-4 pb-4 space-y-4">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {notifGroups.map((group) => (
-            <div key={group.label}>
+            <div key={group.label} className={group.keys.includes('leadTimeChange') ? 'xl:col-span-2' : undefined}>
               <div className="px-2.5 pb-2">
                 <span className={`${FIELD_LABEL_CLASSNAME}`} style={{ color: theme.colors.textSecondary }}>
                   {group.label}
@@ -361,11 +341,11 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
               <div className="rounded-2xl overflow-hidden" style={groupedRows}>
                 {group.keys.map((k, index) => (
                   <div key={k}>
-                    <div className="flex items-center justify-between px-4 py-3 gap-4">
+                    <div className="flex items-center justify-between px-4 py-3 gap-4 min-h-[44px]">
                       <span className="text-[0.875rem] font-medium leading-tight" style={{ color: theme.colors.textPrimary }}>{notifLabels[k]}</span>
-                      <Toggle
+                      <ToggleSwitch
                         checked={!!notif[k]}
-                        onChange={v => setNotif(p => ({ ...p, [k]: v }))}
+                        onChange={(e) => setNotif(p => ({ ...p, [k]: e.target.checked }))}
                         theme={theme}
                         ariaLabel={notifLabels[k]}
                       />
@@ -409,20 +389,29 @@ export const SettingsScreen = ({ theme, isDarkMode, onToggleTheme, userSettings,
             </div>
           ))}
         </div>
-      </GlassCard>
+      </div>
+    </GlassCard>
+  );
 
-      <GlassCard theme={theme} className="overflow-hidden" style={settingsCardStyle}>
-        <SectionHeader icon={Palette} title="Appearance" theme={theme} />
-        <div className="px-5 pb-5">
-          <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between gap-4" style={groupedRows}>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>Dark mode</p>
-              <p className="text-xs mt-0.5" style={{ color: theme.colors.textSecondary }}>Use a lower-glare theme throughout the app.</p>
-            </div>
-            <Toggle checked={isDarkMode} onChange={onToggleTheme} theme={theme} ariaLabel="Dark mode" />
-          </div>
+  return (
+    <AppScreenLayout
+      theme={theme}
+      title="Settings"
+      subtitle="Profile, alerts, and appearance"
+      maxWidthClass="max-w-content"
+      horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
+      contentPaddingBottomClass="pb-24 lg:pb-12"
+      contentClassName="pt-1 space-y-4"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
+        {/* Mobile: contents so cards join the parent grid for reordering.
+            Desktop: sticky left rail with Account + Appearance. */}
+        <div className="contents lg:flex lg:flex-col lg:gap-4 lg:col-span-5 xl:col-span-4 lg:sticky lg:top-4 lg:self-start">
+          {accountCard}
+          {appearanceCard}
         </div>
-      </GlassCard>
+        {notificationsCard}
+      </div>
 
       <div className="pt-1 pb-4 text-center text-[0.6875rem] font-medium" style={{ color: theme.colors.textSecondary }}>v0.9.4</div>
     </AppScreenLayout>
