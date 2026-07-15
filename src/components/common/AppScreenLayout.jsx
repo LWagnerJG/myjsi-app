@@ -4,6 +4,7 @@ import { PageTitle } from './PageTitle.jsx';
 /**
  * Shared full-screen layout scaffold used by feature screens.
  * Standardizes app header offset, scroll area, content width, and optional footer CTA region.
+ * Page fill uses theme.colors.background (canvas-25) — raised cards sit on it without borders.
  */
 export const AppScreenLayout = ({
     theme,

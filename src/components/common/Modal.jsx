@@ -112,8 +112,16 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                     >
                         {title && (
                             <div
-                                className="flex justify-between items-center p-5 border-b flex-shrink-0"
-                                style={{ borderColor: theme?.colors?.border || 'rgba(0,0,0,0.08)' }}
+                                className="flex justify-between items-center p-5 flex-shrink-0"
+                                style={{
+                                    borderBottom: isDark
+                                        ? `1px solid ${theme?.colors?.border || 'rgba(255,255,255,0.08)'}`
+                                        : 'none',
+                                    backgroundColor: isDark
+                                        ? 'transparent'
+                                        : (theme?.colors?.chrome || '#F0EDE8'),
+                                    borderRadius: `${DESIGN_TOKENS.borderRadius.xl} ${DESIGN_TOKENS.borderRadius.xl} 0 0`,
+                                }}
                             >
                                 <h2 id={titleId} className="text-[0.9375rem] font-bold tracking-tight" style={{ color: theme?.colors?.textPrimary }}>
                                     {title}

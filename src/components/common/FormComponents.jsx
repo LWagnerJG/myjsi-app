@@ -37,12 +37,11 @@ export const FormInput = ({
 
     const baseBg = surfaceBackground ?? (softChrome ? theme.colors.background : whiteBg ? '#fff' : theme.colors.subtle);
     const errorBorder   = '1px solid rgba(184,92,92,0.5)';
+    // Prefer fill hierarchy over hairlines; keep borders for errors / explicit overrides
     const baseBorder    = flatFocus
         ? 'none'
         : (surfaceBorder ?? (
-            error       ? errorBorder :
-            softChrome  ? '1px solid rgba(0,0,0,0.04)' :
-                          `1px solid ${theme.colors.border}`
+            error ? errorBorder : 'none'
         ));
 
     const focusRingColor = theme.colors.focusRing || 'rgba(0,0,0,0.08)';
@@ -51,18 +50,10 @@ export const FormInput = ({
     const handleFocus = () => {
         if (flatFocus || !inputRef.current) return;
         inputRef.current.style.boxShadow = `0 0 0 3px ${error ? errorRingColor : focusRingColor}`;
-        if (!error) {
-            inputRef.current.style.borderColor = softChrome
-                ? 'rgba(0,0,0,0.08)'
-                : (theme.colors.accent || theme.colors.border);
-        }
     };
     const handleBlur = () => {
         if (flatFocus || !inputRef.current) return;
         inputRef.current.style.boxShadow = error ? `0 0 0 3px ${errorRingColor}` : 'none';
-        inputRef.current.style.borderColor = error
-            ? 'rgba(184,92,92,0.5)'
-            : softChrome ? 'rgba(0,0,0,0.04)' : theme.colors.border;
     };
 
     const common = {
@@ -179,11 +170,7 @@ export const PortalNativeSelect = ({
     const selectRef = React.useRef(null);
     const baseBg = surfaceBackground ?? (softChrome ? theme.colors.background : whiteBg ? '#fff' : theme.colors.subtle);
     const errorBorder = '1px solid rgba(184,92,92,0.5)';
-    const baseBorder  = surfaceBorder ?? (
-        error       ? errorBorder :
-        softChrome  ? '1px solid rgba(0,0,0,0.04)' :
-                      `1px solid ${theme.colors.border}`
-    );
+    const baseBorder  = surfaceBorder ?? (error ? errorBorder : 'none');
     const placeholderColor = theme.colors.textSecondary;
     const focusRingColor   = theme.colors.focusRing || 'rgba(0,0,0,0.08)';
     const errorRingColor   = 'rgba(184,92,92,0.18)';
@@ -191,16 +178,10 @@ export const PortalNativeSelect = ({
     const handleFocus = () => {
         if (!selectRef.current) return;
         selectRef.current.style.boxShadow = `0 0 0 3px ${error ? errorRingColor : focusRingColor}`;
-        selectRef.current.style.borderColor = error
-            ? 'rgba(184,92,92,0.5)'
-            : softChrome ? 'rgba(0,0,0,0.08)' : theme.colors.border;
     };
     const handleBlur = () => {
         if (!selectRef.current) return;
         selectRef.current.style.boxShadow = error ? `0 0 0 3px ${errorRingColor}` : 'none';
-        selectRef.current.style.borderColor = error
-            ? 'rgba(184,92,92,0.5)'
-            : softChrome ? 'rgba(0,0,0,0.04)' : theme.colors.border;
     };
 
     return (
@@ -313,7 +294,7 @@ export const TagInput = ({
                     padding: 8,
                     borderRadius: R,
                     backgroundColor: whiteBg ? '#fff' : theme.colors.subtle,
-                    border: `1px solid ${theme.colors.border}`,
+                    border: 'none',
                 }}
                 onClick={() => setOpen(true)}
             >

@@ -173,12 +173,12 @@ export const SearchInput = React.memo(function SearchInput({
 }) {
     const dark = isDarkTheme(theme);
     const isControl = size === 'control';
-    // Match homeChrome primary palette — frosted glass pill
-    const bg  = dark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)';
-    const bdr = dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.80)';
+    // Raised white search pill on page canvas — borderless in light mode
+    const bg  = dark ? 'rgba(255,255,255,0.08)' : (theme?.colors?.surface || '#FFFFFF');
+    const bdr = dark ? '1px solid rgba(255,255,255,0.12)' : 'none';
     const shadow = dark
       ? '0 2px 10px rgba(0,0,0,0.25)'
-      : '0 2px 10px rgba(53,53,53,0.08)';
+      : 'none';
     const iconColor = theme?.colors?.textSecondary || '#666';
     // Fainter than SegmentedToggle unselected labels — hint, not chrome
     const placeholderColor = dark ? 'rgba(240,240,240,0.42)' : 'rgba(53,53,53,0.40)';

@@ -117,13 +117,11 @@ export const ChannelChips = ({ theme, dark, onSelect, activeId }) => {
       style={{
         color: active ? theme.colors.textPrimary : theme.colors.textSecondary,
         backgroundColor: active
-          ? (dark ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.92)')
-          : (dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.68)'),
-        border: `1px solid ${active ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)') : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)')}`,
-        opacity: active ? 1 : 0.9,
-        boxShadow: active
-          ? (dark ? '0 8px 18px rgba(0,0,0,0.16)' : '0 6px 14px rgba(53,53,53,0.05)')
-          : (dark ? 'none' : '0 1px 2px rgba(53,53,53,0.03)'),
+          ? (dark ? 'rgba(255,255,255,0.16)' : '#FFFFFF')
+          : (dark ? 'rgba(255,255,255,0.05)' : (theme.colors.chrome || theme.colors.subtle || '#F0EDE8')),
+        border: dark ? `1px solid ${active ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.06)'}` : 'none',
+        opacity: active ? 1 : 0.92,
+        boxShadow: 'none',
       }}
     >
       {label}

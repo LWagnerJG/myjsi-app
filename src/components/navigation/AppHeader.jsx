@@ -21,7 +21,7 @@ export const AppHeader = React.memo(({
     const homeChromePillStyles = getHomeChromePillStyles(dark);
     const homeChromeIconButtonStyles = getHomeChromeIconButtonStyles(dark);
 
-    const bgR = dark ? '26,26,26' : '240,237,232';
+    const bgR = dark ? '22,22,22' : '252,250,247'; // matches theme page canvas (canvas-25 / #161616)
     const homeScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 88px)';
     const innerScrimHeight = 'calc(env(safe-area-inset-top, 0px) + 68px)';
     const scrimProgress = isHome ? Math.min(Math.max((scrollDepth - 2) / 36, 0), 1) : 0;
