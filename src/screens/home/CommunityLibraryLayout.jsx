@@ -17,8 +17,8 @@ import { useToast } from '../../components/common/toastContext.js';
 
 const communitySearchSurface = (dark) => ({
   backgroundColor: dark ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
-  border: dark ? '1px solid rgba(255,255,255,0.10)' : 'none',
-  boxShadow: 'none',
+  border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.06)',
+  boxShadow: dark ? '0 1px 6px rgba(0,0,0,0.18)' : '0 1px 4px rgba(53,53,53,0.05)',
   backdropFilter: 'none',
   WebkitBackdropFilter: 'none',
 });
@@ -376,7 +376,7 @@ export const CommunityLibraryLayout = ({
                       height: 'var(--jsi-ctrl-h)',
                       color: theme.colors.textSecondary,
                       background: theme.colors.subtle,
-                      border: 'none',
+                      border: `1px solid ${theme.colors.border}`,
                     }}
                   >
                     <ChevronLeft className="w-4 h-4" />

@@ -86,24 +86,24 @@ input.commercial-value-input {
 
     /* Map existing tokens to new ones for compatibility */
     --accent-color: var(--jsi-charcoal);
-    --bg-color: var(--jsi-canvas-25-fallback);
+    --bg-color: var(--jsi-warm-beige);
 
     /* ============================================================
        THEME-AWARE CSS CUSTOM PROPERTIES (Light mode defaults)
-       Surface hierarchy (borderless): chrome → page → raised
-       These are dynamically toggled via [data-theme="dark"]
-       allowing Tailwind utilities like bg-theme-surface to work.
+       Default app chrome uses warm-beige page + bordered raised surfaces.
+       canvas-25 is selective (modals/sheets) via --theme-canvas-25.
        ============================================================ */
-    --theme-background: #FCFAF7; /* page / canvas-25 */
-    --theme-chrome: #F0EDE8;     /* inset / chrome (warm beige) */
-    --theme-surface: #FFFFFF;    /* raised cards & inputs */
+    --theme-background: #F0EDE8;
+    --theme-chrome: #F0EDE8;
+    --theme-canvas-25: #FCFAF7;
+    --theme-surface: #FFFFFF;
     --theme-primary: #353535;
     --theme-accent: #353535;
     --theme-accent-text: #FFFFFF;
     --theme-text-primary: #353535;
     --theme-text-secondary: #5B7B8C;
     --theme-border: #E3E0D8;
-    --theme-subtle: #F0EDE8;
+    --theme-subtle: #DFE2DD;
     --theme-shadow: rgba(53, 53, 53, 0.1);
     --theme-input-bg: #FFFFFF;
     --theme-overlay: rgba(0, 0, 0, 0.5);
@@ -119,7 +119,7 @@ input.commercial-value-input {
     --theme-info: #5B7B8C;
     --theme-info-light: rgba(91, 123, 140, 0.12);
     --theme-card-bg: #FFFFFF;
-    --theme-card-border: none;
+    --theme-card-border: 1px solid rgba(0, 0, 0, 0.06);
 
     /* Shared motion tokens */
     --motion-duration-fast: 160ms;
@@ -144,6 +144,7 @@ input.commercial-value-input {
 [data-theme="dark"] {
     --theme-background: #161616;
     --theme-chrome: #111111;
+    --theme-canvas-25: #1C1C1C;
     --theme-surface: #242424;
     --theme-primary: #ECE5DD;
     --theme-accent: #E5DDD3;
@@ -202,7 +203,7 @@ body {
     -webkit-text-size-adjust: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: var(--theme-background, var(--jsi-canvas-25-fallback));
+    background-color: var(--theme-background, var(--jsi-warm-beige));
     color: var(--jsi-charcoal);
     /* Prevent pull-to-refresh and over-scroll rubber-band on mobile */
     overscroll-behavior: none;

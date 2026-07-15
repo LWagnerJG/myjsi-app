@@ -4,19 +4,20 @@
 
 export const lightTheme = {
     colors: {
-        // Core colors — borderless surface hierarchy:
-        // chrome (warm beige) → page/background (canvas-25) → surface (white)
-        background: '#FCFAF7', // jsi-canvas-25 — airy page canvas
-        chrome: '#F0EDE8', // jsi-warm-beige — inset / chrome layer
+        // Core colors — warm beige page is the JSI default.
+        // canvas25 is reserved for selective airy shells (modals/sheets).
+        background: '#F0EDE8', // jsi-warm-beige
+        chrome: '#F0EDE8', // modal header / inset strip
+        canvas25: '#FCFAF7', // selective airy modal body
         surface: '#FFFFFF',
         primary: '#353535', // jsi-charcoal
         accent: '#353535',
         secondary: '#353535',
         textPrimary: '#353535',
         textSecondary: '#5B7B8C', // jsi-info for secondary text
-        border: '#E3E0D8', // jsi-stone — reserved for focus/selection, not card chrome
+        border: '#E3E0D8', // jsi-stone
         shadow: 'rgba(53, 53, 53, 0.1)',
-        subtle: '#F0EDE8', // chrome-tint wells (was sage — aligns with surface hierarchy)
+        subtle: '#DFE2DD', // jsi-sage-grey
 
         // Semantic colors - for consistent usage across components
         accentText: '#FFFFFF', // Text on accent/primary buttons
@@ -49,9 +50,10 @@ export const lightTheme = {
 
 export const darkTheme = {
     colors: {
-        // Core colors — same roles: chrome (deeper) → page → raised
+        // Core colors
         background: '#161616',
         chrome: '#111111',
+        canvas25: '#1C1C1C', // slightly lifted modal body in dark
         surface: '#242424',
         primary: '#ECE5DD',
         accent: '#E5DDD3',

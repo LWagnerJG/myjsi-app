@@ -112,14 +112,15 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                     >
                         {title && (
                             <div
-                                className="flex justify-between items-center p-5 flex-shrink-0"
+                                className="flex justify-between items-center px-5 py-4 flex-shrink-0"
                                 style={{
+                                    // Selective airy hierarchy: chrome header over canvas-25 body
+                                    backgroundColor: isDark
+                                        ? 'rgba(255,255,255,0.04)'
+                                        : (theme?.colors?.chrome || '#F0EDE8'),
                                     borderBottom: isDark
                                         ? `1px solid ${theme?.colors?.border || 'rgba(255,255,255,0.08)'}`
                                         : 'none',
-                                    backgroundColor: isDark
-                                        ? 'transparent'
-                                        : (theme?.colors?.chrome || '#F0EDE8'),
                                     borderRadius: `${DESIGN_TOKENS.borderRadius.xl} ${DESIGN_TOKENS.borderRadius.xl} 0 0`,
                                 }}
                             >
@@ -131,7 +132,8 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                                     aria-label="Close"
                                     className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
                                     style={{
-                                        backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                                        backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.72)',
+                                        border: isDark ? 'none' : '1px solid rgba(0,0,0,0.06)',
                                     }}
                                 >
                                     <X className="w-4 h-4" aria-hidden="true" style={{ color: theme?.colors?.textSecondary }} />
@@ -140,6 +142,12 @@ export const Modal = ({ show, onClose, title, children, theme, maxWidth = 'max-w
                         )}
                         <div
                             className={`${title ? "p-6" : "pt-8 px-6 pb-6"} overflow-y-auto space-y-4 scrollbar-hide`}
+                            style={{
+                                // Nested white fields pop against the airy modal body without extra card borders
+                                backgroundColor: isDark
+                                    ? 'transparent'
+                                    : (theme?.colors?.canvas25 || '#FCFAF7'),
+                            }}
                         >
                             {children}
                         </div>
