@@ -65,6 +65,8 @@ input.commercial-value-input {
     --jsi-white: #FFFFFF;
     --jsi-stone: #E3E0D8;
     --jsi-warm-beige: #F0EDE8;
+    --jsi-canvas-25: oklch(99.2% 0.004 85); /* warm -25 page canvas; hex fallback below */
+    --jsi-canvas-25-fallback: #FCFAF7;
     --jsi-sage-grey: #DFE2DD;
     --jsi-light-grey: #EAECE9;
     --jsi-success: #4A7C59;
@@ -84,22 +86,24 @@ input.commercial-value-input {
 
     /* Map existing tokens to new ones for compatibility */
     --accent-color: var(--jsi-charcoal);
-    --bg-color: var(--jsi-warm-beige);
+    --bg-color: var(--jsi-canvas-25-fallback);
 
     /* ============================================================
        THEME-AWARE CSS CUSTOM PROPERTIES (Light mode defaults)
+       Surface hierarchy (borderless): chrome → page → raised
        These are dynamically toggled via [data-theme="dark"]
        allowing Tailwind utilities like bg-theme-surface to work.
        ============================================================ */
-    --theme-background: #F0EDE8;
-    --theme-surface: #FFFFFF;
+    --theme-background: #FCFAF7; /* page / canvas-25 */
+    --theme-chrome: #F0EDE8;     /* inset / chrome (warm beige) */
+    --theme-surface: #FFFFFF;    /* raised cards & inputs */
     --theme-primary: #353535;
     --theme-accent: #353535;
     --theme-accent-text: #FFFFFF;
     --theme-text-primary: #353535;
     --theme-text-secondary: #5B7B8C;
     --theme-border: #E3E0D8;
-    --theme-subtle: #DFE2DD;
+    --theme-subtle: #F0EDE8;
     --theme-shadow: rgba(53, 53, 53, 0.1);
     --theme-input-bg: #FFFFFF;
     --theme-overlay: rgba(0, 0, 0, 0.5);
@@ -115,7 +119,7 @@ input.commercial-value-input {
     --theme-info: #5B7B8C;
     --theme-info-light: rgba(91, 123, 140, 0.12);
     --theme-card-bg: #FFFFFF;
-    --theme-card-border: 1px solid rgba(0, 0, 0, 0.06);
+    --theme-card-border: none;
 
     /* Shared motion tokens */
     --motion-duration-fast: 160ms;
@@ -138,8 +142,9 @@ input.commercial-value-input {
 
 /* Dark theme overrides */
 [data-theme="dark"] {
-    --theme-background: #1A1A1A;
-    --theme-surface: #262626;
+    --theme-background: #161616;
+    --theme-chrome: #111111;
+    --theme-surface: #242424;
     --theme-primary: #ECE5DD;
     --theme-accent: #E5DDD3;
     --theme-accent-text: #1A1A1A;
@@ -197,7 +202,7 @@ body {
     -webkit-text-size-adjust: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: var(--jsi-warm-beige);
+    background-color: var(--theme-background, var(--jsi-canvas-25-fallback));
     color: var(--jsi-charcoal);
     /* Prevent pull-to-refresh and over-scroll rubber-band on mobile */
     overscroll-behavior: none;

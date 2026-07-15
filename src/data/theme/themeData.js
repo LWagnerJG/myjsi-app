@@ -4,17 +4,19 @@
 
 export const lightTheme = {
     colors: {
-        // Core colors
-        background: '#F0EDE8', // jsi-warm-beige
+        // Core colors — borderless surface hierarchy:
+        // chrome (warm beige) → page/background (canvas-25) → surface (white)
+        background: '#FCFAF7', // jsi-canvas-25 — airy page canvas
+        chrome: '#F0EDE8', // jsi-warm-beige — inset / chrome layer
         surface: '#FFFFFF',
         primary: '#353535', // jsi-charcoal
         accent: '#353535',
         secondary: '#353535',
         textPrimary: '#353535',
         textSecondary: '#5B7B8C', // jsi-info for secondary text
-        border: '#E3E0D8', // jsi-stone
+        border: '#E3E0D8', // jsi-stone — reserved for focus/selection, not card chrome
         shadow: 'rgba(53, 53, 53, 0.1)',
-        subtle: '#DFE2DD', // jsi-sage-grey
+        subtle: '#F0EDE8', // chrome-tint wells (was sage — aligns with surface hierarchy)
 
         // Semantic colors - for consistent usage across components
         accentText: '#FFFFFF', // Text on accent/primary buttons
@@ -47,8 +49,9 @@ export const lightTheme = {
 
 export const darkTheme = {
     colors: {
-        // Core colors
+        // Core colors — same roles: chrome (deeper) → page → raised
         background: '#161616',
+        chrome: '#111111',
         surface: '#242424',
         primary: '#ECE5DD',
         accent: '#E5DDD3',

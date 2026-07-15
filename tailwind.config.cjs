@@ -28,6 +28,7 @@ module.exports = {
                     white: '#FFFFFF',
                     stone: '#E3E0D8',
                     'warm-beige': '#F0EDE8',
+                    'canvas-25': '#FCFAF7',
                     'sage-grey': '#DFE2DD',
                     'light-grey': '#EAECE9',
                     success: '#4A7C59',
@@ -37,8 +38,10 @@ module.exports = {
                 },
                 // Theme-aware colors backed by CSS custom properties
                 // Usage: bg-theme-surface, text-theme-primary, border-theme-border, etc.
+                // Surface hierarchy: bg-theme-chrome → bg-theme-background → bg-theme-surface
                 theme: {
                     background: 'var(--theme-background)',
+                    chrome: 'var(--theme-chrome)',
                     surface: 'var(--theme-surface)',
                     primary: 'var(--theme-primary)',
                     accent: 'var(--theme-accent)',

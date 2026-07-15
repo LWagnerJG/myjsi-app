@@ -8,11 +8,14 @@
 export const JSI_COLORS = {
   // Primary Colors
   charcoal: '#353535',        // Primary text & action color (replaces pure black)
-  white: '#FFFFFF',           // High contrast pairing
+  white: '#FFFFFF',           // High contrast pairing / raised surfaces
 
   // Earth-Toned Neutrals (for backgrounds & soft tonal variations)
-  stone: '#E3E0D8',           // Warm neutral
-  warmBeige: '#F0EDE8',       // Soft background
+  // Surface hierarchy (borderless contrast — prefer fill steps over hairline borders):
+  //   chrome (warmBeige) → page (canvas25) → raised (white)
+  stone: '#E3E0D8',           // Warm neutral / chrome-adjacent
+  warmBeige: '#F0EDE8',       // Chrome / inset layer (zinc-50 role)
+  canvas25: '#FCFAF7',        // Page canvas — warm -25 (oklch 99.2% 0.004 85)
   sageGrey: '#DFE2DD',        // Cool neutral
   lightGrey: '#EAECE9',       // Lightest neutral
 
@@ -21,6 +24,18 @@ export const JSI_COLORS = {
   warning: '#C4956A',         // Warm amber
   error: '#B85C5C',           // Muted red
   info: '#5B7B8C',            // Slate blue
+};
+
+/**
+ * Borderless surface roles — use these instead of decorative borders for hierarchy.
+ * chrome: nav insets, sticky chrome, grouped wells (slightly deeper)
+ * page:   screen / scroll canvas (airy -25)
+ * raised: cards, inputs, floating panels (white / surface)
+ */
+export const SURFACE_ROLES = {
+  chrome: JSI_COLORS.warmBeige,
+  page: JSI_COLORS.canvas25,
+  raised: JSI_COLORS.white,
 };
 
 // TYPOGRAPHY - Neue Haas Grotesk Display Pro
@@ -265,13 +280,25 @@ export const FIELD_LABEL_CLASSNAME = 'text-[0.6875rem] font-semibold tracking-[0
 export const SECTION_TITLE_CLASSNAME = 'text-[0.95rem] sm:text-[1rem] font-semibold tracking-[-0.015em] leading-none';
 
 /**
+ * Resolve a surface-role color from theme (falls back to JSI hierarchy).
+ * Roles: 'chrome' | 'page' | 'raised'
+ */
+export const surfaceRole = (theme, role = 'page') => {
+  const colors = theme?.colors || {};
+  if (role === 'chrome') return colors.chrome || colors.subtle || SURFACE_ROLES.chrome;
+  if (role === 'raised') return colors.surface || SURFACE_ROLES.raised;
+  return colors.background || SURFACE_ROLES.page;
+};
+
+/**
  * Standard card/surface background for dark/light mode.
+ * Light mode relies on page→raised fill contrast — no decorative border.
  * Returns { backgroundColor, border, boxShadow } ready to spread into style.
  */
 export const cardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.065)' : (theme?.colors?.surface || '#FFFFFF'),
+    backgroundColor: dark ? 'rgba(255,255,255,0.065)' : (theme?.colors?.surface || SURFACE_ROLES.raised),
     border: dark ? '1px solid rgba(255,255,255,0.042)' : 'none',
     boxShadow: dark ? DESIGN_TOKENS.shadowsDark.card : DESIGN_TOKENS.shadows.card,
   };
@@ -279,20 +306,23 @@ export const cardSurface = (theme) => {
 
 /**
  * Subtle tinted background for hover rows, sub-panels, and inline containers.
+ * Light mode uses chrome-tint (warm beige family) so wells read against page canvas.
  */
 export const subtleBg = (theme, strength = 1) => {
   const dark = isDarkTheme(theme);
   return dark
     ? `rgba(255,255,255,${(0.042 * strength).toFixed(3)})`
-    : `rgba(236, 238, 241, ${Math.min(0.98, 0.72 + 0.12 * strength).toFixed(2)})`;
+    : `rgba(240, 237, 232, ${Math.min(0.98, 0.55 + 0.18 * strength).toFixed(2)})`;
 };
 
 /**
- * Standard border color for dark/light mode.
+ * Standard border for dark/light mode.
+ * Light mode: none — prefer surface-role fills over hairlines.
+ * Keep for focus rings, selected states, and dark edge definition when needed.
  */
 export const subtleBorder = (theme) => {
   const dark = isDarkTheme(theme);
-  return dark ? '1px solid rgba(255,255,255,0.042)' : '1px solid rgba(0,0,0,0.03)';
+  return dark ? '1px solid rgba(255,255,255,0.042)' : 'none';
 };
 
 /**
@@ -301,15 +331,15 @@ export const subtleBorder = (theme) => {
 export const sectionCardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.035)' : 'rgba(255,255,255,0.90)',
-    border: dark ? subtleBorder(theme) : 'none',
-    boxShadow: dark ? '0 12px 28px rgba(0,0,0,0.16)' : '0 10px 24px rgba(53,53,53,0.05)',
+    backgroundColor: dark ? 'rgba(255,255,255,0.035)' : (theme?.colors?.surface || SURFACE_ROLES.raised),
+    border: 'none',
+    boxShadow: dark ? '0 12px 28px rgba(0,0,0,0.16)' : 'none',
     borderRadius: SECTION_CARD_RADIUS,
   };
 };
 
 /**
- * Standard cool-grey inset tile for grouped controls and lightweight data blocks.
+ * Chrome-tint inset tile for grouped controls and lightweight data blocks.
  * NOTE: Uses pill radius — intended for compact controls (search shells, chips,
  * icon wells). Do NOT spread onto tall multi-row blocks with overflow:hidden;
  * use groupedTileSurface() for card-like groups instead.
@@ -317,7 +347,7 @@ export const sectionCardSurface = (theme) => {
 export const fieldTileSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : '#F2F4F6',
+    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : (theme?.colors?.chrome || SURFACE_ROLES.chrome),
     border: 'none',
     borderRadius: DESIGN_TOKENS.borderRadius.pill,
   };
@@ -330,7 +360,7 @@ export const fieldTileSurface = (theme) => {
 export const groupedTileSurface = (theme, { radius = DESIGN_TOKENS.borderRadius.lg } = {}) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : '#F2F4F6',
+    backgroundColor: dark ? 'rgba(255,255,255,0.055)' : (theme?.colors?.chrome || SURFACE_ROLES.chrome),
     border: 'none',
     borderRadius: radius,
   };
@@ -361,7 +391,7 @@ export const PORTAL_MENU_Z_INDEX = 10000;
 export const portalMenuRowBg = (active, theme) => {
   const dark = isDarkTheme(theme);
   if (!active) return 'transparent';
-  return dark ? '#333333' : '#F2F4F6';
+  return dark ? '#333333' : (theme?.colors?.chrome || SURFACE_ROLES.chrome);
 };
 
 /**
@@ -370,8 +400,8 @@ export const portalMenuRowBg = (active, theme) => {
 export const modalCardSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: theme?.colors?.surface || (dark ? '#282828' : '#FFFFFF'),
-    border: dark ? '1px solid rgba(255,255,255,0.042)' : subtleBorder(theme),
+    backgroundColor: theme?.colors?.surface || (dark ? '#282828' : SURFACE_ROLES.raised),
+    border: dark ? '1px solid rgba(255,255,255,0.042)' : 'none',
     borderRadius: DESIGN_TOKENS.borderRadius.xl,
     boxShadow: dark ? DESIGN_TOKENS.shadowsDark.modal : DESIGN_TOKENS.shadows.modal,
   };
@@ -379,12 +409,13 @@ export const modalCardSurface = (theme) => {
 
 /**
  * Standard input field surface. Spread into style prop.
+ * Light mode: raised white on page canvas — no hairline border.
  */
 export const inputSurface = (theme) => {
   const dark = isDarkTheme(theme);
   return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.075)' : (theme?.colors?.surface || '#FFFFFF'),
-    border: dark ? '1px solid rgba(255,255,255,0.045)' : '1px solid rgba(0,0,0,0.04)',
+    backgroundColor: dark ? 'rgba(255,255,255,0.075)' : (theme?.colors?.surface || SURFACE_ROLES.raised),
+    border: dark ? '1px solid rgba(255,255,255,0.045)' : 'none',
     color: theme?.colors?.textPrimary || JSI_COLORS.charcoal,
   };
 };
