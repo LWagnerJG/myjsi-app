@@ -12,6 +12,7 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableAppTile } from './SortableAppTile.jsx';
 import { getAppBadge, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
+import { appTileBorder } from '../../../design-system/tokens.js';
 
 export const AppGrid = ({
     isEditMode,
@@ -104,6 +105,7 @@ export const AppGrid = ({
                                 style={{
                                     backgroundColor: colors.tileSurface,
                                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                    border: appTileBorder(isDark),
                                     height: 96,
                                 }}
                             >
@@ -158,6 +160,7 @@ export const AppGrid = ({
                             style={{
                                 height: 96,
                                 backgroundColor: colors.tileSurface,
+                                border: appTileBorder(isDark),
                             }}
                         >
                             <div
@@ -209,6 +212,7 @@ export const AppGrid = ({
                         style={{
                             height: 96,
                             backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)',
+                            border: isDark ? '1px dashed rgba(255,255,255,0.12)' : '1px dashed rgba(0,0,0,0.10)',
                         }}
                     >
                         <div
@@ -233,6 +237,7 @@ export const AppGrid = ({
                     style={{
                         height: 56,
                         backgroundColor: colors.tileSurface,
+                        border: appTileBorder(isDark),
                     }}
                 >
                     <div

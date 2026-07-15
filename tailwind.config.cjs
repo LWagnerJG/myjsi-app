@@ -42,6 +42,7 @@ module.exports = {
                 theme: {
                     background: 'var(--theme-background)',
                     chrome: 'var(--theme-chrome)',
+                    'canvas-25': 'var(--theme-canvas-25)',
                     surface: 'var(--theme-surface)',
                     primary: 'var(--theme-primary)',
                     accent: 'var(--theme-accent)',

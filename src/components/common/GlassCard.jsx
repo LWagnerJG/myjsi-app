@@ -26,16 +26,15 @@ export const GlassCard = React.memo(
     const isDark = isDarkTheme(theme);
     const radius = DESIGN_TOKENS.borderRadius.xl; // 24px for JSI
 
-    // Raised white on page canvas (canvas-25) — hierarchy from fill, not borders
+    // Match the frosted-glass header pill in dark mode; solid white in light
     const cardBg = isDark
       ? 'rgba(255,255,255,0.065)'
       : (theme?.colors?.surface || '#FFFFFF');
 
-    // Light mode: no decorative border (page→raised contrast is enough).
-    // Dark mode: hairline for edge definition on translucent glass.
+    // Subtle border for edge definition on dense app chrome
     const cardBorder = isDark
       ? '1px solid rgba(255, 255, 255, 0.055)'
-      : 'none';
+      : '1px solid rgba(0, 0, 0, 0.06)';
 
     const borderColor = theme?.colors?.border || JSI_COLORS.stone;
 

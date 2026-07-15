@@ -3,6 +3,7 @@ import React from 'react';
 import { useSortable, defaultAnimateLayoutChanges } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, X, Lock } from 'lucide-react';
+import { appTileBorder } from '../../../design-system/tokens.js';
 export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemoveDisabled = false, isRemoveLocked = false, isOverlay = false }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id,
@@ -15,12 +16,12 @@ export const SortableAppTile = React.memo(({ id, app, colors, onRemove, isRemove
         }
     });
 
-    const isDark = colors.tileSurface === '#2A2A2A';
+    const isDark = colors.tileSurface === '#2A2A2A' || (typeof colors.tileSurface === 'string' && colors.tileSurface.includes('42,42,42'));
     const style = {
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
         backgroundColor: `${colors.tileSurface || colors.surface}`,
-        border: 'none',
+        border: appTileBorder(isDark),
         boxShadow: isOverlay ? '0 8px 24px rgba(0,0,0,0.1)' : (isDragging ? '0 4px 12px rgba(0,0,0,0.08)' : 'none'),
         opacity: isDragging ? 0.9 : 1,
         zIndex: isDragging ? 20 : 'auto',
