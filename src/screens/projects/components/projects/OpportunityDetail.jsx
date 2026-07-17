@@ -1448,7 +1448,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </div>
           </Section>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:gap-5 xl:gap-6 lg:items-start">
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(260px,330px)] md:gap-5 xl:gap-6 md:items-start">
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
               <Section title="Pricing" subtitle="List price, discount, and project type" theme={theme}>
                 <div className="space-y-3">
@@ -1586,7 +1586,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <Row label="Install Date" theme={theme}>
                     {(id) => (
                       <input id={id} type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                        className={TEXT_INPUT_CLASS} style={{ color: draft.expectedInstallDate ? c.textPrimary : c.textSecondary, colorScheme: isDark ? 'dark' : 'light', ...fieldSurface(theme) }} />
+                        className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, opacity: draft.expectedInstallDate ? 1 : 0.62, colorScheme: isDark ? 'dark' : 'light', ...fieldSurface(theme) }} />
                     )}
                   </Row>
                   <Row label="Location" theme={theme}>
@@ -1782,7 +1782,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
             </div>
 
-            <div className="min-w-0 space-y-4 lg:sticky lg:top-[calc(var(--app-header-offset,72px)+1rem)] lg:self-start">
+            <div className="min-w-0 space-y-4 md:sticky md:top-[calc(var(--app-header-offset,72px)+1rem)] md:self-start">
               <Section title="Project Hub" theme={theme}>
                 <div className="space-y-1 px-[2px]">
                   <DetailHubCard
