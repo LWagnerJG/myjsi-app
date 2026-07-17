@@ -82,8 +82,10 @@ export const SegmentedToggle = ({
     return () => ro.disconnect();
   }, [measure]);
 
+  // `wrap` hugs its content (inline-flex) but can spill onto a second row when
+  // labels are long, so the track never stretches to an empty full-width bar.
   const layoutClass = wrap
-    ? 'flex flex-wrap gap-y-1'
+    ? 'inline-flex flex-wrap max-w-full gap-y-1 align-top'
     : fullWidth ? 'flex w-full' : 'inline-flex';
 
   return (

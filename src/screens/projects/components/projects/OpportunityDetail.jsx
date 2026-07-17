@@ -51,6 +51,11 @@ const DETAIL_SECTION_SUBTITLE_CLASS = 'mt-1 text-[0.6875rem] leading-snug';
 const FIELD_CONTROL_MINH = 'min-h-[44px]';
 const FIELD_VALUE_CLASS = 'text-[0.8125rem] font-semibold';
 const FIELD_HELPER_CLASS = 'text-[0.6875rem] font-medium';
+/* Responsive field grid: fields hold a comfortable ~220px width and pack into
+   as many columns as the container allows, so pills never stretch too wide on
+   large screens and collapse to one column on mobile. */
+const FIELD_GRID_CLASS = 'grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]';
+const FIELD_SPAN_ALL = '[grid-column:1/-1]';
 const TEXT_INPUT_CLASS = `w-full ${FIELD_CONTROL_MINH} px-3.5 bg-transparent outline-none ${FIELD_VALUE_CLASS} focus-ring`;
 
 const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,53,53,0.07)');
@@ -822,7 +827,7 @@ const ProjectContractFields = ({
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       className="overflow-hidden"
     >
-      <div className="grid gap-3 pt-1 sm:grid-cols-3">
+      <div className="grid gap-3 pt-1 [grid-template-columns:repeat(auto-fill,minmax(200px,1fr))]">
         <div className="space-y-1.5">
           <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Contract Program</span>
           <CompactSelect
@@ -1447,7 +1452,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
               <Section title="Pricing" subtitle="List price, discount, and project type" theme={theme}>
                 <div className="space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className={FIELD_GRID_CLASS}>
                     <div className="min-w-0 space-y-1.5">
                       <label htmlFor={listPriceId} className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>List Price</label>
                       <div className={`flex items-center gap-0.5 ${FIELD_CONTROL_MINH} px-3.5`} style={fieldSurface(theme)}>
@@ -1559,8 +1564,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Project Details" theme={theme}>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Row label="Vertical" theme={theme} className={draft.vertical === 'Other' ? 'sm:col-span-2' : ''}>
+                <div className={FIELD_GRID_CLASS}>
+                  <Row label="Vertical" theme={theme} className={draft.vertical === 'Other' ? FIELD_SPAN_ALL : ''}>
                     {(id) => (
                       <div className={draft.vertical === 'Other' ? 'flex items-center gap-2' : ''}>
                         <div className={draft.vertical === 'Other' ? 'w-[44%] flex-shrink-0' : 'w-full'}>
@@ -1605,7 +1610,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </Section>
 
               <Section title="Stakeholders & Competition" theme={theme}>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className={FIELD_GRID_CLASS}>
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Dealer Partners</span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1625,7 +1630,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </Row>
 
                   {specifierOptions.length > 0 && (
-                    <div className="space-y-1.5 sm:col-span-2">
+                    <div className={`space-y-1.5 ${FIELD_SPAN_ALL}`}>
                       <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Who is leading the specifications?</span>
                       <SegmentedToggle
                         theme={theme}
@@ -1639,7 +1644,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     </div>
                   )}
 
-                  <div className="space-y-2 sm:col-span-2">
+                  <div className={`space-y-2 ${FIELD_SPAN_ALL}`}>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                       <span className={`${FIELD_LABEL_CLASS} flex-shrink-0`} style={labelStyle}>Competition</span>
                       <SegmentedToggle
@@ -1712,7 +1717,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                                 <X className="h-3.5 w-3.5" aria-hidden="true" />
                               </button>
                             </div>
-                            <div className="grid gap-2.5 sm:grid-cols-2">
+                            <div className="grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(200px,1fr))]">
                               {prompts.map(prompt => (
                                 <div key={prompt.key} className="space-y-1">
                                   <span className="text-[0.625rem] font-medium" style={{ color: c.textSecondary, opacity: 0.72 }}>{prompt.label}</span>
