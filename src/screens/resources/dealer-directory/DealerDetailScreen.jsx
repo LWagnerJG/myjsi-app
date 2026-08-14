@@ -7,11 +7,11 @@ import { Modal } from '../../../components/common/Modal.jsx';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 import { isDarkTheme, subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { formatCurrencyCompact, formatLongDate } from '../../../utils/format.js';
-import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG } from './data.js';
+import { DEALER_DIRECTORY_DATA, DAILY_DISCOUNT_OPTIONS, ROLE_OPTIONS, PROJECT_STATUS_CONFIG, getChoiceProgram } from './data.js';
 import {
     Building2,
     MoreVertical, UserPlus, CheckCircle, Trash2,
-    ChevronDown,
+    ChevronDown, Award,
 } from 'lucide-react';
 import { HBar, DonutChart, SparkBars } from './components/DealerDetailComponents.jsx';
 
@@ -240,7 +240,7 @@ export const DealerDetailScreen = ({
                     This dealer may have been removed or the link is invalid.
                 </p>
                 <PillButton onClick={() => onNavigate?.('resources/dealer-directory')} theme={theme} size="compact">
-                    Back to Directory
+                    Back to Dealers
                 </PillButton>
             </div>
         );
@@ -249,8 +249,9 @@ export const DealerDetailScreen = ({
     /* ── Derived values ── */
     const goalPct       = dealer.ytdGoal ? Math.round((dealer.sales / dealer.ytdGoal) * 100) : 0;
     const gColor        = goalTone(goalPct);
-    const rebatePct     = dealer.rebatableGoal ? Math.round((dealer.rebatableSales / dealer.rebatableGoal) * 100) : 0;
-    const rColor        = goalTone(rebatePct);
+    const choice        = getChoiceProgram(dealer);
+    const rebatePct     = choice ? choice.percent : (dealer.rebatableGoal ? Math.round((dealer.rebatableSales / dealer.rebatableGoal) * 100) : 0);
+    const rColor        = choice ? choice.color : goalTone(rebatePct);
     const maxSeriesAmt  = dealer.seriesSales?.[0]?.amount || 1;
     const totalVert     = dealer.verticalSales?.reduce((s, v) => s + v.value, 0) || 0;
     const discountShort = dealer.dailyDiscount?.split(' ')?.[0] || dealer.dailyDiscount || '—';
@@ -315,6 +316,15 @@ export const DealerDetailScreen = ({
                                 )}
 
                                 <div className="mt-3 flex flex-wrap gap-2">
+                                    {choice ? (
+                                        <span
+                                            className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.06em]"
+                                            style={{ color: choice.color, backgroundColor: `${choice.color}1A` }}
+                                        >
+                                            <Award className="w-3 h-3" aria-hidden="true" />
+                                            Choice {choice.label}
+                                        </span>
+                                    ) : null}
                                     {dealer.territory && (
                                         <InfoPill theme={theme} colors={colors}>{dealer.territory}</InfoPill>
                                     )}
@@ -355,35 +365,76 @@ export const DealerDetailScreen = ({
             {/* ─── Scrollable content ─── */}
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-16 space-y-4 max-w-content mx-auto w-full">
 
-                {/* ── Goal Progress ── */}
+                {/* ── Goal Progress / Choice Program ── */}
                 <GlassCard theme={theme} className="overflow-hidden p-0">
-                    <CardHeader colors={colors}>
-                        Goal Progress
+                    <CardHeader colors={colors} right={choice ? (
+                        <HeaderMeta colors={colors}>{choice.rebateRate}% rebate</HeaderMeta>
+                    ) : null}>
+                        {choice ? 'Choice Program' : 'Goal Progress'}
                     </CardHeader>
                     <div className="px-5 pb-5 space-y-3">
-                        <ProgressBlock
-                            label="Annual goal"
-                            percent={goalPct}
-                            tone={gColor}
-                            currentValue={`${formatCurrencyCompact(dealer.sales)} sales`}
-                            goalValue={`${formatCurrencyCompact(dealer.ytdGoal)} goal`}
-                            theme={theme}
-                            colors={colors}
-                            isDark={isDark}
-                        />
-
-                        {dealer.rebatableGoal > 0 && (
+                        {!choice ? (
                             <ProgressBlock
-                                label="Rebatable goal"
+                                label="Annual goal"
+                                percent={goalPct}
+                                tone={gColor}
+                                currentValue={`${formatCurrencyCompact(dealer.sales)} sales`}
+                                goalValue={`${formatCurrencyCompact(dealer.ytdGoal)} goal`}
+                                theme={theme}
+                                colors={colors}
+                                isDark={isDark}
+                            />
+                        ) : null}
+
+                        {(choice || dealer.rebatableGoal > 0) && (
+                            <ProgressBlock
+                                label={choice ? `Progress to ${choice.label} rebate` : 'Rebatable goal'}
                                 percent={rebatePct}
                                 tone={rColor}
-                                currentValue={`${formatCurrencyCompact(dealer.rebatableSales)} sales`}
-                                goalValue={`${formatCurrencyCompact(dealer.rebatableGoal)} goal`}
+                                currentValue={`${formatCurrencyCompact(choice ? choice.rebatableSales : dealer.rebatableSales)} sales`}
+                                goalValue={`${formatCurrencyCompact(choice ? choice.rebatableGoal : dealer.rebatableGoal)} goal`}
                                 theme={theme}
                                 colors={colors}
                                 isDark={isDark}
                             />
                         )}
+
+                        {choice ? (
+                            <div className="space-y-2.5 pt-1">
+                                {choice.remaining > 0 ? (
+                                    <p className="text-[0.75rem] font-medium" style={{ color: colors.textSecondary, opacity: 0.78 }}>
+                                        {formatCurrencyCompact(choice.remaining)} remaining to hit this year’s rebate goal.
+                                    </p>
+                                ) : (
+                                    <p className="text-[0.75rem] font-semibold" style={{ color: choice.color }}>
+                                        Rebate goal met — qualifying volume is in.
+                                    </p>
+                                )}
+                                <ul className="m-0 list-none space-y-2 p-0">
+                                    {[
+                                        { label: 'Rebate', value: `${choice.rebateRate}% of qualifying net` },
+                                        { label: 'Extra discount', value: choice.extraDiscount },
+                                        { label: 'Freight', value: choice.freight },
+                                        { label: 'Payout', value: choice.payout },
+                                        { label: 'Does not qualify', value: choice.exclusions },
+                                    ].filter(row => row.value).map(row => (
+                                        <li key={row.label} className="flex gap-3">
+                                            <span className="w-[7.5rem] flex-shrink-0 text-[0.6875rem] font-semibold" style={{ color: colors.textSecondary, opacity: 0.58 }}>
+                                                {row.label}
+                                            </span>
+                                            <span className="min-w-0 text-[0.8125rem] font-medium leading-snug" style={{ color: colors.textPrimary }}>
+                                                {row.value}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                {choice.notes ? (
+                                    <p className="text-[0.6875rem] font-medium leading-snug pt-0.5" style={{ color: colors.textSecondary, opacity: 0.7 }}>
+                                        {choice.notes}
+                                    </p>
+                                ) : null}
+                            </div>
+                        ) : null}
                     </div>
                 </GlassCard>
 

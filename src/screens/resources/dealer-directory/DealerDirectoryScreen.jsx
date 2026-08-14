@@ -3,11 +3,11 @@ import { GlassCard } from '../../../components/common/GlassCard.jsx';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { Modal } from '../../../components/common/Modal.jsx';
 import { motion } from 'framer-motion';
-import { ChevronRight, Building2, UserPlus, Check } from 'lucide-react';
-import { DEALER_DIRECTORY_DATA } from './data.js';
+import { ChevronRight, Building2, UserPlus, Check, Award } from 'lucide-react';
+import { DEALER_DIRECTORY_DATA, getChoiceProgram } from './data.js';
 import { DAILY_DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
 import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
-import { formatCurrency } from '../../../utils/format.js';
+import { formatCurrency, formatCurrencyCompact } from '../../../utils/format.js';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
 
 const stagger = (i) => ({
@@ -19,9 +19,105 @@ const goalTone = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C
 
 const EMPTY_FORM = { companyName: '', adminEmail: '', dailyDiscount: '' };
 
+const ChoiceBadge = ({ program, compact = false }) => (
+    <span
+        className={`inline-flex items-center rounded-full font-bold uppercase tracking-[0.06em] ${compact ? 'px-1.5 py-[1px] text-[0.5625rem]' : 'px-2 py-0.5 text-[0.625rem]'}`}
+        style={{ color: program.color, backgroundColor: `${program.color}1A` }}
+    >
+        {program.label}
+    </span>
+);
+
+const MiniProgress = ({ percent, tone, isDark }) => (
+    <div
+        className="w-14 rounded-full overflow-hidden"
+        style={{ height: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)' }}
+        aria-hidden="true"
+    >
+        <div className="h-full rounded-full" style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: tone }} />
+    </div>
+);
+
+const DealerRow = ({ dealer, i, last, colors, isDark, rowBorder, onNavigate, choiceMode }) => {
+    const program = getChoiceProgram(dealer);
+    const salesPct = dealer.ytdGoal ? Math.round((dealer.sales / dealer.ytdGoal) * 100) : null;
+    const displayPct = choiceMode ? (program?.percent ?? null) : salesPct;
+    const gColor = displayPct !== null ? (choiceMode && program ? program.color : goalTone(displayPct)) : null;
+    const initials = dealer.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    const secondaryLine = dealer.territory || dealer.dailyDiscount || 'No territory assigned';
+
+    return (
+        <motion.button
+            {...stagger(i)}
+            onClick={() => onNavigate?.(`resources/dealer-directory/${dealer.id}`)}
+            className="w-full text-left flex items-center gap-3.5 px-4 transition-colors active:opacity-75"
+            style={{
+                paddingTop: 12,
+                paddingBottom: 12,
+                borderBottom: last ? 'none' : `1px solid ${rowBorder}`,
+            }}
+        >
+            <div
+                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[0.6875rem] font-black"
+                style={{ backgroundColor: `${colors.accent}12`, color: colors.accent }}
+            >
+                {initials}
+            </div>
+
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="text-[0.875rem] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
+                        {dealer.name}
+                    </p>
+                    {program && !choiceMode ? <ChoiceBadge program={program} compact /> : null}
+                </div>
+                <p className="text-[0.6875rem] truncate mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                    {secondaryLine}
+                </p>
+            </div>
+
+            <div className="flex flex-col items-end flex-shrink-0 gap-1">
+                {choiceMode && program ? (
+                    <>
+                        <span className="text-[0.8125rem] font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
+                            {formatCurrencyCompact(program.rebatableSales)}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                            <MiniProgress percent={program.percent} tone={program.color} isDark={isDark} />
+                            <span
+                                className="text-[0.625rem] font-bold tabular-nums px-1.5 py-[1px] rounded-full"
+                                style={{ color: program.color, backgroundColor: `${program.color}1A` }}
+                            >
+                                {program.percent}%
+                            </span>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <span className="text-[0.8125rem] font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
+                            {formatCurrency(dealer.sales)}
+                        </span>
+                        {displayPct !== null && (
+                            <span
+                                className="text-[0.625rem] font-bold tabular-nums mt-0.5 px-1.5 py-[1px] rounded-full"
+                                style={{ color: gColor, backgroundColor: `${gColor}1A` }}
+                            >
+                                {displayPct}%
+                            </span>
+                        )}
+                    </>
+                )}
+            </div>
+
+            <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.22 }} />
+        </motion.button>
+    );
+};
+
 export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirectory, onNavigate, setSuccessMessage }) => {
     const dealers = useMemo(() => dealerDirectory || DEALER_DIRECTORY_DATA || [], [dealerDirectory]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [choiceOnly, setChoiceOnly] = useState(false);
     const isDark = isDarkTheme(theme);
     const colors = theme.colors;
 
@@ -76,7 +172,47 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
         .sort((a, b) => a.name.localeCompare(b.name)),
     [dealers, searchTerm]);
 
+    const choiceGroups = useMemo(() => {
+        const members = sorted.filter(d => getChoiceProgram(d));
+        const platinum = members.filter(d => getChoiceProgram(d)?.id === 'platinum');
+        const gold = members.filter(d => getChoiceProgram(d)?.id === 'gold');
+        return { platinum, gold, count: members.length };
+    }, [sorted]);
+
     const rowBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+    const listEmpty = choiceOnly ? choiceGroups.count === 0 : sorted.length === 0;
+
+    const renderGroup = (label, color, rows, startIndex, isLastGroup) => {
+        if (!rows.length) return null;
+        return (
+            <div key={label}>
+                <div className="flex items-center gap-2 px-4 pt-3.5 pb-1">
+                    <span
+                        className="text-[0.625rem] font-bold uppercase tracking-[0.08em]"
+                        style={{ color, opacity: 0.9 }}
+                    >
+                        {label}
+                    </span>
+                    <span className="text-[0.625rem] font-semibold tabular-nums" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                        {rows.length}
+                    </span>
+                </div>
+                {rows.map((d, i) => (
+                    <DealerRow
+                        key={d.id}
+                        dealer={d}
+                        i={startIndex + i}
+                        last={isLastGroup && i === rows.length - 1}
+                        colors={colors}
+                        isDark={isDark}
+                        rowBorder={rowBorder}
+                        onNavigate={onNavigate}
+                        choiceMode
+                    />
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
@@ -90,91 +226,80 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         >
                             Dealers
                         </h1>
+                        {choiceOnly ? (
+                            <p className="mt-0.5 text-[0.75rem] font-medium" style={{ color: colors.textSecondary, opacity: 0.7 }}>
+                                Choice · Platinum and Gold
+                            </p>
+                        ) : null}
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] flex-shrink-0"
-                        style={{
-                            backgroundColor: colors.accent,
-                            color: colors.accentText,
-                            boxShadow: isDark ? 'none' : '0 6px 14px rgba(53,53,53,0.16)',
-                        }}
-                    >
-                        <UserPlus className="w-3.5 h-3.5" />
-                        Add
-                    </button>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setChoiceOnly(v => !v)}
+                            aria-pressed={choiceOnly}
+                            className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                            style={choiceOnly ? {
+                                backgroundColor: '#5B7B8C',
+                                color: '#FFFFFF',
+                                boxShadow: isDark ? 'none' : '0 6px 14px rgba(91,123,140,0.28)',
+                            } : {
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF',
+                                color: colors.textPrimary,
+                                border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.08)'}`,
+                            }}
+                        >
+                            <Award className="w-3.5 h-3.5" aria-hidden="true" />
+                            Choice
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowAddModal(true)}
+                            className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                            style={{
+                                backgroundColor: colors.accent,
+                                color: colors.accentText,
+                                boxShadow: isDark ? 'none' : '0 6px 14px rgba(53,53,53,0.16)',
+                            }}
+                        >
+                            <UserPlus className="w-3.5 h-3.5" />
+                            Add
+                        </button>
+                    </div>
                 </div>
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={setSearchTerm}
-                    placeholder="Search dealers..."
+                    placeholder={choiceOnly ? 'Search Choice dealers...' : 'Search dealers...'}
                     theme={theme}
                     className="w-full"
                 />
             </ScreenTopChrome>
 
-            {/* List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-8">
                 <div className="max-w-content mx-auto w-full pt-1">
-                {sorted.length > 0 ? (
+                {!listEmpty ? (
                     <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
-                        {sorted.map((d, i) => {
-                            const pct = d.ytdGoal ? Math.round((d.sales / d.ytdGoal) * 100) : null;
-                            const gColor = pct !== null ? goalTone(pct) : null;
-                            const initials = d.name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
-                            const secondaryLine = d.territory || d.dailyDiscount || 'No territory assigned';
-
-                            return (
-                                <motion.button
+                        {choiceOnly ? (
+                            <>
+                                {renderGroup('Platinum', '#5B7B8C', choiceGroups.platinum, 0, choiceGroups.gold.length === 0)}
+                                {renderGroup('Gold', '#C4956A', choiceGroups.gold, choiceGroups.platinum.length, true)}
+                            </>
+                        ) : (
+                            sorted.map((d, i) => (
+                                <DealerRow
                                     key={d.id}
-                                    {...stagger(i)}
-                                    onClick={() => onNavigate?.(`resources/dealer-directory/${d.id}`)}
-                                    className="w-full text-left flex items-center gap-3.5 px-4 transition-colors active:opacity-75"
-                                    style={{
-                                        paddingTop: 12,
-                                        paddingBottom: 12,
-                                        borderBottom: i < sorted.length - 1 ? `1px solid ${rowBorder}` : 'none',
-                                    }}
-                                >
-                                    {/* Avatar */}
-                                    <div
-                                        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[0.6875rem] font-black"
-                                        style={{ backgroundColor: `${colors.accent}12`, color: colors.accent }}
-                                    >
-                                        {initials}
-                                    </div>
-
-                                    {/* Name + territory */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[0.875rem] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
-                                            {d.name}
-                                        </p>
-                                        <p className="text-[0.6875rem] truncate mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.65 }}>
-                                            {secondaryLine}
-                                        </p>
-                                    </div>
-
-                                    {/* Sales + goal */}
-                                    <div className="flex flex-col items-end flex-shrink-0">
-                                        <span className="text-[0.8125rem] font-black tabular-nums leading-none" style={{ color: colors.textPrimary }}>
-                                            {formatCurrency(d.sales)}
-                                        </span>
-                                        {pct !== null && (
-                                            <span
-                                                className="text-[0.625rem] font-bold tabular-nums mt-1 px-1.5 py-[1px] rounded-full"
-                                                style={{ color: gColor, backgroundColor: `${gColor}1A` }}
-                                            >
-                                                {pct}%
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: colors.textSecondary, opacity: 0.22 }} />
-                                </motion.button>
-                            );
-                        })}
+                                    dealer={d}
+                                    i={i}
+                                    last={i === sorted.length - 1}
+                                    colors={colors}
+                                    isDark={isDark}
+                                    rowBorder={rowBorder}
+                                    onNavigate={onNavigate}
+                                    choiceMode={false}
+                                />
+                            ))
+                        )}
                     </GlassCard>
                 ) : (
                     <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
@@ -182,19 +307,23 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                             className="w-14 h-14 rounded-full flex items-center justify-center"
                             style={{ backgroundColor: subtleBg(theme, 1.2) }}
                         >
-                            <Building2 className="w-6 h-6" style={{ color: colors.textSecondary, opacity: 0.35 }} />
+                            {choiceOnly
+                                ? <Award className="w-6 h-6" style={{ color: colors.textSecondary, opacity: 0.35 }} />
+                                : <Building2 className="w-6 h-6" style={{ color: colors.textSecondary, opacity: 0.35 }} />}
                         </div>
-                        <p className="text-[0.9375rem] font-bold" style={{ color: colors.textPrimary }}>No dealers found</p>
-                        <p className="text-[0.8125rem]" style={{ color: colors.textSecondary, opacity: 0.7 }}>Try a different search term.</p>
+                        <p className="text-[0.9375rem] font-bold" style={{ color: colors.textPrimary }}>
+                            {choiceOnly ? 'No Choice dealers found' : 'No dealers found'}
+                        </p>
+                        <p className="text-[0.8125rem]" style={{ color: colors.textSecondary, opacity: 0.7 }}>
+                            {choiceOnly ? 'Platinum and Gold partners will appear here.' : 'Try a different search term.'}
+                        </p>
                     </div>
                 )}
                 </div>
             </div>
 
-            {/* ── Add Dealer Modal ── */}
             <Modal show={showAddModal} onClose={() => { setShowAddModal(false); setForm(EMPTY_FORM); }} title="New Dealer" theme={theme}>
                 <div className="px-5 pb-5 pt-1 space-y-4">
-                    {/* Company Name */}
                     <div>
                         <label className="block text-[0.75rem] font-semibold mb-1.5 px-0.5" style={{ color: colors.textSecondary }}>
                             Company Name
@@ -216,7 +345,6 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         />
                     </div>
 
-                    {/* Admin Email */}
                     <div>
                         <label className="block text-[0.75rem] font-semibold mb-1.5 px-0.5" style={{ color: colors.textSecondary }}>
                             Admin Email
@@ -238,7 +366,6 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         />
                     </div>
 
-                    {/* Daily Discount — inline scrollable picker */}
                     <div>
                         <label className="block text-[0.75rem] font-semibold mb-1.5 px-0.5" style={{ color: colors.textSecondary }}>
                             Daily Discount
@@ -274,7 +401,6 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         </div>
                     </div>
 
-                    {/* Submit */}
                     <button
                         type="button"
                         onClick={handleAddDealer}

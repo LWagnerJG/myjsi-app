@@ -1,4 +1,5 @@
-// Dealer Directory specific data — enriched with vertical sales, series, rep rewards, recent projects
+// Dealers — enriched with vertical sales, series, rep rewards, recent projects,
+// and Choice Program (Platinum / Gold) rebate terms.
 export const DEALER_DIRECTORY_DATA = [
     {
         id: 1,
@@ -472,6 +473,97 @@ export const DEALER_DIRECTORY_DATA = [
         ],
     }
 ];
+
+/* ── Choice Program ────────────────────────────────────────────────────
+   JSI Choice is the volume rebate partnership: Platinum and Gold dealers
+   only. Terms are per-dealer (rate, freight, extra discount, exclusions)
+   and progress is measured against rebatableSales / rebatableGoal. */
+
+export const CHOICE_TIERS = {
+    platinum: {
+        id: 'platinum',
+        label: 'Platinum',
+        color: '#5B7B8C',
+        rebateRate: 3,
+        extraDiscount: '1 extra point off list on Choice-eligible orders',
+        freight: 'Prepaid dock delivery on $5,000+ list',
+        payout: 'Paid after year-end true-up (January)',
+        exclusions: 'Contract, GSA, and promotional packages do not qualify',
+    },
+    gold: {
+        id: 'gold',
+        label: 'Gold',
+        color: '#C4956A',
+        rebateRate: 2,
+        extraDiscount: '½ extra point off list on Choice-eligible orders',
+        freight: 'Prepaid dock delivery on $8,000+ list',
+        payout: 'Paid after year-end true-up (January)',
+        exclusions: 'Contract, GSA, and promotional packages do not qualify',
+    },
+};
+
+/** Per-dealer Choice membership + any term overrides. Absent = not Choice. */
+export const CHOICE_PROGRAM = {
+    1: {
+        tier: 'platinum',
+        extraDiscount: '1 extra point off list; healthcare packages qualify',
+        notes: 'Northern Indiana Platinum. Healthcare volume counts toward rebate.',
+    },
+    2: {
+        tier: 'gold',
+        notes: 'Southern Indiana Gold. Corporate + healthcare mix.',
+    },
+    3: {
+        tier: 'platinum',
+        extraDiscount: '1 extra point off list; education packages qualify',
+        freight: 'Prepaid dock delivery on $5,000+ list; inside delivery waived on education jobs $25k+',
+        notes: 'Central Indiana Platinum. Education freight concession on file.',
+    },
+    4: {
+        tier: 'gold',
+        notes: 'Central Ohio Gold. Standard Gold terms.',
+    },
+    5: {
+        tier: 'gold',
+        notes: 'Northeast Indiana Gold. Standard Gold terms.',
+    },
+    6: {
+        tier: 'platinum',
+        extraDiscount: '1 extra point off list; corporate standards packages qualify',
+        notes: 'Central Indiana Platinum. Highest Choice volume in the territory.',
+    },
+};
+
+export const getChoiceProgram = (dealer) => {
+    if (!dealer) return null;
+    const nameKey = String(dealer.name || '').trim().toLowerCase();
+    const named = {
+        'business furniture llc': CHOICE_PROGRAM[1],
+        'corporate design inc': CHOICE_PROGRAM[2],
+        'officeworks': CHOICE_PROGRAM[3],
+        'loth inc.': CHOICE_PROGRAM[4],
+        'loth inc': CHOICE_PROGRAM[4],
+        'one eleven design': CHOICE_PROGRAM[5],
+        'rje business interiors': CHOICE_PROGRAM[6],
+    };
+    const entry = CHOICE_PROGRAM[dealer.id] || named[nameKey];
+    if (!entry) return null;
+    const tier = CHOICE_TIERS[entry.tier];
+    if (!tier) return null;
+    const rebatableGoal = dealer.rebatableGoal || 0;
+    const rebatableSales = dealer.rebatableSales || 0;
+    const percent = rebatableGoal ? Math.round((rebatableSales / rebatableGoal) * 100) : 0;
+    return {
+        ...tier,
+        ...entry,
+        rebatableGoal,
+        rebatableSales,
+        percent,
+        remaining: Math.max(0, rebatableGoal - rebatableSales),
+    };
+};
+
+export const isChoiceDealer = (dealer) => !!getChoiceProgram(dealer);
 
 export const DEALER_ROLES = [
     { value: 'sales', label: 'Sales' },

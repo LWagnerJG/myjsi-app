@@ -353,7 +353,7 @@ export const MOCK_CUSTOMERS = [
     jsiRep: { name: 'Sarah Mitchell', role: 'Account Executive', email: 'smitchell@jsifurniture.com', phone: '317-555-0142' },
   },
 
-  /* ── Dealers (synced from Dealer Directory) ── */
+  /* ── Dealers (synced from Dealers) ── */
   {
     id: 'dealer-dir-1', type: 'dealer',
     name: 'Business Furniture LLC',

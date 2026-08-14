@@ -3,7 +3,7 @@ export const RESOURCES_DATA = [
     {
         category: "Sales & Rep Tools",
         items: [
-            { label: "Dealer Directory", nav: "resources/dealer-directory" },
+            { label: "Dealers", nav: "resources/dealer-directory" },
             { label: "Commission Rates", nav: "resources/commission-rates" },
             { label: "Sample Discounts", nav: "resources/sample-discounts" },
             { label: "Contracts", nav: "resources/contracts" },

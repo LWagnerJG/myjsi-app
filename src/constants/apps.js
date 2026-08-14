@@ -18,7 +18,7 @@ export const allApps = [
     { name: 'Projects', route: 'projects', icon: Briefcase, desc: 'Manage active project specs' },
     { name: 'Add Project', route: 'new-lead', icon: FilePlus, desc: 'Start a new project or lead' },
     { name: 'Resources', route: 'resources', icon: Database, desc: 'Tools, docs, and references' },
-    { name: 'Dealer Directory', route: 'resources/dealer-directory', icon: Users, desc: 'Find dealers by location' },
+    { name: 'Dealers', route: 'resources/dealer-directory', icon: Users, desc: 'Find dealers and Choice partners' },
     { name: 'Commission Rates', route: 'resources/commission-rates', icon: DollarSign, desc: 'View current commission rates' },
     { name: 'Contracts', route: 'resources/contracts', icon: FileText, desc: 'Access dealer contracts' },
     { name: 'Loaner Pool', route: 'resources/loaner-pool', icon: Package, desc: 'Reserve loaner furniture' },

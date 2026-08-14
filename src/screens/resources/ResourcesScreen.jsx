@@ -16,7 +16,7 @@ const sublabelMap = {
     'Search Fabrics': 'Textile library',
     'Commission Rates': 'Rep commission by discount',
     'Contracts': 'Information and discounts',
-    'Dealer Directory': 'Partner contact finder',
+    'Dealers': 'Partners, Choice, and rebate progress',
     'Sample Discounts': 'Demo pricing overview',
     'Install Instructions': 'Assembly guidance and videos',
     'Loaner Pool': 'Search sample chairs',
