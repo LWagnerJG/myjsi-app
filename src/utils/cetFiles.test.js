@@ -4,10 +4,12 @@ import {
   isCetNative,
   describeDocumentsHub,
   buildUploadedDocument,
+  buildUploadedDocuments,
   canPreviewProjectFile,
   describeCetDownload,
   describeDocumentSource,
   partitionProjectDocuments,
+  formatFileSize,
 } from './cetFiles.js';
 
 describe('CET file classification', () => {
@@ -51,5 +53,22 @@ describe('CET file classification', () => {
     expect(cet).toHaveLength(1);
     expect(other).toHaveLength(1);
     expect(describeDocumentSource(cet[0])).toBe('Sarah Palmer · Business Furniture · Dealer');
+  });
+
+  it('rejects CET lock files and never reports 0KB for tiny uploads', () => {
+    expect(classifyProjectFile('Lobby.cmdrw.cmlock')).toMatchObject({ skip: true });
+    expect(buildUploadedDocument({ name: 'Lobby.cmlock', type: '', size: 12 })).toBeNull();
+    expect(formatFileSize(400)).toBe('400B');
+    expect(formatFileSize(0)).toBe('');
+  });
+
+  it('gives each upload a unique id even when the filename and clock match', () => {
+    const files = [
+      { name: 'Lobby.cmpck', type: '', size: 2048 },
+      { name: 'Lobby.cmpck', type: '', size: 2048 },
+    ];
+    const docs = buildUploadedDocuments(files, { uploadedByRole: 'dealer' });
+    expect(docs).toHaveLength(2);
+    expect(docs[0].id).not.toBe(docs[1].id);
   });
 });

@@ -561,6 +561,7 @@ export const ProjectsScreen = forwardRef(({
 
   if (selectedOpportunity) return (
     <OpportunityDetail
+      key={selectedOpportunity.id}
       opp={selectedOpportunity}
       theme={theme}
       customers={customers}

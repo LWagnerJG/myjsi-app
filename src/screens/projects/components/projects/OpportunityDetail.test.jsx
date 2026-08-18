@@ -148,4 +148,27 @@ describe('OpportunityDetail', () => {
     expect(screen.getByRole('button', { name: /download to open in cet designer xyz_lobby_refresh\.cmpck/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /preview lobby_photolab\.pdf/i })).toBeInTheDocument();
   });
+
+  it('does not relock a Won project after the autosave echo', () => {
+    vi.useFakeTimers();
+    render(<Harness initial={{ ...baseOpp, stage: 'Won', winProbability: 100 }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Reopen to edit' }));
+    expect(screen.getByRole('button', { name: 'Lock again' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Project notes' }), { target: { value: 'Post-win note' } });
+    act(() => { vi.advanceTimersByTime(700); });
+
+    expect(screen.getByRole('button', { name: 'Lock again' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Project notes' })).toHaveValue('Post-win note');
+  });
+
+  it('keeps the first CET upload when a second file is added immediately', () => {
+    render(<Harness initial={baseOpp} />);
+    fireEvent.click(screen.getByRole('button', { name: /documents/i }));
+    const input = screen.getByTestId('documents-hub-upload');
+    fireEvent.change(input, { target: { files: [new File(['pack'], 'A.cmpck')] } });
+    fireEvent.change(input, { target: { files: [new File(['draw'], 'B.cmdrw')] } });
+    expect(screen.getByText('A.cmpck')).toBeInTheDocument();
+    expect(screen.getByText('B.cmdrw')).toBeInTheDocument();
+  });
 });

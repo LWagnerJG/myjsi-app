@@ -46,6 +46,10 @@ export const classifyProjectFile = (fileName, mimeType = '') => {
   const ext = getFileExtension(fileName);
   if (CET_BY_EXT[ext]) return { ...CET_BY_EXT[ext], extension: ext, isCet: true };
 
+  if (ext === 'cmlock') {
+    return { kind: 'lock', type: 'CET lock', native: false, label: 'Lock file', extension: ext, isCet: false, skip: true };
+  }
+
   const mime = String(mimeType || '').toLowerCase();
   if (ext === 'pdf' || mime.includes('pdf')) return { kind: 'pdf', type: 'PDF', native: false, label: 'PDF', extension: ext, isCet: false };
   if (ext === 'dwg' || ext === 'dxf') return { kind: 'cad', type: ext.toUpperCase(), native: false, label: 'CAD from CET', extension: ext, isCet: false };
@@ -94,8 +98,71 @@ export const partitionProjectDocuments = (documents = []) => {
 export const formatFileSize = (bytes) => {
   const n = Number(bytes);
   if (!Number.isFinite(n) || n <= 0) return '';
+  if (n < 1024) return `${n}B`;
   if (n < 1024 * 1024) return `${Math.round(n / 1024)}KB`;
   return `${(n / (1024 * 1024)).toFixed(1)}MB`;
+};
+
+export const isRejectedUpload = (fileName) => classifyProjectFile(fileName).skip === true;
+
+let uploadSeq = 0;
+
+export const buildUploadedDocument = (file, extras = {}, index = 0) => {
+  if (!file?.name || isRejectedUpload(file.name)) return null;
+  const classified = classifyProjectFile(file.name, file.type);
+  if (classified.skip) return null;
+  uploadSeq += 1;
+  const { uploadedBy, uploadedByRole, company, attachedToNotes } = extras;
+  return {
+    id: `doc_${Date.now()}_${uploadSeq}_${index}_${file.name}`,
+    fileName: file.name,
+    type: classified.type,
+    kind: classified.kind,
+    size: formatFileSize(file.size),
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    uploadedBy: uploadedBy || '',
+    uploadedByRole: uploadedByRole || 'user',
+    company: company || '',
+    attachedToNotes: attachedToNotes === true,
+  };
+};
+
+export const buildUploadedDocuments = (files, extras = {}) => (
+  Array.from(files || []).map((file, index) => buildUploadedDocument(file, extras, index)).filter(Boolean)
+);
+
+const usableUrl = (doc, blobUrl) => {
+  if (blobUrl) return blobUrl;
+  const url = doc?.url;
+  if (url && url !== '#') return url;
+  return '';
+};
+
+export const downloadProjectDocument = (doc, blobUrl) => {
+  if (typeof document === 'undefined' || !doc) return false;
+  const href = usableUrl(doc, blobUrl);
+  const a = document.createElement('a');
+  a.rel = 'noopener';
+  a.download = doc.fileName || 'download';
+  if (href) {
+    a.href = href;
+  } else {
+    const objectUrl = URL.createObjectURL(new Blob([], { type: 'application/octet-stream' }));
+    a.href = objectUrl;
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+  }
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  return true;
+};
+
+export const previewProjectDocument = (doc, blobUrl) => {
+  if (typeof window === 'undefined' || !doc) return false;
+  const href = usableUrl(doc, blobUrl);
+  if (!href) return false;
+  window.open(href, '_blank', 'noopener,noreferrer');
+  return true;
 };
 
 export const describeDocumentsHub = (documents = []) => {
@@ -115,17 +182,3 @@ export const describeDocumentsHub = (documents = []) => {
   return parts.join(' · ');
 };
 
-export const buildUploadedDocument = (file, { uploadedBy, uploadedByRole, company } = {}) => {
-  const classified = classifyProjectFile(file.name, file.type);
-  return {
-    id: `${Date.now()}_${file.name}`,
-    fileName: file.name,
-    type: classified.type,
-    kind: classified.kind,
-    size: formatFileSize(file.size),
-    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    uploadedBy: uploadedBy || '',
-    uploadedByRole: uploadedByRole || 'user',
-    company: company || '',
-  };
-};

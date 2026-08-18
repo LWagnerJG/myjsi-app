@@ -526,7 +526,9 @@ export const CustomerMicrositeScreen = ({ customer, theme, onUpdateCustomer }) =
                             <FileText className="w-3.5 h-3.5" style={{ color: c.textSecondary, opacity: 0.6 }} />
                           </div>
                           <span className="text-[0.8125rem] font-medium flex-1 truncate" style={{ color: c.textPrimary }}>{d.name}</span>
-                          <Download className="w-4 h-4 shrink-0 opacity-30" style={{ color: c.textSecondary }} />
+                          {RowTag === 'a' ? (
+                            <Download className="w-4 h-4 shrink-0 opacity-30" style={{ color: c.textSecondary }} aria-hidden="true" />
+                          ) : null}
                         </RowTag>
                       </React.Fragment>
                     );

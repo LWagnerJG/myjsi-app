@@ -25,12 +25,14 @@ import {
   CET_UPLOAD_ACCEPT,
   isCetNative,
   describeDocumentsHub,
-  buildUploadedDocument,
+  buildUploadedDocuments,
   classifyProjectFile,
   canPreviewProjectFile,
   describeCetDownload,
   describeDocumentSource,
   partitionProjectDocuments,
+  downloadProjectDocument,
+  previewProjectDocument,
 } from '../../../../utils/cetFiles.js';
 
 /* helpers */
@@ -594,13 +596,13 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
             </div>
           </div>
           <JSIActionButtonGroup compact className="px-2.5 pb-2.5 pt-0.5">
-            <JSIActionButton theme={theme} size="small" icon={<Eye className="w-3 h-3" />}>
+            <JSIActionButton theme={theme} size="small" icon={<Eye className="w-3 h-3" />} disabled={!q.url} onClick={() => q.url && window.open(q.url, '_blank', 'noopener,noreferrer')}>
               View
             </JSIActionButton>
-            <JSIActionButton theme={theme} size="small" icon={<Share2 className="w-3 h-3" />}>
+            <JSIActionButton theme={theme} size="small" icon={<Share2 className="w-3 h-3" />} disabled={!q.url} onClick={() => q.url && navigator.clipboard?.writeText?.(q.url)}>
               Share
             </JSIActionButton>
-            <JSIActionButton theme={theme} size="small" icon={<Download className="w-3 h-3" />}>
+            <JSIActionButton theme={theme} size="small" icon={<Download className="w-3 h-3" />} disabled={!q.url} onClick={() => downloadProjectDocument({ fileName: q.fileName, url: q.url })}>
               Save
             </JSIActionButton>
           </JSIActionButtonGroup>
@@ -892,7 +894,7 @@ const ProjectContractFields = ({
   );
 };
 
-const DocumentFileRow = ({ doc, theme, onRemove }) => {
+const DocumentFileRow = ({ doc, theme, onRemove, onDownload, onPreview }) => {
   const c = theme.colors;
   const cet = isCetNative(doc);
   const classified = classifyProjectFile(doc.fileName);
@@ -927,9 +929,9 @@ const DocumentFileRow = ({ doc, theme, onRemove }) => {
       </div>
       <div className="flex items-center gap-1 flex-shrink-0">
         {previewable ? (
-          <button type="button" className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title="Preview" aria-label={`Preview ${doc.fileName}`}><Eye className="w-3.5 h-3.5" aria-hidden="true" /></button>
+          <button type="button" onClick={() => onPreview?.(doc)} className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title="Preview" aria-label={`Preview ${doc.fileName}`}><Eye className="w-3.5 h-3.5" aria-hidden="true" /></button>
         ) : null}
-        <button type="button" className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title={downloadHint} aria-label={`${downloadHint} ${doc.fileName}`}><Download className="w-3.5 h-3.5" aria-hidden="true" /></button>
+        <button type="button" onClick={() => onDownload?.(doc)} className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title={downloadHint} aria-label={`${downloadHint} ${doc.fileName}`}><Download className="w-3.5 h-3.5" aria-hidden="true" /></button>
         {onRemove ? (
           <button type="button" onClick={onRemove} className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title="Remove" aria-label={`Remove ${doc.fileName}`}><X className="w-3.5 h-3.5" aria-hidden="true" /></button>
         ) : null}
@@ -985,12 +987,16 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const saveRef = useRef(null);
   const draftRef = useRef(opp);
   const onUpdateRef = useRef(onUpdate);
+  const blobUrlsRef = useRef(new Map());
   /* Rewards stay rule-driven until the user explicitly touches a toggle
      (tracked via the persisted `*Manual` flags so overrides survive saves). */
   const rewardAutoManagedRef = useRef({ salesReward: true, designerReward: true });
   useEffect(() => {
+    /* Autosave echoes the saved snapshot back through `opp`. Don't clobber
+       keystrokes/uploads that happened after the debounce fired, and don't
+       relock a Won/Lost record the user just reopened. */
+    if (dirty.current) return;
     setDraft(opp);
-    setUnlocked(false);
     rewardAutoManagedRef.current = {
       salesReward: opp.salesRewardManual !== true && opp.salesReward !== false,
       designerReward: opp.designerRewardManual !== true && opp.designerReward !== false,
@@ -998,6 +1004,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   }, [opp]);
   useEffect(() => { draftRef.current = draft; }, [draft]);
   useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
+  useEffect(() => () => {
+    blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    blobUrlsRef.current.clear();
+  }, []);
 
   // Won/Lost deals lock into a read-only historical record until reopened.
   const isClosed = draft.stage === 'Won' || draft.stage === 'Lost';
@@ -1246,9 +1256,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   const fileInputRef = useRef(null);
   const notesFileInputRef = useRef(null);
-  /* Documents attached from the Notes field this session, so they can be shown
-     inline for quick review/removal without duplicating the whole hub list. */
-  const [notesDocIds, setNotesDocIds] = useState([]);
+  /* Documents attached from Notes persist via `attachedToNotes` so chips
+     survive reload; this session list is only a fast path for the current view. */
+  const [notesDocIds, setNotesDocIds] = useState(
+    () => (opp?.documents || []).filter(d => d.attachedToNotes).map(d => d.id),
+  );
 
   /* computed */
   const rawNumeric = parseCurrency(draft.value);
@@ -1300,6 +1312,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const [selectedSampleOrder, setSelectedSampleOrder] = useState(null);
   const [hubModal, setHubModal] = useState(null); // 'quotes' | 'samples' | 'documents' | 'contacts' | 'related-orders' | null
   const [newContactName, setNewContactName] = useState('');
+  useEffect(() => {
+    setUnlocked(false);
+    setHubModal(null);
+    setNotesDocIds((opp?.documents || []).filter(d => d.attachedToNotes).map(d => d.id));
+  }, [opp?.id]);
   /* Contacts you can pull straight from the dealers / A&D firms on this project. */
   const companyContactGroups = useMemo(() => {
     const companies = [...(draft.dealers || []), ...(draft.designFirms || [])];
@@ -1345,7 +1362,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     .filter(Boolean);
 
   const notesDocuments = useMemo(
-    () => (draft.documents || []).filter(d => notesDocIds.includes(d.id)),
+    () => (draft.documents || []).filter(d => d.attachedToNotes || notesDocIds.includes(d.id)),
     [draft.documents, notesDocIds],
   );
   const projectDocuments = draft.documents || [];
@@ -1362,25 +1379,57 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     };
   }, [members, currentUserId, draft.dealers]);
 
+  const rememberUploadBlobs = useCallback((files, docs) => {
+    Array.from(files || []).forEach((file) => {
+      const doc = docs.find(d => d.fileName === file.name && !blobUrlsRef.current.has(d.id));
+      if (!doc || typeof URL === 'undefined') return;
+      try { blobUrlsRef.current.set(doc.id, URL.createObjectURL(file)); } catch { /* ignore */ }
+    });
+  }, []);
+
+  const patchDocuments = useCallback((mutator) => {
+    if (readOnlyRef.current) return;
+    setDraft(p => {
+      dirty.current = true;
+      return { ...p, documents: mutator(p.documents || []) };
+    });
+  }, []);
+
+  const handleDocumentDownload = useCallback((doc) => {
+    downloadProjectDocument(doc, blobUrlsRef.current.get(doc.id));
+  }, []);
+
+  const handleDocumentPreview = useCallback((doc) => {
+    previewProjectDocument(doc, blobUrlsRef.current.get(doc.id));
+  }, []);
+
+  const removeProjectDocument = useCallback((docId) => {
+    const blobUrl = blobUrlsRef.current.get(docId);
+    if (blobUrl) {
+      URL.revokeObjectURL(blobUrl);
+      blobUrlsRef.current.delete(docId);
+    }
+    setNotesDocIds(ids => ids.filter(id => id !== docId));
+    patchDocuments(docs => docs.filter(d => d.id !== docId));
+  }, [patchDocuments]);
+
   const handleNotesFileUpload = useCallback((e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    const newDocs = files.map(f => buildUploadedDocument(f, resolveUploader()));
+    const newDocs = buildUploadedDocuments(files, { ...resolveUploader(), attachedToNotes: true });
+    rememberUploadBlobs(files, newDocs);
+    if (!newDocs.length) { e.target.value = ''; return; }
     setDraft(p => {
       dirty.current = true;
       return { ...p, documents: [...(p.documents || []), ...newDocs] };
     });
     setNotesDocIds(ids => [...ids, ...newDocs.map(d => d.id)]);
     e.target.value = '';
-  }, [resolveUploader]);
+  }, [resolveUploader, rememberUploadBlobs]);
 
   const removeNotesDoc = useCallback((docId) => {
-    setNotesDocIds(ids => ids.filter(id => id !== docId));
-    setDraft(p => {
-      dirty.current = true;
-      return { ...p, documents: (p.documents || []).filter(d => d.id !== docId) };
-    });
-  }, []);
+    removeProjectDocument(docId);
+  }, [removeProjectDocument]);
   /* End User is the canonical customer; it's set at project creation and
      reviewed (locked) here. Fall back to legacy `company` for older records. */
   const endUserDisplay = String(draft.endUser || draft.company || '').trim();
@@ -1926,6 +1975,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   type="file"
                   multiple
                   accept={CET_UPLOAD_ACCEPT}
+                  data-testid="notes-file-upload"
                   className="hidden"
                   onChange={handleNotesFileUpload}
                 />
@@ -2136,13 +2186,21 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       />
 
       {/* Hidden file input for the documents hub */}
-      <input ref={fileInputRef} type="file" multiple accept={CET_UPLOAD_ACCEPT} className="hidden"
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={CET_UPLOAD_ACCEPT}
+        data-testid="documents-hub-upload"
+        className="hidden"
         onChange={e => {
           const files = Array.from(e.target.files || []);
-          const newDocs = files.map(f => buildUploadedDocument(f, resolveUploader()));
-          update('documents', [...(draft.documents || []), ...newDocs]);
+          const newDocs = buildUploadedDocuments(files, resolveUploader());
+          rememberUploadBlobs(files, newDocs);
+          if (newDocs.length) patchDocuments(docs => [...docs, ...newDocs]);
           e.target.value = '';
-        }} />
+        }}
+      />
 
       {/* CONTACTS HUB MODAL — pull people straight from this project's dealers / A&D firms */}
       <Modal show={hubModal === 'contacts'} onClose={() => { setHubModal(null); setNewContactName(''); }} title="Contacts" theme={theme} maxWidth="max-w-lg">
@@ -2363,7 +2421,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   key={doc.id}
                   doc={doc}
                   theme={theme}
-                  onRemove={() => update('documents', projectDocuments.filter(d => d.id !== doc.id))}
+                  onDownload={handleDocumentDownload}
+                  onPreview={handleDocumentPreview}
+                  onRemove={() => removeProjectDocument(doc.id)}
                 />
               ))}
             </div>
@@ -2376,7 +2436,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   key={doc.id}
                   doc={doc}
                   theme={theme}
-                  onRemove={() => update('documents', projectDocuments.filter(d => d.id !== doc.id))}
+                  onDownload={handleDocumentDownload}
+                  onPreview={handleDocumentPreview}
+                  onRemove={() => removeProjectDocument(doc.id)}
                 />
               ))}
             </div>
