@@ -4,6 +4,7 @@ import { FormInput } from '../../components/forms/FormInput.jsx';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
 import { PortalNativeSelect } from '../../components/forms/PortalNativeSelect.jsx';
 import { ToggleSwitch } from '../../components/forms/ToggleSwitch.jsx';
+import { BooleanSegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { SpotlightMultiSelect } from '../../components/common/SpotlightMultiSelect.jsx';
 import { WizardBottomBar } from '../../components/common/WizardBottomBar.jsx';
 import { PillButton, PrimaryButton } from '../../components/common/JSIButtons.jsx';
@@ -210,17 +211,18 @@ const ToggleField = ({ label, checked, onChange, theme }) => {
   );
 };
 
-const RewardTogglePill = ({ label, sublabel, checked, onChange, theme }) => {
+const RewardToggleField = ({ label, checked, onChange, theme }) => {
   const c = theme.colors;
   return (
-    <div className="inline-flex items-center gap-2">
-      <span
-        className="text-xs font-medium tabular-nums"
-        style={{ color: checked ? c.textPrimary : c.textSecondary, opacity: checked ? 1 : 0.65 }}
-      >
-        {label} {sublabel}
-      </span>
-      <ToggleSwitch checked={checked} onChange={onChange} theme={theme} ariaLabel={`${label} reward`} />
+    <div className="inline-flex items-center gap-2.5">
+      <span className="text-[0.6875rem] font-semibold" style={{ color: c.textSecondary }}>{label}</span>
+      <BooleanSegmentedToggle
+        value={checked}
+        onChange={onChange}
+        theme={theme}
+        variant="onOff"
+        ariaLabel={label}
+      />
     </div>
   );
 };
@@ -1755,19 +1757,17 @@ export const NewLeadScreen = ({
               </Row>
 
               <Row label="Rewards" theme={theme} inline>
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 min-h-[40px]">
-                  <RewardTogglePill
-                    label="Sales"
-                    sublabel={salesRewardEnabled ? '3%' : 'off'}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 min-h-[44px]">
+                  <RewardToggleField
+                    label="Sales 3%"
                     checked={salesRewardEnabled}
-                    onChange={(event) => { upd('salesReward', event.target.checked); markTouched('salesReward'); }}
+                    onChange={(checked) => { upd('salesReward', checked); markTouched('salesReward'); }}
                     theme={theme}
                   />
-                  <RewardTogglePill
-                    label="Designer"
-                    sublabel={designerRewardEnabled ? '1%' : 'off'}
+                  <RewardToggleField
+                    label="Designer 1%"
                     checked={designerRewardEnabled}
-                    onChange={(event) => { upd('designerReward', event.target.checked); markTouched('designerReward'); }}
+                    onChange={(checked) => { upd('designerReward', checked); markTouched('designerReward'); }}
                     theme={theme}
                   />
                 </div>

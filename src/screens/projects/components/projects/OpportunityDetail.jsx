@@ -2,7 +2,7 @@
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus, Box } from 'lucide-react';
-import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
+import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface, groupedTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
 import { CONTRACTS_DATA } from '../../../resources/contracts/data.js';
@@ -17,8 +17,7 @@ import { Modal } from '../../../../components/common/Modal.jsx';
 import { ProbabilitySlider } from '../../../../components/forms/ProbabilitySlider.jsx';
 import { RequestQuoteModal } from '../../../../components/common/RequestQuoteModal.jsx';
 import { createQuoteListItem, persistQuoteRequest } from '../../../../utils/quoteRequests.js';
-import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
-import { SegmentedToggle } from '../../../../components/common/GroupedToggle.jsx';
+import { SegmentedToggle, BooleanSegmentedToggle } from '../../../../components/common/GroupedToggle.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { buildOpportunityProjectContacts, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
 import {
@@ -49,12 +48,10 @@ const SPIFF_502010_MIN_LIST = 10000;
 const REWARD_AUTO_OFF_NET_LIMIT = 150000;
 const REWARD_AUTO_OFF_DISCOUNT_MIN = 0.64;
 
-/* Shared surface values — one cool-grey tile (#F2F4F6 light) and pill radii everywhere. */
-const DETAIL_RADIUS_CARD = '28px';
-const DETAIL_RADIUS_INSET = '24px';
-const DETAIL_RADIUS_MENU = '24px';
-const DETAIL_RADIUS_HUB = '20px';
-const DETAIL_RADIUS_MULTILINE = '16px';
+/* Shared surfaces — pills for controls, card radius from the design tokens. */
+const DETAIL_RADIUS_CARD = DESIGN_TOKENS.borderRadius.xl;
+const DETAIL_RADIUS_GROUPED = DESIGN_TOKENS.borderRadius.lg;
+const DETAIL_RADIUS_MENU = DESIGN_TOKENS.borderRadius.xl;
 const detailTileBg = (theme) => fieldTileSurface(theme).backgroundColor;
 const FIELD_LABEL_CLASS = FIELD_LABEL_CLASSNAME;
 const DETAIL_SECTION_TITLE_CLASS = 'text-[0.875rem] font-semibold tracking-[-0.01em] leading-none';
@@ -75,13 +72,14 @@ const dividerColor = (isDark) => (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(53,5
 
 const fieldSurface = (theme) => ({
   backgroundColor: detailTileBg(theme),
-  // Card radius — pill (9999px) turns multi-row blocks into stadium shapes
-  borderRadius: DETAIL_RADIUS_INSET,
+  borderRadius: DESIGN_TOKENS.borderRadius.pill,
 });
+
+const groupedSurface = (theme) => groupedTileSurface(theme, { radius: DETAIL_RADIUS_GROUPED });
 
 const multilineSurface = (theme) => ({
   backgroundColor: detailTileBg(theme),
-  borderRadius: DETAIL_RADIUS_MULTILINE,
+  borderRadius: DETAIL_RADIUS_GROUPED,
 });
 
 const insetBg = (theme) => detailTileBg(theme);
@@ -435,17 +433,18 @@ const EditableIdentityField = ({ value, onChange, placeholder, ariaLabel, theme,
   );
 };
 
-const RewardTogglePill = ({ label, sublabel, checked, onChange, theme }) => {
-  const c = theme.colors;
-  return (
-    <div className="inline-flex items-center gap-2">
-      <span className="text-[0.75rem] font-medium" style={{ color: checked ? c.textPrimary : c.textSecondary, opacity: checked ? 1 : 0.6 }}>
-        {label} <span className="tabular-nums">{sublabel}</span>
-      </span>
-      <ToggleSwitch checked={checked} onChange={onChange} theme={theme} ariaLabel={`${label} reward`} />
-    </div>
-  );
-};
+const RewardToggleField = ({ label, checked, onChange, theme, labelStyle }) => (
+  <div className="min-w-0 space-y-1.5">
+    <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>{label}</span>
+    <BooleanSegmentedToggle
+      value={checked}
+      onChange={onChange}
+      theme={theme}
+      variant="onOff"
+      ariaLabel={label}
+    />
+  </div>
+);
 
 const ContactSummaryCard = ({ contact, theme }) => {
   const isDark = isDarkTheme(theme);
@@ -468,7 +467,7 @@ const ContactSummaryCard = ({ contact, theme }) => {
       : c.textSecondary;
 
   return (
-    <div className="flex items-start gap-3 px-3.5 py-3" style={fieldSurface(theme)}>
+    <div className="flex items-start gap-3 px-3.5 py-3" style={groupedSurface(theme)}>
       <div className="w-9 h-9 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ backgroundColor: avatarBg, color: avatarColor }}>
         {getInitials(contact.name)}
       </div>
@@ -540,7 +539,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
     <div className="space-y-2.5">
       {/* ── Queue status bar ── */}
       {pending.length > 0 && (
-        <div className="flex items-center gap-3 px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.10)' : 'rgba(91,123,140,0.06)' }}>
+        <div className="flex items-center gap-3 px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.10)' : 'rgba(91,123,140,0.06)' }}>
           <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: isDark ? 'rgba(91,123,140,0.18)' : 'rgba(91,123,140,0.12)' }}>
             <Users className="w-3 h-3" style={{ color: JSI_COLORS.info }} />
           </div>
@@ -557,7 +556,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
         const StIcon = meta.icon;
         const requestedLabel = formatQuoteMoment(q.requestedAt);
         return (
-          <div key={q.id || qi} className="flex items-start gap-3 px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div key={q.id || qi} className="flex items-start gap-3 px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
             <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
               <StIcon className="w-3 h-3" style={{ color: meta.color }} />
             </div>
@@ -579,7 +578,7 @@ const QuoteTracker = ({ quotes = [], theme, onRequestQuote }) => {
       {completed.map((q, qi) => {
         const completedLabel = formatQuoteMoment(q.completedAt || q.requestedAt);
         return (
-        <div key={q.id || `c${qi}`} className="rounded-[24px] overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.06)' : 'rgba(74,124,89,0.05)' }}>
+        <div key={q.id || `c${qi}`} className="rounded-[16px] overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(74,124,89,0.06)' : 'rgba(74,124,89,0.05)' }}>
           <div className="flex items-start gap-3 px-3.5 py-3">
             <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(74,124,89,0.12)' }}>
               <CheckCircle className="w-3 h-3" style={{ color: JSI_COLORS.success }} />
@@ -649,7 +648,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
       maxWidth="max-w-lg"
     >
       <div className="space-y-4">
-        <div className="px-4 py-3.5 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+        <div className="px-4 py-3.5 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
               <StatusIcon className="w-4 h-4" style={{ color: meta.color }} />
@@ -671,25 +670,25 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ordered</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{formatSampleOrderTimestamp(order.date)}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Fulfillment</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{deliveryLabel}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Ship to</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.shipTo || 'TBD'}</p>
           </div>
-          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
             <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Requested by</span>
             <p className="mt-1 text-[0.75rem] font-semibold" style={{ color: c.textPrimary }}>{order.orderedBy?.name || 'Unknown'}</p>
           </div>
         </div>
 
-        <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+        <div className="px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
           <div className="flex items-start gap-2.5">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }} />
             <div>
@@ -700,7 +699,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
         </div>
 
         {order.tracking ? (
-          <div className="px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+          <div className="px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
             <div className="flex items-start gap-2.5">
               <Truck className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }} />
               <div>
@@ -715,7 +714,7 @@ const SampleOrderDetailModal = ({ order, theme, onClose }) => {
           <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Sample contents</span>
           <div className="space-y-1.5">
             {(order.items || []).map((item, index) => (
-              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[24px]" style={{ backgroundColor: insetBg(theme) }}>
+              <div key={`${item.code || item.name}-${index}`} className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-[16px]" style={{ backgroundColor: insetBg(theme) }}>
                 <div className="min-w-0">
                   <p className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{item.name}</p>
                   <p className="mt-0.5 text-[0.625rem]" style={{ color: c.textSecondary }}>{item.code || 'Sample'}</p>
@@ -909,7 +908,7 @@ const DocumentFileRow = ({ doc, theme, onRemove, onDownload, onPreview }) => {
   const Icon = cet ? Box : FileText;
   const iconColor = cet ? JSI_COLORS.info : c.accent;
   return (
-    <div className="flex items-center gap-2.5 px-3.5 py-3" style={fieldSurface(theme)}>
+    <div className="flex items-center gap-2.5 px-3.5 py-3" style={groupedSurface(theme)}>
       <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconColor}14`, color: iconColor }}>
         <Icon className="w-4 h-4" aria-hidden="true" />
       </div>
@@ -950,7 +949,7 @@ const DetailHubCard = ({ icon: Icon, title, count, summary, onClick, theme, acce
       type="button"
       onClick={onClick}
       className="group w-full flex items-center gap-3 px-2.5 min-h-[52px] py-2.5 text-left transition-colors active:scale-[0.99] focus-ring"
-      style={{ borderRadius: DETAIL_RADIUS_INSET }}
+      style={{ borderRadius: DETAIL_RADIUS_GROUPED }}
       onMouseEnter={e => { e.currentTarget.style.backgroundColor = hoverBg; }}
       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
@@ -1483,69 +1482,71 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           {/* HERO — grounded in its own card, consistent with the sections below */}
           <Section theme={theme} className={`mb-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
-            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-center lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
-              <div className="min-w-0">
-                <span className={`${FIELD_LABEL_CLASS} mb-1 block`} style={labelStyle}>Project Name</span>
-                <EditableIdentityField
-                  value={draft.name}
-                  onChange={v => update('name', v)}
-                  ariaLabel="Project name"
-                  placeholder="Project name"
-                  theme={theme}
-                  inputClass="project-display-title font-semibold tracking-[-0.035em]"
-                  className="max-w-[34rem]"
-                />
-                {heroSummaryParts.length > 0 && (
-                  <p className="mt-1 truncate text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }} title={heroSummaryParts.join('  \u00b7  ')}>
-                    {heroSummaryParts.join('  \u00b7  ')}
-                  </p>
-                )}
-
-                {/* End User — locked review (set during project creation) */}
-                <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                  <span className={FIELD_LABEL_CLASS} style={labelStyle}>End User</span>
-                  {endUserLocked ? (
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-full pl-3 pr-2.5 py-1"
-                      style={fieldSurface(theme)}
-                      title="End user is set when the project is created and can't be changed here"
-                      aria-label={`End user ${endUserDisplay}. Locked: set at project creation and not editable here.`}
-                    >
-                      <span className="text-[0.8125rem] font-semibold truncate max-w-[220px]" style={{ color: c.textPrimary }}>{endUserDisplay}</span>
-                      <Lock className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
-                    </span>
-                  ) : (
-                    <input
-                      value={draft.endUser || ''}
-                      onChange={e => update('endUser', e.target.value)}
-                      className="min-h-[32px] rounded-full px-3 text-[0.8125rem] font-semibold outline-none focus-ring"
-                      style={{ ...fieldSurface(theme), color: c.textPrimary }}
-                      placeholder="Add end user"
-                    />
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+              <div className="min-w-0 space-y-3">
+                <div className="space-y-1.5">
+                  <EditableIdentityField
+                    value={draft.name}
+                    onChange={v => update('name', v)}
+                    ariaLabel="Project name"
+                    placeholder="Project name"
+                    theme={theme}
+                    inputClass="project-display-title font-semibold tracking-[-0.02em]"
+                    className="max-w-[34rem]"
+                  />
+                  {heroSummaryParts.length > 0 && (
+                    <p className="truncate text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }} title={heroSummaryParts.join('  \u00b7  ')}>
+                      {heroSummaryParts.join('  \u00b7  ')}
+                    </p>
                   )}
-                  {customerConnectionLabel !== 'Open' ? (
-                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-[0.05em]"
-                      style={{ backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'), color: draft.customerId ? c.accent : c.textSecondary }}>
-                      {customerConnectionLabel}
-                    </span>
-                  ) : null}
-                  {linkedCustomer ? (
-                    <button type="button" onClick={openLinkedCustomer}
-                      className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
-                      style={{ color: c.accent }}>
-                      Open profile
-                      <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.7 }} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {customerLocationLabel ? (
-                    <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }}>{customerLocationLabel}</span>
-                  ) : null}
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>End User</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {endUserLocked ? (
+                      <span
+                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3.5"
+                        style={fieldSurface(theme)}
+                        title="End user is set when the project is created and can't be changed here"
+                        aria-label={`End user ${endUserDisplay}. Locked: set at project creation and not editable here.`}
+                      >
+                        <span className={`${FIELD_VALUE_CLASS} truncate max-w-[220px]`} style={{ color: c.textPrimary }}>{endUserDisplay}</span>
+                        <Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
+                      </span>
+                    ) : (
+                      <input
+                        value={draft.endUser || ''}
+                        onChange={e => update('endUser', e.target.value)}
+                        className={`${TEXT_INPUT_CLASS} max-w-[280px]`}
+                        style={{ ...fieldSurface(theme), color: c.textPrimary }}
+                        placeholder="Add end user"
+                      />
+                    )}
+                    {customerConnectionLabel !== 'Open' ? (
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-[0.05em]"
+                        style={{ backgroundColor: draft.customerId ? `${c.accent}14` : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.055)'), color: draft.customerId ? c.accent : c.textSecondary }}>
+                        {customerConnectionLabel}
+                      </span>
+                    ) : null}
+                    {linkedCustomer ? (
+                      <button type="button" onClick={openLinkedCustomer}
+                        className="inline-flex min-h-[44px] items-center gap-1 text-[0.6875rem] font-semibold transition-all active:scale-[0.98] focus-ring"
+                        style={{ color: c.accent }}>
+                        Open profile
+                        <ArrowUpRight className="w-3.5 h-3.5" style={{ opacity: 0.7 }} aria-hidden="true" />
+                      </button>
+                    ) : null}
+                    {customerLocationLabel ? (
+                      <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }}>{customerLocationLabel}</span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-1">
-                <div className="min-w-0">
-                  <span className={`${FIELD_LABEL_CLASS} mb-1.5 block`} style={labelStyle}>Stage</span>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-1">
+                <div className="min-w-0 space-y-1.5">
+                  <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Stage</span>
                   <CompactSelect
                     options={STAGES}
                     value={draft.stage}
@@ -1554,10 +1555,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     ariaLabel="Project stage"
                   />
                 </div>
-                <div className="min-w-0">
-                  <div className="mb-1 flex items-center justify-between gap-3">
+                <div className="min-w-0 space-y-1.5">
+                  <div className="flex items-center justify-between gap-3">
                     <span className={FIELD_LABEL_CLASS} style={labelStyle}>Win Probability</span>
-                    <span className="text-[0.8125rem] font-bold tabular-nums" style={{ color: c.textPrimary }}>{currentProbability}%</span>
+                    <span className={`${FIELD_VALUE_CLASS} tabular-nums`} style={{ color: c.textPrimary }}>{currentProbability}%</span>
                   </div>
                   <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} showValueBubble={false} compact />
                 </div>
@@ -1567,7 +1568,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(260px,330px)] md:gap-5 xl:gap-6 md:items-start">
             <div className={`min-w-0 space-y-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
-              <Section title="Pricing" subtitle="List price, discount, and project type" theme={theme}>
+              <Section title="Pricing" theme={theme}>
                 <div className="space-y-3">
                   <div className={FIELD_GRID_CLASS}>
                     <div className="min-w-0 space-y-1.5">
@@ -1584,11 +1585,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                           placeholder="0"
                         />
                       </div>
-                      {rawNumeric > 0 && discountPct > 0 ? (
-                        <p className={`${FIELD_HELPER_CLASS} tabular-nums pl-1`} style={{ color: c.textSecondary, opacity: 0.62 }}>
-                          {netValueLabel} net
-                        </p>
-                      ) : null}
                     </div>
 
                     <div className="min-w-0 space-y-1.5">
@@ -1607,11 +1603,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         </span>
                         <ChevronDown className={`h-3.5 w-3.5 flex-shrink-0 transition-transform ${discountOpen ? 'rotate-180' : ''}`} style={{ color: c.textSecondary, opacity: 0.5 }} aria-hidden="true" />
                       </button>
-                      {discountPct > 0 ? (
-                        <p className={`${FIELD_HELPER_CLASS} pl-1`} style={{ color: c.textSecondary, opacity: 0.62 }}>
-                          {discountDetailLabel}
-                        </p>
-                      ) : null}
                     </div>
 
                     <Row label="PO Timeframe" theme={theme}>
@@ -1627,6 +1618,21 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         labelStyle={labelStyle}
                       />
                     </div>
+
+                    <RewardToggleField
+                      label="Sales 3%"
+                      checked={salesRewardEnabled}
+                      onChange={v => setRewardEnabled('salesReward', v)}
+                      theme={theme}
+                      labelStyle={labelStyle}
+                    />
+                    <RewardToggleField
+                      label="Designer 1%"
+                      checked={designerRewardEnabled}
+                      onChange={v => setRewardEnabled('designerReward', v)}
+                      theme={theme}
+                      labelStyle={labelStyle}
+                    />
                   </div>
 
                   <AnimatePresence initial={false}>
@@ -1645,34 +1651,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     ) : null}
                   </AnimatePresence>
 
-                  <div className="rounded-[20px] px-3.5 py-3" style={{ backgroundColor: detailTileBg(theme) }}>
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                      <span className={`${FIELD_LABEL_CLASS}`} style={labelStyle}>Rewards</span>
-                      <RewardTogglePill
-                        label="Sales"
-                        sublabel={salesRewardEnabled ? '3%' : 'off'}
-                        checked={salesRewardEnabled}
-                        onChange={e => setRewardEnabled('salesReward', e.target.checked)}
-                        theme={theme}
-                      />
-                      <RewardTogglePill
-                        label="Designer"
-                        sublabel={designerRewardEnabled ? '1%' : 'off'}
-                        checked={designerRewardEnabled}
-                        onChange={e => setRewardEnabled('designerReward', e.target.checked)}
-                        theme={theme}
-                      />
-                    </div>
-                  </div>
+                  {rawNumeric > 0 && discountPct > 0 ? (
+                    <p className={`${FIELD_HELPER_CLASS} pl-1`} style={{ color: c.textSecondary, opacity: 0.62 }}>
+                      {netValueLabel} net · {discountDetailLabel}
+                    </p>
+                  ) : null}
 
                   {rewardDefaultOff ? (
-                    <div className="flex items-center gap-2 rounded-[20px] px-3.5 py-2.5" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                    <div className="flex items-center gap-2 rounded-[16px] px-3.5 py-2.5" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                       <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
                       <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>{rewardsDetailLabel}</span>
                     </div>
                   ) : null}
                   {showSpiffWarning ? (
-                    <div className="flex items-center gap-2 rounded-[20px] px-3.5 py-2.5" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
+                    <div className="flex items-center gap-2 rounded-[16px] px-3.5 py-2.5" style={{ backgroundColor: isDark ? 'rgba(196,149,106,0.08)' : 'rgba(196,149,106,0.06)' }}>
                       <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" style={{ color: c.warning }} aria-hidden="true" />
                       <span className="text-[0.6875rem] font-medium" style={{ color: c.warning }}>No spiff eligible: 50/20/10 with list value under $10K.</span>
                     </div>
@@ -1714,13 +1706,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   </Row>
                   <div className="space-y-1.5">
                     <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Bid Project</span>
-                    <SegmentedToggle
+                    <BooleanSegmentedToggle
                       value={!!draft.isBid}
                       onChange={v => update('isBid', v)}
                       theme={theme}
-                      size="sm"
                       ariaLabel="Bid project"
-                      options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
                     />
                   </div>
                 </div>
@@ -1764,13 +1754,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   <div className={`space-y-2 ${FIELD_SPAN_ALL}`}>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                       <span className={`${FIELD_LABEL_CLASS} flex-shrink-0`} style={labelStyle}>Competition</span>
-                      <SegmentedToggle
+                      <BooleanSegmentedToggle
                         value={competitionValue}
                         onChange={v => setCompetition(v)}
                         theme={theme}
-                        size="sm"
                         ariaLabel="Competition present"
-                        options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
                       />
                       {competitionValue === true ? (
                         <SuggestInputPill
@@ -1807,8 +1795,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                         return (
                           <div
                             key={p.series}
-                            className="rounded-[20px] px-3.5 py-3"
-                            style={{ backgroundColor: detailTileBg(theme) }}
+                            className="px-3.5 py-3"
+                            style={groupedSurface(theme)}
                           >
                             <div className="mb-3 flex items-center justify-between gap-2">
                               <div className="flex min-w-0 items-center gap-2">
@@ -2067,7 +2055,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             This will change the discount on this project. Authorize the update to apply the new pricing basis.
           </p>
 
-          <div className="p-3.5 space-y-2" style={fieldSurface(theme)}>
+          <div className="p-3.5 space-y-2" style={groupedSurface(theme)}>
             <div className="flex items-center justify-between gap-3">
               <span className={FIELD_LABEL_CLASS} style={{ color: c.textSecondary, opacity: 0.84 }}>Current</span>
               <span className="text-[0.75rem] font-semibold text-right" style={{ color: c.textPrimary }}>{formatDiscountLabel(draft.discount)}</span>
@@ -2117,7 +2105,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={handleMarkLost}
               className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
-              style={fieldSurface(theme)}
+              style={groupedSurface(theme)}
             >
               <span className="block text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>Move to Lost</span>
               <span className="mt-1 block text-[0.6875rem] leading-snug" style={{ color: c.textSecondary }}>
@@ -2131,7 +2119,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               type="button"
               onClick={handleDelete}
               className="w-full text-left p-3.5 transition-all active:scale-[0.99] focus-ring"
-              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: DETAIL_RADIUS_INSET }}
+              style={{ backgroundColor: isDark ? 'rgba(184,92,92,0.14)' : 'rgba(184,92,92,0.08)', borderRadius: DETAIL_RADIUS_GROUPED }}
             >
               <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold" style={{ color: c.error }}>
                 <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -2243,7 +2231,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             <div className="space-y-3">
               <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Add from project companies</span>
               {companyContactGroups.map((group) => (
-                <div key={group.company} className="rounded-[24px] p-3" style={{ backgroundColor: insetBg(theme) }}>
+                <div key={group.company} className="rounded-[16px] p-3" style={{ backgroundColor: insetBg(theme) }}>
                   <div className="text-[0.75rem] font-semibold mb-2" style={{ color: c.textPrimary }}>{group.company}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {group.contacts.map((ct) => {
@@ -2337,7 +2325,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   type="button"
                   onClick={() => { setHubModal(null); setSelectedSampleOrder(order); }}
                   className="w-full flex items-center gap-3 px-3.5 py-3 text-left transition-all active:scale-[0.98] focus-ring"
-                  style={fieldSurface(theme)}
+                  style={groupedSurface(theme)}
                 >
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.bg }}>
                     <StatusIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
@@ -2376,7 +2364,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
           {relatedOrders.map((order) => {
             const sc = STATUS_COLORS[order.status] || '#8B8680';
             return (
-              <div key={order.orderNumber} className="flex items-center gap-3 px-3.5 py-3 rounded-[24px]"
+              <div key={order.orderNumber} className="flex items-center gap-3 px-3.5 py-3 rounded-[16px]"
                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : insetBg(theme) }}>
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: sc }} />
                 <div className="flex-1 min-w-0">

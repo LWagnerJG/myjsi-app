@@ -21,7 +21,7 @@ describe('CET file classification', () => {
   });
 
   it('summarizes the Project Hub documents row around CET work', () => {
-    expect(describeDocumentsHub([])).toBe('Drop in CET drawings, plans, and PDFs');
+    expect(describeDocumentsHub([])).toBe('CET drawings and plans');
     expect(describeDocumentsHub([
       { fileName: 'XYZ_Lobby.cmpck', kind: 'cet-pack' },
       { fileName: 'XYZ_Lobby.cmdrw', kind: 'cet-drawing' },

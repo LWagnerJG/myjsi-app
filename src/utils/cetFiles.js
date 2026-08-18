@@ -167,7 +167,7 @@ export const previewProjectDocument = (doc, blobUrl) => {
 
 export const describeDocumentsHub = (documents = []) => {
   const docs = documents || [];
-  if (!docs.length) return 'Drop in CET drawings, plans, and PDFs';
+  if (!docs.length) return 'CET drawings and plans';
   const cet = docs.filter(isCetNative);
   const packs = cet.filter(d => (d.kind || classifyProjectFile(d.fileName).kind) === 'cet-pack').length;
   const drawings = cet.filter(d => (d.kind || classifyProjectFile(d.fileName).kind) === 'cet-drawing').length;

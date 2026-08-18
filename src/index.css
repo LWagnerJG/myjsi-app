@@ -30,7 +30,7 @@ textarea {
 
 /* Project detail hero title — must out-specific the global 16px input rule. */
 input.project-display-title {
-    font-size: clamp(1.625rem, 3vw, 1.875rem) !important;
+    font-size: clamp(1.5rem, 2.6vw, 1.75rem) !important;
     line-height: 1.15 !important;
 }
 

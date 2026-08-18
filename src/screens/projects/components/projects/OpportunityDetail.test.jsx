@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, act, cleanup, within } from '@testing-library/react';
 import { OpportunityDetail } from './OpportunityDetail.jsx';
 import { lightTheme } from '../../../../data/theme/themeData.js';
 import { INITIAL_OPPORTUNITIES } from '../../data.js';
@@ -121,15 +121,15 @@ describe('OpportunityDetail', () => {
     // Net 36k at 64% discount → rewards auto-default off.
     render(<Harness initial={{ ...baseOpp, discount: '50/20/10 (64.00%)' }} />);
 
-    const salesToggle = () => screen.getByRole('switch', { name: 'Sales reward' });
-    expect(salesToggle()).toHaveAttribute('aria-checked', 'false');
+    const salesGroup = () => screen.getByRole('group', { name: 'Sales 3%' });
+    expect(within(salesGroup()).getByRole('button', { name: 'Off' })).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(salesToggle());
-    expect(salesToggle()).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(within(salesGroup()).getByRole('button', { name: 'On' }));
+    expect(within(salesGroup()).getByRole('button', { name: 'On' })).toHaveAttribute('aria-pressed', 'true');
 
     // Flush the debounced save; the parent echoes the saved opp back down.
     act(() => { vi.advanceTimersByTime(700); });
-    expect(salesToggle()).toHaveAttribute('aria-checked', 'true');
+    expect(within(salesGroup()).getByRole('button', { name: 'On' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('treats Documents as CET work from the dealer, not a generic PDF tray', () => {

@@ -15,6 +15,16 @@ import { isDarkTheme } from '../../design-system/tokens.js';
  */
 const PILL_BLEED = 3; // px the pill extends past each button, matching track padding
 
+export const YES_NO_OPTIONS = [
+  { label: 'No', value: false },
+  { label: 'Yes', value: true },
+];
+
+export const ON_OFF_OPTIONS = [
+  { label: 'Off', value: false },
+  { label: 'On', value: true },
+];
+
 export const SegmentedToggle = ({
   value,
   onChange,
@@ -145,3 +155,22 @@ export const SegmentedToggle = ({
     </div>
   );
 };
+
+/** Canonical boolean control — same track as filters, bid, and rewards. */
+export const BooleanSegmentedToggle = ({
+  value,
+  onChange,
+  theme,
+  ariaLabel,
+  variant = 'yesNo',
+  size = 'sm',
+}) => (
+  <SegmentedToggle
+    value={value}
+    onChange={onChange}
+    theme={theme}
+    size={size}
+    ariaLabel={ariaLabel}
+    options={variant === 'onOff' ? ON_OFF_OPTIONS : YES_NO_OPTIONS}
+  />
+);
