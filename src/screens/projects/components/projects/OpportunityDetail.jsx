@@ -1,7 +1,7 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus, Box } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
@@ -21,6 +21,17 @@ import { ToggleSwitch } from '../../../../components/forms/ToggleSwitch.jsx';
 import { SegmentedToggle } from '../../../../components/common/GroupedToggle.jsx';
 import { SuggestInputPill } from './SuggestInputPill.jsx';
 import { buildOpportunityProjectContacts, getSampleOrdersForOpportunity, resolveOpportunityCustomerLink } from '../../../../utils/projectLinks.js';
+import {
+  CET_UPLOAD_ACCEPT,
+  isCetNative,
+  describeDocumentsHub,
+  buildUploadedDocument,
+  classifyProjectFile,
+  canPreviewProjectFile,
+  describeCetDownload,
+  describeDocumentSource,
+  partitionProjectDocuments,
+} from '../../../../utils/cetFiles.js';
 
 /* helpers */
 const parseCurrency = (raw) => {
@@ -746,7 +757,11 @@ const ProjectNotesField = ({ value, onChange, onAttach, documents, onRemoveDoc, 
         <div className="flex flex-wrap items-center gap-1.5">
           {docs.map(doc => (
             <span key={doc.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full py-1 pl-2.5 pr-1.5 text-[0.6875rem] font-semibold" style={{ ...fieldSurface(theme), color: c.textPrimary }}>
-              <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+              {isCetNative(doc) ? (
+                <Box className="h-3 w-3 flex-shrink-0" style={{ color: JSI_COLORS.info }} aria-hidden="true" />
+              ) : (
+                <FileText className="h-3 w-3 flex-shrink-0" style={{ color: c.accent }} aria-hidden="true" />
+              )}
               <span className="truncate max-w-[160px]">{doc.fileName}</span>
               {!readOnly ? (
                 <button type="button" onClick={() => onRemoveDoc(doc.id)} aria-label={`Remove ${doc.fileName}`} className="flex h-5 w-5 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }}>
@@ -760,7 +775,7 @@ const ProjectNotesField = ({ value, onChange, onAttach, documents, onRemoveDoc, 
       {!readOnly ? (
         <button type="button" onClick={onAttach} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
           <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
-          Attach documents
+          Attach CET or files
         </button>
       ) : null}
     </div>
@@ -874,6 +889,52 @@ const ProjectContractFields = ({
         </div>
       ) : null}
     </motion.div>
+  );
+};
+
+const DocumentFileRow = ({ doc, theme, onRemove }) => {
+  const c = theme.colors;
+  const cet = isCetNative(doc);
+  const classified = classifyProjectFile(doc.fileName);
+  const previewable = canPreviewProjectFile(doc);
+  const downloadHint = describeCetDownload(doc);
+  const meta = [
+    doc.type || classified.type,
+    doc.size,
+    doc.date,
+  ].filter(Boolean).join(' · ');
+  const source = describeDocumentSource(doc);
+  const Icon = cet ? Box : FileText;
+  const iconColor = cet ? JSI_COLORS.info : c.accent;
+  return (
+    <div className="flex items-center gap-2.5 px-3.5 py-3" style={fieldSurface(theme)}>
+      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${iconColor}14`, color: iconColor }}>
+        <Icon className="w-4 h-4" aria-hidden="true" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
+          {cet ? (
+            <span className="flex-shrink-0 rounded-full px-1.5 py-[1px] text-[0.5625rem] font-bold uppercase tracking-[0.06em]" style={{ color: JSI_COLORS.info, backgroundColor: `${JSI_COLORS.info}18` }}>
+              CET
+            </span>
+          ) : null}
+        </div>
+        <div className="text-[0.6875rem] truncate" style={{ color: c.textSecondary, opacity: 0.65 }}>{meta}</div>
+        {source ? (
+          <div className="text-[0.625rem] truncate mt-0.5" style={{ color: c.textSecondary, opacity: 0.55 }}>{source}</div>
+        ) : null}
+      </div>
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {previewable ? (
+          <button type="button" className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title="Preview" aria-label={`Preview ${doc.fileName}`}><Eye className="w-3.5 h-3.5" aria-hidden="true" /></button>
+        ) : null}
+        <button type="button" className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title={downloadHint} aria-label={`${downloadHint} ${doc.fileName}`}><Download className="w-3.5 h-3.5" aria-hidden="true" /></button>
+        {onRemove ? (
+          <button type="button" onClick={onRemove} className="flex h-11 w-11 items-center justify-center rounded-full focus-ring" style={{ color: c.textSecondary }} title="Remove" aria-label={`Remove ${doc.fileName}`}><X className="w-3.5 h-3.5" aria-hidden="true" /></button>
+        ) : null}
+      </div>
+    </div>
   );
 };
 
@@ -1287,24 +1348,31 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     () => (draft.documents || []).filter(d => notesDocIds.includes(d.id)),
     [draft.documents, notesDocIds],
   );
+  const projectDocuments = draft.documents || [];
+  const hasCetDocs = projectDocuments.some(isCetNative);
+  const { cet: cetDocuments, other: otherDocuments } = partitionProjectDocuments(projectDocuments);
+
+  const resolveUploader = useCallback(() => {
+    const member = (members || []).find(m => String(m.id) === String(currentUserId));
+    const uploadedBy = member ? `${member.firstName || ''} ${member.lastName || ''}`.trim() : 'You';
+    return {
+      uploadedBy,
+      uploadedByRole: member ? 'rep' : 'user',
+      company: member ? 'JSI' : ((draft.dealers || [])[0] || ''),
+    };
+  }, [members, currentUserId, draft.dealers]);
 
   const handleNotesFileUpload = useCallback((e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    const newDocs = files.map(f => ({
-      id: `${Date.now()}_${f.name}`,
-      fileName: f.name,
-      type: f.type.includes('pdf') ? 'PDF' : f.type.includes('image') ? 'Image' : 'Document',
-      size: f.size < 1024 * 1024 ? `${Math.round(f.size / 1024)}KB` : `${(f.size / (1024 * 1024)).toFixed(1)}MB`,
-      date: new Date().toLocaleDateString(),
-    }));
+    const newDocs = files.map(f => buildUploadedDocument(f, resolveUploader()));
     setDraft(p => {
       dirty.current = true;
       return { ...p, documents: [...(p.documents || []), ...newDocs] };
     });
     setNotesDocIds(ids => [...ids, ...newDocs.map(d => d.id)]);
     e.target.value = '';
-  }, []);
+  }, [resolveUploader]);
 
   const removeNotesDoc = useCallback((docId) => {
     setNotesDocIds(ids => ids.filter(id => id !== docId));
@@ -1818,14 +1886,13 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     />
                   ) : null}
                   <DetailHubCard
-                    icon={Paperclip}
+                    icon={hasCetDocs ? Box : Paperclip}
                     title="Documents"
-                    count={(draft.documents || []).length || null}
-                    summary={(draft.documents || []).length
-                      ? `Last upload ${(draft.documents || [])[(draft.documents || []).length - 1]?.date || ''}`
-                      : 'Drop in plans, specs, and PDFs'}
+                    count={projectDocuments.length || null}
+                    summary={describeDocumentsHub(projectDocuments)}
                     onClick={() => setHubModal('documents')}
                     theme={theme}
+                    accentColor={hasCetDocs ? JSI_COLORS.info : undefined}
                   />
                   {relatedOrders.length > 0 && (
                     <DetailHubCard
@@ -1858,7 +1925,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                   ref={notesFileInputRef}
                   type="file"
                   multiple
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                  accept={CET_UPLOAD_ACCEPT}
                   className="hidden"
                   onChange={handleNotesFileUpload}
                 />
@@ -2069,10 +2136,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       />
 
       {/* Hidden file input for the documents hub */}
-      <input ref={fileInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" className="hidden"
+      <input ref={fileInputRef} type="file" multiple accept={CET_UPLOAD_ACCEPT} className="hidden"
         onChange={e => {
           const files = Array.from(e.target.files || []);
-          const newDocs = files.map(f => ({ id: Date.now() + '_' + f.name, fileName: f.name, type: f.type.includes('pdf') ? 'PDF' : f.type.includes('image') ? 'Image' : 'Document', size: f.size < 1024 * 1024 ? `${Math.round(f.size / 1024)}KB` : `${(f.size / (1024 * 1024)).toFixed(1)}MB`, date: new Date().toLocaleDateString() }));
+          const newDocs = files.map(f => buildUploadedDocument(f, resolveUploader()));
           update('documents', [...(draft.documents || []), ...newDocs]);
           e.target.value = '';
         }} />
@@ -2272,40 +2339,53 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
         </div>
       </Modal>
 
-      {/* DOCUMENTS HUB MODAL */}
+      {/* DOCUMENTS HUB — CET work first. Native files download to CET Designer. */}
       <Modal show={hubModal === 'documents'} onClose={() => setHubModal(null)} title="Documents" theme={theme} maxWidth="max-w-lg">
         <div className="space-y-3">
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-2.5 py-3 px-3.5 transition-all hover:opacity-80 focus-ring"
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full flex items-center gap-2.5 min-h-[52px] py-3 px-3.5 transition-all hover:opacity-80 focus-ring"
             style={{ ...fieldSurface(theme), color: c.textSecondary }}>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${c.accent}14`, color: c.accent }}>
-              <Upload className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${JSI_COLORS.info}14`, color: JSI_COLORS.info }}>
+              <Upload className="w-4 h-4" aria-hidden="true" />
             </div>
-            <div className="text-left">
-              <span className="text-[0.8125rem] font-semibold block" style={{ color: c.textPrimary }}>Upload files</span>
-              <span className="text-[0.6875rem]" style={{ opacity: 0.65 }}>PDF, DOC, images and more</span>
+            <div className="text-left min-w-0">
+              <span className="text-[0.8125rem] font-semibold block" style={{ color: c.textPrimary }}>Upload CET Pack &amp; Go</span>
+              <span className="text-[0.6875rem]" style={{ opacity: 0.65 }}>Drawings (.cmdrw), Pack &amp; Go (.cmpck), schemes, CAD, PDFs</span>
             </div>
           </button>
-          {(draft.documents || []).length > 0 ? (
+          <p className={FIELD_HELPER_CLASS} style={{ color: c.textSecondary }}>
+            CET files open in CET Designer — they cannot be previewed here.
+          </p>
+          {cetDocuments.length > 0 ? (
             <div className="space-y-2">
-              {(draft.documents || []).map(doc => (
-                <div key={doc.id} className="group flex items-center gap-2.5 px-3.5 py-3 transition-colors"
-                  style={fieldSurface(theme)}>
-                  <FileText className="w-4 h-4 flex-shrink-0" style={{ color: c.accent }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[0.75rem] font-semibold truncate" style={{ color: c.textPrimary }}>{doc.fileName}</div>
-                    <div className="text-[0.6875rem]" style={{ color: c.textSecondary, opacity: 0.65 }}>{doc.type} {'\u00b7'} {doc.size} {'\u00b7'} {doc.date}</div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button type="button" className="p-1.5 rounded-full focus-ring" style={{ color: c.textSecondary }} title="Preview" aria-label={`Preview ${doc.fileName}`}><Eye className="w-3.5 h-3.5" aria-hidden="true" /></button>
-                    <button type="button" className="p-1.5 rounded-full focus-ring" style={{ color: c.textSecondary }} title="Download" aria-label={`Download ${doc.fileName}`}><Download className="w-3.5 h-3.5" aria-hidden="true" /></button>
-                    <button type="button" onClick={() => update('documents', (draft.documents || []).filter(d => d.id !== doc.id))} className="p-1.5 rounded-full focus-ring" style={{ color: c.textSecondary }} title="Remove" aria-label={`Remove ${doc.fileName}`}><X className="w-3.5 h-3.5" aria-hidden="true" /></button>
-                  </div>
-                </div>
+              <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>CET Designer</span>
+              {cetDocuments.map(doc => (
+                <DocumentFileRow
+                  key={doc.id}
+                  doc={doc}
+                  theme={theme}
+                  onRemove={() => update('documents', projectDocuments.filter(d => d.id !== doc.id))}
+                />
               ))}
             </div>
-          ) : (
-            <p className="text-[0.75rem] text-center py-2" style={{ color: c.textSecondary, opacity: 0.7 }}>No documents uploaded yet.</p>
-          )}
+          ) : null}
+          {otherDocuments.length > 0 ? (
+            <div className="space-y-2">
+              <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Exports &amp; plans</span>
+              {otherDocuments.map(doc => (
+                <DocumentFileRow
+                  key={doc.id}
+                  doc={doc}
+                  theme={theme}
+                  onRemove={() => update('documents', projectDocuments.filter(d => d.id !== doc.id))}
+                />
+              ))}
+            </div>
+          ) : null}
+          {projectDocuments.length === 0 ? (
+            <p className="text-[0.75rem] text-center py-2" style={{ color: c.textSecondary, opacity: 0.7 }}>
+              No CET files on this project yet. Upload a Pack &amp; Go from CET Designer so JSI can open the same drawing.
+            </p>
+          ) : null}
         </div>
       </Modal>
     </div>

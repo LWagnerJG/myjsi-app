@@ -131,4 +131,21 @@ describe('OpportunityDetail', () => {
     act(() => { vi.advanceTimersByTime(700); });
     expect(salesToggle()).toHaveAttribute('aria-checked', 'true');
   });
+
+  it('treats Documents as CET work from the dealer, not a generic PDF tray', () => {
+    const opp = INITIAL_OPPORTUNITIES.find(o => o.id === 2);
+    render(<Harness initial={opp} />);
+
+    expect(screen.getByText('1 CET drawing · 1 Pack & Go · 1 more CET · 1 other')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /documents/i }));
+    expect(screen.getByText('CET Designer')).toBeInTheDocument();
+    expect(screen.getByText('XYZ_Lobby_Refresh.cmpck')).toBeInTheDocument();
+    expect(screen.getByText('XYZ_Corporate_Standards.cmscl')).toBeInTheDocument();
+    expect(screen.getAllByText('Sarah Palmer · Business Furniture · Dealer').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/cannot be previewed/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /preview xyz_lobby_refresh\.cmpck/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /download to open in cet designer xyz_lobby_refresh\.cmpck/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /preview lobby_photolab\.pdf/i })).toBeInTheDocument();
+  });
 });
