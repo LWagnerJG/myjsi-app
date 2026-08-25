@@ -158,9 +158,11 @@ describe('counts and completion', () => {
 
     it('writes plain-language confirmation copy', () => {
         expect(buildCompletionPrompt({ accepted: 179, held: 0, openIssues: 1 }))
-            .toBe('Post 179 accepted cartons, leave one issue open?');
+            .toBe('Post 179 accepted cartons and leave one issue open?');
         expect(buildCompletionPrompt({ accepted: 178, held: 1, openIssues: 2 }))
-            .toBe('Post 178 accepted cartons, hold 1, leave 2 issues open?');
+            .toBe('Post 178 accepted cartons, hold 1, and leave 2 issues open?');
+        expect(buildCompletionPrompt({ accepted: 180, held: 0, openIssues: 0 }))
+            .toBe('Post 180 accepted cartons?');
     });
 });
 

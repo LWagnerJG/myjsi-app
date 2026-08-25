@@ -416,7 +416,9 @@ export function buildCompletionPrompt(counts) {
     if (counts.held) parts.push(`hold ${counts.held}`);
     const openText = counts.openIssues === 1 ? 'one issue' : `${counts.openIssues} issues`;
     if (counts.openIssues) parts.push(`leave ${openText} open`);
-    return `${parts.join(', ')}?`;
+    if (parts.length === 1) return `${parts[0]}?`;
+    const last = parts.pop();
+    return `${parts.join(', ')}${parts.length > 1 ? ',' : ''} and ${last}?`;
 }
 
 export function makeSyncEvent(type, payload, { at, dedupeKey } = {}) {

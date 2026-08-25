@@ -166,7 +166,7 @@ export const ScanScreen = ({ theme, screenParams, setBackHandler }) => {
         <AppScreenLayout
             theme={theme}
             showTitle={false}
-            maxWidthClass="max-w-content"
+            maxWidthClass="max-w-4xl"
             horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
             contentPaddingBottomClass="pb-10"
             contentClassName="pt-4"

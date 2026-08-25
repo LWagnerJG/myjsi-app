@@ -77,7 +77,13 @@ export const ShipmentOverview = ({
                     <CountTile theme={theme} label="Scanned" value={counts.scanned} tone={theme.colors.info} />
                     <CountTile theme={theme} label="Accepted" value={counts.accepted} tone={theme.colors.success} />
                     <CountTile theme={theme} label="Issues" value={counts.openIssues} tone={counts.openIssues ? theme.colors.warning : undefined} />
-                    <CountTile theme={theme} label="Missing" value={counts.missing} tone={counts.missing ? theme.colors.error : undefined} />
+                    {/* Nothing is short until the receipt is posted — before that it is simply unscanned. */}
+                    <CountTile
+                        theme={theme}
+                        label={completed ? 'Missing' : 'Not scanned'}
+                        value={counts.missing}
+                        tone={completed && counts.missing ? theme.colors.error : undefined}
+                    />
                 </div>
                 {completed ? (
                     <Caption theme={theme} className="mt-3">

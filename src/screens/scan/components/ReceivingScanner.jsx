@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     AlertTriangle,
     Camera,
@@ -11,6 +11,7 @@ import {
     PackagePlus,
     ScanLine,
     Search,
+    X,
     XCircle,
 } from 'lucide-react';
 import { floatingBarStyle, subtleBg, subtleBorder } from '../../../design-system/tokens.js';
@@ -198,7 +199,7 @@ export const ReceivingScanner = ({
     const feedbackTone = feedback?.tone || 'info';
 
     return (
-        <div className="space-y-4 pb-40">
+        <div className="space-y-4 pb-64">
             <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[0.9375rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>
@@ -233,68 +234,13 @@ export const ReceivingScanner = ({
                 <div className="grid grid-cols-3 gap-2">
                     <CountTile theme={theme} label="Remaining" value={counts.remaining} />
                     <CountTile theme={theme} label="Issues" value={counts.openIssues} tone={counts.openIssues ? theme.colors.warning : undefined} />
-                    <CountTile theme={theme} label="Waiting to sync" value={receiving.queuedCount} tone={receiving.queuedCount ? theme.colors.info : undefined} />
+                    <CountTile theme={theme} label="To sync" value={receiving.queuedCount} tone={receiving.queuedCount ? theme.colors.info : undefined} />
                 </div>
             </SectionCard>
 
             <div aria-live="assertive" className="sr-only">
                 {feedback ? `${feedback.title}. ${feedback.detail}` : ''}
             </div>
-
-            <AnimatePresence initial={false}>
-                {feedback ? (
-                    <motion.div
-                        key={feedback.at}
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18 }}
-                        className="rounded-3xl px-4 py-3.5 flex items-start gap-3"
-                        style={{
-                            backgroundColor: theme.colors[`${feedbackTone}Light`],
-                            border: `1px solid ${theme.colors[feedbackTone]}33`,
-                        }}
-                    >
-                        {feedbackConfig?.icon ? (
-                            <feedbackConfig.icon
-                                className="w-5 h-5 flex-shrink-0 mt-0.5"
-                                style={{ color: theme.colors[feedbackTone] }}
-                                aria-hidden="true"
-                            />
-                        ) : null}
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{feedback.title}</p>
-                            <p className="text-[0.75rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>{feedback.detail}</p>
-                            {feedback.outcome === SCAN_OUTCOME.UNKNOWN ? (
-                                <div className="mt-2.5 flex flex-wrap gap-2">
-                                    <QuietButton
-                                        theme={theme}
-                                        icon={PackagePlus}
-                                        onClick={() => {
-                                            receiving.recordExtraCarton(shipment, feedback.barcode);
-                                            onOpenIssue({ carton: null, type: 'extra-carton', barcode: feedback.barcode });
-                                            setFeedback(null);
-                                        }}
-                                    >
-                                        Record as extra carton
-                                    </QuietButton>
-                                </div>
-                            ) : null}
-                            {feedback.outcome === SCAN_OUTCOME.VALID && feedback.carton ? (
-                                <div className="mt-2.5">
-                                    <QuietButton
-                                        theme={theme}
-                                        icon={AlertTriangle}
-                                        onClick={() => onOpenIssue({ carton: feedback.carton, type: 'damaged' })}
-                                    >
-                                        Report an issue
-                                    </QuietButton>
-                                </div>
-                            ) : null}
-                        </div>
-                    </motion.div>
-                ) : null}
-            </AnimatePresence>
 
             <SectionCard theme={theme} className="space-y-3">
                 <SectionHeading theme={theme}>Scan a carton</SectionHeading>
@@ -463,22 +409,97 @@ export const ReceivingScanner = ({
                 )}
             </SectionCard>
 
+            {/* Result and count sit with the scan button, in thumb reach and outside page flow. */}
             <div
                 className="fixed left-0 right-0 bottom-0 px-4 pt-3"
                 style={{ ...floatingBarStyle(theme), paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
             >
-                <div className="mx-auto w-full max-w-content flex flex-col gap-2 sm:flex-row">
-                    <BigButton
-                        theme={theme}
-                        icon={ScanLine}
-                        onClick={() => showResult(receiving.simulateNext(shipment))}
-                        className="sm:flex-1"
-                    >
-                        Simulate next scan
-                    </BigButton>
-                    <BigButton theme={theme} tone="neutral" onClick={onReview} className="sm:w-48">
-                        Review receipt
-                    </BigButton>
+                <div className="mx-auto w-full max-w-4xl space-y-2.5">
+                    {feedback ? (
+                        <motion.div
+                            key={feedback.at}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.14 }}
+                            className="rounded-3xl px-4 py-3 flex items-start gap-3"
+                            style={{
+                                backgroundColor: theme.colors.surface,
+                                backgroundImage: `linear-gradient(0deg, ${theme.colors[`${feedbackTone}Light`]}, ${theme.colors[`${feedbackTone}Light`]})`,
+                                border: `1px solid ${theme.colors[feedbackTone]}33`,
+                            }}
+                        >
+                            {feedbackConfig?.icon ? (
+                                <feedbackConfig.icon
+                                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                                    style={{ color: theme.colors[feedbackTone] }}
+                                    aria-hidden="true"
+                                />
+                            ) : null}
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[0.9375rem] font-semibold" style={{ color: theme.colors.textPrimary }}>{feedback.title}</p>
+                                <p className="text-[0.75rem] mt-0.5" style={{ color: theme.colors.textSecondary }}>{feedback.detail}</p>
+                                {feedback.outcome === SCAN_OUTCOME.UNKNOWN && feedback.barcode ? (
+                                    <div className="mt-2.5">
+                                        <QuietButton
+                                            theme={theme}
+                                            icon={PackagePlus}
+                                            onClick={() => {
+                                                receiving.recordExtraCarton(shipment, feedback.barcode);
+                                                onOpenIssue({ carton: null, type: 'extra-carton', barcode: feedback.barcode });
+                                                setFeedback(null);
+                                            }}
+                                        >
+                                            Record as extra carton
+                                        </QuietButton>
+                                    </div>
+                                ) : null}
+                                {feedback.outcome === SCAN_OUTCOME.VALID && feedback.carton ? (
+                                    <div className="mt-2.5">
+                                        <QuietButton
+                                            theme={theme}
+                                            icon={AlertTriangle}
+                                            onClick={() => onOpenIssue({ carton: feedback.carton, type: 'damaged' })}
+                                        >
+                                            Report an issue
+                                        </QuietButton>
+                                    </div>
+                                ) : null}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setFeedback(null)}
+                                aria-label="Dismiss scan result"
+                                className="w-11 h-11 -mr-2 -mt-1.5 rounded-full flex items-center justify-center flex-shrink-0 focus-ring"
+                            >
+                                <X className="w-4 h-4" style={{ color: theme.colors.textSecondary }} aria-hidden="true" />
+                            </button>
+                        </motion.div>
+                    ) : null}
+
+                    <div className="flex items-center justify-between gap-3 px-1">
+                        <p className="text-[0.8125rem] font-semibold tabular-nums" style={{ color: theme.colors.textPrimary }}>
+                            {counts.scanned} of {counts.expected}
+                        </p>
+                        <p className="text-[0.75rem] font-medium tabular-nums" style={{ color: theme.colors.textSecondary }}>
+                            {counts.remaining} left
+                            {counts.openIssues ? ` · ${counts.openIssues} issue${counts.openIssues === 1 ? '' : 's'}` : ''}
+                            {receiving.queuedCount ? ` · ${receiving.queuedCount} to sync` : ''}
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <BigButton
+                            theme={theme}
+                            icon={ScanLine}
+                            onClick={() => showResult(receiving.simulateNext(shipment))}
+                            className="sm:flex-1"
+                        >
+                            Simulate next scan
+                        </BigButton>
+                        <BigButton theme={theme} tone="neutral" onClick={onReview} className="sm:w-48">
+                            Review receipt
+                        </BigButton>
+                    </div>
                 </div>
             </div>
 

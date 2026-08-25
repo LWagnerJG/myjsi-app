@@ -73,7 +73,7 @@ export const StatusPill = ({ theme, label, tone = 'info', icon: Icon, className 
     const bg = theme.colors[`${tone}Light`] || subtleBg(theme);
     return (
         <span
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold ${className}`}
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold whitespace-nowrap ${className}`}
             style={{ backgroundColor: bg, color }}
         >
             {Icon ? <Icon className="w-3 h-3" aria-hidden="true" /> : null}
@@ -187,6 +187,7 @@ export const ProgressBar = ({ theme, value, max, tone = 'accent' }) => {
             <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: theme.colors[tone] || theme.colors.accent }}
+                initial={false}
                 animate={{ width: `${pct}%` }}
                 transition={{ type: 'spring', stiffness: 220, damping: 32 }}
             />
