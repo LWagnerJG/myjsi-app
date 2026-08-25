@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Calendar, List, Building2, Package, X, Layers, MapPin, CheckCircle2, Clock, Truck, ChevronRight } from 'lucide-react';
+import { Calendar, List, Building2, Package, X, Layers, MapPin, CheckCircle2, Clock, Truck, ChevronRight, ScanLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
@@ -352,6 +352,8 @@ const OrdersToolbarActions = ({
     dealerRef,
     viewMode,
     setViewMode,
+    showFilters = true,
+    onNavigate,
 }) => {
     const controlTile = fieldTileSurface(theme);
     const dealerActive = selectedDealer !== 'All Dealers';
@@ -359,6 +361,19 @@ const OrdersToolbarActions = ({
 
     return (
         <div className="flex items-center gap-2">
+            <button
+                type="button"
+                onClick={() => onNavigate?.('scan')}
+                className="rounded-full flex items-center justify-center active:scale-95 transition border"
+                style={chromeIconButtonStyle(theme)}
+                title="Scan — receive a shipment"
+                aria-label="Scan cartons into the warehouse"
+            >
+                <ScanLine className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
+            </button>
+
+            {showFilters ? (
+            <>
             <div ref={dealerRef} className="relative">
                 <button
                     type="button"
@@ -421,6 +436,8 @@ const OrdersToolbarActions = ({
                     ? <Calendar className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
                     : <List className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />}
             </button>
+            </>
+            ) : null}
         </div>
     );
 };
@@ -528,7 +545,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
         };
     }, [filtered, dateType]);
 
-    const toolbarTrailing = dateType !== 'samples' ? (
+    const toolbarTrailing = (
         <OrdersToolbarActions
             theme={theme}
             dark={dark}
@@ -540,8 +557,10 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
             dealerRef={dealerRef}
             viewMode={viewMode}
             setViewMode={setViewMode}
+            showFilters={dateType !== 'samples'}
+            onNavigate={onNavigate}
         />
-    ) : null;
+    );
 
     return (
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>

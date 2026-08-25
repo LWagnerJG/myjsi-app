@@ -20,6 +20,7 @@ const sublabelMap = {
     'Sample Discounts': 'Demo pricing overview',
     'Install Instructions': 'Assembly guidance and videos',
     'Loaner Pool': 'Search sample chairs',
+    'Scan': 'Warehouse carton receiving',
     'Request Field Visit': 'Onsite tech scheduling',
     'Tour Visit': 'Facility travel planning',
     'Social Media': 'Brand share kit',

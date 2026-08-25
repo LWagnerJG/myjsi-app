@@ -3,7 +3,7 @@ import {
     Database, Briefcase, MessageSquare, Package, RotateCw, Search, Paperclip,
     DollarSign, UserPlus, MapPin, Percent, FileText, Calendar, Palette,
     Wrench, MonitorPlay, Share2, Hourglass, Settings, HelpCircle, Send, Gift, FilePlus,
-    BrainCircuit,
+    BrainCircuit, ScanLine,
 } from 'lucide-react';
 
 // All available apps/screens for home customization and search
@@ -39,6 +39,7 @@ export const allApps = [
     { name: 'Request Field Visit', route: 'resources/request-field-visit', icon: MapPin, desc: 'Schedule a JSI field visit' },
     { name: 'New Dealer Sign-Up', route: 'resources/new-dealer-signup', icon: UserPlus, homeEligible: false, desc: 'Register a new dealer' },
     { name: 'RFP Responder', route: 'rfp-responder', icon: BrainCircuit, desc: 'Analyze an RFP and build a response' },
+    { name: 'Scan', route: 'scan', icon: ScanLine, desc: 'Receive warehouse cartons against a shipment' },
 ];
 
 // Default home screen apps (used when user hasn't customized)

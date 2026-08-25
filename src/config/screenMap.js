@@ -26,6 +26,7 @@ const MarketplaceScreen = React.lazy(() => import('../screens/marketplace/index.
 const PresentationsScreen = React.lazy(() => import('../screens/resources/presentations/index.js').then(m => ({ default: m.PresentationsScreen })));
 const GoodBetterBestScreen = React.lazy(() => import('../screens/resources/presentations/GoodBetterBestScreen.jsx').then(m => ({ default: m.GoodBetterBestScreen })));
 const RfpResponderScreen = React.lazy(() => import('../screens/rfp/RfpResponderScreen.jsx').then(m => ({ default: m.default })));
+const ScanScreen = React.lazy(() => import('../screens/scan/ScanScreen.jsx').then(m => ({ default: m.ScanScreen })));
 
 // Resource feature routes (lead-times, commission-rates, etc.) are handled lazily in App.jsx
 // and intentionally omitted here — including them here would pull them into the main bundle.
@@ -54,6 +55,7 @@ export const SCREEN_MAP = {
   'presentations': PresentationsScreen,
   'good-better-best': GoodBetterBestScreen,
   'rfp-responder': RfpResponderScreen,
+  'scan': ScanScreen,
   // 'new-dealer-signup' is lazy-loaded in App.jsx
 };
 

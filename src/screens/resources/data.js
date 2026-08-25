@@ -25,6 +25,7 @@ export const RESOURCES_DATA = [
         items: [
             { label: "Loaner Pool", nav: "resources/loaner-pool" },
             { label: "New Dealer Sign-Up", nav: "resources/new-dealer-signup" },
+            { label: "Scan", nav: "scan" },
             { label: "Request Field Visit", nav: "resources/request-field-visit" },
             { label: "Install Instructions", nav: "resources/install-instructions" },
         ].sort((a, b) => a.label.localeCompare(b.label))

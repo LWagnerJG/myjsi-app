@@ -52,6 +52,7 @@ const CreateContentModal = React.lazy(() => import('./screens/community/CreateCo
 const UploadToLibraryModal = React.lazy(() => import('./screens/library/UploadToLibraryModal.jsx').then(m => ({ default: m.UploadToLibraryModal })));
 const CustomsScreen = React.lazy(() => import('./screens/products/CustomsScreen.jsx').then(m => ({ default: m.CustomsScreen })));
 const StudioOnePagerDetailScreen = React.lazy(() => import('./screens/studio/OnePagerDetailScreen.jsx').then(m => ({ default: m.OnePagerDetailScreen })));
+const ScanScreen = React.lazy(() => import('./screens/scan/ScanScreen.jsx').then(m => ({ default: m.ScanScreen })));
 
 // Legacy underscore routes aliased to their canonical hyphenated slugs
 const RESOURCE_SLUG_ALIASES = {
@@ -92,7 +93,8 @@ const RESOURCE_FEATURE_SCREENS = {
     'social-media': SocialMediaScreen,
     'search-fabrics': SearchFabricsScreen,
     'request-com-yardage': RequestComYardageScreen,
-    'comcol-request': ComColRequest
+    'comcol-request': ComColRequest,
+    'scan': ScanScreen
 };
 
 const screenToPath = (screen) => {
@@ -229,6 +231,10 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
                 <CompetitiveAnalysisScreen {...rest} categoryId={parts[2]} productId={productId} />
             </Suspense>
         );
+    }
+
+    if (base === 'scan') {
+        return lazyWrap(ScanScreen, parts[1] ? { screenParams: { ...(rest.screenParams || {}), shipmentId: parts[1] } } : undefined);
     }
 
     if (base === 'orders' && parts.length > 1) return lazyWrap(OrderDetailScreen);
