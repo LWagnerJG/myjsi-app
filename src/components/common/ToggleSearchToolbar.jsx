@@ -89,7 +89,7 @@ export const ToggleSearchToolbar = ({
       ) : null}
 
       {trailing && stackTrailingOnMobile ? (
-        <div className="col-span-1 row-start-3 md:col-span-1 md:col-start-3 md:row-start-1 justify-self-stretch md:justify-self-end">
+        <div className="col-span-1 row-start-3 md:col-span-1 md:col-start-3 md:row-start-1 justify-self-stretch md:justify-self-end flex md:block">
           {trailing}
         </div>
       ) : null}
