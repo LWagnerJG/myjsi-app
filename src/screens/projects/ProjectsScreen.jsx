@@ -31,6 +31,40 @@ const COMPACT_PROJECTS_TAB_OPTIONS = [
   { value: 'my-projects', label: 'Installs' },
 ];
 
+/** Fills an empty grid cell on desktop so a lonely last card doesn't strand empty canvas. */
+const NewProjectGhostCard = ({ theme, onClick, className = '' }) => {
+  const dark = isDarkTheme(theme);
+  const c = theme.colors;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Create project"
+      className={`w-full text-left focus-ring rounded-2xl h-full min-h-[148px] ${className}`.trim()}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
+      <div
+        className="rounded-2xl h-full min-h-[148px] flex flex-col items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+        style={{
+          backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)',
+          border: `1.5px dashed ${dark ? 'rgba(255,255,255,0.16)' : 'rgba(53,53,53,0.14)'}`,
+        }}
+      >
+        <span
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full"
+          style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}
+        >
+          <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
+        </span>
+        <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>New project</span>
+        <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>
+          Fill this stage
+        </span>
+      </div>
+    </button>
+  );
+};
+
 const TypeDropdown = React.memo(({ value, onChange, theme }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -748,6 +782,22 @@ export const ProjectsScreen = forwardRef(({
                       linkedCustomer={linkedCustomer}
                       customerLinkSource={customerLinkSource}
                       onClick={() => onNavigate(`projects/${opportunity.id}`)} />
+                  ))}
+                  {/* Complete the last row on 2-col / 3-col so the fold isn't empty canvas */}
+                  {presentedOpportunities.length % 2 === 1 ? (
+                    <NewProjectGhostCard
+                      theme={theme}
+                      onClick={() => onNavigate('new-lead')}
+                      className="hidden sm:block xl:hidden"
+                    />
+                  ) : null}
+                  {Array.from({ length: (3 - (presentedOpportunities.length % 3)) % 3 }).map((_, i) => (
+                    <NewProjectGhostCard
+                      key={`ghost-new-${i}`}
+                      theme={theme}
+                      onClick={() => onNavigate('new-lead')}
+                      className="hidden xl:block"
+                    />
                   ))}
                 </div>
                 <div className="mt-6 flex justify-center">
