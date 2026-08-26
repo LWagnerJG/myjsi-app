@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
 import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
-import { ArrowRight, Package } from 'lucide-react';
+import { ArrowRight, Package, Clock3, Layers, Sparkles } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
+import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
 import { isDarkTheme, cardSurface, subtleBg } from '../../design-system/tokens.js';
 import { HOME_SURFACE_DARK, HOME_SURFACE_LIGHT } from '../../design-system/homeChrome.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,16 +24,52 @@ const CREDENZA_SIZE_MULTIPLIERS = { '20x60': 0.82, '20x66': 0.88, '20x72': 1, '2
 const materialPrice = (p, materialMode) =>
   (materialMode === 'veneer' && p.veneerPrice) ? p.veneerPrice : (p.price || 0);
 
+/**
+ * Shared list-price math for hero overlay + SERIES table.
+ * Keep exact published list when the layout factor is 1; round only for
+ * scaled typicals so both surfaces always show the same field.
+ */
+const computeDisplayedListPrice = ({
+  product,
+  categoryId,
+  materialMode,
+  typicalLayout,
+  credenzaSize,
+}) => {
+  if (!product) return null;
+  if (categoryId === 'casegoods') {
+    const factor = TYPICAL_MULTIPLIERS[typicalLayout] || 1;
+    const raw = materialPrice(product, materialMode) * factor;
+    return factor === 1 ? Math.round(raw) : Math.round(raw / 10) * 10;
+  }
+  if (categoryId === 'credenzas') {
+    const factor = CREDENZA_SIZE_MULTIPLIERS[credenzaSize] || 1;
+    const raw = materialPrice(product, materialMode) * factor;
+    return factor === 1 ? Math.round(raw) : Math.round(raw / 10) * 10;
+  }
+  if (categoryId === 'conference-tables') {
+    return materialPrice(product, materialMode);
+  }
+  return product.price;
+};
 
+const CASEGOODS_FINISH_NOTES = {
+  brogan: ['Veneer standard', 'Matched grain across pedestals', 'Soft-close drawers'],
+  finale: ['Veneer standard', 'Beveled edge profiles', 'Integrated wire management'],
+  flux: ['Laminate or veneer tops', 'Full-height storage options', 'Modesty panel available'],
+  vision: ['Value laminate lineup', 'Shared hardware with Flux', 'Quick-ship select SKUs'],
+};
 
 // ─── Product thumbnail strip ─────────────────────────────────────────────────
 const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, theme, categoryName }) => {
   const dark = isDarkTheme(theme);
   const isCasegoods = categoryName?.toLowerCase() === 'casegoods';
   const scrollRef = useRef(null);
+  const fillStrip = products.length > 0 && products.length <= 6;
 
-  // Auto-scroll the active product into view
+  // Auto-scroll the active product into view on narrow strips
   useEffect(() => {
+    if (fillStrip) return;
     const container = scrollRef.current;
     if (!container || !activeProduct) return;
     const idx = products.findIndex(p => p.id === activeProduct.id);
@@ -42,10 +79,9 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
     const btnLeft = btn.offsetLeft;
     const btnWidth = btn.offsetWidth;
     const containerWidth = container.offsetWidth;
-    // Center the button in the scroll area
     const scrollTarget = btnLeft - (containerWidth / 2) + (btnWidth / 2);
     container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
-  }, [activeProduct, products]);
+  }, [activeProduct, products, fillStrip]);
 
   return (
     <div
@@ -59,7 +95,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
     >
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto scrollbar-hide px-3 py-3 gap-1"
+        className={`flex px-3 py-3 gap-1 ${fillStrip ? 'lg:gap-2' : 'overflow-x-auto scrollbar-hide'}`}
       >
         {products.map((p) => {
           const active = activeProduct?.id === p.id;
@@ -69,22 +105,26 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
               key={p.id}
               onClick={() => onProductSelect(p)}
               aria-pressed={active}
-              className="relative flex-shrink-0 flex flex-col items-center rounded-2xl transition-all duration-300 group"
+              className={`relative flex flex-col items-center rounded-2xl transition-all duration-300 group ${fillStrip ? 'flex-1 min-w-0' : 'flex-shrink-0'}`}
               style={{
-                width: 88,
+                width: fillStrip ? undefined : 88,
                 padding: '10px 4px 8px',
                 backgroundColor: 'transparent',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <div className="relative w-[72px] h-[76px] flex items-center justify-center overflow-hidden">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  loading="lazy"
-                  className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.08]"
-                  style={{ transform: `scale(${active ? baseScale * 1.06 : baseScale})` }}
-                />
+              <div className="relative w-[72px] h-[76px] flex items-center justify-center overflow-hidden mx-auto">
+                {p.image ? (
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    loading="lazy"
+                    className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.08]"
+                    style={{ transform: `scale(${active ? baseScale * 1.06 : baseScale})` }}
+                  />
+                ) : (
+                  <Package className="w-7 h-7" style={{ color: theme.colors.textSecondary, opacity: 0.35 }} />
+                )}
               </div>
               <span
                 className="mt-1.5 text-[0.8125rem] font-medium tracking-tight text-center leading-tight line-clamp-1 w-full px-1 transition-colors"
@@ -92,7 +132,6 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
               >
                 {p.name}
               </span>
-              {/* Active indicator dot */}
               <motion.span
                 className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"
                 initial={false}
@@ -114,7 +153,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
 ProductTabs.displayName = 'ProductTabs';
 
 // ─── Hero image with overlay info ────────────────────────────────────────────
-const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, categoryName }) => {
+const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, categoryName, listPrice }) => {
   const dark = isDarkTheme(theme);
   const handleCompetitionClick = useCallback(
     () => onNavigate(`products/category/${categoryId}/competition/${product.id}`),
@@ -186,14 +225,14 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           </AnimatePresence>
           <AnimatePresence mode="wait">
             <motion.p
-              key={product.price}
+              key={listPrice ?? product.price}
               className="mt-0.5 text-[0.9375rem] font-semibold text-white/90 drop-shadow-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              {formatCurrencyOrTbd(product.price)}
+              {formatCurrencyOrTbd(listPrice ?? product.price)}
             </motion.p>
           </AnimatePresence>
         </div>
@@ -268,24 +307,17 @@ const PricingTable = React.memo(({
 
   const sorted = useMemo(() => [...products].sort((a, b) => (a.price || 0) - (b.price || 0)), [products]);
 
-  const computePrice = useCallback((p) => {
-    if (isCasegoods) {
-      const typicalFactor = TYPICAL_MULTIPLIERS[typicalLayout] || 1;
-      return Math.round(materialPrice(p, materialMode) * typicalFactor / 10) * 10;
-    }
-    if (isCredenzas) {
-      const sizeFactor = CREDENZA_SIZE_MULTIPLIERS[credenzaSize] || 1;
-      return Math.round(materialPrice(p, materialMode) * sizeFactor / 10) * 10;
-    }
-    if (isConference) {
-      return materialPrice(p, materialMode);
-    }
-    return p.price;
-  }, [isCasegoods, isCredenzas, isConference, materialMode, typicalLayout, credenzaSize]);
+  const computePrice = useCallback((p) => computeDisplayedListPrice({
+    product: p,
+    categoryId,
+    materialMode,
+    typicalLayout,
+    credenzaSize,
+  }), [categoryId, materialMode, typicalLayout, credenzaSize]);
 
   return (
     <div
-      className="rounded-[24px] overflow-hidden lg:sticky lg:top-3"
+      className="rounded-[24px] overflow-hidden"
       style={{
         ...cardSurface(theme),
         backgroundColor: dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
@@ -390,6 +422,109 @@ const PricingTable = React.memo(({
 });
 PricingTable.displayName = 'PricingTable';
 
+const ProductSeriesDetails = React.memo(({ product, products, theme, categoryId, onSelectProduct, materialMode }) => {
+  const dark = isDarkTheme(theme);
+  const lead = useMemo(
+    () => LEAD_TIMES_DATA.find((row) => row.series?.toLowerCase() === product?.name?.toLowerCase()),
+    [product?.name]
+  );
+  const finishes = CASEGOODS_FINISH_NOTES[product?.id] || [
+    materialMode === 'veneer' ? 'Veneer list pricing' : 'Laminate list pricing',
+    'Standard JSI finish program',
+    'COM / COL available on select SKUs',
+  ];
+  const related = useMemo(
+    () => (products || []).filter((p) => p.id !== product?.id).slice(0, 3),
+    [products, product?.id]
+  );
+
+  if (!product) return null;
+
+  return (
+    <div
+      className="rounded-[24px] overflow-hidden"
+      style={{
+        ...cardSurface(theme),
+        backgroundColor: dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
+        boxShadow: 'none',
+      }}
+    >
+      <div className="px-5 pt-4 pb-2 flex items-center gap-2">
+        <Sparkles className="w-3.5 h-3.5" style={{ color: theme.colors.textSecondary, opacity: 0.55 }} />
+        <span className="text-[0.6875rem] font-medium tracking-wide uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+          {product.name} details
+        </span>
+      </div>
+
+      <div className="px-5 pb-3 space-y-3">
+        <div className="flex items-start gap-2.5">
+          <Clock3 className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+          <div className="min-w-0">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              Lead time
+            </p>
+            <p className="text-sm font-semibold" style={{ color: theme.colors.textPrimary }}>
+              {lead?.weeks != null ? `${lead.weeks} weeks` : '4–6 weeks'}
+              {lead?.type ? ` · ${lead.type}` : categoryId === 'casegoods' ? ' · Casegoods' : ''}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2.5">
+          <Layers className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: theme.colors.textSecondary, opacity: 0.5 }} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wide mb-1.5" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              Specs & finishes
+            </p>
+            <ul className="space-y-1">
+              {finishes.map((note) => (
+                <li key={note} className="text-[0.8125rem] leading-snug" style={{ color: theme.colors.textPrimary }}>
+                  {note}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {related.length > 0 && (
+        <>
+          <div className="mx-5" style={{ height: 1, backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
+          <div className="px-5 pt-3 pb-4">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wide mb-2" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+              Related series
+            </p>
+            <div className="flex flex-col gap-1">
+              {related.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelectProduct(p)}
+                  className="flex items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                  style={{ backgroundColor: subtleBg(theme, 0.6) }}
+                >
+                  <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shrink-0" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}>
+                    {p.image ? (
+                      <img src={p.image} alt="" className="w-full h-full object-contain p-0.5" loading="lazy" />
+                    ) : (
+                      <Package className="w-4 h-4" style={{ color: theme.colors.textSecondary, opacity: 0.4 }} />
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold truncate" style={{ color: theme.colors.textPrimary }}>{p.name}</span>
+                  <span className="ml-auto text-xs font-semibold tabular-nums shrink-0" style={{ color: theme.colors.textSecondary }}>
+                    {formatCurrencyOrTbd(materialPrice(p, materialMode))}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+});
+ProductSeriesDetails.displayName = 'ProductSeriesDetails';
+
 // ─── Error State ─────────────────────────────────────────────────────────────
 const ErrorState = ({ theme, message = 'The requested item does not exist.' }) => {
   return (
@@ -435,6 +570,14 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
     return categoryData.products;
   }, [categoryData, isGuest, guestLegType]);
 
+  const activeListPrice = useMemo(() => computeDisplayedListPrice({
+    product: activeProduct,
+    categoryId,
+    materialMode,
+    typicalLayout,
+    credenzaSize,
+  }), [activeProduct, categoryId, materialMode, typicalLayout, credenzaSize]);
+
   useEffect(() => {
     if (isGuest && activeProduct && !visibleProducts.includes(activeProduct)) {
       const next = visibleProducts[0];
@@ -471,6 +614,7 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
             <div className="min-w-0">
               <ProductHero
                 product={activeProduct}
+                listPrice={activeListPrice}
                 theme={theme}
                 categoryId={categoryId}
                 onNavigate={onNavigate}
@@ -478,7 +622,7 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
               />
             </div>
 
-            <div className="min-w-0">
+            <div className="min-w-0 space-y-3 lg:sticky lg:top-3">
               <PricingTable
                 products={visibleProducts}
                 activeProduct={activeProduct}
@@ -497,6 +641,14 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
                 onCredenzaSizeChange={setCredenzaSize}
                 materialMode={materialMode}
                 onMaterialModeChange={setMaterialMode}
+              />
+              <ProductSeriesDetails
+                product={activeProduct}
+                products={visibleProducts}
+                theme={theme}
+                categoryId={categoryId}
+                onSelectProduct={handleProductSelect}
+                materialMode={materialMode}
               />
             </div>
           </div>

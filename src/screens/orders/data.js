@@ -8,7 +8,7 @@ export const ORDER_DATA = [
         orderNumber: '450080-00',
         vertical: 'Education',
         po: 'S65474-2',
-        net: 112000.00,
+        net: 132020.00,
         shipDate: '2025-09-15T12:00:00Z',
         status: 'In Production',
         shipTo: 'BUSINESS FURNISHINGS LLC\n4102 MEGHAN BEELER COURT\nSOUTH BEND, IN 46628',
@@ -17,8 +17,21 @@ export const ORDER_DATA = [
         ackUrl: '/JSI-ACK-sample.pdf',
         lineItems: [
             { line: '001', name: 'VISION CONFERENCE TABLE', model: 'VCT12048', quantity: 5, net: 8000.00, extNet: 40000.00, specs: [{ label: 'FINISH', value: 'MOCHA LAMINATE' }, { label: 'BASE', value: 'TRUSS LEG - BLACK' }] },
-            { line: '002', name: 'ARWYN SWIVEL CHAIR', model: 'AW6007C', quantity: 40, net: 1800.00, extNet: 72000.00, specs: [{ label: 'UPHOLSTERY', value: 'MAHARAM, MODE, GLACIER' }] }
-        ]
+            { line: '002', name: 'ARWYN SWIVEL CHAIR', model: 'AW6007C', quantity: 24, net: 1800.00, extNet: 43200.00, specs: [{ label: 'UPHOLSTERY', value: 'MAHARAM, MODE, GLACIER' }] },
+            { line: '003', name: 'VISION CREDENZA', model: 'VCR7220D', quantity: 4, net: 2500.00, extNet: 10000.00, specs: [{ label: 'FINISH', value: 'MOCHA LAMINATE' }, { label: 'DOORS', value: 'HINGED' }] },
+            { line: '004', name: 'INDIE OCCASIONAL TABLE', model: 'IN3208', quantity: 6, net: 820.00, extNet: 4920.00, specs: [{ label: 'TOP', value: 'FLINT LAMINATE' }, { label: 'BASE', value: 'BLACK POWDERCOAT' }] },
+            { line: '005', name: 'POET LOUNGE CHAIR', model: 'PT4101A', quantity: 4, net: 1650.00, extNet: 6600.00, specs: [{ label: 'FABRIC', value: 'DESIGNTEX, ECO TWEED, 04' }] },
+            { line: '006', name: 'FINN TASK CHAIR', model: 'FN1210', quantity: 12, net: 980.00, extNet: 11760.00, specs: [{ label: 'MESH', value: 'GRAPHITE' }, { label: 'BASE', value: 'POLISHED ALUMINUM' }] },
+            { line: '007', name: 'ZIVA COFFEE TABLE', model: 'ZV2448CT', quantity: 2, net: 1250.00, extNet: 2500.00, specs: [{ label: 'FINISH', value: 'FLINT LAMINATE' }] },
+            { line: '008', name: 'CAAV LOUNGE CHAIR', model: 'CV4501A', quantity: 3, net: 2000.00, extNet: 6000.00, specs: [{ label: 'FABRIC', value: 'MAHARAM, MODE, GLACIER' }] },
+            { line: '009', name: 'VISION LATERAL FILE', model: 'VLF3620', quantity: 4, net: 980.00, extNet: 3920.00, specs: [{ label: 'FINISH', value: 'MOCHA LAMINATE' }, { label: 'DRAWERS', value: '2-HIGH' }] },
+            { line: '010', name: 'PROXY STACK CHAIR', model: 'PX1140', quantity: 16, net: 195.00, extNet: 3120.00, specs: [{ label: 'SHELL', value: 'FOG' }, { label: 'FRAME', value: 'CHROME' }] },
+        ],
+        carrier: 'Averitt Express',
+        proNumber: '881-4500801',
+        trackingUrl: null,
+        csr: { name: 'Elena Brooks', email: 'elena.brooks@jsifurniture.com', phone: '(812) 555-0142' },
+        salesRep: { name: 'Luke Wagner', email: 'luke.wagner@jsifurniture.com', phone: '(812) 555-0198' },
     },
     {
         date: '2025-06-13T10:00:00Z',

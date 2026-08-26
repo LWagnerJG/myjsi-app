@@ -53,6 +53,14 @@ describe('demo shipment generation', () => {
         expect(new Set(MAIN_SHIPMENT.cartons.map((c) => c.phase)).size).toBe(2);
         expect(new Set(MAIN_SHIPMENT.cartons.map((c) => c.pallet)).size).toBe(MAIN_SHIPMENT.pallets);
     });
+
+    it('seeds ServiceNow mid-receive so demos always show In progress', () => {
+        expect(MAIN_SHIPMENT.preInProgress).toMatchObject({
+            receiptNumber: 'RCV-4471-01',
+            scannedCount: 1,
+            user: expect.any(String),
+        });
+    });
 });
 
 describe('classifyScan', () => {
