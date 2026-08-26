@@ -1456,7 +1456,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   return (
     <div className="min-h-full app-header-offset" style={{ background: c.background }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-28 sm:pb-10 max-w-content mx-auto w-full">
+      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-10 max-w-content mx-auto w-full">
 
           {isClosed && (
             <motion.div
@@ -1641,7 +1641,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       {(id) => <CompactSelect id={id} options={PO_TIMEFRAMES} value={draft.poTimeframe} onChange={v => update('poTimeframe', v)} theme={theme} mutedValues={['Unknown']} />}
                     </Row>
 
-                    <div ref={projectTypeRef} className="scroll-mt-24">
+                    <div ref={projectTypeRef} className="scroll-mt-36 sm:scroll-mt-24">
                       <ProjectTypeField
                         projectType={draft.projectType}
                         onProjectType={setProjectType}

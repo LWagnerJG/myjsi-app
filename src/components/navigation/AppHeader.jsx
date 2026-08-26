@@ -201,14 +201,16 @@ export const AppHeader = React.memo(({
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <div
-                            data-greeting-anchor
-                            className={`flex items-baseline justify-end transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isHome ? 'max-w-[250px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}
-                            style={{ color: theme.colors.textPrimary }}
-                        >
-                            <span className="text-[0.9375rem] font-medium">{getTimeGreeting()},</span>
-                            <span className="text-[0.9375rem] font-medium ml-1 md:ml-1.5">{userName}</span>
-                        </div>
+                        {isHome ? (
+                            <div
+                                data-greeting-anchor
+                                className="flex items-baseline justify-end mr-1 whitespace-nowrap"
+                                style={{ color: theme.colors.textPrimary }}
+                            >
+                                <span className="text-[0.9375rem] font-medium">{getTimeGreeting()},</span>
+                                <span className="text-[0.9375rem] font-medium ml-1 md:ml-1.5 truncate max-w-[7.5rem] sm:max-w-none">{userName}</span>
+                            </div>
+                        ) : null}
 
                         <button
                         ref={profileBtnRef}

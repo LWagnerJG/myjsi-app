@@ -143,7 +143,8 @@ const CategoryCard = React.memo(({
                                     src={img}
                                     alt={`${category.name} ${i + 1}`}
                                     className="w-full h-full object-contain object-center mix-blend-multiply hover:scale-[1.06] transition-transform duration-500"
-                                    loading="lazy"
+                                    loading={i === 0 ? 'eager' : 'lazy'}
+                                    decoding="async"
                                 />
                             </div>
                         ))}
@@ -168,7 +169,8 @@ const CategoryCard = React.memo(({
                         src={category.images?.[0]}
                         alt={category.name}
                         className="w-full h-full object-contain mix-blend-multiply"
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
                     />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -196,7 +198,7 @@ const ViewModeToggle = React.memo(({ viewMode, onToggle, theme }) => {
     return (
         <button
             onClick={onToggle}
-            className="flex-shrink-0 rounded-full flex items-center justify-center active:scale-95 transition border"
+            className="hidden md:flex flex-shrink-0 rounded-full items-center justify-center active:scale-95 transition border"
             style={{
                 height: 'var(--jsi-ctrl-h)',
                 width: 'var(--jsi-ctrl-h)',

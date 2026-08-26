@@ -118,7 +118,8 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
                   <img
                     src={p.image}
                     alt={p.name}
-                    loading="lazy"
+                    loading={fillStrip ? 'eager' : 'lazy'}
+                    fetchPriority={fillStrip && active ? 'high' : undefined}
                     className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.08]"
                     style={{ transform: `scale(${active ? baseScale * 1.06 : baseScale})` }}
                   />
