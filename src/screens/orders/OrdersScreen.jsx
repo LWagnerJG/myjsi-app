@@ -142,10 +142,10 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
             className={`group/order-row w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.025]'}`}
         >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-5 py-4 sm:items-center sm:gap-4 sm:px-6">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2.5 px-5 py-4 sm:items-center sm:gap-4 sm:px-6">
                 <div className="min-w-0">
                     <p
-                        className="text-[0.9375rem] font-bold leading-snug line-clamp-2 sm:truncate sm:leading-normal"
+                        className="text-[0.9375rem] font-bold leading-snug break-words [overflow-wrap:anywhere] line-clamp-2 sm:truncate sm:leading-normal sm:[overflow-wrap:normal]"
                         style={{ color: theme.colors.textPrimary }}
                         title={order.details}
                     >
@@ -159,14 +159,14 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                         SO {order.orderNumber}
                     </p>
                 </div>
-                <div className="flex min-w-0 max-w-[42%] flex-shrink items-center justify-end gap-2 text-right sm:max-w-none sm:flex-shrink-0 sm:gap-3">
-                    <div className="min-w-0">
-                        <p className="text-[0.9375rem] font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
+                <div className="flex shrink-0 items-start justify-end gap-2 text-right sm:items-center sm:gap-3">
+                    <div>
+                        <p className="text-[0.9375rem] font-bold tabular-nums whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
                         <p className="hidden text-[0.6875rem] mt-1 sm:flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
                             <span className="truncate max-w-[7.5rem]" style={{ opacity: 0.58 }} title={order.orderNumber}>{order.orderNumber}</span>
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                         </p>
-                        <p className="mt-1 flex justify-end sm:hidden">
+                        <p className="mt-1.5 flex justify-end sm:hidden">
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                         </p>
                     </div>
@@ -374,7 +374,7 @@ const OrdersToolbarActions = ({
     const viewActive = viewMode === 'calendar';
 
     return (
-        <div className="flex items-center justify-end gap-2 w-full md:w-auto">
+        <div className="flex items-center justify-between gap-2 w-full md:w-auto md:justify-end">
             <button
                 type="button"
                 onClick={() => onNavigate?.('scan')}
@@ -387,7 +387,7 @@ const OrdersToolbarActions = ({
             </button>
 
             {showFilters ? (
-            <>
+            <div className="flex items-center gap-2">
             <div ref={dealerRef} className="relative">
                 <button
                     type="button"
@@ -450,7 +450,7 @@ const OrdersToolbarActions = ({
                     ? <Calendar className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />
                     : <List className="w-[18px] h-[18px]" style={{ color: theme.colors.textPrimary }} />}
             </button>
-            </>
+            </div>
             ) : null}
         </div>
     );
