@@ -17,6 +17,7 @@ import {
 import { floatingBarStyle, subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { hapticSuccess, hapticWarning } from '../../../utils/haptics.js';
 import { SCAN_OUTCOME, formatClock } from '../receivingLogic.js';
+import { isScanDemoEnabled } from '../demoFlags.js';
 import {
     BigButton,
     Caption,
@@ -217,7 +218,8 @@ export const ReceivingScanner = ({
                 />
             </div>
 
-            <SectionCard theme={theme} className="space-y-3">
+            <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-[minmax(260px,0.85fr)_minmax(0,1.15fr)] lg:gap-4 lg:items-start">
+            <SectionCard theme={theme} className="space-y-3 lg:sticky lg:top-2">
                 <div className="flex items-end justify-between gap-3">
                     <div>
                         <p className="text-[2.25rem] font-bold leading-none tabular-nums" style={{ color: theme.colors.textPrimary }}>
@@ -238,6 +240,7 @@ export const ReceivingScanner = ({
                 </div>
             </SectionCard>
 
+            <div className="space-y-4 min-w-0">
             <div aria-live="assertive" className="sr-only">
                 {feedback ? `${feedback.title}. ${feedback.detail}` : ''}
             </div>
@@ -308,11 +311,6 @@ export const ReceivingScanner = ({
                 </form>
 
                 <div className="flex flex-wrap gap-2">
-                    {cameraSupported ? (
-                        <QuietButton theme={theme} icon={cameraOn ? CameraOff : Camera} onClick={cameraOn ? stopCamera : startCamera}>
-                            {cameraOn ? 'Stop camera' : 'Camera scan'}
-                        </QuietButton>
-                    ) : null}
                     <QuietButton theme={theme} icon={CornerUpLeft} onClick={() => setConfirmUndo(true)}>
                         Undo last scan
                     </QuietButton>
@@ -408,6 +406,8 @@ export const ReceivingScanner = ({
                     <Caption theme={theme}>Nothing scanned yet on this receipt.</Caption>
                 )}
             </SectionCard>
+            </div>
+            </div>
 
             {/* Result and count sit with the scan button, in thumb reach and outside page flow. */}
             <div
@@ -488,17 +488,57 @@ export const ReceivingScanner = ({
                     </div>
 
                     <div className="flex flex-col gap-2 sm:flex-row">
-                        <BigButton
-                            theme={theme}
-                            icon={ScanLine}
-                            onClick={() => showResult(receiving.simulateNext(shipment))}
-                            className="sm:flex-1"
-                        >
-                            Simulate next scan
-                        </BigButton>
-                        <BigButton theme={theme} tone="neutral" onClick={onReview} className="sm:w-48">
-                            Review receipt
-                        </BigButton>
+                        {isScanDemoEnabled() ? (
+                            <>
+                                <BigButton
+                                    theme={theme}
+                                    icon={ScanLine}
+                                    onClick={() => showResult(receiving.simulateNext(shipment))}
+                                    className="sm:flex-1"
+                                >
+                                    Simulate next scan
+                                </BigButton>
+                                {cameraSupported ? (
+                                    <BigButton
+                                        theme={theme}
+                                        tone="neutral"
+                                        icon={cameraOn ? CameraOff : Camera}
+                                        onClick={cameraOn ? stopCamera : startCamera}
+                                        className="sm:w-48"
+                                    >
+                                        {cameraOn ? 'Stop camera' : 'Camera scan'}
+                                    </BigButton>
+                                ) : null}
+                                <BigButton theme={theme} tone="neutral" onClick={onReview} className="sm:w-48">
+                                    Review receipt
+                                </BigButton>
+                            </>
+                        ) : (
+                            <>
+                                {cameraSupported ? (
+                                    <BigButton
+                                        theme={theme}
+                                        icon={cameraOn ? CameraOff : Camera}
+                                        onClick={cameraOn ? stopCamera : startCamera}
+                                        className="sm:flex-1"
+                                    >
+                                        {cameraOn ? 'Stop camera' : 'Camera scan'}
+                                    </BigButton>
+                                ) : (
+                                    <BigButton
+                                        theme={theme}
+                                        icon={ScanLine}
+                                        disabled
+                                        className="sm:flex-1"
+                                    >
+                                        Camera unavailable
+                                    </BigButton>
+                                )}
+                                <BigButton theme={theme} tone="neutral" onClick={onReview} className="sm:w-48">
+                                    Review receipt
+                                </BigButton>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

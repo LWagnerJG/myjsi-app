@@ -496,53 +496,56 @@ export const HomeScreen = React.memo(({
                     onRecordRecent={recordRecentSpotlightItem}
                 />
 
-                {/* App grid */}
-                <div className="relative">
-                    <AppGrid
-                        isEditMode={isEditMode}
-                        setIsEditMode={setIsEditMode}
-                        currentApps={currentApps}
-                        availableApps={availableApps}
-                        safeHomeApps={safeHomeApps}
-                        activeDragId={activeDragId}
-                        setActiveDragId={setActiveDragId}
-                        activeApp={activeApp}
-                        sensors={sensors}
-                        handleReorder={handleReorder}
-                        toggleApp={toggleApp}
-                        onUpdateHomeApps={onUpdateHomeApps}
-                        onNavigate={onNavigate}
-                        colors={colors}
-                        isDark={isDark}
-                        appGridCols={appGridCols}
-                        recentOrders={recentOrders}
-                        posts={posts}
-                        leadTimeFavoritesData={leadTimeFavoritesData}
-                        samplesCartCount={samplesCartCount}
-                        opportunities={allOpportunities}
-                        replacementRequests={replacementRequests}
-                    />
-                </div>
+                {/* App grid + activity — stacked on phone, side-by-side dashboard on desktop */}
+                <div className="flex flex-col gap-4 sm:gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.95fr)] lg:gap-6 lg:items-start">
+                    <div className="relative min-w-0">
+                        <AppGrid
+                            isEditMode={isEditMode}
+                            setIsEditMode={setIsEditMode}
+                            currentApps={currentApps}
+                            availableApps={availableApps}
+                            safeHomeApps={safeHomeApps}
+                            activeDragId={activeDragId}
+                            setActiveDragId={setActiveDragId}
+                            activeApp={activeApp}
+                            sensors={sensors}
+                            handleReorder={handleReorder}
+                            toggleApp={toggleApp}
+                            onUpdateHomeApps={onUpdateHomeApps}
+                            onNavigate={onNavigate}
+                            colors={colors}
+                            isDark={isDark}
+                            appGridCols={appGridCols}
+                            recentOrders={recentOrders}
+                            posts={posts}
+                            leadTimeFavoritesData={leadTimeFavoritesData}
+                            samplesCartCount={samplesCartCount}
+                            opportunities={allOpportunities}
+                            replacementRequests={replacementRequests}
+                        />
+                    </div>
 
-                {/* Home feature card(s) — flex-grow to fill remaining space */}
-                <HomeFeatureCards
-                    theme={theme}
-                    colors={colors}
-                    isDark={isDark}
-                    isEditMode={isEditMode}
-                    homeFeatureMode={homeFeatureMode}
-                    setHomeFeatureMode={setHomeFeatureMode}
-                    secondaryFeatureMode={secondaryFeatureMode}
-                    setSecondaryFeatureMode={setSecondaryFeatureMode}
-                    homeFeatureOptions={homeFeatureOptions}
-                    navigateFeature={navigateFeature}
-                    leadTimeFavoritesData={leadTimeFavoritesData}
-                    communityPosts={communityPosts}
-                    onNavigate={onNavigate}
-                    opportunities={opportunities}
-                    recentOrders={recentOrders}
-                    hoverBg={hoverBg}
-                />
+                    <div className="min-w-0 lg:sticky lg:top-2">
+                        <HomeFeatureCards
+                            theme={theme}
+                            colors={colors}
+                            isDark={isDark}
+                            isEditMode={isEditMode}
+                            homeFeatureMode={homeFeatureMode}
+                            setHomeFeatureMode={setHomeFeatureMode}
+                            secondaryFeatureMode={secondaryFeatureMode}
+                            setSecondaryFeatureMode={setSecondaryFeatureMode}
+                            homeFeatureOptions={homeFeatureOptions}
+                            navigateFeature={navigateFeature}
+                            leadTimeFavoritesData={leadTimeFavoritesData}
+                            communityPosts={communityPosts}
+                            onNavigate={onNavigate}
+                            opportunities={opportunities}
+                            recentOrders={recentOrders}
+                            hoverBg={hoverBg}
+                        />
+                    </div>
+                </div>
 
                 {/* Feedback CTA — desktop inline only; mobile uses sticky bar below */}
                 {!isEditMode && (

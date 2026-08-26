@@ -315,6 +315,7 @@ const PricingTable = React.memo(({
               options={configOptions}
               size="sm"
               fullWidth
+              wrap
               theme={theme}
             />
           )}
@@ -444,10 +445,10 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
   if (!categoryData) return <ErrorState theme={theme} />;
 
   return (
-    <div className="flex flex-col h-full app-header-offset">
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
+    <div className="flex flex-col h-full app-header-offset overflow-x-hidden">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
         {/* Cap width below global --content-max-width so product photos don't stretch on xl/2xl */}
-        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 mx-auto w-full max-w-[720px] lg:max-w-[960px] xl:max-w-[1000px]">
+        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 mx-auto w-full max-w-[720px] lg:max-w-[1100px] xl:max-w-[1200px]">
           {/* Category title */}
           <h1
             className="text-[1.25rem] font-bold tracking-tight px-1"
@@ -466,34 +467,38 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
           />
 
           {/* Stacked on mobile; hero + pricing side-by-side on desktop */}
-          <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:gap-4 lg:items-start">
-            <ProductHero
-              product={activeProduct}
-              theme={theme}
-              categoryId={categoryId}
-              onNavigate={onNavigate}
-              categoryName={categoryData.name}
-            />
+          <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.9fr)] lg:gap-5 lg:items-start">
+            <div className="min-w-0">
+              <ProductHero
+                product={activeProduct}
+                theme={theme}
+                categoryId={categoryId}
+                onNavigate={onNavigate}
+                categoryName={categoryData.name}
+              />
+            </div>
 
-            <PricingTable
-              products={visibleProducts}
-              activeProduct={activeProduct}
-              onSelectProduct={handleProductSelect}
-              theme={theme}
-              categoryId={categoryId}
-              typicalLayout={typicalLayout}
-              onTypicalLayoutChange={setTypicalLayout}
-              conferenceSize={conferenceSize}
-              onConferenceSizeChange={setConferenceSize}
-              loungeConfig={loungeConfig}
-              onLoungeConfigChange={setLoungeConfig}
-              guestLegType={guestLegType}
-              onGuestLegTypeChange={setGuestLegType}
-              credenzaSize={credenzaSize}
-              onCredenzaSizeChange={setCredenzaSize}
-              materialMode={materialMode}
-              onMaterialModeChange={setMaterialMode}
-            />
+            <div className="min-w-0">
+              <PricingTable
+                products={visibleProducts}
+                activeProduct={activeProduct}
+                onSelectProduct={handleProductSelect}
+                theme={theme}
+                categoryId={categoryId}
+                typicalLayout={typicalLayout}
+                onTypicalLayoutChange={setTypicalLayout}
+                conferenceSize={conferenceSize}
+                onConferenceSizeChange={setConferenceSize}
+                loungeConfig={loungeConfig}
+                onLoungeConfigChange={setLoungeConfig}
+                guestLegType={guestLegType}
+                onGuestLegTypeChange={setGuestLegType}
+                credenzaSize={credenzaSize}
+                onCredenzaSizeChange={setCredenzaSize}
+                materialMode={materialMode}
+                onMaterialModeChange={setMaterialMode}
+              />
+            </div>
           </div>
         </div>
       </div>

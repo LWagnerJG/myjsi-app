@@ -3,6 +3,7 @@ import { CheckCircle2, Download, Grid3x3, ScanLine } from 'lucide-react';
 import { subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { RECEIPT_STATUS, formatDateTime } from '../receivingLogic.js';
 import { formatShortDate } from '../../../utils/format.js';
+import { isScanDemoEnabled } from '../demoFlags.js';
 import {
     BigButton,
     Caption,
@@ -32,10 +33,12 @@ export const ShipmentOverview = ({
     return (
         <div className="space-y-4">
             <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                    <DemoBadge theme={theme} />
-                    {cached ? <StatusPill theme={theme} label="Saved for offline" tone="success" icon={CheckCircle2} /> : null}
-                </div>
+                {(isScanDemoEnabled() || cached) ? (
+                    <div className="flex items-center gap-2">
+                        {isScanDemoEnabled() ? <DemoBadge theme={theme} /> : null}
+                        {cached ? <StatusPill theme={theme} label="Saved for offline" tone="success" icon={CheckCircle2} /> : null}
+                    </div>
+                ) : null}
                 <h1 className="text-[1.5rem] font-bold tracking-[-0.02em] leading-tight" style={{ color: theme.colors.textPrimary }}>
                     {shipment.projectName}
                 </h1>

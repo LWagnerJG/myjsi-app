@@ -11,7 +11,8 @@
 .panel {
     position: absolute;
     inset: 0;
-    background-color: inherit;
+    /* Solid paint so the outgoing screen never shows through the incoming route */
+    background-color: var(--theme-background, #F0EDE8);
     will-change: transform, opacity;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -74,8 +75,14 @@
 }
 
 @keyframes exitLeft {
-    from { opacity: 1; }
-    to   { opacity: 0.72; }
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(-6%, 0, 0);
+    }
 }
 
 @keyframes exitRight {

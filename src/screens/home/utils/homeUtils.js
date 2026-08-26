@@ -2,7 +2,7 @@
 
 /**
  * Returns a badge object for a given app route based on live data.
- * Used to show counts/values on the home screen app tiles.
+ * Badges are action-needed counts only (not dollar amounts).
  */
 export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests) => {
     switch (route) {
@@ -13,12 +13,9 @@ export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, s
             if (shipping > 0) return { value: String(shipping), label: 'Shipping', color: '#5B7B8C', kind: 'count' };
             return null;
         }
-        case 'sales': {
-            const ytd = recentOrders?.reduce((s, o) => s + (o.net || 0), 0) || 0;
-            if (!ytd) return null;
-            const fmt = ytd >= 1000000 ? `$${(ytd / 1000000).toFixed(1)}M` : `$${Math.round(ytd / 1000)}K`;
-            return { value: fmt, label: 'YTD', color: '#4A7C59', kind: 'currency' };
-        }
+        case 'sales':
+            // Sales YTD is shown as a labeled tile stat, not a corner badge.
+            return null;
         case 'community': {
             const cutoff = Date.now() - 48 * 60 * 60 * 1000;
             const recent = posts?.filter(p => p.createdAt && p.createdAt > cutoff).length || 0;
@@ -41,6 +38,17 @@ export const getAppBadge = (route, recentOrders, posts, leadTimeFavoritesData, s
         default:
             return null;
     }
+};
+
+/**
+ * Labeled body stat for tiles that show a value (e.g. Sales YTD) instead of a badge.
+ */
+export const getAppTileStat = (route, recentOrders) => {
+    if (route !== 'sales') return null;
+    const ytd = recentOrders?.reduce((s, o) => s + (o.net || 0), 0) || 0;
+    if (!ytd) return null;
+    const fmt = ytd >= 1000000 ? `$${(ytd / 1000000).toFixed(1)}M` : `$${Math.round(ytd / 1000)}K`;
+    return { value: fmt, label: 'YTD', color: '#4A7C59' };
 };
 
 

@@ -982,6 +982,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   const [draft, setDraft] = useState(opp);
   const [unlocked, setUnlocked] = useState(false);
+  const [saveState, setSaveState] = useState('saved'); // 'saved' | 'saving' | 'unsaved'
   const dirty = useRef(false);
   const saveRef = useRef(null);
   const draftRef = useRef(opp);
@@ -1110,8 +1111,14 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   useEffect(() => {
     if (!dirty.current) return;
+    setSaveState('unsaved');
     clearTimeout(saveRef.current);
-    saveRef.current = setTimeout(() => { onUpdate(draft); dirty.current = false; }, 500);
+    saveRef.current = setTimeout(() => {
+      setSaveState('saving');
+      onUpdate(draft);
+      dirty.current = false;
+      setSaveState('saved');
+    }, 500);
     return () => clearTimeout(saveRef.current);
   }, [draft, onUpdate]);
 
@@ -1482,18 +1489,43 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
           {/* HERO — grounded in its own card, consistent with the sections below */}
           <Section theme={theme} className={`mb-4 ${readOnly ? 'pointer-events-none select-none' : ''}`}>
-            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(280px,320px)] md:items-start lg:grid-cols-[minmax(0,1fr)_minmax(300px,340px)]">
               <div className="min-w-0 space-y-3">
                 <div className="space-y-1.5">
-                  <EditableIdentityField
-                    value={draft.name}
-                    onChange={v => update('name', v)}
-                    ariaLabel="Project name"
-                    placeholder="Project name"
-                    theme={theme}
-                    inputClass="project-display-title font-semibold tracking-[-0.02em]"
-                    className="max-w-[34rem]"
-                  />
+                  <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+                    <EditableIdentityField
+                      value={draft.name}
+                      onChange={v => update('name', v)}
+                      ariaLabel="Project name"
+                      placeholder="Project name"
+                      theme={theme}
+                      inputClass="project-display-title font-semibold tracking-[-0.02em]"
+                      className="max-w-[34rem] min-w-0 flex-1"
+                    />
+                    <div
+                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 flex-shrink-0"
+                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)' }}
+                      aria-live="polite"
+                    >
+                      <div
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{
+                          backgroundColor: saveState === 'unsaved' ? c.warning : JSI_COLORS.success,
+                          opacity: saveState === 'saving' ? 0.55 : 1,
+                        }}
+                      />
+                      <span className="text-[0.625rem] font-semibold tracking-wide" style={{ color: c.textSecondary }}>
+                        {saveState === 'unsaved' ? 'Unsaved' : saveState === 'saving' ? 'Saving…' : 'Saved'}
+                      </span>
+                    </div>
+                  </div>
+                  {rawNumeric > 0 && discountPct > 0 ? (
+                    <p className="text-[0.9375rem] font-semibold tabular-nums tracking-tight" style={{ color: c.textPrimary }}>
+                      {netValueLabel} <span className="font-medium" style={{ color: c.textSecondary, opacity: 0.72 }}>net</span>
+                      <span className="mx-1.5" style={{ color: c.textSecondary, opacity: 0.35 }}>·</span>
+                      <span className="font-medium" style={{ color: c.textSecondary, opacity: 0.8 }}>{discountDetailLabel}</span>
+                    </p>
+                  ) : null}
                   {heroSummaryParts.length > 0 && (
                     <p className="truncate text-[0.75rem] font-medium" style={{ color: c.textSecondary, opacity: 0.6 }} title={heroSummaryParts.join('  \u00b7  ')}>
                       {heroSummaryParts.join('  \u00b7  ')}
@@ -1544,7 +1576,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-1">
+              <div className="grid grid-cols-1 gap-3 min-w-0">
                 <div className="min-w-0 space-y-1.5">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Stage</span>
                   <CompactSelect
@@ -1555,10 +1587,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     ariaLabel="Project stage"
                   />
                 </div>
-                <div className="min-w-0 space-y-1.5">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className={FIELD_LABEL_CLASS} style={labelStyle}>Win Probability</span>
-                    <span className={`${FIELD_VALUE_CLASS} tabular-nums`} style={{ color: c.textPrimary }}>{currentProbability}%</span>
+                <div className="min-w-0 space-y-1.5 overflow-visible">
+                  <div className="flex items-center justify-between gap-3 min-w-0">
+                    <span className={`${FIELD_LABEL_CLASS} shrink-0`} style={labelStyle}>Win Probability</span>
+                    <span className={`${FIELD_VALUE_CLASS} tabular-nums shrink-0`} style={{ color: c.textPrimary }}>{currentProbability}%</span>
                   </div>
                   <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} showValueBubble={false} compact />
                 </div>
@@ -1997,9 +2029,17 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 ) : null}
               </div>
               <div className="flex justify-center">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: JSI_COLORS.success, opacity: 0.5 }} />
-                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.45 }}>Changes saved automatically</span>
+                <div className="flex items-center gap-1.5" aria-live="polite">
+                  <div
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      backgroundColor: saveState === 'unsaved' ? c.warning : JSI_COLORS.success,
+                      opacity: saveState === 'saved' ? 0.5 : 1,
+                    }}
+                  />
+                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.7 }}>
+                    {saveState === 'unsaved' ? 'Unsaved changes' : saveState === 'saving' ? 'Saving…' : 'Saved'}
+                  </span>
                 </div>
               </div>
             </div>
