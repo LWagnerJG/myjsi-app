@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   Share2, Eye, Film, FileText, BarChart3,
-  Truck, PackageCheck, ClipboardCheck,
+  Truck, PackageCheck, ClipboardCheck, Phone, Mail, User,
 } from 'lucide-react';
 import { isDarkTheme } from '../../design-system/tokens.js';
 import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
@@ -138,27 +138,89 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
             </JSIActionButtonGroup>
           </div>
 
-          {/* ── order progress — sticky sidebar on desktop ── */}
-          <div
-            ref={tlRef}
-            className="rounded-[24px] overflow-hidden lg:col-start-2 lg:row-span-2 lg:sticky lg:top-2"
-            style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
-          >
-            <div className="flex items-center justify-between px-5 pt-4 pb-3">
-              <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Order Progress</span>
-              {pct != null && (
-                <span className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}12`, color: sc }}>
-                  {pct}%
-                </span>
-              )}
+          {/* ── order progress + shipping/contacts — sticky sidebar on desktop ── */}
+          <div className="lg:col-start-2 lg:row-span-2 lg:sticky lg:top-2 space-y-3">
+            <div
+              ref={tlRef}
+              className="rounded-[24px] overflow-hidden"
+              style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
+            >
+              <div className="flex items-center justify-between px-5 pt-4 pb-3">
+                <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Order Progress</span>
+                {pct != null && (
+                  <span className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}12`, color: sc }}>
+                    {pct}%
+                  </span>
+                )}
+              </div>
+              <div className="px-4 pt-2.5 pb-2">
+                {STAGES.map((s, i) => (
+                  <Stage key={s.key} stage={s} state={stageState(i)} isLast={i === 5}
+                    subtitle={subs[i] ?? null} statusColor={sc}
+                    progress={i === cur ? pct : null} dark={dark} c={c} idx={i}
+                    shipTo={i === 4 ? shipToAddr : null} />
+                ))}
+              </div>
             </div>
-            <div className="px-4 pt-2.5 pb-2">
-              {STAGES.map((s, i) => (
-                <Stage key={s.key} stage={s} state={stageState(i)} isLast={i === 5}
-                  subtitle={subs[i] ?? null} statusColor={sc}
-                  progress={i === cur ? pct : null} dark={dark} c={c} idx={i}
-                  shipTo={i === 4 ? shipToAddr : null} />
-              ))}
+
+            <div className="rounded-[24px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
+              <div className="px-5 pt-4 pb-2">
+                <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Shipping & contacts</span>
+              </div>
+              <div className="px-5 pb-4 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <Truck className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
+                  <div className="min-w-0">
+                    <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Carrier</p>
+                    <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{order.carrier || 'Assigned at ship'}</p>
+                    <p className="text-[0.8125rem] mt-0.5" style={{ color: c.textSecondary }}>
+                      PRO {order.proNumber || '—'} · Est. {fs(order.shipDate) || 'TBD'}
+                    </p>
+                  </div>
+                </div>
+                {order.csr && (
+                  <div className="flex items-start gap-2.5">
+                    <User className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
+                    <div className="min-w-0">
+                      <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>CSR</p>
+                      <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{order.csr.name}</p>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[0.75rem]" style={{ color: c.textSecondary }}>
+                        {order.csr.email && (
+                          <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3 opacity-60" />{order.csr.email}</span>
+                        )}
+                        {order.csr.phone && (
+                          <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3 opacity-60" />{order.csr.phone}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {order.salesRep && (
+                  <div className="flex items-start gap-2.5">
+                    <User className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
+                    <div className="min-w-0">
+                      <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Sales rep</p>
+                      <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{order.salesRep.name}</p>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[0.75rem]" style={{ color: c.textSecondary }}>
+                        {order.salesRep.email && (
+                          <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3 opacity-60" />{order.salesRep.email}</span>
+                        )}
+                        {order.salesRep.phone && (
+                          <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3 opacity-60" />{order.salesRep.phone}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {shipToAddr && (
+                  <div className="pt-1" style={{ borderTop: `1px solid ${border}` }}>
+                    <p className="text-[0.6875rem] font-medium uppercase tracking-wide mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Ship to</p>
+                    {shipToAddr.map((line) => (
+                      <p key={line} className="text-[0.8125rem] leading-snug" style={{ color: c.textPrimary }}>{line}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -168,13 +230,15 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
               <div className="flex items-center justify-between px-5 pt-4 pb-2">
                 <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Line Items</span>
                 <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.5 }}>
-                  {order.lineItems.length}
+                  {order.lineItems.length} lines · {qty} units
                 </span>
               </div>
-              {order.lineItems.map((li, idx) => (
-                <LineItem key={li.line} item={li} open={xLine === li.line}
-                  onToggle={() => toggle(li.line)} c={c} dark={dark} panelBorder={border} isFirst={idx === 0} />
-              ))}
+              <div className="max-h-[min(58vh,520px)] overflow-y-auto scrollbar-hide">
+                {order.lineItems.map((li, idx) => (
+                  <LineItem key={li.line} item={li} open={xLine === li.line}
+                    onToggle={() => toggle(li.line)} c={c} dark={dark} panelBorder={border} isFirst={idx === 0} />
+                ))}
+              </div>
             </div>
           </div>
 

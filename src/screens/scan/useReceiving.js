@@ -35,25 +35,52 @@ const MAX_SYNCED_QUEUE = 120;
 function buildSeedState() {
     const receipts = {};
     DEMO_SHIPMENTS.forEach((shipment) => {
-        if (!shipment.preCompleted) return;
-        receipts[shipment.id] = {
-            ...createReceipt(shipment, shipment.preCompleted.user, shipment.preCompleted.completedAt),
-            id: shipment.preCompleted.receiptNumber,
-            status: RECEIPT_STATUS.COMPLETED,
-            completedAt: shipment.preCompleted.completedAt,
-            scanned: shipment.cartons.reduce((acc, carton) => {
-                acc[carton.id] = {
-                    at: shipment.preCompleted.completedAt,
-                    by: shipment.preCompleted.user,
-                    barcode: carton.barcode,
-                    offline: false,
-                };
-                return acc;
-            }, {}),
-            accepted: shipment.cartons.map((c) => c.id),
-            missing: [],
-            held: [],
-        };
+        if (shipment.preCompleted) {
+            receipts[shipment.id] = {
+                ...createReceipt(shipment, shipment.preCompleted.user, shipment.preCompleted.completedAt),
+                id: shipment.preCompleted.receiptNumber,
+                status: RECEIPT_STATUS.COMPLETED,
+                completedAt: shipment.preCompleted.completedAt,
+                scanned: shipment.cartons.reduce((acc, carton) => {
+                    acc[carton.id] = {
+                        at: shipment.preCompleted.completedAt,
+                        by: shipment.preCompleted.user,
+                        barcode: carton.barcode,
+                        offline: false,
+                    };
+                    return acc;
+                }, {}),
+                accepted: shipment.cartons.map((c) => c.id),
+                missing: [],
+                held: [],
+            };
+            return;
+        }
+
+        if (shipment.preInProgress) {
+            const seedCount = Math.max(1, Math.min(shipment.preInProgress.scannedCount || 1, shipment.cartons.length));
+            const seededCartons = shipment.cartons.slice(0, seedCount);
+            const startedAt = shipment.preInProgress.startedAt || '2026-08-25T14:08:00.000Z';
+            receipts[shipment.id] = {
+                ...createReceipt(shipment, shipment.preInProgress.user, startedAt),
+                id: shipment.preInProgress.receiptNumber,
+                status: RECEIPT_STATUS.IN_PROGRESS,
+                startedAt,
+                completedAt: null,
+                scanned: seededCartons.reduce((acc, carton) => {
+                    acc[carton.id] = {
+                        at: startedAt,
+                        by: shipment.preInProgress.user,
+                        barcode: carton.barcode,
+                        offline: false,
+                    };
+                    return acc;
+                }, {}),
+                accepted: [],
+                missing: [],
+                held: [],
+            };
+        }
     });
 
     return {
@@ -75,7 +102,8 @@ const INITIAL_STATE = buildSeedState();
 const lookupBarcode = (barcode) => findCartonByBarcode(barcode);
 
 export function useReceiving() {
-    const [state, setState, resetState] = usePersistentState('scan.receiving', INITIAL_STATE);
+    // v2 reseeds localStorage with the deterministic mid-receive demo fixture.
+    const [state, setState, resetState] = usePersistentState('scan.receiving', INITIAL_STATE, { version: 2 });
     const [syncing, setSyncing] = useState(false);
     const stateRef = useRef(state);
     const syncRunRef = useRef(false);

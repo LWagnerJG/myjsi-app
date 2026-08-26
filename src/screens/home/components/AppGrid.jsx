@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Plus, Settings2, ChevronRight } from 'lucide-react';
+import { Check, Plus, Settings2, ChevronRight, Hourglass, FileText, MapPin, PieChart } from 'lucide-react';
 import {
     DndContext,
     DragOverlay,
@@ -13,6 +13,13 @@ import {
 import { SortableAppTile } from './SortableAppTile.jsx';
 import { getAppBadge, getAppTileStat, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
 import { appTileBorder } from '../../../design-system/tokens.js';
+import { formatCurrencyCompact } from '../../../utils/format.js';
+
+const DESKTOP_RESOURCE_SHORTCUTS = [
+    { label: 'Lead Times', route: 'resources/lead-times', Icon: Hourglass },
+    { label: 'Contracts', route: 'resources/contracts', Icon: FileText },
+    { label: 'Field Visit', route: 'resources/request-field-visit', Icon: MapPin },
+];
 
 export const AppGrid = ({
     isEditMode,
@@ -37,6 +44,9 @@ export const AppGrid = ({
     opportunities,
     replacementRequests
 }) => {
+    const salesYtd = (recentOrders || []).reduce((sum, order) => sum + (order.net || 0), 0);
+    const openOrders = (recentOrders || []).filter((o) => o.status !== 'Delivered').length;
+
     if (isEditMode) {
         const editGridApps = currentApps.filter(a => a.route !== 'resources');
         // Resources is excluded from dragging — only movable apps are sortable
@@ -249,6 +259,65 @@ export const AppGrid = ({
                     <ChevronRight className="w-4 h-4 ml-auto opacity-20 group-hover:opacity-40 transition-opacity" style={{ color: colors.textSecondary }} />
                 </button>
             )}
+
+            {/* Desktop fill — Sales snapshot + resource shortcuts under the tile column */}
+            <div
+                className="hidden lg:block mt-3 rounded-2xl overflow-hidden"
+                style={{
+                    backgroundColor: colors.tileSurface,
+                    border: appTileBorder(isDark),
+                }}
+            >
+                <button
+                    type="button"
+                    onClick={() => onNavigate('sales')}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-opacity hover:opacity-90"
+                    aria-label="Open Sales YTD"
+                >
+                    <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: `${colors.accent}10` }}
+                    >
+                        <PieChart className="w-[18px] h-[18px]" style={{ color: colors.accent }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary, opacity: 0.55 }}>
+                            Sales YTD
+                        </p>
+                        <p className="text-[1.0625rem] font-bold tabular-nums tracking-tight" style={{ color: colors.textPrimary }}>
+                            {formatCurrencyCompact(salesYtd)}
+                        </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                        <p className="text-[0.6875rem] font-medium" style={{ color: colors.textSecondary, opacity: 0.55 }}>
+                            Open orders
+                        </p>
+                        <p className="text-sm font-semibold tabular-nums" style={{ color: colors.textPrimary }}>
+                            {openOrders}
+                        </p>
+                    </div>
+                </button>
+                <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
+                <div className="grid grid-cols-3 gap-1 p-2">
+                    {DESKTOP_RESOURCE_SHORTCUTS.map(({ label, route, Icon }) => (
+                        <button
+                            key={route}
+                            type="button"
+                            onClick={() => onNavigate(route)}
+                            className="flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 transition-colors active:scale-[0.98]"
+                            style={{
+                                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                            }}
+                            aria-label={`Open ${label}`}
+                        >
+                            <Icon className="w-3.5 h-3.5" style={{ color: colors.textSecondary, opacity: 0.7 }} />
+                            <span className="text-[0.625rem] font-semibold text-center leading-tight" style={{ color: colors.textSecondary }}>
+                                {label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             {/* Customize pill — fallback when it can't fill a grid row cleanly */}
             {onUpdateHomeApps && !customizeInGrid && (

@@ -168,9 +168,16 @@ export const SalesScreen = ({ theme, onNavigate }) => {
     };
   }, [yearOpen]);
 
-  const TileHeader = ({ title, action, detail }) => (
+  const TileHeader = ({ title, action, detail, subtitle }) => (
     <div className="flex items-center justify-between gap-3 mb-3">
-      <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>{title}</h3>
+      <div className="min-w-0">
+        <h3 className="text-[0.9375rem] font-bold truncate" style={{ color: colors.textPrimary }}>{title}</h3>
+        {subtitle ? (
+          <p className="text-[0.625rem] font-semibold uppercase tracking-[0.08em] mt-0.5" style={{ color: colors.textSecondary, opacity: 0.55 }}>
+            {subtitle}
+          </p>
+        ) : null}
+      </div>
       {(action || detail) && (
         <div className="flex items-center gap-2 shrink-0">
           {detail && <span className="text-sm font-bold tabular-nums" style={{ color: colors.textPrimary }}>{detail}</span>}
@@ -296,40 +303,27 @@ export const SalesScreen = ({ theme, onNavigate }) => {
               </div>
             </div>
 
-            {/* Progress bar (with discrete YTD marker showing calendar-year pace) */}
+            {/* Progress bar — goal label stays readable even when fill is tiny */}
             <div className="relative pb-3.5">
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <span className="text-[0.6875rem] font-bold tabular-nums" style={{ color: colors.textPrimary }}>
+                  {progressPct.toFixed(0)}% of goal
+                </span>
+                <span className="text-[0.6875rem] font-semibold tabular-nums" style={{ color: colors.textSecondary, opacity: 0.72 }}>
+                  {formatCurrencyCompact(activeGoal)} goal
+                </span>
+              </div>
               <div
                 className="relative w-full h-6 rounded-full"
                 style={{ backgroundColor: subtleBg(theme, 1.8) }}
               >
-                {/* Clipped fill + goal label */}
                 <div className="absolute inset-0 rounded-full overflow-hidden">
-                  <span
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[0.5625rem] font-bold tabular-nums pointer-events-none select-none"
-                    style={{ color: colors.textSecondary, opacity: 0.32, zIndex: 0 }}
-                  >
-                    {formatCurrencyCompact(activeGoal)} goal
-                  </span>
                   <motion.div
-                    className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-3"
+                    className="absolute inset-y-0 left-0 rounded-full"
                     style={{ backgroundColor: colors.accent }}
-                    animate={{ width: ready ? `${Math.max(progressPct, 3)}%` : '0%' }}
+                    animate={{ width: ready ? `${Math.max(progressPct, 2)}%` : '0%' }}
                     transition={{ duration: 0.9, ease: [0.34, 1.0, 0.64, 1], delay: 0.25 }}
-                  >
-                    <AnimatePresence>
-                      {ready && progressPct > 14 && (
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.65, duration: 0.2 }}
-                          className="text-[0.5625rem] font-black tabular-nums select-none"
-                          style={{ color: isDark ? colors.accent : '#fff' }}
-                        >
-                          {progressPct.toFixed(0)}%
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
+                  />
                 </div>
 
                 {/* YTD marker — discrete whiskers above & below the bar at today's calendar position. */}
@@ -513,25 +507,32 @@ export const SalesScreen = ({ theme, onNavigate }) => {
 
           <button type="button" onClick={() => onNavigate('incentive-rewards')} className="w-full h-full text-left">
             <GlassCard theme={theme} className="p-4 h-full flex flex-col" variant="elevated">
-              <TileHeader title="Rewards" action />
+              <TileHeader
+                title="Rewards"
+                action
+                subtitle={rewardsSnapshot?.key || null}
+                detail={rewardsSnapshot ? formatCurrencyCompact(rewardsSnapshot.totalAll) : null}
+              />
               {rewardsSnapshot ? (
                 <div className="flex-1 divide-y" style={dividerStyle}>
                   {topSalesLeader && (
                     <div className={flatRowCls}>
-                      <span className="text-xs font-semibold truncate">{topSalesLeader.name.split(' ')[0]}</span>
+                      <span className="text-xs font-semibold truncate">
+                        <span style={{ color: colors.textSecondary, opacity: 0.55 }}>Sales · </span>
+                        {topSalesLeader.name.split(' ')[0]}
+                      </span>
                       <span className="text-xs font-bold tabular-nums ml-1">{formatCurrencyCompact(topSalesLeader.amount)}</span>
                     </div>
                   )}
                   {topDesignLeader && (
                     <div className={flatRowCls}>
-                      <span className="text-xs font-semibold truncate">{topDesignLeader.name.split(' ')[0]}</span>
+                      <span className="text-xs font-semibold truncate">
+                        <span style={{ color: colors.textSecondary, opacity: 0.55 }}>Design · </span>
+                        {topDesignLeader.name.split(' ')[0]}
+                      </span>
                       <span className="text-xs font-bold tabular-nums ml-1">{formatCurrencyCompact(topDesignLeader.amount)}</span>
                     </div>
                   )}
-                  <div className={flatRowCls}>
-                    <span className="text-[0.625rem] font-medium" style={{ color: colors.textSecondary, opacity: 0.5 }}>{rewardsSnapshot.key}</span>
-                    <span className="text-xs font-black tabular-nums">{formatCurrencyCompact(rewardsSnapshot.totalAll)}</span>
-                  </div>
                 </div>
               ) : (
                 <p className="text-xs opacity-40 flex-1 flex items-center">No data yet.</p>

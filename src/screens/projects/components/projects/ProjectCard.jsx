@@ -63,12 +63,14 @@ export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkS
             <p className="mt-0.5 text-xs font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>
               {opp.vertical || 'Active project'}
             </p>
-            <div className="mt-2 flex min-w-0 items-center gap-1.5" title={customerTitle}>
-              <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
-              <span className="truncate text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.92 }}>
-                {displayCustomerName}
-              </span>
-              <span className="shrink-0 text-[0.5625rem] font-semibold uppercase tracking-[0.08em]" style={{ color: c.textSecondary, opacity: dark ? 0.42 : 0.5 }}>
+            <div className="mt-2 min-w-0" title={customerTitle}>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                <span className="min-w-0 flex-1 text-[0.6875rem] font-medium leading-snug line-clamp-2" style={{ color: c.textSecondary, opacity: 0.92 }}>
+                  {displayCustomerName}
+                </span>
+              </div>
+              <span className="mt-1 inline-block text-[0.5625rem] font-semibold uppercase tracking-[0.08em]" style={{ color: c.textSecondary, opacity: dark ? 0.42 : 0.5 }}>
                 {customerStatus}
               </span>
             </div>

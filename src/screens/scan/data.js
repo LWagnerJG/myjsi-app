@@ -93,6 +93,13 @@ function buildMainShipment() {
         // Pre-flagged for the demo: the worker finds this carton crushed at the door.
         damagedCartonNumber: DAMAGED_CARTON_NUMBER,
         missingCartonNumber: MISSING_CARTON_NUMBER,
+        // Deterministic mid-receive seed so demos always show 1 of N in progress.
+        preInProgress: {
+            receiptNumber: 'RCV-4471-01',
+            scannedCount: 1,
+            startedAt: '2026-08-25T14:08:00.000Z',
+            user: SCAN_USER.name,
+        },
     };
 }
 
