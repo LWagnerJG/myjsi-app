@@ -155,18 +155,18 @@ export const ConnectionChip = ({ theme, network, queuedCount, failedCount, synci
     let text = NETWORK_LABELS[network] || 'Online';
     if (syncing) text = 'Syncing';
     else if (failedCount) text = `${failedCount} failed`;
-    else if (queuedCount) text = `${queuedCount} waiting to sync`;
+    else if (queuedCount) text = `${queuedCount} to sync`;
     else if (!offline) text = 'Synced';
 
     return (
         <button
             type="button"
             onClick={onClick}
-            className="min-h-[36px] inline-flex items-center gap-1.5 rounded-full px-3 text-[0.75rem] font-semibold transition active:scale-[0.97] focus-ring"
+            className="min-h-[44px] shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition active:scale-[0.97] focus-ring whitespace-nowrap"
             style={{ backgroundColor: bg, color }}
             aria-label={`Connection: ${text}. Open demo connection panel`}
         >
-            <Icon className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} aria-hidden="true" />
+            <Icon className={`w-3.5 h-3.5 shrink-0 ${syncing ? 'animate-spin' : ''}`} aria-hidden="true" />
             {text}
         </button>
     );

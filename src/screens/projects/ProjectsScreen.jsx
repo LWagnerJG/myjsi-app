@@ -377,13 +377,14 @@ export const ProjectsScreen = forwardRef(({
   }, []);
 
   useEffect(() => {
-    updateStageFade();
+    const frame = window.requestAnimationFrame(() => updateStageFade());
     window.addEventListener('resize', updateStageFade);
     const ro = typeof ResizeObserver !== 'undefined' && stagesScrollRef.current
       ? new ResizeObserver(updateStageFade)
       : null;
     if (ro && stagesScrollRef.current) ro.observe(stagesScrollRef.current);
     return () => {
+      window.cancelAnimationFrame(frame);
       window.removeEventListener('resize', updateStageFade);
       ro?.disconnect();
     };
@@ -598,19 +599,21 @@ export const ProjectsScreen = forwardRef(({
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
-        <div ref={headerControlsRef} className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex flex-wrap items-center gap-x-3 gap-y-2">
-          <div ref={projectsToggleRef} className="order-1 min-w-0 flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
-            <div className="inline-block pr-4">
+        <div ref={headerControlsRef} className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
+          <div ref={projectsToggleRef} className="order-1 w-full min-w-0 sm:flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
+            <div className="inline-block min-w-full sm:min-w-0 sm:pr-4 [--jsi-ctrl-h:44px] sm:[--jsi-ctrl-h:36px]">
               <SegmentedToggle
                 value={projectsTab}
                 onChange={setProjectsTab}
                 options={projectsTabOptions}
                 size={projectsToggleSize}
                 theme={theme}
+                fullWidth
+                className="w-full"
               />
             </div>
           </div>
-          <div className="order-2 ml-auto flex-shrink-0 flex items-center gap-2">
+          <div className="order-2 flex w-full flex-shrink-0 items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:justify-end">
             {projectsTab === 'pipeline' && (
               <ProjectSpotlight
                 opportunities={opportunities}
@@ -623,10 +626,10 @@ export const ProjectsScreen = forwardRef(({
                 type="button"
                 aria-label={cta.ariaLabel}
                 onClick={cta.action}
-                className="flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-w-[82px] gap-1.5 text-sm leading-none px-3"
-                style={{ height: 'var(--jsi-ctrl-h)', backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
+                className="flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-h-[44px] min-w-[44px] gap-1.5 text-sm leading-none px-4"
+                style={{ height: 44, backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
               >
-                <Plus size={14} strokeWidth={2.5} />
+                <Plus size={16} strokeWidth={2.5} />
                 {cta.label}
               </button>
             )}
@@ -678,19 +681,30 @@ export const ProjectsScreen = forwardRef(({
         )}
 
         {projectsTab === 'pipeline' && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-3 relative max-w-content mx-auto w-full">
-            <div ref={stagesScrollRef} onScroll={updateStageFade} className="overflow-x-auto scrollbar-hide">
-              <div className="inline-flex items-center gap-0 py-0.5 whitespace-nowrap">
+          <div className="relative max-w-content mx-auto w-full">
+            <div
+              ref={stagesScrollRef}
+              onScroll={updateStageFade}
+              className="overflow-x-auto scrollbar-hide overscroll-x-contain px-4 sm:px-6 lg:px-8"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <div className="inline-flex min-w-max items-center gap-0 py-0.5 pb-3 whitespace-nowrap" role="tablist" aria-label="Pipeline stages">
                 {STAGES.map((stage, i) => {
                   const active = selectedPipelineStage === stage;
                   return (
-                    <button key={stage} onClick={() => setSelectedPipelineStage(stage)}
-                      className="relative text-[0.8125rem] transition-all px-3.5 py-1.5"
+                    <button
+                      key={stage}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setSelectedPipelineStage(stage)}
+                      className="relative min-h-[44px] text-[0.8125rem] transition-all px-3.5 py-2.5 focus-ring"
                       style={{
                         color: active ? theme.colors.textPrimary : (isDark ? 'rgba(240,240,240,0.55)' : '#9A9790'),
                         fontWeight: active ? 600 : 500,
                         borderBottom: active ? `2px solid ${theme.colors.textPrimary}` : '2px solid transparent',
-                      }}>
+                      }}
+                    >
                       {stage !== 'Won' && stage !== 'Lost' && (
                         <span style={{ opacity: active ? 0.5 : 0.35 }} className="mr-0.5">{i + 1}</span>
                       )}
@@ -702,12 +716,18 @@ export const ProjectsScreen = forwardRef(({
               <div className="h-px" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
             </div>
             {showStageFadeLeft && (
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-8"
-                style={{ background: `linear-gradient(to right, ${theme.colors.background}, ${theme.colors.background}00)` }} />
+              <div
+                className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-12"
+                style={{ background: `linear-gradient(to right, ${theme.colors.background} 18%, ${theme.colors.background}00)` }}
+                aria-hidden="true"
+              />
             )}
             {showStageFadeRight && (
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-10"
-                style={{ background: `linear-gradient(to left, ${theme.colors.background}, ${theme.colors.background}00)` }} />
+              <div
+                className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 sm:w-14"
+                style={{ background: `linear-gradient(to left, ${theme.colors.background} 18%, ${theme.colors.background}00)` }}
+                aria-hidden="true"
+              />
             )}
           </div>
         )}

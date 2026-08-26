@@ -109,10 +109,10 @@ export const ProjectSpotlight = ({ opportunities = [], theme, onOpenProject }) =
         type="button"
         aria-label="Search projects"
         onClick={() => setOpen(true)}
-        className="flex-shrink-0 inline-flex items-center justify-center rounded-full transition-all active:scale-[0.95] focus-ring"
-        style={{ height: 'var(--jsi-ctrl-h)', width: 'var(--jsi-ctrl-h)', backgroundColor: tileBg, color: c.textPrimary }}
+        className="flex-shrink-0 inline-flex items-center justify-center rounded-full transition-all active:scale-[0.95] focus-ring min-h-[44px] min-w-[44px]"
+        style={{ height: 44, width: 44, backgroundColor: tileBg, color: c.textPrimary }}
       >
-        <Search size={16} strokeWidth={2.2} />
+        <Search size={18} strokeWidth={2.2} />
       </button>
 
       {createPortal(

@@ -155,7 +155,7 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                         <span className="truncate">{formatCompanyName(order.company)}</span>
                         <span className="text-[0.75rem] flex-shrink-0" style={{ opacity: 0.5 }}>{formatRelativeTime(order.date)}</span>
                     </p>
-                    <p className="mt-1 text-[0.6875rem] tabular-nums sm:hidden" style={{ color: theme.colors.textSecondary, opacity: 0.58 }}>
+                    <p className="mt-1 text-[0.75rem] tabular-nums font-medium sm:hidden" style={{ color: theme.colors.textSecondary }}>
                         SO {order.orderNumber}
                     </p>
                 </div>

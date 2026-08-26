@@ -3,7 +3,7 @@ import { ToggleSearchToolbar } from '../../components/common/ToggleSearchToolbar
 
 export const PRODUCT_VIEW_OPTIONS = [
   { value: 'categories', label: 'Categories' },
-  { value: 'families', label: 'Our Families' },
+  { value: 'families', label: 'Families' },
   { value: 'custom', label: 'Custom' },
 ];
 
@@ -27,7 +27,7 @@ export const toSeriesSlug = (series) => String(series || '')
   .replace(/[^a-z0-9]+/g, '-')
   .replace(/^-+|-+$/g, '');
 
-/** Shared products chrome — Categories / Our Families / Custom + search. */
+/** Shared products chrome — Categories / Families / Custom + search. */
 export const ProductsViewToolbar = ({
   theme,
   activeView,
@@ -42,12 +42,14 @@ export const ProductsViewToolbar = ({
     value={activeView}
     onChange={onViewChange}
     options={PRODUCT_VIEW_OPTIONS}
-    toggleSize="sm"
+    toggleSize="smDense"
     searchValue={searchTerm}
     onSearchChange={onSearchChange}
     searchPlaceholder={searchPlaceholder}
     searchId="products-main-search"
     trailing={trailing}
+    trailingMobile={trailing ? 'below' : 'inline'}
     toggleAriaLabel="Product views"
+    className="[--jsi-ctrl-h:44px] sm:[--jsi-ctrl-h:36px]"
   />
 );
