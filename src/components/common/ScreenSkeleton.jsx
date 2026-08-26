@@ -3,19 +3,18 @@ import { isDarkTheme } from '../../design-system/tokens.js';
 
 /**
  * Skeleton loading screen shown while lazy-loaded routes resolve.
- * Matches actual card surface colors so there's no jarring color shift.
+ * Uses subtle background-tinted blocks (not bright white cards) so desktop
+ * navigations don't flash blank white tiles.
  */
 export const ScreenSkeleton = ({ theme }) => {
     const dark = isDarkTheme(theme);
     const bg = theme?.colors?.background || (dark ? '#161616' : '#F0EDE8');
 
-    // Match GlassCard's actual dark surface: rgba(255,255,255,0.08)
-    const cardSurface = dark ? 'rgba(255,255,255,0.08)' : (theme?.colors?.surface || '#FFFFFF');
-    const borderColor = dark ? 'rgba(255,255,255,0.12)' : (theme?.colors?.border || '#E3E0D8');
+    const cardSurface = dark ? 'rgba(255,255,255,0.05)' : 'rgba(53,53,53,0.04)';
+    const borderColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)';
 
-    // Shimmer highlight color — just slightly lighter than the card surface
-    const shimmerHigh = dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.9)';
-    const shimmerBase = dark ? 'rgba(255,255,255,0.08)' : (theme?.colors?.surface || '#FFFFFF');
+    const shimmerHigh = dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.55)';
+    const shimmerBase = dark ? 'rgba(255,255,255,0.04)' : 'rgba(53,53,53,0.04)';
 
     const shimmer = {
         background: `linear-gradient(90deg, ${shimmerBase} 25%, ${shimmerHigh} 50%, ${shimmerBase} 75%)`,
@@ -49,8 +48,8 @@ export const ScreenSkeleton = ({ theme }) => {
                     <div className="h-28 w-full rounded-2xl mt-2" style={shimmer} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    {[1, 2, 3, 4].map(i => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
                         <div
                             key={i}
                             className="rounded-2xl p-4 space-y-2.5"

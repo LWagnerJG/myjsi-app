@@ -39,7 +39,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   const detRef = useFadeUp(100);
 
   if (!order) return (
-    <div className="min-h-full flex flex-col items-center justify-center gap-3" style={{ backgroundColor: c.background }}>
+    <div className="h-full min-h-full flex flex-col items-center justify-center gap-3" style={{ backgroundColor: c.background }}>
       <p className="text-sm" style={{ color: c.textSecondary }}>Order not found</p>
       <button onClick={() => onNavigate('orders')} className="text-sm font-medium underline" style={{ color: c.accent }}>Back to Orders</button>
     </div>
@@ -76,15 +76,19 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-full" style={{ backgroundColor: c.background }}>
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 scrollbar-hide" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)' }}>
-        <div className="max-w-content mx-auto w-full">
+    <div className="h-full min-h-full" style={{ backgroundColor: c.background }}>
+      <div
+        className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 scrollbar-hide"
+        style={{
+          paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 16px)',
+          backgroundColor: c.background,
+        }}
+      >
+        <div className="max-w-content mx-auto w-full space-y-3 lg:space-y-0 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)] lg:gap-5 lg:items-start">
 
           {/* ── header card ── */}
-          <div ref={hdrRef} className="mt-3 mb-3">
+          <div ref={hdrRef} className="mt-3 lg:col-start-1">
             <div className="rounded-[24px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
-
-              {/* title + status + subtitle */}
               <div className="px-5 pt-5 pb-2">
                 <div className="flex items-start justify-between gap-3">
                   <h1 className="text-[1.125rem] font-semibold leading-tight flex-1 min-w-0" style={{ color: c.textPrimary }}>
@@ -100,7 +104,6 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                 </p>
               </div>
 
-              {/* stats row */}
               <div className="grid grid-cols-2 gap-x-6 gap-y-3 px-5 pb-5 pt-2">
                 <div>
                   <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Net Total</p>
@@ -119,10 +122,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   <p className="text-sm font-semibold mt-px" style={{ color: c.textPrimary }}>{order.discount}</p>
                 </div>
               </div>
-
             </div>
 
-            {/* actions — JSI web buttons below the card */}
             <JSIActionButtonGroup className="mt-3">
               {actions.map(({ label, Icon, onClick }) => (
                 <JSIActionButton
@@ -137,8 +138,12 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
             </JSIActionButtonGroup>
           </div>
 
-          {/* ── order progress ── */}
-          <div ref={tlRef} className="mb-3 rounded-[24px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
+          {/* ── order progress — sticky sidebar on desktop ── */}
+          <div
+            ref={tlRef}
+            className="rounded-[24px] overflow-hidden lg:col-start-2 lg:row-span-2 lg:sticky lg:top-2"
+            style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
+          >
             <div className="flex items-center justify-between px-5 pt-4 pb-3">
               <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Order Progress</span>
               {pct != null && (
@@ -158,7 +163,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           </div>
 
           {/* ── line items ── */}
-          <div ref={detRef} className="mb-2">
+          <div ref={detRef} className="lg:col-start-1">
             <div className="rounded-[24px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
               <div className="flex items-center justify-between px-5 pt-4 pb-2">
                 <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Line Items</span>

@@ -3,6 +3,7 @@ import { CheckCircle2, PackageSearch, ScanLine, Truck } from 'lucide-react';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
 import { subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { DEMO_SHIPMENTS } from '../data.js';
+import { isScanDemoEnabled } from '../demoFlags.js';
 import { RECEIPT_STATUS, formatDateTime } from '../receivingLogic.js';
 import {
     BigButton,
@@ -145,14 +146,24 @@ export const ScanHome = ({ theme, receiving, onOpenShipment, onOpenConnection })
                     theme={theme}
                 />
                 <div className="flex items-center gap-2">
-                    <DemoBadge theme={theme} />
-                    <Caption theme={theme}>Order and shipment numbers below are fabricated.</Caption>
+                    {isScanDemoEnabled() ? (
+                        <>
+                            <DemoBadge theme={theme} />
+                            <Caption theme={theme}>Order and shipment numbers below are fabricated.</Caption>
+                        </>
+                    ) : null}
                 </div>
             </div>
 
-            {renderGroup('Expected today', buckets.expected, 'Start receiving', 'Nothing else expected today.')}
-            {renderGroup('In progress', buckets.inProgress, 'Continue receiving', 'No receipts in progress.')}
-            {renderGroup('Completed', buckets.completed, 'View receipt', 'No completed receipts yet.')}
+            <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
+                <div className="space-y-6 min-w-0">
+                    {renderGroup('Expected today', buckets.expected, 'Start receiving', 'Nothing else expected today.')}
+                </div>
+                <div className="space-y-6 min-w-0">
+                    {renderGroup('In progress', buckets.inProgress, 'Continue receiving', 'No receipts in progress.')}
+                    {renderGroup('Completed', buckets.completed, 'View receipt', 'No completed receipts yet.')}
+                </div>
+            </div>
 
             {!buckets.expected.length && !buckets.inProgress.length && !buckets.completed.length ? (
                 <div className="flex flex-col items-center gap-2 py-14 text-center">

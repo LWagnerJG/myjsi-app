@@ -40,12 +40,13 @@ export const useFadeUp = (delay = 0) => {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Keep opacity at 1 from first paint so the route never ghosts over the
+    // previous screen; only nudge upward for a light enter motion.
     el.style.transition = 'none';
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(8px)';
-    void el.offsetHeight;
-    el.style.transition = `opacity .35s ease ${delay}ms, transform .35s ease ${delay}ms`;
     el.style.opacity = '1';
+    el.style.transform = 'translateY(6px)';
+    void el.offsetHeight;
+    el.style.transition = `transform .28s ease ${delay}ms`;
     el.style.transform = 'translateY(0)';
   }, [delay]);
   return ref;

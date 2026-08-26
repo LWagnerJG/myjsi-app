@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     getAppBadge,
+    getAppTileStat,
     MIN_PINNED_APPS,
     MAX_PINNED_APPS,
     NON_REMOVABLE_APPS,
@@ -36,19 +37,25 @@ describe('homeUtils', () => {
             expect(getAppBadge('orders', orders, [], [], 0)).toBeNull();
         });
 
-        it('returns formatted YTD for sales route', () => {
+        it('returns null for sales badge — YTD is a tile body stat', () => {
             const orders = [
                 { net: 500000 },
                 { net: 700000 },
             ];
-            const badge = getAppBadge('sales', orders, [], [], 0);
-            expect(badge).toEqual({ value: '$1.2M', label: 'YTD', color: '#4A7C59', kind: 'currency' });
+            expect(getAppBadge('sales', orders, [], [], 0)).toBeNull();
         });
 
-        it('returns K format for smaller sales amounts', () => {
+        it('returns formatted YTD tile stat for sales route', () => {
+            const orders = [
+                { net: 500000 },
+                { net: 700000 },
+            ];
+            expect(getAppTileStat('sales', orders)).toEqual({ value: '$1.2M', label: 'YTD', color: '#4A7C59' });
+        });
+
+        it('returns K format for smaller sales tile stats', () => {
             const orders = [{ net: 75000 }];
-            const badge = getAppBadge('sales', orders, [], [], 0);
-            expect(badge).toEqual({ value: '$75K', label: 'YTD', color: '#4A7C59', kind: 'currency' });
+            expect(getAppTileStat('sales', orders)).toEqual({ value: '$75K', label: 'YTD', color: '#4A7C59' });
         });
 
         it('returns recent post count for community route', () => {

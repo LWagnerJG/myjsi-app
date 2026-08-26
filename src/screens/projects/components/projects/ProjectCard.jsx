@@ -53,7 +53,11 @@ export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkS
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[0.9375rem] leading-snug truncate" style={{ color: c.textPrimary }}>
+            <p
+              className="font-semibold text-[0.9375rem] leading-snug line-clamp-2"
+              style={{ color: c.textPrimary }}
+              title={opp.name}
+            >
               {opp.name}
             </p>
             <p className="mt-0.5 text-xs font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>
@@ -68,15 +72,14 @@ export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkS
                 {customerStatus}
               </span>
             </div>
-          </div>
-
-          <div className="text-right shrink-0 pt-0.5">
-            <p className="text-[0.625rem] font-semibold uppercase tracking-[0.06em] mb-0.5" style={{ color: c.textSecondary, opacity: 0.5 }}>
-              List
-            </p>
-            <p className="font-bold text-lg tabular-nums tracking-tight leading-none" style={{ color: c.textPrimary }}>
-              {displayValue}
-            </p>
+            <div className="mt-2.5 flex items-baseline gap-1.5">
+              <span className="text-[0.625rem] font-semibold uppercase tracking-[0.06em]" style={{ color: c.textSecondary, opacity: 0.5 }}>
+                List
+              </span>
+              <span className="font-bold text-[0.9375rem] tabular-nums tracking-tight" style={{ color: c.textPrimary }}>
+                {displayValue}
+              </span>
+            </div>
           </div>
         </div>
 

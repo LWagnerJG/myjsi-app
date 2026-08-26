@@ -11,7 +11,7 @@ import {
     rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableAppTile } from './SortableAppTile.jsx';
-import { getAppBadge, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
+import { getAppBadge, getAppTileStat, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
 import { appTileBorder } from '../../../design-system/tokens.js';
 
 export const AppGrid = ({
@@ -149,14 +149,14 @@ export const AppGrid = ({
             <div className={`grid gap-2.5 sm:gap-3 ${gridColsClass}`}>
                 {gridApps.map((app) => {
                     const badge = getAppBadge(app.route, recentOrders, posts, leadTimeFavoritesData, samplesCartCount, opportunities, replacementRequests);
-                    const isCurrencyBadge = badge?.kind === 'currency';
+                    const tileStat = getAppTileStat(app.route, recentOrders);
                     const iconColor = colors.accent;
                     return (
                         <button
                             key={app.route}
                             onClick={() => onNavigate(app.route)}
                             aria-label={`Open ${app.name}`}
-                            className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1.5 p-2.5 sm:p-3"
+                            className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 group gap-1 p-2.5 sm:p-3"
                             style={{
                                 height: 96,
                                 backgroundColor: colors.tileSurface,
@@ -172,56 +172,55 @@ export const AppGrid = ({
                             <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight text-center leading-tight line-clamp-2 px-0.5" style={{ color: colors.textPrimary }}>
                                 {app.name}
                             </span>
-                            {badge && (
-                                isCurrencyBadge ? (
-                                    <div
-                                        className="absolute top-1.5 right-1.5 h-[18px] px-1.5 flex items-center justify-center rounded-md font-semibold tabular-nums"
-                                        style={{
-                                            fontSize: '0.625rem',
-                                            backgroundColor: `${badge.color}18`,
-                                            color: badge.color,
-                                            border: `1px solid ${badge.color}25`,
-                                        }}
-                                    >
-                                        {badge.value}
-                                    </div>
-                                ) : (
-                                    <div
-                                        className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full font-bold tabular-nums"
-                                        style={{
-                                            fontSize: '0.625rem',
-                                            backgroundColor: `${badge.color}20`,
-                                            color: badge.color,
-                                            border: `1px solid ${badge.color}35`,
-                                        }}
-                                    >
-                                        {badge.value}
-                                    </div>
-                                )
-                            )}
+                            {tileStat ? (
+                                <span
+                                    className="text-[0.625rem] font-semibold tabular-nums leading-none"
+                                    style={{ color: tileStat.color }}
+                                    aria-label={`${tileStat.label} ${tileStat.value}`}
+                                >
+                                    <span style={{ opacity: 0.7 }}>{tileStat.label} </span>
+                                    {tileStat.value}
+                                </span>
+                            ) : null}
+                            {badge ? (
+                                <div
+                                    className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full font-bold tabular-nums"
+                                    style={{
+                                        fontSize: '0.625rem',
+                                        backgroundColor: `${badge.color}20`,
+                                        color: badge.color,
+                                        border: `1px solid ${badge.color}35`,
+                                    }}
+                                    title={badge.label}
+                                    aria-label={`${badge.label}: ${badge.value}`}
+                                >
+                                    {badge.value}
+                                </div>
+                            ) : null}
                         </button>
                     );
                 })}
 
-                {/* Customize ghost tile — only when it fills a row cleanly */}
+                {/* Customize — secondary tile, same language as app tiles (not a dashed dead state) */}
                 {customizeInGrid && (
                     <button
                         onClick={() => setIsEditMode(true)}
                         aria-label="Customize home apps"
-                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 gap-1.5 p-2.5 sm:p-3"
+                        title="Rearrange and pin apps on Home"
+                        className="relative flex flex-col items-center justify-center rounded-2xl transition-all active:scale-95 gap-1.5 p-2.5 sm:p-3 group"
                         style={{
                             height: 96,
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)',
-                            border: isDark ? '1px dashed rgba(255,255,255,0.12)' : '1px dashed rgba(0,0,0,0.10)',
+                            backgroundColor: colors.tileSurface,
+                            border: appTileBorder(isDark),
                         }}
                     >
                         <div
-                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)' }}
                         >
-                            <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.32 }} />
+                            <Settings2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" style={{ color: colors.textSecondary, opacity: 0.7 }} />
                         </div>
-                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight" style={{ color: colors.textSecondary, opacity: 0.32 }}>
+                        <span className="text-[0.8125rem] sm:text-sm font-semibold tracking-tight" style={{ color: colors.textPrimary }}>
                             Customize
                         </span>
                     </button>
@@ -257,14 +256,16 @@ export const AppGrid = ({
                     <button
                         onClick={() => setIsEditMode(true)}
                         aria-label="Customize home apps"
+                        title="Rearrange and pin apps on Home"
                         className="flex items-center gap-2 px-5 py-2 rounded-full transition-all active:scale-95"
                         style={{
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                            color: colors.textSecondary,
+                            backgroundColor: colors.tileSurface,
+                            color: colors.textPrimary,
+                            border: appTileBorder(isDark),
                         }}
                     >
-                        <Settings2 className="w-3.5 h-3.5" style={{ opacity: 0.45 }} />
-                        <span className="text-xs font-semibold" style={{ opacity: 0.45 }}>Customize</span>
+                        <Settings2 className="w-3.5 h-3.5" style={{ color: colors.textSecondary, opacity: 0.7 }} />
+                        <span className="text-xs font-semibold">Customize</span>
                     </button>
                 </div>
             )}
