@@ -2003,6 +2003,9 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </div>
           </div>
 
+          {/* Mobile scroll clearance for fixed Done footer */}
+          <div className="h-40 sm:hidden" aria-hidden="true" />
+
           {/* SAVE + STATUS — pinned on mobile, inline on desktop */}
           <div
             className="fixed inset-x-0 bottom-0 z-20 border-t px-4 py-3 sm:static sm:z-auto sm:border-0 sm:px-0 sm:py-0 sm:pt-8"
