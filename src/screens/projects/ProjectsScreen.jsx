@@ -717,15 +717,19 @@ export const ProjectsScreen = forwardRef(({
             </div>
             {showStageFadeLeft && (
               <div
-                className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-12"
-                style={{ background: `linear-gradient(to right, ${theme.colors.background} 18%, ${theme.colors.background}00)` }}
+                className="pointer-events-none absolute inset-y-0 left-0 z-10 w-14 sm:w-16"
+                style={{
+                  background: `linear-gradient(to right, ${theme.colors.background} 0%, ${theme.colors.background} 35%, ${theme.colors.background}00 100%)`,
+                }}
                 aria-hidden="true"
               />
             )}
             {showStageFadeRight && (
               <div
-                className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 sm:w-14"
-                style={{ background: `linear-gradient(to left, ${theme.colors.background} 18%, ${theme.colors.background}00)` }}
+                className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-20"
+                style={{
+                  background: `linear-gradient(to left, ${theme.colors.background} 0%, ${theme.colors.background} 40%, ${theme.colors.background}00 100%)`,
+                }}
                 aria-hidden="true"
               />
             )}

@@ -1139,7 +1139,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     if (!el || typeof ResizeObserver === 'undefined') return undefined;
     const measure = () => {
       const h = Math.ceil(el.getBoundingClientRect().height);
-      if (h > 0) setDoneFooterPad(h + 24);
+      if (h > 0) setDoneFooterPad(h + 40);
     };
     measure();
     const ro = new ResizeObserver(measure);
