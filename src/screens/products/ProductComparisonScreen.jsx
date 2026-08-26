@@ -65,11 +65,11 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
   const dark = isDarkTheme(theme);
   const isCasegoods = categoryName?.toLowerCase() === 'casegoods';
   const scrollRef = useRef(null);
-  const fillStrip = products.length > 0 && products.length <= 6;
+  // Fill strip only on desktop — at 390px a 4-up flex strip crushes thumbs.
+  const fillStripDesktop = products.length > 0 && products.length <= 6;
 
-  // Auto-scroll the active product into view on narrow strips
+  // Auto-scroll the active product into view on narrow / scrollable strips
   useEffect(() => {
-    if (fillStrip) return;
     const container = scrollRef.current;
     if (!container || !activeProduct) return;
     const idx = products.findIndex(p => p.id === activeProduct.id);
@@ -80,8 +80,8 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
     const btnWidth = btn.offsetWidth;
     const containerWidth = container.offsetWidth;
     const scrollTarget = btnLeft - (containerWidth / 2) + (btnWidth / 2);
-    container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
-  }, [activeProduct, products, fillStrip]);
+    container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
+  }, [activeProduct, products]);
 
   return (
     <div
@@ -95,7 +95,7 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
     >
       <div
         ref={scrollRef}
-        className={`flex px-3 py-3 gap-1 ${fillStrip ? 'lg:gap-2' : 'overflow-x-auto scrollbar-hide'}`}
+        className={`flex px-3 py-3 gap-2 overflow-x-auto scrollbar-hide ${fillStripDesktop ? 'lg:gap-2 lg:overflow-x-visible' : ''}`}
       >
         {products.map((p) => {
           const active = activeProduct?.id === p.id;
@@ -105,21 +105,20 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
               key={p.id}
               onClick={() => onProductSelect(p)}
               aria-pressed={active}
-              className={`relative flex flex-col items-center rounded-2xl transition-all duration-300 group ${fillStrip ? 'flex-1 min-w-0' : 'flex-shrink-0'}`}
+              className={`relative flex flex-col items-center rounded-2xl transition-all duration-300 group flex-shrink-0 w-24 min-w-[96px] ${fillStripDesktop ? 'lg:flex-1 lg:min-w-0 lg:w-auto' : ''}`}
               style={{
-                width: fillStrip ? undefined : 88,
-                padding: '10px 4px 8px',
+                padding: '10px 6px 8px',
                 backgroundColor: 'transparent',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <div className="relative w-[72px] h-[76px] flex items-center justify-center overflow-hidden mx-auto">
+              <div className="relative w-[80px] h-[84px] flex items-center justify-center overflow-hidden mx-auto">
                 {p.image ? (
                   <img
                     src={p.image}
                     alt={p.name}
-                    loading={fillStrip ? 'eager' : 'lazy'}
-                    fetchPriority={fillStrip && active ? 'high' : undefined}
+                    loading={fillStripDesktop ? 'eager' : 'lazy'}
+                    fetchPriority={fillStripDesktop && active ? 'high' : undefined}
                     className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.08]"
                     style={{ transform: `scale(${active ? baseScale * 1.06 : baseScale})` }}
                   />
@@ -238,7 +237,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           </AnimatePresence>
         </div>
 
-        {/* Competition CTA — same sweep-up hover treatment as Order Detail actions */}
+        {/* Competition CTA — high-contrast on hero for phone readability */}
         <JSIWebButton
           onClick={handleCompetitionClick}
           theme={theme}
@@ -248,10 +247,10 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
           icon={<ArrowRight className="w-3.5 h-3.5" />}
           className="flex-shrink-0"
           style={{
-            backgroundColor: dark ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.72)',
+            backgroundColor: '#FFFFFF',
+            color: '#353535',
             border: 'none',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.22)',
           }}
         >
           Competition

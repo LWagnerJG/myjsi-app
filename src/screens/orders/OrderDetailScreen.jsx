@@ -104,20 +104,20 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 px-5 pb-5 pt-2">
-                <div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-5 pb-5 pt-2 sm:gap-x-6">
+                <div className="min-w-0">
                   <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Net Total</p>
                   <p className="text-lg font-semibold tabular-nums mt-px" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Est. Ship</p>
                   <p className="text-[0.9375rem] font-semibold mt-px" style={{ color: c.textPrimary }}>{fs(order.shipDate) || '—'}</p>
                 </div>
-                <div>
+                <div className="min-w-0 col-span-2 sm:col-span-1">
                   <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Dealer</p>
-                  <p className="text-sm font-semibold mt-px" style={{ color: c.textPrimary }}>{tc(order.company)}</p>
+                  <p className="text-sm font-semibold mt-px break-words [overflow-wrap:anywhere]" style={{ color: c.textPrimary }}>{tc(order.company)}</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Discount</p>
                   <p className="text-sm font-semibold mt-px" style={{ color: c.textPrimary }}>{order.discount}</p>
                 </div>

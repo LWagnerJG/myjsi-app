@@ -236,7 +236,7 @@ export const ReceivingScanner = ({
                 <div className="grid grid-cols-3 gap-2">
                     <CountTile theme={theme} label="Remaining" value={counts.remaining} />
                     <CountTile theme={theme} label="Issues" value={counts.openIssues} tone={counts.openIssues ? theme.colors.warning : undefined} />
-                    <CountTile theme={theme} label="To sync" value={receiving.queuedCount} tone={receiving.queuedCount ? theme.colors.info : undefined} />
+                    <CountTile theme={theme} label="Sync" value={receiving.queuedCount} tone={receiving.queuedCount ? theme.colors.info : undefined} />
                 </div>
             </SectionCard>
 

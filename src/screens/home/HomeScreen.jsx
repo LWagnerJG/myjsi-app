@@ -470,7 +470,7 @@ export const HomeScreen = React.memo(({
             />
 
             <div
-                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-content mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-40 sm:pb-6"
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-content mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-6"
                 style={{
                     position: 'relative',
                     zIndex: 2,
@@ -525,7 +525,7 @@ export const HomeScreen = React.memo(({
                         />
                     </div>
 
-                    <div className="min-w-0 lg:sticky lg:top-2 mb-20 sm:mb-0 lg:mb-0">
+                    <div className="min-w-0 lg:sticky lg:top-2 mb-[5.5rem] sm:mb-0 lg:mb-0">
                         <HomeFeatureCards
                             theme={theme}
                             colors={colors}
@@ -544,6 +544,8 @@ export const HomeScreen = React.memo(({
                             recentOrders={recentOrders}
                             hoverBg={hoverBg}
                         />
+                        {/* Phone: clear fixed Share Feedback pill so last activity rows stay tappable */}
+                        <div className="h-16 sm:hidden" aria-hidden="true" />
                     </div>
                 </div>
 

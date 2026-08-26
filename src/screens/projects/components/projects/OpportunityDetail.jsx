@@ -1132,6 +1132,24 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   /* remove project (move to Lost or delete permanently) */
   const [removeOpen, setRemoveOpen] = useState(false);
+  const doneFooterRef = useRef(null);
+  const [doneFooterPad, setDoneFooterPad] = useState(148);
+  useEffect(() => {
+    const el = doneFooterRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const measure = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height);
+      if (h > 0) setDoneFooterPad(h + 24);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [onDone, saveState]);
   const cancelPendingSave = useCallback(() => {
     dirty.current = false;
     clearTimeout(saveRef.current);
@@ -1456,7 +1474,10 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   return (
     <div className="min-h-full app-header-offset" style={{ background: c.background }}>
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-[calc(10rem+env(safe-area-inset-bottom,0px))] sm:pb-10 max-w-content mx-auto w-full">
+      <div
+        className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 max-w-content mx-auto w-full pb-[var(--done-footer-pad,10rem)] sm:!pb-10"
+        style={{ ['--done-footer-pad']: `${doneFooterPad}px` }}
+      >
 
           {isClosed && (
             <motion.div
@@ -2003,53 +2024,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
             </div>
           </div>
 
-          {/* Mobile scroll clearance for fixed Done footer */}
-          <div className="h-40 sm:hidden" aria-hidden="true" />
-
-          {/* SAVE + STATUS — pinned on mobile, inline on desktop */}
-          <div
-            className="fixed inset-x-0 bottom-0 z-20 border-t px-4 py-3 sm:static sm:z-auto sm:border-0 sm:px-0 sm:py-0 sm:pt-8"
-            style={{
-              borderColor: dividerColor(isDark),
-              backgroundColor: isDark ? 'rgba(36,36,36,0.92)' : 'rgba(240,237,232,0.92)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
-            }}
-          >
-            <div className="max-w-content mx-auto space-y-2 sm:space-y-3">
-              <div className="flex items-center gap-2 sm:justify-center">
-                {onDone ? (
-                  <button
-                    type="button"
-                    onClick={handleDone}
-                    className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[240px]"
-                    style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
-                  >
-                    <Check className="h-4 w-4" aria-hidden="true" />
-                    Done
-                  </button>
-                ) : null}
-              </div>
-              <div className="flex justify-center">
-                <div className="flex items-center gap-1.5" aria-live="polite">
-                  <div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      backgroundColor: saveState === 'unsaved' ? c.warning : JSI_COLORS.success,
-                      opacity: saveState === 'saved' ? 0.5 : 1,
-                    }}
-                  />
-                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.7 }}>
-                    {saveState === 'unsaved' ? 'Unsaved changes' : saveState === 'saving' ? 'Saving…' : 'Saved'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {canRemove ? (
-            <div className="flex justify-center pb-5">
+            <div className="flex justify-center pb-5 pt-2">
               <button
                 type="button"
                 onClick={() => setRemoveOpen(true)}
@@ -2061,6 +2037,47 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
               </button>
             </div>
           ) : null}
+
+          {/* SAVE + STATUS — pinned on mobile, inline on desktop */}
+          <div
+            ref={doneFooterRef}
+            className="fixed inset-x-0 bottom-0 z-20 border-t px-4 pt-3 sm:static sm:z-auto sm:border-0 sm:px-0 sm:pt-8"
+            style={{
+              borderColor: dividerColor(isDark),
+              backgroundColor: isDark ? 'rgba(36,36,36,0.92)' : 'rgba(240,237,232,0.92)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))',
+            }}
+          >
+            <div className="max-w-content mx-auto space-y-2 sm:space-y-3">
+              <div className="flex flex-col items-stretch gap-2 sm:items-center">
+                <div className="flex items-center justify-center gap-1.5" aria-live="polite">
+                  <div
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      backgroundColor: saveState === 'unsaved' ? c.warning : JSI_COLORS.success,
+                      opacity: saveState === 'saved' ? 0.5 : 1,
+                    }}
+                  />
+                  <span className="text-[0.625rem] font-medium tracking-wide" style={{ color: c.textSecondary, opacity: 0.7 }}>
+                    {saveState === 'unsaved' ? 'Unsaved changes' : saveState === 'saving' ? 'Saving…' : 'Saved'}
+                  </span>
+                </div>
+                {onDone ? (
+                  <button
+                    type="button"
+                    onClick={handleDone}
+                    className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-[0.875rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:w-auto sm:min-w-[240px]"
+                    style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
+                  >
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                    Done
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
 
       </div>
 

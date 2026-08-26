@@ -170,6 +170,7 @@ export const ScanScreen = ({ theme, screenParams, setBackHandler }) => {
             horizontalPaddingClass="px-4 sm:px-6 lg:px-8"
             contentPaddingBottomClass="pb-10"
             contentClassName="pt-4"
+            nestedScroll={false}
         >
             {content()}
 
