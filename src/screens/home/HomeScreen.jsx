@@ -525,7 +525,7 @@ export const HomeScreen = React.memo(({
                         />
                     </div>
 
-                    <div className="min-w-0 lg:sticky lg:top-2">
+                    <div className="min-w-0 lg:sticky lg:top-2 mb-20 sm:mb-0 lg:mb-0">
                         <HomeFeatureCards
                             theme={theme}
                             colors={colors}
