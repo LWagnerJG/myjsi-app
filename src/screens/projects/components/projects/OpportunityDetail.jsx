@@ -1017,7 +1017,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
 
   /* Delineate a project whose name simply duplicates the end-user name.
      Runs once per loaded opportunity so "ABC Corporation" becomes
-     "ABC Corporation (Project 1)" — keeping reps from confusing the two. */
+     "ABC Corporation (Project 1)" — keeping reps from confusing the two.
+     Silent: do not mark dirty / flash Unsaved on first paint. */
   useEffect(() => {
     if (readOnlyRef.current) return;
     const eu = String(opp?.endUser || '').trim();
@@ -1027,12 +1028,24 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
     const peers = (opportunities || []).filter(o => norm(o.endUser || o.company) === norm(eu));
     const idx = peers.findIndex(o => String(o.id) === String(opp?.id));
     const n = idx >= 0 ? idx + 1 : peers.length + 1;
-    setDraft(p => { dirty.current = true; return { ...p, name: `${eu} (Project ${n})` }; });
+    setDraft(p => {
+      const nextName = `${eu} (Project ${n})`;
+      if (p.name === nextName) return p;
+      return { ...p, name: nextName };
+    });
   }, [opp?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = useCallback((k, v) => {
     if (readOnlyRef.current) return;
     setDraft(p => { const n = { ...p, [k]: v }; dirty.current = true; return n; });
+  }, []);
+
+  /** Patch draft without marking dirty (mount-time defaults / derived fields). */
+  const patchDraftSilent = useCallback((updater) => {
+    setDraft((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      return next === prev ? prev : next;
+    });
   }, []);
 
   /* Project Type — required, with a connected contract/state picker. Selections
@@ -1253,15 +1266,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   useEffect(() => {
     const current = draftRef.current?.drivingSpecs;
     if (!specifierOptions.length) {
-      if (current) update('drivingSpecs', null);
+      if (current) patchDraftSilent((p) => ({ ...p, drivingSpecs: null }));
       return;
     }
     const match = current && specifierOptions.find(o => o.type === current.type && o.name === current.name);
     if (!match) {
       const fallback = getDefaultSpecifierOption(specifierOptions);
-      if (fallback) update('drivingSpecs', { type: fallback.type, name: fallback.name });
+      if (fallback) {
+        patchDraftSilent((p) => ({
+          ...p,
+          drivingSpecs: { type: fallback.type, name: fallback.name },
+        }));
+      }
     }
-  }, [specifierOptions, update]);
+  }, [specifierOptions, patchDraftSilent]);
 
   /* JSI quote intake mode (separate from the live quotes in the hub). */
   const quoteMode = draft.jsiQuoteExists ? 'existing' : draft.quoteNeeded ? 'needed' : (draft.noQuoteNeeded ? 'not-needed' : null);
@@ -1314,9 +1332,8 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
         next.designerReward = rewardDefaultValue;
         changed = true;
       }
-      if (!changed) return prev;
-      dirty.current = true;
-      return next;
+      // Auto-managed reward defaults must not flash Unsaved on first load.
+      return changed ? next : prev;
     });
   }, [rewardDefaultValue]);
 
@@ -1523,22 +1540,6 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       inputClass="project-display-title font-semibold tracking-[-0.02em]"
                       className="max-w-[34rem] min-w-0 flex-1"
                     />
-                    <div
-                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 flex-shrink-0"
-                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)' }}
-                      aria-live="polite"
-                    >
-                      <div
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{
-                          backgroundColor: saveState === 'unsaved' ? c.warning : JSI_COLORS.success,
-                          opacity: saveState === 'saving' ? 0.55 : 1,
-                        }}
-                      />
-                      <span className="text-[0.625rem] font-semibold tracking-wide" style={{ color: c.textSecondary }}>
-                        {saveState === 'unsaved' ? 'Unsaved' : saveState === 'saving' ? 'Saving…' : 'Saved'}
-                      </span>
-                    </div>
                   </div>
                   {rawNumeric > 0 && discountPct > 0 ? (
                     <p className="text-[0.9375rem] font-semibold tabular-nums tracking-tight" style={{ color: c.textPrimary }}>

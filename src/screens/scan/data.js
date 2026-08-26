@@ -136,6 +136,41 @@ function buildSecondShipment() {
     };
 }
 
+/** Second expected truck so desktop left column doesn't die under a single card. */
+function buildThirdExpectedShipment() {
+    const shipmentSeq = '4490';
+    const shipmentId = 'SHP-4490';
+    const plan = [
+        { productLine: 'Vision Casegoods', model: 'VS4160', description: 'Vision desk shell, 60"', qty: 1, count: 22, poLine: '1' },
+        { productLine: 'Bourne Lounge', model: 'BL2251', description: 'Bourne lounge, 2-seat', qty: 1, count: 14, poLine: '2' },
+        { productLine: 'Indie Tables', model: 'IN3208', description: 'Indie occasional table, 20" rd', qty: 1, count: 10, poLine: '3' },
+    ];
+    const total = plan.reduce((sum, line) => sum + line.count, 0);
+
+    return {
+        id: shipmentId,
+        seq: shipmentSeq,
+        demo: true,
+        projectId: 'PRJ-ADOBE-N',
+        projectName: 'Adobe North Campus — Phase 2',
+        customer: 'One Workplace',
+        manufacturer: 'JSI',
+        warehouse: 'Livermore',
+        dealerPo: 'OW-118512',
+        salesOrder: 'SO-451801',
+        carrier: 'Old Dominion',
+        proNumber: '881-4490338',
+        shipDate: '2026-08-23',
+        expectedArrival: '2026-08-26',
+        phase: 'Release 1 — Floors 5–6',
+        pallets: Math.ceil(total / CARTONS_PER_PALLET),
+        cartonCount: total,
+        productLines: plan.map((line) => line.productLine),
+        phases: ['Release 1 — Floors 5–6'],
+        cartons: buildCartons({ shipmentSeq, shipmentId, plan, total }),
+    };
+}
+
 function buildCompletedShipment() {
     const shipmentSeq = '4463';
     const shipmentId = 'SHP-4463';
@@ -176,7 +211,12 @@ function buildCompletedShipment() {
 }
 
 export const MAIN_SHIPMENT = buildMainShipment();
-export const DEMO_SHIPMENTS = [MAIN_SHIPMENT, buildSecondShipment(), buildCompletedShipment()];
+export const DEMO_SHIPMENTS = [
+    MAIN_SHIPMENT,
+    buildSecondShipment(),
+    buildThirdExpectedShipment(),
+    buildCompletedShipment(),
+];
 export const DEMO_SHIPMENT_INDEX = new Map(DEMO_SHIPMENTS.map((shipment) => [shipment.id, shipment]));
 
 /** A carton that physically shows up on the dock but belongs to another shipment. */

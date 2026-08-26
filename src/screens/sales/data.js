@@ -81,7 +81,7 @@ export const MONTHLY_SALES_DATA_BY_YEAR = {
 };
 
 // Alias for current year — used by any component that doesn't need year selection
-export const MONTHLY_SALES_DATA = MONTHLY_SALES_DATA_BY_YEAR[2025];
+export const MONTHLY_SALES_DATA = MONTHLY_SALES_DATA_BY_YEAR[2026];
 
 // Backlog — orders booked but not yet invoiced/shipped
 // Source: ERP (products.getLeadTime will inform scheduled ship dates when wired)
@@ -190,6 +190,33 @@ export const CUSTOMER_RANK_DATA = [
 ];
 
 export const INCENTIVE_REWARDS_DATA = {
+    // 2026 quarters — align Sales year selector (2026) + YTD months
+    '2026-Q2': {
+        sales: [
+            { name: 'Luke Wagner', amount: 9100.00 },
+            { name: 'Sarah Johnson', amount: 7250.50 },
+            { name: 'Mike Davis', amount: 5480.25 },
+            { name: 'Emily Chen', amount: 4325.75 }
+        ],
+        designers: [
+            { name: 'Jessica Martinez', amount: 3450.00 },
+            { name: 'David Wilson', amount: 2980.50 },
+            { name: 'Lisa Garcia', amount: 2560.25 }
+        ]
+    },
+    '2026-Q1': {
+        sales: [
+            { name: 'Luke Wagner', amount: 8700.00 },
+            { name: 'Sarah Johnson', amount: 6950.25 },
+            { name: 'Mike Davis', amount: 5100.75 },
+            { name: 'Emily Chen', amount: 4025.50 }
+        ],
+        designers: [
+            { name: 'Jessica Martinez', amount: 3300.00 },
+            { name: 'David Wilson', amount: 2750.75 },
+            { name: 'Lisa Garcia', amount: 2380.50 }
+        ]
+    },
     // 2025 quarters
     '2025-Q3': {
         sales: [

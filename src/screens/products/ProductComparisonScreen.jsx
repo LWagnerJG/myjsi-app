@@ -65,8 +65,19 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
   const dark = isDarkTheme(theme);
   const isCasegoods = categoryName?.toLowerCase() === 'casegoods';
   const scrollRef = useRef(null);
+  const [loadedIds, setLoadedIds] = useState(() => new Set());
   // Fill strip only on desktop — at 390px a 4-up flex strip crushes thumbs.
   const fillStripDesktop = products.length > 0 && products.length <= 6;
+
+  // Priority-warm the first row of thumbs so casegoods doesn't flash text-only tabs.
+  useEffect(() => {
+    products.slice(0, 4).forEach((p) => {
+      if (!p?.image || typeof Image === 'undefined') return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = p.image;
+    });
+  }, [products]);
 
   // Auto-scroll the active product into view on narrow / scrollable strips
   useEffect(() => {
@@ -83,6 +94,15 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
     container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
   }, [activeProduct, products]);
 
+  const markLoaded = useCallback((id) => {
+    setLoadedIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
   return (
     <div
       className="rounded-[24px] overflow-hidden"
@@ -97,9 +117,10 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
         ref={scrollRef}
         className={`flex px-3 py-3 gap-2 overflow-x-auto scrollbar-hide ${fillStripDesktop ? 'lg:gap-2 lg:overflow-x-visible' : ''}`}
       >
-        {products.map((p) => {
+        {products.map((p, idx) => {
           const active = activeProduct?.id === p.id;
           const baseScale = p?.thumbScale || (isCasegoods ? 1.25 : 1.0);
+          const loaded = loadedIds.has(p.id);
           return (
             <button
               key={p.id}
@@ -112,14 +133,28 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <div className="relative w-[80px] h-[84px] flex items-center justify-center overflow-hidden mx-auto">
+              <div
+                className="relative w-[80px] h-[84px] flex items-center justify-center overflow-hidden mx-auto rounded-xl"
+                style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)' }}
+              >
+                {!loaded && (
+                  <div
+                    className="absolute inset-0 animate-pulse"
+                    style={{ background: dark
+                      ? 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.10))'
+                      : 'linear-gradient(135deg, rgba(53,53,53,0.04), rgba(53,53,53,0.09))' }}
+                    aria-hidden="true"
+                  />
+                )}
                 {p.image ? (
                   <img
                     src={p.image}
                     alt={p.name}
-                    loading={fillStripDesktop ? 'eager' : 'lazy'}
-                    fetchPriority={fillStripDesktop && active ? 'high' : undefined}
-                    className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.08]"
+                    loading={idx < 4 ? 'eager' : 'lazy'}
+                    fetchPriority={idx < 4 ? 'high' : 'auto'}
+                    decoding="async"
+                    onLoad={() => markLoaded(p.id)}
+                    className={`max-w-full max-h-full object-contain transition-all duration-500 group-hover:scale-[1.08] ${loaded ? 'opacity-100' : 'opacity-0'}`}
                     style={{ transform: `scale(${active ? baseScale * 1.06 : baseScale})` }}
                   />
                 ) : (
@@ -155,6 +190,7 @@ ProductTabs.displayName = 'ProductTabs';
 // ─── Hero image with overlay info ────────────────────────────────────────────
 const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, categoryName, listPrice }) => {
   const dark = isDarkTheme(theme);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const handleCompetitionClick = useCallback(
     () => onNavigate(`products/category/${categoryId}/competition/${product.id}`),
     [categoryId, onNavigate, product.id]
@@ -171,29 +207,57 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
     : (isSeatingLikeCategory ? 0.96 : 1.12);
   if (isCasegoods) baseZoom *= 1.15;
 
+  useEffect(() => {
+    setImageLoaded(false);
+    if (!product?.image || typeof Image === 'undefined') return undefined;
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => setImageLoaded(true);
+    img.src = product.image;
+    if (img.complete) setImageLoaded(true);
+    return () => { img.onload = null; };
+  }, [product?.id, product?.image]);
+
   return (
     <motion.div
       className={`relative w-full ${aspectClass} rounded-[24px] overflow-hidden group`}
       style={{
-        backgroundColor: dark ? '#1E1E1E' : '#F0EDE8',
+        backgroundColor: dark ? '#1E1E1E' : '#E8E4DC',
       }}
       initial={false}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.22, 0.8, 0.12, 0.99] }}
     >
+      {/* Fixed-aspect placeholder until hero paints — avoids grey flash + floating label */}
+      {!imageLoaded && (
+        <div
+          className="absolute inset-0 animate-pulse"
+          style={{
+            background: dark
+              ? 'linear-gradient(145deg, #1A1A1A 0%, #2A2A2A 55%, #1E1E1E 100%)'
+              : 'linear-gradient(145deg, #E4DFD6 0%, #F0EDE8 55%, #DDD7CC 100%)',
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Product image with crossfade — no radial mask (that caused the boxy crop) */}
       <AnimatePresence mode="wait">
         <motion.div
           key={product.id}
           className="absolute inset-0 w-full h-full flex items-center justify-center p-3 sm:p-4 lg:p-5"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: imageLoaded ? 1 : 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
           <img
             src={product.image}
             alt={product.name}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
             className="max-w-full max-h-full object-contain group-hover:scale-[1.03] transition-transform duration-700"
             style={{ transform: `scale(${baseZoom})` }}
           />
@@ -205,6 +269,7 @@ const ProductHero = React.memo(({ product, theme, categoryId, onNavigate, catego
         className="absolute inset-x-0 bottom-0 h-[42%] pointer-events-none"
         style={{
           background: 'linear-gradient(to top, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.16) 55%, transparent 100%)',
+          opacity: imageLoaded ? 1 : 0.35,
         }}
       />
 
