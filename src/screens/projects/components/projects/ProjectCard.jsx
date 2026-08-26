@@ -39,9 +39,9 @@ export const ProjectCard = ({ opp, theme, onClick, linkedCustomer, customerLinkS
         className="rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
         style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
       >
-        <div className="px-4 pt-4 pb-3 flex items-start gap-3.5">
+        <div className="px-4 pt-4 pb-3 flex items-start gap-3.5 sm:gap-4">
           <div
-            className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
             style={{ backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.045)' }}
             aria-hidden="true"
           >

@@ -591,7 +591,7 @@ export const ProductComparisonScreen = ({ categoryId, initialProductId, onNaviga
     <div className="flex flex-col h-full app-header-offset overflow-x-hidden">
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
         {/* Cap width below global --content-max-width so product photos don't stretch on xl/2xl */}
-        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 mx-auto w-full max-w-[720px] lg:max-w-[1100px] xl:max-w-[1200px]">
+        <div className="px-4 sm:px-6 lg:px-8 pt-2 pb-8 space-y-3 mx-auto w-full max-w-[720px] lg:max-w-[1100px] xl:max-w-[1280px]">
           {/* Category title */}
           <h1
             className="text-[1.25rem] font-bold tracking-tight px-1"

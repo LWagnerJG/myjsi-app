@@ -233,7 +233,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   {order.lineItems.length} lines · {qty} units
                 </span>
               </div>
-              <div className="max-h-[min(58vh,520px)] overflow-y-auto scrollbar-hide">
+              <div className="max-h-[min(70vh,640px)] lg:max-h-none overflow-y-auto scrollbar-hide">
                 {order.lineItems.map((li, idx) => (
                   <LineItem key={li.line} item={li} open={xLine === li.line}
                     onToggle={() => toggle(li.line)} c={c} dark={dark} panelBorder={border} isFirst={idx === 0} />

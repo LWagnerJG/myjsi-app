@@ -260,9 +260,9 @@ export const AppGrid = ({
                 </button>
             )}
 
-            {/* Desktop fill — Sales snapshot + resource shortcuts under the tile column */}
+            {/* Desktop fill — Sales snapshot + recent orders + resource shortcuts */}
             <div
-                className="hidden lg:block mt-3 rounded-2xl overflow-hidden"
+                className="hidden lg:flex lg:flex-col mt-3 rounded-2xl overflow-hidden"
                 style={{
                     backgroundColor: colors.tileSurface,
                     border: appTileBorder(isDark),
@@ -297,6 +297,45 @@ export const AppGrid = ({
                         </p>
                     </div>
                 </button>
+                {(recentOrders || []).length > 0 && (
+                    <>
+                        <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
+                        <div className="px-2 py-1.5">
+                            <p className="px-2 pt-1 pb-1 text-[0.625rem] font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                                Recent orders
+                            </p>
+                            {(recentOrders || []).slice(0, 4).map((order) => (
+                                <button
+                                    key={order.orderNumber}
+                                    type="button"
+                                    onClick={() => onNavigate(`orders/${order.orderNumber}`)}
+                                    className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors"
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                    }}
+                                >
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block text-[0.75rem] font-semibold truncate" style={{ color: colors.textPrimary }}>
+                                            {order.details}
+                                        </span>
+                                        <span className="block text-[0.625rem] truncate" style={{ color: colors.textSecondary, opacity: 0.65 }}>
+                                            {order.company} · {order.status}
+                                        </span>
+                                    </span>
+                                    <span className="text-[0.75rem] font-semibold tabular-nums shrink-0" style={{ color: colors.textPrimary }}>
+                                        {formatCurrencyCompact(order.net || 0)}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
                 <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
                 <div className="grid grid-cols-3 gap-1 p-2">
                     {DESKTOP_RESOURCE_SHORTCUTS.map(({ label, route, Icon }) => (
