@@ -20,6 +20,8 @@ const chromeIconButtonStyle = (theme, active = false) => {
     return {
         height: 'var(--jsi-ctrl-h)',
         width: 'var(--jsi-ctrl-h)',
+        minHeight: 44,
+        minWidth: 44,
         backgroundColor: active
             ? (dark ? 'rgba(255,255,255,0.16)' : '#FFFFFF')
             : (dark ? 'rgba(255,255,255,0.10)' : theme.colors.surface),
@@ -140,19 +142,31 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
             className={`group/order-row w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.025]'}`}
         >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 sm:px-6">
-                <div className="flex-1 min-w-0">
-                    <p className="text-[0.9375rem] font-bold truncate" style={{ color: theme.colors.textPrimary }}>{order.details}</p>
-                    <p className="text-[0.8125rem] mt-1 flex items-center gap-1.5" style={{ color: theme.colors.textSecondary }}>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-5 py-4 sm:items-center sm:gap-4 sm:px-6">
+                <div className="min-w-0">
+                    <p
+                        className="text-[0.9375rem] font-bold leading-snug line-clamp-2 sm:truncate sm:leading-normal"
+                        style={{ color: theme.colors.textPrimary }}
+                        title={order.details}
+                    >
+                        {order.details}
+                    </p>
+                    <p className="text-[0.8125rem] mt-1 flex items-center gap-1.5 min-w-0" style={{ color: theme.colors.textSecondary }}>
                         <span className="truncate">{formatCompanyName(order.company)}</span>
                         <span className="text-[0.75rem] flex-shrink-0" style={{ opacity: 0.5 }}>{formatRelativeTime(order.date)}</span>
                     </p>
+                    <p className="mt-1 text-[0.6875rem] tabular-nums sm:hidden" style={{ color: theme.colors.textSecondary, opacity: 0.58 }}>
+                        SO {order.orderNumber}
+                    </p>
                 </div>
-                <div className="flex flex-shrink-0 items-center justify-end gap-3 text-right">
-                    <div>
+                <div className="flex min-w-0 max-w-[42%] flex-shrink items-center justify-end gap-2 text-right sm:max-w-none sm:flex-shrink-0 sm:gap-3">
+                    <div className="min-w-0">
                         <p className="text-[0.9375rem] font-bold tabular-nums" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
-                        <p className="text-[0.6875rem] mt-1 flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
-                            <span style={{ opacity: 0.58 }}>{order.orderNumber}</span>
+                        <p className="hidden text-[0.6875rem] mt-1 sm:flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                            <span className="truncate max-w-[7.5rem]" style={{ opacity: 0.58 }} title={order.orderNumber}>{order.orderNumber}</span>
+                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                        </p>
+                        <p className="mt-1 flex justify-end sm:hidden">
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                         </p>
                     </div>
@@ -360,7 +374,7 @@ const OrdersToolbarActions = ({
     const viewActive = viewMode === 'calendar';
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 w-full md:w-auto">
             <button
                 type="button"
                 onClick={() => onNavigate?.('scan')}
