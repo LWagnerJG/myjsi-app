@@ -470,7 +470,7 @@ export const HomeScreen = React.memo(({
             />
 
             <div
-                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-content mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-32 sm:pb-6"
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-content mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-40 sm:pb-6"
                 style={{
                     position: 'relative',
                     zIndex: 2,
