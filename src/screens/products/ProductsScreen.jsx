@@ -7,8 +7,9 @@ import React, {
 } from 'react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
+import { PageHeader } from '../../components/common/PageHeader.jsx';
 import { TabContent } from '../../components/common/TabContent.jsx';
-import { isDarkTheme, cardSurface } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, fieldTileSurface, ROW_DENSITY } from '../../design-system/tokens.js';
 import {
     List,
     Grid,
@@ -117,9 +118,10 @@ const CategoryCard = React.memo(({
 
     if (viewMode === 'grid') {
         return (
-            <div
+            <button
+                type="button"
                 onClick={handleClick}
-                className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${className}`}
+                className={`w-full text-left rounded-[24px] overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] focus-ring ${className}`}
                 style={{
                     ...cardStyle(dark, theme),
                     padding: 0,
@@ -150,17 +152,18 @@ const CategoryCard = React.memo(({
                         ))}
                     </div>
                 </div>
-            </div>
+            </button>
         );
     }
 
     return (
-        <div
+        <button
+            type="button"
             onClick={handleClick}
-            className={`rounded-[24px] overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.005] active:scale-[0.99] ${className}`}
+            className={`w-full text-left rounded-[24px] overflow-hidden transition-all duration-200 hover:scale-[1.005] active:scale-[0.99] focus-ring ${className}`}
             style={{ ...cardStyle(dark, theme) }}
         >
-            <div className="p-3.5 flex items-center gap-4">
+            <div className={`p-3.5 flex items-center gap-4 ${ROW_DENSITY.comfortable.py}`} style={{ minHeight: ROW_DENSITY.comfortable.minHeight }}>
                 <div
                     className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0"
                     style={{ backgroundColor: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)' }}
@@ -185,7 +188,7 @@ const CategoryCard = React.memo(({
                 </div>
                 <ChevronRight className="w-4 h-4 flex-shrink-0 opacity-30" style={{ color: theme.colors.textSecondary }} />
             </div>
-        </div>
+        </button>
     );
 });
 CategoryCard.displayName = 'CategoryCard';
@@ -310,7 +313,16 @@ export const ProductsScreen = ({ theme, onNavigate, currentScreen, screenParams 
     const [viewMode, setViewMode] = usePersistentState('pref.products.viewMode', 'list');
     const scrollContainerRef = useRef(null);
     const dark = isDarkTheme(theme);
-    const activeViewMode = viewMode === 'list' ? 'list' : 'grid';
+    const [isPhone, setIsPhone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches);
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        const onChange = () => setIsPhone(mq.matches);
+        onChange();
+        mq.addEventListener?.('change', onChange);
+        return () => mq.removeEventListener?.('change', onChange);
+    }, []);
+    // Phone always list — avoids 2-col grid flash when desktop preference persists
+    const activeViewMode = isPhone ? 'list' : (viewMode === 'list' ? 'list' : 'grid');
     const activeProductView = productViewFromScreen(currentScreen);
 
     // Honor deep-link / back-nav params that ask for a specific view.
@@ -388,23 +400,26 @@ export const ProductsScreen = ({ theme, onNavigate, currentScreen, screenParams 
                 className="flex-1 overflow-y-auto scrollbar-hide"
             >
                 <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-2" fade={false}>
-                    <ProductsViewToolbar
-                        theme={theme}
-                        activeView={activeProductView === 'custom' ? 'custom' : activeProductView}
-                        onViewChange={handleViewChange}
-                        searchTerm={searchTerm}
-                        onSearchChange={handleSearchChange}
-                        searchPlaceholder={searchPlaceholder}
-                        trailing={
-                            activeProductView !== 'families' ? (
-                                <ViewModeToggle
-                                    viewMode={activeViewMode}
-                                    onToggle={toggleViewMode}
-                                    theme={theme}
-                                />
-                            ) : null
-                        }
-                    />
+                    <div className="flex flex-col gap-2.5">
+                        <PageHeader theme={theme} title="Products" subtitle="Categories, families, and custom" />
+                        <ProductsViewToolbar
+                            theme={theme}
+                            activeView={activeProductView === 'custom' ? 'custom' : activeProductView}
+                            onViewChange={handleViewChange}
+                            searchTerm={searchTerm}
+                            onSearchChange={handleSearchChange}
+                            searchPlaceholder={searchPlaceholder}
+                            trailing={
+                                activeProductView !== 'families' ? (
+                                    <ViewModeToggle
+                                        viewMode={activeViewMode}
+                                        onToggle={toggleViewMode}
+                                        theme={theme}
+                                    />
+                                ) : null
+                            }
+                        />
+                    </div>
                 </ScreenTopChrome>
 
                 <div className="px-4 sm:px-6 lg:px-8 pt-1 pb-8">

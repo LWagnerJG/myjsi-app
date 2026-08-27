@@ -6,9 +6,11 @@ import { motion } from 'framer-motion';
 import { ChevronRight, Building2, UserPlus, Check, Award } from 'lucide-react';
 import { DEALER_DIRECTORY_DATA, getChoiceProgram } from './data.js';
 import { DAILY_DISCOUNT_OPTIONS } from '../../../constants/discounts.js';
-import { isDarkTheme, subtleBg } from '../../../design-system/tokens.js';
+import { isDarkTheme, subtleBg, cardSurface, ROW_DENSITY } from '../../../design-system/tokens.js';
 import { formatCurrency, formatCurrencyCompact } from '../../../utils/format.js';
 import { ScreenTopChrome } from '../../../components/common/ScreenTopChrome.jsx';
+import { PageHeader } from '../../../components/common/PageHeader.jsx';
+import { StatusChip } from '../../../components/common/StatusChip.jsx';
 
 const stagger = (i) => ({
     initial: { opacity: 0, y: 6 },
@@ -19,13 +21,16 @@ const goalTone = (pct) => pct >= 80 ? '#4A7C59' : pct >= 50 ? '#C4956A' : '#B85C
 
 const EMPTY_FORM = { companyName: '', adminEmail: '', dailyDiscount: '' };
 
-const ChoiceBadge = ({ program, compact = false }) => (
-    <span
-        className={`inline-flex items-center rounded-full font-bold uppercase tracking-[0.06em] ${compact ? 'px-1.5 py-[1px] text-[0.5625rem]' : 'px-2 py-0.5 text-[0.625rem]'}`}
-        style={{ color: program.color, backgroundColor: `${program.color}1A` }}
-    >
-        {program.label}
-    </span>
+const ChoiceBadge = ({ program, compact = false, theme }) => (
+    <StatusChip
+        theme={theme}
+        label={program.label}
+        tone="neutral"
+        color={program.color}
+        showDot={false}
+        style={{ backgroundColor: `${program.color}1A` }}
+        className={compact ? '!text-[0.5625rem] !px-1.5 !py-[1px]' : ''}
+    />
 );
 
 const MiniProgress = ({ percent, tone, isDark }) => (
@@ -38,8 +43,9 @@ const MiniProgress = ({ percent, tone, isDark }) => (
     </div>
 );
 
-const DealerRow = ({ dealer, i, last, colors, isDark, rowBorder, onNavigate, choiceMode }) => {
+const DealerRow = ({ dealer, i, last, colors, isDark, rowBorder, onNavigate, choiceMode, theme }) => {
     const program = getChoiceProgram(dealer);
+    const rowDensity = ROW_DENSITY.compact;
     const salesPct = dealer.ytdGoal ? Math.round((dealer.sales / dealer.ytdGoal) * 100) : null;
     const displayPct = choiceMode ? (program?.percent ?? null) : salesPct;
     const gColor = displayPct !== null ? (choiceMode && program ? program.color : goalTone(displayPct)) : null;
@@ -50,10 +56,9 @@ const DealerRow = ({ dealer, i, last, colors, isDark, rowBorder, onNavigate, cho
         <motion.button
             {...stagger(i)}
             onClick={() => onNavigate?.(`resources/dealer-directory/${dealer.id}`)}
-            className="w-full text-left flex items-center gap-3.5 px-4 transition-colors active:opacity-75"
+            className={`w-full text-left flex items-center gap-3.5 px-4 ${rowDensity.py} transition-colors active:opacity-75`}
             style={{
-                paddingTop: 12,
-                paddingBottom: 12,
+                minHeight: rowDensity.minHeight,
                 borderBottom: last ? 'none' : `1px solid ${rowBorder}`,
             }}
         >
@@ -69,7 +74,7 @@ const DealerRow = ({ dealer, i, last, colors, isDark, rowBorder, onNavigate, cho
                     <p className="text-[0.875rem] font-bold tracking-tight truncate leading-snug" style={{ color: colors.textPrimary }}>
                         {dealer.name}
                     </p>
-                    {program && !choiceMode ? <ChoiceBadge program={program} compact /> : null}
+                    {program && !choiceMode ? <ChoiceBadge program={program} compact theme={theme} /> : null}
                 </div>
                 <p className="text-[0.6875rem] truncate mt-0.5 leading-snug" style={{ color: colors.textSecondary, opacity: 0.65 }}>
                     {secondaryLine}
@@ -208,6 +213,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                         rowBorder={rowBorder}
                         onNavigate={onNavigate}
                         choiceMode
+                        theme={theme}
                     />
                 ))}
             </div>
@@ -218,60 +224,52 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: colors.background }}>
 
             <ScreenTopChrome theme={theme} contentClassName="pt-2 pb-3 space-y-2.5">
-                <div className="flex items-start justify-between gap-3 px-0 pt-1">
-                    <div className="min-w-0">
-                        <h1
-                            className="text-[1.625rem] font-black tracking-[-0.03em] leading-tight"
-                            style={{ color: colors.textPrimary }}
-                        >
-                            Dealers
-                        </h1>
-                        {choiceOnly ? (
-                            <p className="mt-0.5 text-[0.75rem] font-medium" style={{ color: colors.textSecondary, opacity: 0.7 }}>
-                                Choice · Platinum and Gold
-                            </p>
-                        ) : null}
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                        <button
-                            type="button"
-                            onClick={() => setChoiceOnly(v => !v)}
-                            aria-pressed={choiceOnly}
-                            className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] focus-ring"
-                            style={choiceOnly ? {
-                                backgroundColor: '#5B7B8C',
-                                color: '#FFFFFF',
-                                boxShadow: isDark ? 'none' : '0 6px 14px rgba(91,123,140,0.28)',
-                            } : {
-                                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF',
-                                color: colors.textPrimary,
-                                border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.08)'}`,
-                            }}
-                        >
-                            <Award className="w-3.5 h-3.5" aria-hidden="true" />
-                            Choice
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShowAddModal(true)}
-                            className="flex items-center gap-1.5 rounded-full px-3.5 h-9 text-[0.8125rem] font-semibold transition-all active:scale-[0.97] focus-ring"
-                            style={{
-                                backgroundColor: colors.accent,
-                                color: colors.accentText,
-                                boxShadow: isDark ? 'none' : '0 6px 14px rgba(53,53,53,0.16)',
-                            }}
-                        >
-                            <UserPlus className="w-3.5 h-3.5" />
-                            Add
-                        </button>
-                    </div>
-                </div>
+                <PageHeader
+                    theme={theme}
+                    title="Dealers"
+                    subtitle={choiceOnly ? 'Choice · Platinum and Gold' : 'Partner directory'}
+                    action={(
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setChoiceOnly(v => !v)}
+                                aria-pressed={choiceOnly}
+                                className="flex items-center gap-1.5 rounded-full px-3.5 min-h-[44px] text-[0.8125rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                                style={choiceOnly ? {
+                                    backgroundColor: '#5B7B8C',
+                                    color: '#FFFFFF',
+                                    boxShadow: isDark ? 'none' : '0 6px 14px rgba(91,123,140,0.28)',
+                                } : {
+                                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#FFFFFF',
+                                    color: colors.textPrimary,
+                                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.10)' : 'rgba(53,53,53,0.08)'}`,
+                                }}
+                            >
+                                <Award className="w-3.5 h-3.5" aria-hidden="true" />
+                                Choice
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowAddModal(true)}
+                                className="flex items-center gap-1.5 rounded-full px-3.5 min-h-[44px] text-[0.8125rem] font-semibold transition-all active:scale-[0.97] focus-ring"
+                                style={{
+                                    backgroundColor: colors.accent,
+                                    color: colors.accentText,
+                                    boxShadow: isDark ? 'none' : '0 6px 14px rgba(53,53,53,0.16)',
+                                }}
+                            >
+                                <UserPlus className="w-3.5 h-3.5" />
+                                Add
+                            </button>
+                        </div>
+                    )}
+                />
                 <StandardSearchBar
                     value={searchTerm}
                     onChange={setSearchTerm}
                     placeholder={choiceOnly ? 'Search Choice dealers...' : 'Search dealers...'}
                     theme={theme}
+                    size="control"
                     className="w-full"
                 />
             </ScreenTopChrome>
@@ -279,7 +277,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
             <div className="flex-1 overflow-y-auto scrollbar-hide px-4 sm:px-6 lg:px-8 pb-8">
                 <div className="max-w-content mx-auto w-full pt-1">
                 {!listEmpty ? (
-                    <GlassCard theme={theme} className="rounded-[22px] overflow-hidden p-0">
+                    <GlassCard theme={theme} className="overflow-hidden p-0" style={cardSurface(theme)}>
                         {choiceOnly ? (
                             <>
                                 {renderGroup('Platinum', '#5B7B8C', choiceGroups.platinum, 0, choiceGroups.gold.length === 0)}
@@ -297,6 +295,7 @@ export const DealerDirectoryScreen = ({ theme, dealerDirectory, setDealerDirecto
                                     rowBorder={rowBorder}
                                     onNavigate={onNavigate}
                                     choiceMode={false}
+                                    theme={theme}
                                 />
                             ))
                         )}

@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Share2, X, Play, Download, MapPin } from 'lucide-react';
 import { getUnifiedBackdropStyle, UNIFIED_MODAL_Z, ModalSafeAreaCover } from '../../components/common/modalUtils.js';
 import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
+import { StatusChip } from '../../components/common/StatusChip.jsx';
+import { FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
 import { formatCurrencyDecimal, formatCurrency, formatLongDate, formatShortDate, smartTitleCase } from '../../utils/format.js';
 
 /* ── helpers ────────────────────────────────────────────────── */
@@ -17,10 +19,6 @@ export const fs = (d) => d ? formatShortDate(d) : '';
 
 /* shared label style used across all expanded/detail areas */
 const fieldLabel = (c) => ({
-  fontSize: "0.6875rem",
-  fontWeight: 500,
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
   color: c.textSecondary,
   opacity: 0.5,
   marginBottom: 2,
@@ -78,7 +76,7 @@ export const Chk = ({ clr }) => (
 );
 
 /* ── timeline stage ──────────────────────────────────────────── */
-export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, progress, dark, c, idx, shipTo }) => {
+export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, progress, dark, c, theme, idx, shipTo }) => {
   const done = state === 'completed', now = state === 'current', later = state === 'future';
   const { Icon } = stage;
   const ref = useFadeUp(idx * 45);
@@ -108,10 +106,7 @@ export const Stage = React.memo(({ stage, state, isLast, subtitle, statusColor, 
             {stage.label}
           </span>
           {now && (
-            <span className="text-[0.625rem] font-bold uppercase tracking-[0.07em] px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: `${sc}18`, color: sc }}>
-              Current
-            </span>
+            <StatusChip theme={theme} label="Current" tone="active" color={sc} className="!text-[0.625rem]" />
           )}
         </div>
         {subtitle && !later && (
@@ -170,7 +165,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
         <div className="px-5 pb-4" style={{ paddingLeft: 'calc(1.25rem + 20px + 0.875rem)' }}>
           {/* unit price — only show this since extended + qty are already in the header */}
           <div className="mb-2">
-            <p style={fieldLabel(c)}>Unit Price</p>
+            <p style={fieldLabel(c)} className={FIELD_LABEL_CLASSNAME}>Unit price</p>
             <p className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>{fmt$(item.net, true)}</p>
           </div>
 
@@ -179,7 +174,7 @@ export const LineItem = React.memo(({ item, open, onToggle, c, dark, panelBorder
             <div className="space-y-1.5 pt-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'}` }}>
               {item.specs.map((s, i) => (
                 <div key={i} className="flex items-center justify-between gap-4">
-                  <span style={fieldLabel(c)}>{s.label}</span>
+                  <span style={fieldLabel(c)} className={FIELD_LABEL_CLASSNAME}>{s.label}</span>
                   <span className="text-[0.75rem] font-semibold text-right" style={{ color: c.textPrimary }}>{s.value}</span>
                 </div>
               ))}

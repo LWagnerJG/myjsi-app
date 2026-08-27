@@ -690,9 +690,15 @@ function App() {
         homeApps, handleUpdateHomeApps, homeResetKey, setOpportunities
     ]);
 
-    const suspenseFallback = useMemo(() => (
-        <ScreenSkeleton theme={currentTheme} />
-    ), [currentTheme]);
+    const suspenseFallbackFor = useCallback((screenKey) => {
+        const base = String(screenKey || '').split('/')[0];
+        if (base === 'scan') return <ScreenSkeleton theme={currentTheme} variant="scan" />;
+        if (base === 'orders' || base === 'products' || base === 'dealer-directory' || base === 'dealers') {
+            return <ScreenSkeleton theme={currentTheme} variant="list" />;
+        }
+        if (base === 'projects') return <ScreenSkeleton theme={currentTheme} variant="toolbar" />;
+        return <ScreenSkeleton theme={currentTheme} />;
+    }, [currentTheme]);
 
     return (
         <ToastHost theme={currentTheme}>
@@ -713,7 +719,7 @@ function App() {
                 <main className="flex-1 overflow-hidden max-w-content mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
                     <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection}>
                         <ErrorBoundary screenKey={currentScreen} theme={currentTheme}>
-                            <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallback} {...screenProps} />
+                            <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallbackFor(currentScreen)} {...screenProps} />
                         </ErrorBoundary>
                     </AnimatedScreenWrapper>
                 </main>

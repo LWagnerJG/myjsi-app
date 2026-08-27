@@ -275,9 +275,38 @@ export const isDarkTheme = (theme) => {
 
 // SURFACE HELPERS — eliminate repeated dark/light card + input styling
 
-export const SECTION_CARD_RADIUS = '28px';
+export const SECTION_CARD_RADIUS = '24px';
+export const SURFACE_CARD_RADIUS = '24px';
+export const INSET_PANEL_RADIUS = '16px';
+
+/** Field labels — sentence case (e.g. "Est. ship", "Dealer PO") */
 export const FIELD_LABEL_CLASSNAME = 'text-[0.6875rem] font-semibold tracking-[0.01em]';
+/** Section headings — title case (e.g. "Project Hub", "Line Items") */
 export const SECTION_TITLE_CLASSNAME = 'text-[0.95rem] sm:text-[1rem] font-semibold tracking-[-0.015em] leading-none';
+/** Metric captions only — small caps (e.g. "NET TOTAL", "YTD") */
+export const METRIC_CAPTION_CLASSNAME = 'text-[0.625rem] font-semibold uppercase tracking-[0.08em]';
+
+/** List-row density scale — assign by screen type, not ad hoc */
+export const ROW_DENSITY = {
+  comfortable: { minHeight: 88, py: 'py-4', thumb: 80 }, // products category
+  default: { minHeight: 64, py: 'py-3.5', thumb: 56 },   // orders / projects
+  compact: { minHeight: 48, py: 'py-2.5', thumb: 36 },   // dealers / scan meta
+};
+
+/**
+ * Product cutout thumb — neutral tile, object-contain.
+ * Returns style + class helpers for a fixed square well.
+ */
+export const cutoutImageWell = (theme, size = 56) => {
+  const dark = isDarkTheme(theme);
+  return {
+    width: size,
+    height: size,
+    borderRadius: 12,
+    backgroundColor: dark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.05)',
+    overflow: 'hidden',
+  };
+};
 
 /**
  * Resolve a selective airy-surface color (modals/sheets only).
@@ -292,7 +321,8 @@ export const airySurfaceRole = (theme, role = 'airy') => {
 
 /**
  * Standard card/surface background for dark/light mode.
- * Returns { backgroundColor, border, boxShadow } ready to spread into style.
+ * Variant A — surface card (lists, hubs, primary containers). Radius 24.
+ * Returns { backgroundColor, border, boxShadow, borderRadius } ready to spread.
  */
 export const cardSurface = (theme) => {
   const dark = isDarkTheme(theme);
@@ -300,6 +330,21 @@ export const cardSurface = (theme) => {
     backgroundColor: dark ? 'rgba(255,255,255,0.065)' : (theme?.colors?.surface || '#FFFFFF'),
     border: dark ? '1px solid rgba(255,255,255,0.042)' : '1px solid rgba(0,0,0,0.06)',
     boxShadow: dark ? DESIGN_TOKENS.shadowsDark.card : DESIGN_TOKENS.shadows.card,
+    borderRadius: SURFACE_CARD_RADIUS,
+  };
+};
+
+/**
+ * Variant B — inset panel for denser nested blocks (scan section cards, form groups).
+ * Same fill language; slightly softer radius (16) and shadow.
+ */
+export const insetPanelSurface = (theme) => {
+  const dark = isDarkTheme(theme);
+  return {
+    backgroundColor: dark ? 'rgba(255,255,255,0.045)' : (theme?.colors?.surface || '#FFFFFF'),
+    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.05)',
+    boxShadow: dark ? '0 8px 20px rgba(0,0,0,0.14)' : '0 6px 16px rgba(53,53,53,0.04)',
+    borderRadius: INSET_PANEL_RADIUS,
   };
 };
 
@@ -331,15 +376,11 @@ export const appTileBorder = (themeOrDark) => {
 
 /**
  * Standard rounded section card used across project/detail and form screens.
+ * Aliases inset panel language so Scan/detail share one token.
  */
 export const sectionCardSurface = (theme) => {
-  const dark = isDarkTheme(theme);
-  return {
-    backgroundColor: dark ? 'rgba(255,255,255,0.035)' : 'rgba(255,255,255,0.90)',
-    border: dark ? subtleBorder(theme) : '1px solid rgba(0,0,0,0.05)',
-    boxShadow: dark ? '0 12px 28px rgba(0,0,0,0.16)' : '0 10px 24px rgba(53,53,53,0.05)',
-    borderRadius: SECTION_CARD_RADIUS,
-  };
+  const base = insetPanelSurface(theme);
+  return { ...base, borderRadius: SURFACE_CARD_RADIUS };
 };
 
 /**

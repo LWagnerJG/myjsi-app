@@ -2,17 +2,20 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactDOM from 'react-dom';
 import { AlertTriangle, Check, CloudOff, Loader2, RefreshCw, Wifi, X } from 'lucide-react';
+import { StatusChip } from '../../../components/common/StatusChip.jsx';
 import {
     DESIGN_TOKENS,
     isDarkTheme,
-    sectionCardSurface,
+    insetPanelSurface,
+    FIELD_LABEL_CLASSNAME,
+    ROW_DENSITY,
     subtleBg,
     subtleBorder,
 } from '../../../design-system/tokens.js';
 import { NETWORK_LABELS, NETWORK_MODES } from '../receivingLogic.js';
 
 export const SectionCard = ({ theme, children, className = '', style = {}, as: Tag = 'div', ...rest }) => (
-    <Tag className={`px-4 py-4 sm:px-5 ${className}`} style={{ ...sectionCardSurface(theme), ...style }} {...rest}>
+    <Tag className={`px-4 py-4 sm:px-5 ${className}`} style={{ ...insetPanelSurface(theme), ...style }} {...rest}>
         {children}
     </Tag>
 );
@@ -42,8 +45,8 @@ export const DemoBadge = ({ theme, label = 'Demo data' }) => (
 );
 
 export const InfoRow = ({ theme, label, value, mono = false }) => (
-    <div className="flex items-baseline justify-between gap-3 py-1.5">
-        <span className="text-[0.75rem] flex-shrink-0" style={{ color: theme.colors.textSecondary }}>{label}</span>
+    <div className={`flex items-baseline justify-between gap-3 ${ROW_DENSITY.default.py}`}>
+        <span className={`${FIELD_LABEL_CLASSNAME} flex-shrink-0`} style={{ color: theme.colors.textSecondary }}>{label}</span>
         <span
             className={`text-[0.8125rem] font-semibold text-right ${mono ? 'tabular-nums' : ''}`}
             style={{ color: theme.colors.textPrimary }}
@@ -68,19 +71,24 @@ export const CountTile = ({ theme, label, value, tone }) => {
     );
 };
 
-export const StatusPill = ({ theme, label, tone = 'info', icon: Icon, className = '' }) => {
-    const color = theme.colors[tone] || theme.colors.textSecondary;
-    const bg = theme.colors[`${tone}Light`] || subtleBg(theme);
-    return (
-        <span
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold whitespace-nowrap ${className}`}
-            style={{ backgroundColor: bg, color }}
-        >
-            {Icon ? <Icon className="w-3 h-3" aria-hidden="true" /> : null}
-            {label}
-        </span>
-    );
+const STATUS_PILL_TONE = {
+    info: 'active',
+    success: 'success',
+    warning: 'warning',
+    error: 'error',
+    neutral: 'neutral',
 };
+
+export const StatusPill = ({ theme, label, tone = 'info', icon: Icon, className = '' }) => (
+    <StatusChip
+        theme={theme}
+        label={label}
+        tone={STATUS_PILL_TONE[tone] || STATUS_PILL_TONE.info}
+        icon={Icon}
+        showDot={!Icon}
+        className={className}
+    />
+);
 
 /** Primary warehouse-scale action. Kept large for gloved, one-handed use. */
 export const BigButton = ({ theme, children, icon: Icon, tone = 'accent', onClick, disabled, type = 'button', className = '', ...rest }) => {

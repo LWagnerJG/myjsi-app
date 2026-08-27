@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { CheckCircle2, PackageSearch, ScanLine, Truck } from 'lucide-react';
+import { PackageSearch, ScanLine } from 'lucide-react';
 import StandardSearchBar from '../../../components/common/StandardSearchBar.jsx';
+import { PageHeader } from '../../../components/common/PageHeader.jsx';
+import { StatusChip } from '../../../components/common/StatusChip.jsx';
 import { subtleBg, subtleBorder } from '../../../design-system/tokens.js';
 import { DEMO_SHIPMENTS } from '../data.js';
 import { isScanDemoEnabled } from '../demoFlags.js';
@@ -14,7 +16,6 @@ import {
     ProgressBar,
     SectionCard,
     SectionHeading,
-    StatusPill,
 } from './ScanPrimitives.jsx';
 
 const matches = (shipment, query) => {
@@ -47,13 +48,13 @@ const ShipmentCard = ({ theme, shipment, receipt, counts, onOpen, primaryLabel }
                     </Caption>
                 </div>
                 {completed ? (
-                    <StatusPill theme={theme} label="Complete" tone="success" icon={CheckCircle2} />
+                    <StatusChip theme={theme} label="Complete" tone="success" />
                 ) : held ? (
-                    <StatusPill theme={theme} label="On hold" tone="warning" />
+                    <StatusChip theme={theme} label="On hold" tone="warning" />
                 ) : receipt ? (
-                    <StatusPill theme={theme} label="In progress" tone="info" />
+                    <StatusChip theme={theme} label="In progress" tone="active" />
                 ) : (
-                    <StatusPill theme={theme} label={`${shipment.cartonCount} cartons`} tone="info" icon={Truck} />
+                    <StatusChip theme={theme} label={`${shipment.cartonCount} cartons`} tone="neutral" showDot={false} />
                 )}
             </div>
 
@@ -123,27 +124,27 @@ export const ScanHome = ({ theme, receiving, onOpenShipment, onOpenConnection })
     return (
         <div className="space-y-6">
             <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                    <div>
-                        <h1 className="text-[1.5rem] font-bold tracking-[-0.02em]" style={{ color: theme.colors.textPrimary }}>
-                            Scan
-                        </h1>
-                        <Caption theme={theme}>Receive a truck at the dock, online or off.</Caption>
-                    </div>
-                    <ConnectionChip
-                        theme={theme}
-                        network={receiving.network}
-                        queuedCount={receiving.queuedCount}
-                        failedCount={receiving.failedCount}
-                        syncing={receiving.syncing}
-                        onClick={onOpenConnection}
-                    />
-                </div>
+                <PageHeader
+                    theme={theme}
+                    title="Scan"
+                    subtitle="Receive a truck at the dock, online or off."
+                    action={(
+                        <ConnectionChip
+                            theme={theme}
+                            network={receiving.network}
+                            queuedCount={receiving.queuedCount}
+                            failedCount={receiving.failedCount}
+                            syncing={receiving.syncing}
+                            onClick={onOpenConnection}
+                        />
+                    )}
+                />
                 <StandardSearchBar
                     value={query}
                     onChange={setQuery}
                     placeholder="Project, PO, sales order, shipment or PRO"
                     theme={theme}
+                    size="control"
                 />
                 <div className="flex items-center gap-2">
                     {isScanDemoEnabled() ? (

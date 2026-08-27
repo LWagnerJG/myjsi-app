@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Package, Briefcase, LayoutGrid } from 'lucide-react';
 import { GlassCard } from '../../../components/common/GlassCard.jsx';
+import { PageHeader } from '../../../components/common/PageHeader.jsx';
 import { HomeSearchInput } from '../../../components/common/SearchInput.jsx';
 import { QuickActionDropdown } from '../../../components/common/QuickActionDropdown.jsx';
 import { getHomeChromePillStyles } from '../../../design-system/homeChrome.js';
@@ -12,10 +13,18 @@ const DROPDOWN_ID = 'spotlight-listbox';
 
 const TYPE_LABEL = { order: 'Order', project: 'Project', product: 'Product' };
 
+const timeGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+};
+
 export const HomeHeader = ({
     colors,
     todayLabel,
     theme,
+    userName = 'there',
     searchQuery,
     setSearchQuery,
     handleSearchSubmit,
@@ -148,17 +157,18 @@ export const HomeHeader = ({
 
     return (
         <div className="flex flex-col gap-2.5">
+            <PageHeader
+                theme={theme}
+                title={`${timeGreeting()}, ${userName}`}
+                subtitle={todayLabel}
+            />
+
             {/* Search row */}
             <div className="relative group">
                 <div className="flex items-center gap-4">
-                    <div className="shrink-0 hidden sm:block min-w-[120px]">
-                        <h2 className="text-[1.625rem] font-bold tracking-tight leading-none" style={{ color: colors.textPrimary }}>Dashboard</h2>
-                        <div className="text-xs font-medium whitespace-nowrap mt-1.5" style={{ color: colors.textSecondary, opacity: 0.45 }}>{todayLabel}</div>
-                    </div>
-
                     <GlassCard
                         theme={theme}
-                        className="relative z-10 px-5 flex items-center min-w-0 ml-auto w-full max-w-[760px]"
+                        className="relative z-10 px-5 flex items-center min-w-0 w-full max-w-[760px] sm:ml-auto"
                         onDragEnter={handleDragEnter}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}

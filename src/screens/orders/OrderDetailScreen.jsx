@@ -4,6 +4,8 @@ import {
   Truck, PackageCheck, ClipboardCheck, Phone, Mail, User,
 } from 'lucide-react';
 import { isDarkTheme } from '../../design-system/tokens.js';
+import { METRIC_CAPTION_CLASSNAME, FIELD_LABEL_CLASSNAME, SECTION_TITLE_CLASSNAME } from '../../design-system/tokens.js';
+import { StatusChip } from '../../components/common/StatusChip.jsx';
 import { JSIActionButton, JSIActionButtonGroup } from '../../components/common/JSIButtons.jsx';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { useFadeUp, tc, fmt$, fd, fs, Stage, LineItem, AckModal, ClipsModal } from './OrderDetailScreenComponents.jsx';
@@ -94,9 +96,8 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   <h1 className="text-[1.125rem] font-semibold leading-tight flex-1 min-w-0" style={{ color: c.textPrimary }}>
                     {tc(order.details)}
                   </h1>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: `${sc}12` }}>
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc }} />
-                    <span className="text-[0.6875rem] font-semibold" style={{ color: sc }}>{order.status}</span>
+                  <div className="inline-flex flex-shrink-0 mt-0.5">
+                    <StatusChip theme={theme} label={order.status} tone={order.status === 'Delivered' || order.status === 'Shipping' ? 'success' : order.status === 'Lost' ? 'error' : 'active'} color={sc} />
                   </div>
                 </div>
                 <p className="text-[0.8125rem] mt-1" style={{ color: c.textSecondary }}>
@@ -106,19 +107,19 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
               <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-5 pb-5 pt-2 sm:gap-x-6">
                 <div className="min-w-0">
-                  <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Net Total</p>
+                  <p className={METRIC_CAPTION_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>Net total</p>
                   <p className="text-lg font-semibold tabular-nums mt-px" style={{ color: c.textPrimary }}>{fmt$(order.net, true)}</p>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Est. Ship</p>
+                  <p className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>Est. ship</p>
                   <p className="text-[0.9375rem] font-semibold mt-px" style={{ color: c.textPrimary }}>{fs(order.shipDate) || '—'}</p>
                 </div>
                 <div className="min-w-0 col-span-2 sm:col-span-1">
-                  <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Dealer</p>
+                  <p className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>Dealer</p>
                   <p className="text-sm font-semibold mt-px break-words [overflow-wrap:anywhere]" style={{ color: c.textPrimary }}>{tc(order.company)}</p>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Discount</p>
+                  <p className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>Discount</p>
                   <p className="text-sm font-semibold mt-px" style={{ color: c.textPrimary }}>{order.discount}</p>
                 </div>
               </div>
@@ -146,18 +147,16 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
               style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}
             >
               <div className="flex items-center justify-between px-5 pt-4 pb-3">
-                <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Order Progress</span>
+                <span className={SECTION_TITLE_CLASSNAME} style={{ color: c.textPrimary }}>Order Progress</span>
                 {pct != null && (
-                  <span className="text-[0.6875rem] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${sc}12`, color: sc }}>
-                    {pct}%
-                  </span>
+                  <StatusChip theme={theme} label={`${pct}%`} tone="active" color={sc} showDot={false} />
                 )}
               </div>
               <div className="px-4 pt-2.5 pb-2">
                 {STAGES.map((s, i) => (
                   <Stage key={s.key} stage={s} state={stageState(i)} isLast={i === 5}
                     subtitle={subs[i] ?? null} statusColor={sc}
-                    progress={i === cur ? pct : null} dark={dark} c={c} idx={i}
+                    progress={i === cur ? pct : null} dark={dark} c={c} theme={theme} idx={i}
                     shipTo={i === 4 ? shipToAddr : null} />
                 ))}
               </div>
@@ -165,13 +164,13 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
 
             <div className="rounded-[24px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
               <div className="px-5 pt-4 pb-2">
-                <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Shipping & contacts</span>
+                <span className={SECTION_TITLE_CLASSNAME} style={{ color: c.textPrimary }}>Shipping & Contacts</span>
               </div>
               <div className="px-5 pb-4 space-y-3">
                 <div className="flex items-start gap-2.5">
                   <Truck className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
                   <div className="min-w-0">
-                    <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Carrier</p>
+                    <p className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>Carrier</p>
                     <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{order.carrier || 'Assigned at ship'}</p>
                     <p className="text-[0.8125rem] mt-0.5" style={{ color: c.textSecondary }}>
                       PRO {order.proNumber || '—'} · Est. {fs(order.shipDate) || 'TBD'}
@@ -182,7 +181,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   <div className="flex items-start gap-2.5">
                     <User className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
                     <div className="min-w-0">
-                      <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>CSR</p>
+                      <p className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>CSR</p>
                       <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{order.csr.name}</p>
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[0.75rem]" style={{ color: c.textSecondary }}>
                         {order.csr.email && (
@@ -199,7 +198,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                   <div className="flex items-start gap-2.5">
                     <User className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: c.textSecondary, opacity: 0.5 }} />
                     <div className="min-w-0">
-                      <p className="text-[0.6875rem] font-medium uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Sales rep</p>
+                      <p className={FIELD_LABEL_CLASSNAME} style={{ color: c.textSecondary, opacity: 0.5 }}>Sales rep</p>
                       <p className="text-sm font-semibold" style={{ color: c.textPrimary }}>{order.salesRep.name}</p>
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[0.75rem]" style={{ color: c.textSecondary }}>
                         {order.salesRep.email && (
@@ -214,7 +213,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
                 )}
                 {shipToAddr && (
                   <div className="pt-1" style={{ borderTop: `1px solid ${border}` }}>
-                    <p className="text-[0.6875rem] font-medium uppercase tracking-wide mb-1" style={{ color: c.textSecondary, opacity: 0.5 }}>Ship to</p>
+                    <p className={`${FIELD_LABEL_CLASSNAME} mb-1`} style={{ color: c.textSecondary, opacity: 0.5 }}>Ship to</p>
                     {shipToAddr.map((line) => (
                       <p key={line} className="text-[0.8125rem] leading-snug" style={{ color: c.textPrimary }}>{line}</p>
                     ))}
@@ -228,7 +227,7 @@ export const OrderDetailScreen = ({ theme, onNavigate, currentScreen }) => {
           <div ref={detRef} className="lg:col-start-1">
             <div className="rounded-[24px] overflow-hidden" style={{ backgroundColor: c.surface, border: `1px solid ${border}` }}>
               <div className="flex items-center justify-between px-5 pt-4 pb-2">
-                <span className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: c.textSecondary, opacity: 0.5 }}>Line Items</span>
+                <span className={SECTION_TITLE_CLASSNAME} style={{ color: c.textPrimary }}>Line Items</span>
                 <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.5 }}>
                   {order.lineItems.length} lines · {qty} units
                 </span>

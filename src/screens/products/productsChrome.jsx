@@ -42,7 +42,7 @@ export const ProductsViewToolbar = ({
     value={activeView}
     onChange={onViewChange}
     options={PRODUCT_VIEW_OPTIONS}
-    toggleSize="smDense"
+    toggleSize="sm"
     searchValue={searchTerm}
     onSearchChange={onSearchChange}
     searchPlaceholder={searchPlaceholder}
@@ -50,6 +50,5 @@ export const ProductsViewToolbar = ({
     trailing={trailing}
     trailingMobile={trailing ? 'below' : 'inline'}
     toggleAriaLabel="Product views"
-    className="[--jsi-ctrl-h:44px] sm:[--jsi-ctrl-h:36px]"
   />
 );

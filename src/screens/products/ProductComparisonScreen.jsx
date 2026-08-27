@@ -4,7 +4,7 @@ import { JSIWebButton } from '../../components/common/JSIButtons.jsx';
 import { ArrowRight, Package, Clock3, Layers, Sparkles } from 'lucide-react';
 import { PRODUCT_DATA } from './data.js';
 import { LEAD_TIMES_DATA } from '../resources/lead-times/data.js';
-import { isDarkTheme, cardSurface, subtleBg } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, subtleBg, METRIC_CAPTION_CLASSNAME } from '../../design-system/tokens.js';
 import { HOME_SURFACE_DARK, HOME_SURFACE_LIGHT } from '../../design-system/homeChrome.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrencyOrTbd } from '../../utils/format.js';
@@ -66,8 +66,32 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
   const isCasegoods = categoryName?.toLowerCase() === 'casegoods';
   const scrollRef = useRef(null);
   const [loadedIds, setLoadedIds] = useState(() => new Set());
+  const [fadeLeft, setFadeLeft] = useState(false);
+  const [fadeRight, setFadeRight] = useState(false);
   // Fill strip only on desktop — at 390px a 4-up flex strip crushes thumbs.
   const fillStripDesktop = products.length > 0 && products.length <= 6;
+
+  const updateStripFade = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    if (max <= 2) {
+      setFadeLeft(false);
+      setFadeRight(false);
+      return;
+    }
+    setFadeLeft(el.scrollLeft > 4);
+    setFadeRight(el.scrollLeft < max - 4);
+  }, []);
+
+  useEffect(() => {
+    updateStripFade();
+    const el = scrollRef.current;
+    if (!el) return undefined;
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateStripFade) : null;
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [products, updateStripFade]);
 
   // Priority-warm the first row of thumbs so casegoods doesn't flash text-only tabs.
   useEffect(() => {
@@ -103,19 +127,23 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
     });
   }, []);
 
+  const stripBg = dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT;
+
   return (
     <div
-      className="rounded-[24px] overflow-hidden"
+      className="relative rounded-[24px] overflow-hidden"
       style={{
         ...cardSurface(theme),
-        backgroundColor: dark ? HOME_SURFACE_DARK : HOME_SURFACE_LIGHT,
+        backgroundColor: stripBg,
         boxShadow: 'none',
         padding: 0,
       }}
     >
       <div
         ref={scrollRef}
+        onScroll={updateStripFade}
         className={`flex px-3 py-3 gap-2 overflow-x-auto scrollbar-hide ${fillStripDesktop ? 'lg:gap-2 lg:overflow-x-visible' : ''}`}
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {products.map((p, idx) => {
           const active = activeProduct?.id === p.id;
@@ -182,6 +210,20 @@ const ProductTabs = React.memo(({ products, activeProduct, onProductSelect, them
           );
         })}
       </div>
+      {fadeLeft && (
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-12"
+          style={{ background: `linear-gradient(to right, ${stripBg} 0%, ${stripBg}00 100%)` }}
+          aria-hidden="true"
+        />
+      )}
+      {fadeRight && (
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 sm:w-12"
+          style={{ background: `linear-gradient(to left, ${stripBg} 0%, ${stripBg}00 100%)` }}
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 });
@@ -400,7 +442,7 @@ const PricingTable = React.memo(({
                 { value: 'laminate', label: 'Laminate' },
                 { value: 'veneer', label: 'Veneer' },
               ]}
-              size="md"
+              size="sm"
               fullWidth
               theme={theme}
             />
@@ -421,10 +463,10 @@ const PricingTable = React.memo(({
 
       {/* Column headers */}
       <div className="px-5 pt-4 pb-1.5 flex items-center justify-between">
-        <span className="text-[0.6875rem] font-medium tracking-wide uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+        <span className={METRIC_CAPTION_CLASSNAME} style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
           Series
         </span>
-        <span className="text-[0.6875rem] font-medium tracking-wide uppercase" style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
+        <span className={METRIC_CAPTION_CLASSNAME} style={{ color: theme.colors.textSecondary, opacity: 0.5 }}>
           List
         </span>
       </div>

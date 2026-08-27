@@ -150,10 +150,8 @@ export const SuggestInputPill = ({
         type="button"
         aria-label={placeholder}
         onClick={() => setExpanded(true)}
-        className="inline-flex items-center justify-center flex-shrink-0 transition-all active:scale-[0.9] focus-ring hover:opacity-100"
+        className="inline-flex items-center justify-center flex-shrink-0 w-7 h-7 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 transition-all active:scale-[0.9] focus-ring hover:opacity-100"
         style={{
-          width: 28,
-          height: 28,
           borderRadius: 9999,
           backgroundColor: 'transparent',
           border: `1px dashed ${isDark ? 'rgba(255,255,255,0.22)' : 'rgba(53,53,53,0.22)'}`,
