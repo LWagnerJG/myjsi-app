@@ -5,9 +5,12 @@ import { isDarkTheme } from '../../design-system/tokens.js';
  * Canonical in-page header for top-level screens.
  * App bar stays logo + back + utilities; titles live here — not in AppHeader.
  *
- * title        — required H1
- * subtitle     — optional supporting line
- * action       — optional right-side control (button, chip, etc.)
+ * Mobile (~390): H1/subtitle hidden — app bar is enough wayfinding.
+ * Desktop (md+ / ~1280): title + optional subhead shown for dual-surface demos.
+ *
+ * title        — required H1 (desktop only)
+ * subtitle     — optional supporting line (desktop only)
+ * action       — optional right-side control (button, chip, etc.) — kept on mobile
  * className    — outer spacing; default matches content gutters when used inside padded layouts
  */
 export const PageHeader = React.memo(({
@@ -21,9 +24,14 @@ export const PageHeader = React.memo(({
 }) => {
   const dark = isDarkTheme(theme);
 
+  // No title block on phone and no action → collapse entirely (no empty padding).
+  const shellClass = action
+    ? `flex items-start justify-between gap-3 pt-1 pb-3 ${className}`.trim()
+    : `hidden md:flex items-start justify-between gap-3 pt-1 pb-3 ${className}`.trim();
+
   return (
-    <div className={`flex items-start justify-between gap-3 pt-1 pb-3 ${className}`.trim()}>
-      <div className="min-w-0 flex-1">
+    <div className={shellClass}>
+      <div className="min-w-0 flex-1 hidden md:block">
         <h1
           className={`text-[1.625rem] font-bold tracking-tight leading-tight ${titleClassName}`.trim()}
           style={{ color: theme.colors.textPrimary, fontFamily: 'var(--jsi-font)' }}
@@ -40,7 +48,7 @@ export const PageHeader = React.memo(({
         ) : null}
       </div>
       {action ? (
-        <div className="flex-shrink-0 flex items-center gap-2 pt-0.5">
+        <div className="flex-shrink-0 flex items-center gap-2 pt-0.5 md:pt-0.5 w-full md:w-auto justify-end">
           {action}
         </div>
       ) : null}
