@@ -3,6 +3,9 @@ import { isDarkTheme } from '../../design-system/tokens.js';
 
 const STEP = 5;
 const clampToStep = (pct) => Math.max(0, Math.min(100, Math.round(pct / STEP) * STEP));
+const bandFor = (pct) => (
+  pct <= 25 ? 'Long shot' : pct <= 50 ? 'Possible' : pct <= 75 ? 'Likely' : 'Strong'
+);
 
 /**
  * Accessible win-probability slider.
@@ -83,7 +86,7 @@ export const ProbabilitySlider = ({ value, onChange, theme, showLabel = true, sh
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={safeValue}
-                    aria-valuetext={`${safeValue}%`}
+                    aria-valuetext={`${safeValue}% · ${bandFor(safeValue)}`}
                     onKeyDown={onKeyDown}
                     className="relative rounded-full focus-ring"
                     style={{

@@ -1,7 +1,7 @@
 ﻿import React, { useState, useRef, useEffect, useCallback, useMemo, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus, Box } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Check, ChevronDown, Upload, FileText, Eye, Send, Paperclip, Users, Clock, CheckCircle, AlertCircle, Loader2, Pencil, Share2, Download, Mail, MapPin, Package, Phone, Truck, ShoppingBag, X, Trash2, Lock, Plus, Box } from 'lucide-react';
 import { isDarkTheme, DESIGN_TOKENS, JSI_COLORS, FIELD_LABEL_CLASSNAME, fieldTileSurface, groupedTileSurface } from '../../../../design-system/tokens.js';
 import { formatCurrency } from '../../../../utils/format.js';
 import { STAGES, VERTICALS, COMPETITORS, DISCOUNT_OPTIONS, PO_TIMEFRAMES, INITIAL_DESIGN_FIRMS, INITIAL_DEALERS } from '../../data.js';
@@ -113,6 +113,15 @@ const parseProjectDateValue = (value) => {
   const parsed = new Date(rawValue);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
+const formatInstallDateLabel = (value) => {
+  const date = parseProjectDateValue(value);
+  if (!date) return null;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+/* Band labels make the slider readable at a glance without changing the value. */
+const getWinProbabilityBand = (pct) => (
+  pct <= 25 ? 'Long shot' : pct <= 50 ? 'Possible' : pct <= 75 ? 'Likely' : 'Strong'
+);
 const formatSampleOrderTimestamp = (value) => {
   if (!value) return 'Date unavailable';
   const date = parseProjectDateValue(value);
@@ -1316,6 +1325,19 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
   const rewardsOn = salesRewardEnabled || designerRewardEnabled;
   const showSpiffWarning = isDiscount502010 && rewardsOn && rawNumeric > 0 && rawNumeric < SPIFF_502010_MIN_LIST;
   const currentProbability = typeof draft.winProbability === 'number' ? draft.winProbability : 0;
+  const probabilityBandLabel = getWinProbabilityBand(currentProbability);
+
+  const specCompleteness = useMemo(() => {
+    let set = 0;
+    let total = 0;
+    (draft.products || []).forEach((p) => {
+      getSeriesSpecPrompts(p.series).forEach((pr) => {
+        total += 1;
+        if (p[pr.key]) set += 1;
+      });
+    });
+    return { set, total, incomplete: total > 0 && set < total };
+  }, [draft.products]);
 
   useEffect(() => {
     if (readOnlyRef.current) return;
@@ -1610,9 +1632,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 <div className="min-w-0 space-y-1.5 overflow-visible">
                   <div className="flex items-center justify-between gap-3 min-w-0">
                     <span className={`${FIELD_LABEL_CLASS} shrink-0`} style={labelStyle}>Win Probability</span>
-                    <span className={`${FIELD_VALUE_CLASS} tabular-nums shrink-0`} style={{ color: c.textPrimary }}>{currentProbability}%</span>
+                    <div className="flex items-baseline gap-1.5 shrink-0 min-w-0">
+                      <span className={`${FIELD_HELPER_CLASS} truncate`} style={{ color: c.textSecondary, opacity: 0.55 }}>{probabilityBandLabel}</span>
+                      <span className={`${FIELD_VALUE_CLASS} tabular-nums`} style={{ color: c.textPrimary }}>{currentProbability}%</span>
+                    </div>
                   </div>
-                  <ProbabilitySlider value={currentProbability} onChange={v => update('winProbability', v)} theme={theme} showLabel={false} showValueBubble={false} compact />
+                  <ProbabilitySlider
+                    value={currentProbability}
+                    onChange={v => update('winProbability', v)}
+                    theme={theme}
+                    showLabel={false}
+                    showValueBubble={false}
+                    compact
+                    ariaLabel={`Win probability, ${probabilityBandLabel}`}
+                  />
                 </div>
               </div>
             </div>
@@ -1745,22 +1778,50 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                     )}
                   </Row>
                   <Row label="Install date" theme={theme}>
-                    {(id) => (
-                      <input
-                        id={id}
-                        type="date"
-                        value={draft.expectedInstallDate || ''}
-                        onChange={e => update('expectedInstallDate', e.target.value)}
-                        className={TEXT_INPUT_CLASS}
-                        style={{
-                          color: c.textPrimary,
-                          opacity: draft.expectedInstallDate ? 1 : 0.62,
-                          colorScheme: isDark ? 'dark' : 'light',
-                          minHeight: 'var(--jsi-ctrl-h)',
-                          ...fieldSurface(theme),
-                        }}
-                      />
-                    )}
+                    {(id) => {
+                      const installDateLabel = formatInstallDateLabel(draft.expectedInstallDate);
+                      return (
+                        <div className="relative w-full">
+                          <div
+                            className={`pointer-events-none w-full ${FIELD_CONTROL_MINH} px-3.5 flex items-center gap-2.5`}
+                            style={fieldSurface(theme)}
+                            aria-hidden="true"
+                          >
+                            <CalendarDays className="w-4 h-4 flex-shrink-0" style={{ color: c.textSecondary, opacity: 0.45 }} />
+                            <span
+                              className={`flex-1 ${FIELD_VALUE_CLASS}`}
+                              style={{ color: installDateLabel ? c.textPrimary : c.textSecondary, opacity: installDateLabel ? 1 : 0.55 }}
+                            >
+                              {installDateLabel || 'Set install date'}
+                            </span>
+                          </div>
+                          <input
+                            id={id}
+                            type="date"
+                            value={draft.expectedInstallDate || ''}
+                            onChange={e => update('expectedInstallDate', e.target.value)}
+                            className="absolute inset-0 z-[1] w-full h-full opacity-0 cursor-pointer"
+                            style={{ colorScheme: isDark ? 'dark' : 'light' }}
+                            aria-label="Install date"
+                          />
+                          {draft.expectedInstallDate ? (
+                            <button
+                              type="button"
+                              className="absolute right-2.5 top-1/2 z-[2] -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full focus-ring"
+                              aria-label="Clear install date"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                update('expectedInstallDate', '');
+                              }}
+                              style={{ color: c.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}
+                            >
+                              <X className="w-3.5 h-3.5" aria-hidden="true" />
+                            </button>
+                          ) : null}
+                        </div>
+                      );
+                    }}
                   </Row>
                   <Row label="Location" theme={theme}>
                     {(id) => (
@@ -1847,13 +1908,29 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                 </div>
               </Section>
 
-              <Section title="Specs & Quote" theme={theme} collapsible>
+              <Section
+                title="Specs & Quote"
+                theme={theme}
+                collapsible
+                right={specCompleteness.total > 0 ? (
+                  <span
+                    className="text-[0.625rem] font-semibold tabular-nums"
+                    style={{
+                      color: specCompleteness.incomplete ? c.textSecondary : JSI_COLORS.success,
+                      opacity: specCompleteness.incomplete ? 0.7 : 1,
+                    }}
+                  >
+                    {specCompleteness.set} of {specCompleteness.total} set
+                  </span>
+                ) : undefined}
+              >
                 <div className="space-y-3">
                   <span className={`${FIELD_LABEL_CLASS} block`} style={labelStyle}>Specified Series ({(draft.products || []).length})</span>
                   {(draft.products || []).length > 0 && (
                     <div className="space-y-3">
                       {(draft.products || []).map(p => {
                         const prompts = getSeriesSpecPrompts(p.series);
+                        const setCount = prompts.filter(pr => p[pr.key]).length;
                         const leadLabel = getSeriesLeadLabel(p.series);
                         const nestedFieldBg = isDark ? 'rgba(255,255,255,0.06)' : '#FFFFFF';
                         return (
@@ -1873,6 +1950,18 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                                     aria-label={leadLabel === 'QS' ? 'Quick ship' : `${leadLabel} lead time`}
                                   >
                                     {leadLabel === 'QS' ? 'Quick ship' : `${leadLabel} lead`}
+                                  </span>
+                                ) : null}
+                                {prompts.length > 0 ? (
+                                  <span
+                                    className="flex-shrink-0 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold tabular-nums"
+                                    style={{
+                                      backgroundColor: setCount === prompts.length ? 'rgba(74,124,89,0.14)' : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)'),
+                                      color: setCount === prompts.length ? JSI_COLORS.success : c.textSecondary,
+                                    }}
+                                    aria-label={`${setCount} of ${prompts.length} specs set`}
+                                  >
+                                    {setCount}/{prompts.length}
                                   </span>
                                 ) : null}
                               </div>
@@ -1939,6 +2028,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       <button
                         type="button"
                         onClick={handleRequestQuote}
+                        aria-describedby={specCompleteness.incomplete ? 'spec-incomplete-hint' : undefined}
                         className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[0.8125rem] font-semibold transition-all active:scale-[0.99] focus-ring sm:flex-none sm:min-w-[200px]"
                         style={{ backgroundColor: c.accent, color: c.accentText || '#FFFFFF' }}
                       >
@@ -1947,6 +2037,11 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       </button>
                     ) : null}
                   </div>
+                  {quoteMode !== 'not-needed' && specCompleteness.incomplete ? (
+                    <p id="spec-incomplete-hint" className={`${FIELD_HELPER_CLASS}`} style={{ color: c.textSecondary, opacity: 0.72 }}>
+                      {specCompleteness.total - specCompleteness.set} of {specCompleteness.total} series specs are still TBD. You can still request a quote.
+                    </p>
+                  ) : null}
                 </div>
               </Section>
             </div>

@@ -83,6 +83,35 @@ describe('OpportunityDetail', () => {
     expect(screen.getByRole('textbox', { name: 'Project notes' })).toHaveValue('Main HQ expansion; awaiting test fit.');
   });
 
+  it('shows a win-probability band label that updates with the slider', () => {
+    render(<Harness initial={baseOpp} />);
+    expect(screen.getByText('Possible')).toBeInTheDocument();
+
+    const slider = screen.getByRole('slider', { name: /win probability/i });
+    fireEvent.keyDown(slider, { key: 'End' });
+    expect(screen.getByText('Strong')).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: /win probability/i })).toHaveAttribute('aria-valuetext', '100% · Strong');
+  });
+
+  it('renders an iOS-friendly install date control with placeholder and clear', () => {
+    render(<Harness initial={baseOpp} />);
+    expect(screen.getByText('Set install date')).toBeInTheDocument();
+    const dateInput = screen.getByLabelText('Install date');
+    fireEvent.change(dateInput, { target: { value: '2026-09-15' } });
+    expect(screen.getByText('Sep 15, 2026')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear install date' }));
+    expect(screen.getByText('Set install date')).toBeInTheDocument();
+  });
+
+  it('surfaces light spec completeness on Specs when series prompts are TBD', () => {
+    render(<Harness initial={{
+      ...baseOpp,
+      products: [{ series: 'Vision' }],
+    }} />);
+    expect(screen.getByText(/of \d+ set/)).toBeInTheDocument();
+    expect(screen.getByText(/series specs are still TBD/i)).toBeInTheDocument();
+  });
+
   it('requires a project type selection before Done fires', () => {
     const onDone = vi.fn();
     render(
