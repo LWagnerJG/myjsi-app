@@ -1800,16 +1800,20 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                             type="date"
                             value={draft.expectedInstallDate || ''}
                             onChange={e => update('expectedInstallDate', e.target.value)}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            className="absolute inset-0 z-[1] w-full h-full opacity-0 cursor-pointer"
                             style={{ colorScheme: isDark ? 'dark' : 'light' }}
                             aria-label="Install date"
                           />
                           {draft.expectedInstallDate ? (
                             <button
                               type="button"
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full focus-ring"
+                              className="absolute right-2.5 top-1/2 z-[2] -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full focus-ring"
                               aria-label="Clear install date"
-                              onClick={() => update('expectedInstallDate', '')}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                update('expectedInstallDate', '');
+                              }}
                               style={{ color: c.textSecondary, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)' }}
                             >
                               <X className="w-3.5 h-3.5" aria-hidden="true" />
