@@ -220,7 +220,6 @@ const RewardToggleField = ({ label, checked, onChange, theme }) => {
         value={checked}
         onChange={onChange}
         theme={theme}
-        variant="onOff"
         ariaLabel={label}
       />
     </div>

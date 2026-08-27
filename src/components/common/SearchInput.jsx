@@ -147,8 +147,8 @@ export const HomeSearchInput = React.memo(function HomeSearchInput({
 
 // SearchInput — universal search pill used across all non-home screens.
 // Uses the same frosted-glass language as the home screen pill and app header.
-// size="md" (default): 56px standalone search
-// size="control": matches SegmentedToggle / CTA height via --jsi-ctrl-h
+// size="control" (default): matches SegmentedToggle / CTA height via --jsi-ctrl-h
+// size="md": 56px standalone search
 //
 // Typed text (control) matches SegmentedToggle `sm` / `smDense`:
 //   0.8125rem · font-weight 600
@@ -169,7 +169,8 @@ export const SearchInput = React.memo(function SearchInput({
     inputClassName = '',
     autoFocus = false,
     inputRef,
-    size = 'md',
+    onKeyDown,
+    size = 'control',
 }) {
     const dark = isDarkTheme(theme);
     const isControl = size === 'control';
@@ -262,6 +263,7 @@ export const SearchInput = React.memo(function SearchInput({
                 role="searchbox"
                 value={value}
                 onChange={(e) => onChange && onChange(e.target.value)}
+                onKeyDown={onKeyDown}
                 placeholder={placeholder}
                 className={`min-w-0 flex-1 bg-transparent outline-none border-0 ${inputClassName}`}
                 style={{

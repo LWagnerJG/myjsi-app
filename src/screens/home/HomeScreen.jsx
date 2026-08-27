@@ -470,7 +470,7 @@ export const HomeScreen = React.memo(({
             />
 
             <div
-                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-content mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] sm:pb-6"
+                className="px-4 sm:px-6 lg:px-8 flex flex-col max-w-content mx-auto w-full gap-4 sm:gap-6 py-4 sm:py-6 pb-[calc(9rem+env(safe-area-inset-bottom,0px))] sm:pb-6"
                 style={{
                     position: 'relative',
                     zIndex: 2,
@@ -482,6 +482,9 @@ export const HomeScreen = React.memo(({
                     colors={colors}
                     todayLabel={todayLabel}
                     theme={theme}
+                    userName={(members || []).find(m => m.id === currentUserId)?.firstName
+                        || (members || []).find(m => m.id === currentUserId)?.name?.split?.(' ')?.[0]
+                        || 'there'}
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     handleSearchSubmit={handleSearchSubmit}
@@ -525,7 +528,7 @@ export const HomeScreen = React.memo(({
                         />
                     </div>
 
-                    <div className="min-w-0 lg:sticky lg:top-2 mb-[5.5rem] sm:mb-0 lg:mb-0">
+                    <div className="min-w-0 lg:sticky lg:top-2 mb-[6.75rem] sm:mb-0 lg:mb-0">
                         <HomeFeatureCards
                             theme={theme}
                             colors={colors}

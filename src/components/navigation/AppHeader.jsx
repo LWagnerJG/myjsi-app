@@ -84,13 +84,6 @@ export const AppHeader = React.memo(({
         };
     }, [isHome]);
 
-    const getTimeGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning';
-        if (hour < 17) return 'Good Afternoon';
-        return 'Good Evening';
-    };
-
     return (
         <>
             {isHome && scrimProgress > 0.02 && (
@@ -201,17 +194,6 @@ export const AppHeader = React.memo(({
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-3">
-                        {isHome ? (
-                            <div
-                                data-greeting-anchor
-                                className="flex items-baseline justify-end mr-1 whitespace-nowrap"
-                                style={{ color: theme.colors.textPrimary }}
-                            >
-                                <span className="text-[0.9375rem] font-medium">{getTimeGreeting()},</span>
-                                <span className="text-[0.9375rem] font-medium ml-1 md:ml-1.5 truncate max-w-[7.5rem] sm:max-w-none">{userName}</span>
-                            </div>
-                        ) : null}
-
                         <button
                         ref={profileBtnRef}
                         type="button"

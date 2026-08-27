@@ -371,10 +371,9 @@ const CompactSelect = ({ id, options, value, onChange, theme, ariaLabel, surface
 
 /* Removable entity chip (dealers, A&D firms, series). */
 const RemovableChip = ({ label, detail, onRemove, theme, size = 'default' }) => {
-  const isDark = isDarkTheme(theme);
   const sizeClass = size === 'small'
-    ? 'h-7 px-2.5 text-[0.625rem]'
-    : 'h-8 px-3 text-[0.6875rem]';
+    ? 'min-h-[44px] px-2.5 text-[0.625rem] sm:min-h-0 sm:h-7'
+    : 'min-h-[44px] px-3 text-[0.6875rem] sm:min-h-0 sm:h-8';
   return (
     <button
       type="button"
@@ -440,7 +439,6 @@ const RewardToggleField = ({ label, checked, onChange, theme, labelStyle }) => (
       value={checked}
       onChange={onChange}
       theme={theme}
-      variant="onOff"
       ariaLabel={label}
     />
   </div>
@@ -774,7 +772,7 @@ const ProjectNotesField = ({ value, onChange, onAttach, documents, onRemoveDoc, 
         </div>
       ) : null}
       {!readOnly ? (
-        <button type="button" onClick={onAttach} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
+        <button type="button" onClick={onAttach} className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3.5 text-[0.75rem] font-semibold transition-all active:scale-[0.98] focus-ring" style={{ ...fieldSurface(theme), color: c.textSecondary }}>
           <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
           Attach CET or files
         </button>
@@ -1746,10 +1744,22 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
                       </div>
                     )}
                   </Row>
-                  <Row label="Install Date" theme={theme}>
+                  <Row label="Install date" theme={theme}>
                     {(id) => (
-                      <input id={id} type="date" value={draft.expectedInstallDate || ''} onChange={e => update('expectedInstallDate', e.target.value)}
-                        className={TEXT_INPUT_CLASS} style={{ color: c.textPrimary, opacity: draft.expectedInstallDate ? 1 : 0.62, colorScheme: isDark ? 'dark' : 'light', ...fieldSurface(theme) }} />
+                      <input
+                        id={id}
+                        type="date"
+                        value={draft.expectedInstallDate || ''}
+                        onChange={e => update('expectedInstallDate', e.target.value)}
+                        className={TEXT_INPUT_CLASS}
+                        style={{
+                          color: c.textPrimary,
+                          opacity: draft.expectedInstallDate ? 1 : 0.62,
+                          colorScheme: isDark ? 'dark' : 'light',
+                          minHeight: 'var(--jsi-ctrl-h)',
+                          ...fieldSurface(theme),
+                        }}
+                      />
                     )}
                   </Row>
                   <Row label="Location" theme={theme}>

@@ -122,14 +122,14 @@ describe('OpportunityDetail', () => {
     render(<Harness initial={{ ...baseOpp, discount: '50/20/10 (64.00%)' }} />);
 
     const salesGroup = () => screen.getByRole('group', { name: 'Sales 3%' });
-    expect(within(salesGroup()).getByRole('button', { name: 'Off' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(salesGroup()).getByRole('button', { name: 'No' })).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(within(salesGroup()).getByRole('button', { name: 'On' }));
-    expect(within(salesGroup()).getByRole('button', { name: 'On' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(within(salesGroup()).getByRole('button', { name: 'Yes' }));
+    expect(within(salesGroup()).getByRole('button', { name: 'Yes' })).toHaveAttribute('aria-pressed', 'true');
 
     // Flush the debounced save; the parent echoes the saved opp back down.
     act(() => { vi.advanceTimersByTime(700); });
-    expect(within(salesGroup()).getByRole('button', { name: 'On' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(salesGroup()).getByRole('button', { name: 'Yes' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('treats Documents as CET work from the dealer, not a generic PDF tray', () => {

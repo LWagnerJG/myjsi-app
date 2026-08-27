@@ -15,6 +15,7 @@ import { formatCompanyName } from '../../utils/format.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { ProjectCard } from './components/projects/ProjectCard.jsx';
 import { ProjectSpotlight } from './components/projects/ProjectSpotlight.jsx';
+import { PageHeader } from '../../components/common/PageHeader.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
 import { resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
@@ -28,7 +29,7 @@ const CUSTOMER_TYPES = [
 const COMPACT_PROJECTS_TAB_OPTIONS = [
   { value: 'pipeline', label: 'Projects' },
   { value: 'customers', label: 'Customers' },
-  { value: 'my-projects', label: 'Installs' },
+  { value: 'my-projects', label: 'Installations' },
 ];
 
 /** Fills an empty grid cell on desktop so a lonely last card doesn't strand empty canvas. */
@@ -633,9 +634,16 @@ export const ProjectsScreen = forwardRef(({
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
 
       <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
+        <div className="px-4 sm:px-6 lg:px-8 max-w-content mx-auto w-full">
+          <PageHeader
+            theme={theme}
+            title="Projects"
+            subtitle={projectsTab === 'pipeline' ? 'Pipeline by stage' : projectsTab === 'customers' ? 'Accounts and firms' : 'Installations'}
+          />
+        </div>
         <div ref={headerControlsRef} className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
           <div ref={projectsToggleRef} className="order-1 w-full min-w-0 sm:flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
-            <div className="inline-block min-w-full sm:min-w-0 sm:pr-4 [--jsi-ctrl-h:44px] sm:[--jsi-ctrl-h:36px]">
+            <div className="inline-block min-w-full sm:min-w-0 sm:pr-4">
               <SegmentedToggle
                 value={projectsTab}
                 onChange={setProjectsTab}
@@ -647,7 +655,7 @@ export const ProjectsScreen = forwardRef(({
               />
             </div>
           </div>
-          <div className="order-2 flex w-full flex-shrink-0 items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:justify-end">
+          <div className="order-2 flex w-full min-w-0 flex-shrink-0 items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:justify-end sm:flex-1">
             {projectsTab === 'pipeline' && (
               <ProjectSpotlight
                 opportunities={opportunities}
@@ -722,7 +730,7 @@ export const ProjectsScreen = forwardRef(({
               className="overflow-x-auto scrollbar-hide overscroll-x-contain px-4 sm:px-6 lg:px-8"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <div className="inline-flex min-w-max items-center gap-0 py-0.5 pb-3 whitespace-nowrap" role="tablist" aria-label="Pipeline stages">
+              <div className="inline-flex min-w-max items-center gap-1 py-0.5 pb-3 whitespace-nowrap rounded-[999px] p-[3px]" role="tablist" aria-label="Pipeline stages" style={{ backgroundColor: theme.colors.subtle || '#E3E0D8' }}>
                 {STAGES.map((stage, i) => {
                   const active = selectedPipelineStage === stage;
                   return (
@@ -732,11 +740,15 @@ export const ProjectsScreen = forwardRef(({
                       role="tab"
                       aria-selected={active}
                       onClick={() => setSelectedPipelineStage(stage)}
-                      className="relative min-h-[44px] text-[0.8125rem] transition-all px-3.5 py-2.5 focus-ring"
+                      className="relative rounded-full text-[0.8125rem] font-semibold transition-all px-3 focus-ring whitespace-nowrap"
                       style={{
-                        color: active ? theme.colors.textPrimary : (isDark ? 'rgba(240,240,240,0.55)' : '#9A9790'),
-                        fontWeight: active ? 600 : 500,
-                        borderBottom: active ? `2px solid ${theme.colors.textPrimary}` : '2px solid transparent',
+                        minHeight: 'calc(var(--jsi-ctrl-h) - 6px)',
+                        color: active ? theme.colors.textPrimary : (isDark ? 'rgba(240,240,240,0.78)' : '#6A6762'),
+                        backgroundColor: active
+                          ? (isDark ? 'rgba(255,255,255,0.14)' : '#FFFFFF')
+                          : 'transparent',
+                        border: active && !isDark ? '1px solid rgba(255,255,255,0.96)' : 'none',
+                        boxShadow: active && !isDark ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
                       }}
                     >
                       {stage !== 'Won' && stage !== 'Lost' && (
@@ -747,7 +759,6 @@ export const ProjectsScreen = forwardRef(({
                   );
                 })}
               </div>
-              <div className="h-px" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
             </div>
             {showStageFadeLeft && (
               <div

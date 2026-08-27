@@ -2,8 +2,8 @@ import React from 'react';
 import { SearchInput } from './SearchInput.jsx';
 
 // Standardized search pill used across feature screens.
-// size="md" (default): 56px standalone search
-// size="control": matches SegmentedToggle / CTA height (--jsi-ctrl-h) for toolbar rows
+// size="control" (default): matches SegmentedToggle / CTA height (--jsi-ctrl-h)
+// size="md": 56px standalone search (home-adjacent contexts only)
 export const StandardSearchBar = ({
   value,
   onChange,
@@ -15,7 +15,8 @@ export const StandardSearchBar = ({
   inputRef,
   style,
   inputClassName = '',
-  size = 'md',
+  onKeyDown,
+  size = 'control',
 }) => {
   const handleChange = (e) => {
     // Accept both synthetic event and raw value handlers
@@ -34,6 +35,7 @@ export const StandardSearchBar = ({
       autoFocus={autoFocus}
       inputRef={inputRef}
       style={style}
+      onKeyDown={onKeyDown}
       size={size}
     />
   );

@@ -48,7 +48,8 @@ input.commercial-value-input {
 :root {
     --app-height: 100vh;
     --app-header-offset: 72px;
-    --jsi-ctrl-h: 36px; /* shared fixed height for toggle + CTA pill buttons — immune to iOS Dynamic Type */
+    /* Phone-first control height (44px touch); desktop tightens at sm+ */
+    --jsi-ctrl-h: 44px;
     --safe-area-inset-top: env(safe-area-inset-top);
     --safe-area-inset-right: env(safe-area-inset-right);
     --safe-area-inset-bottom: env(safe-area-inset-bottom);
@@ -572,6 +573,9 @@ h6 {
 }
 
 @media (min-width: 640px) {
+    :root {
+        --jsi-ctrl-h: 36px;
+    }
     .content-padding {
         padding-left: var(--content-padding-tablet);
         padding-right: var(--content-padding-tablet);

@@ -4,13 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { ScreenTopChrome } from '../../components/common/ScreenTopChrome.jsx';
 import SwipeCalendar from '../../components/common/SwipeCalendar.jsx';
-import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
+import { isDarkTheme, cardSurface, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME, ROW_DENSITY } from '../../design-system/tokens.js';
 import { VERTICAL_COLORS } from '../../constants/verticals.js';
 import { ORDER_DATA, STATUS_COLORS } from './data.js';
 import { OrdersViewToolbar } from './ordersChrome.jsx';
 import { INITIAL_SAMPLE_ORDERS } from '../samples/sampleOrders.js';
-import { formatCurrency, formatCompanyName, formatRelativeTime, formatShortDate } from '../../utils/format.js';
+import { formatCurrency, formatCompanyName, formatRelativeTime, formatShortDate, smartTitleCase } from '../../utils/format.js';
 import { useCompanyResource } from '../../hooks/useCompanyResource.js';
+import { PageHeader } from '../../components/common/PageHeader.jsx';
+import { StatusChip } from '../../components/common/StatusChip.jsx';
+import { METRIC_CAPTION_CLASSNAME } from '../../design-system/tokens.js';
 
 const ORDERS_SHELL_CLASS = 'w-full max-w-content mx-auto';
 const ORDERS_EDGE_PADDING = 'px-4 sm:px-6 lg:px-8';
@@ -133,23 +136,31 @@ export const OrderCalendarView = ({ orders, theme, dateType, onOrderClick }) => 
     );
 };
 
+const orderStatusTone = (status) => {
+    if (status === 'Delivered' || status === 'Shipping' || status === 'Won') return 'success';
+    if (status === 'Lost') return 'error';
+    if (status === 'In Production' || status === 'Acknowledged' || status === 'PO Expected') return 'active';
+    if (status === 'Decision/Bidding') return 'warning';
+    return 'neutral';
+};
+
 const OrderRow = ({ order, theme, onNavigate, isLast }) => {
     const dark = isDarkTheme(theme);
-    const statusColor = STATUS_COLORS[order.status] || '#8B8680';
+    const rowDensity = ROW_DENSITY.default;
     return (
         <button
             type="button"
             onClick={() => onNavigate(`orders/${order.orderNumber}`)}
             className={`group/order-row w-full text-left transition active:scale-[0.99] ${dark ? 'hover:bg-white/[0.04]' : 'hover:bg-black/[0.025]'}`}
         >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2.5 px-5 py-4 sm:items-center sm:gap-4 sm:px-6">
+            <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2.5 px-5 ${rowDensity.py} sm:items-center sm:gap-4 sm:px-6`} style={{ minHeight: rowDensity.minHeight }}>
                 <div className="min-w-0">
                     <p
                         className="text-[0.9375rem] font-bold leading-snug break-words [overflow-wrap:anywhere] line-clamp-2 sm:truncate sm:leading-normal sm:[overflow-wrap:normal]"
                         style={{ color: theme.colors.textPrimary }}
-                        title={order.details}
+                        title={smartTitleCase(order.details)}
                     >
-                        {order.details}
+                        {smartTitleCase(order.details)}
                     </p>
                     <p className="text-[0.8125rem] mt-1 flex items-center gap-1.5 min-w-0" style={{ color: theme.colors.textSecondary }}>
                         <span className="truncate">{formatCompanyName(order.company)}</span>
@@ -162,12 +173,12 @@ const OrderRow = ({ order, theme, onNavigate, isLast }) => {
                 <div className="flex shrink-0 items-start justify-end gap-2 text-right sm:items-center sm:gap-3">
                     <div>
                         <p className="text-[0.9375rem] font-bold tabular-nums whitespace-nowrap" style={{ color: theme.colors.textPrimary }}>{formatCurrency(order.net)}</p>
-                        <p className="hidden text-[0.6875rem] mt-1 sm:flex items-center justify-end gap-1" style={{ color: theme.colors.textSecondary }}>
+                        <p className="hidden text-[0.6875rem] mt-1 sm:flex items-center justify-end gap-1.5" style={{ color: theme.colors.textSecondary }}>
                             <span className="truncate max-w-[7.5rem]" style={{ opacity: 0.58 }} title={order.orderNumber}>{order.orderNumber}</span>
-                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                            <StatusChip theme={theme} label={order.status} tone={orderStatusTone(order.status)} className="!px-2 !py-0.5" />
                         </p>
                         <p className="mt-1.5 flex justify-end sm:hidden">
-                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+                            <StatusChip theme={theme} label={order.status} tone={orderStatusTone(order.status)} className="!px-2 !py-0.5" />
                         </p>
                     </div>
                     <ChevronRight
@@ -192,7 +203,7 @@ const DateGroupCard = ({ theme, dateKey, group, onNavigate }) => {
     return (
         <div className="rounded-[24px] overflow-hidden" style={{ ...cardSurface(theme) }}>
             <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-2 sm:px-6">
-                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em]" style={{ color: metaColor }}>{label}</p>
+                <p className={METRIC_CAPTION_CLASSNAME} style={{ color: metaColor }}>{label}</p>
                 <p className="text-[0.6875rem] font-bold tabular-nums" style={{ color: metaColor }}>{formatCurrency(group.total)}</p>
             </div>
             <div className="mx-5 sm:mx-6" style={{ borderTop: `1px solid ${headerDivider}` }} />
@@ -580,6 +591,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
         <div className="flex flex-col h-full app-header-offset" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
             <ScreenTopChrome theme={theme} contentClassName="pt-3 pb-2" fade={false}>
                 <div className="flex flex-col gap-2.5">
+                    <PageHeader theme={theme} title="Orders" subtitle="Shipments, POs, and samples" />
                     <OrdersViewToolbar
                         theme={theme}
                         dateType={dateType}
