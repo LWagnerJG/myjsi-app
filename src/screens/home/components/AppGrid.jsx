@@ -13,7 +13,8 @@ import {
 import { SortableAppTile } from './SortableAppTile.jsx';
 import { getAppBadge, getAppTileStat, MIN_PINNED_APPS, NON_REMOVABLE_APPS } from '../utils/homeUtils.js';
 import { appTileBorder } from '../../../design-system/tokens.js';
-import { formatCurrencyCompact } from '../../../utils/format.js';
+import { formatCurrencyCompact, smartTitleCase } from '../../../utils/format.js';
+import { METRIC_CAPTION_CLASSNAME } from '../../../design-system/tokens.js';
 
 const DESKTOP_RESOURCE_SHORTCUTS = [
     { label: 'Lead Times', route: 'resources/lead-times', Icon: Hourglass },
@@ -281,7 +282,7 @@ export const AppGrid = ({
                         <PieChart className="w-[18px] h-[18px]" style={{ color: colors.accent }} />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[0.6875rem] font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary, opacity: 0.55 }}>
+                        <p className={METRIC_CAPTION_CLASSNAME} style={{ color: colors.textSecondary, opacity: 0.55 }}>
                             Sales YTD
                         </p>
                         <p className="text-[1.0625rem] font-bold tabular-nums tracking-tight" style={{ color: colors.textPrimary }}>
@@ -301,7 +302,7 @@ export const AppGrid = ({
                     <>
                         <div className="mx-4" style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }} />
                         <div className="px-2 py-1.5">
-                            <p className="px-2 pt-1 pb-1 text-[0.625rem] font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary, opacity: 0.45 }}>
+                            <p className={`px-2 pt-1 pb-1 ${METRIC_CAPTION_CLASSNAME}`} style={{ color: colors.textSecondary, opacity: 0.45 }}>
                                 Recent orders
                             </p>
                             {(recentOrders || []).slice(0, 4).map((order) => (
@@ -322,10 +323,10 @@ export const AppGrid = ({
                                 >
                                     <span className="min-w-0 flex-1">
                                         <span className="block text-[0.75rem] font-semibold truncate" style={{ color: colors.textPrimary }}>
-                                            {order.details}
+                                            {smartTitleCase(order.details)}
                                         </span>
                                         <span className="block text-[0.625rem] truncate" style={{ color: colors.textSecondary, opacity: 0.65 }}>
-                                            {order.company} · {order.status}
+                                            {smartTitleCase(order.company)} · {order.status}
                                         </span>
                                     </span>
                                     <span className="text-[0.75rem] font-semibold tabular-nums shrink-0" style={{ color: colors.textPrimary }}>
