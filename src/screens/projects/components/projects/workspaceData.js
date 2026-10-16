@@ -30,3 +30,13 @@ export const groupCustomerProjects = (customers = [], opportunities = []) => {
     return activeDifference || a.name.localeCompare(b.name);
   });
 };
+
+const searchArray = value => Array.isArray(value) ? value : value ? [value] : [];
+const searchEntity = value => typeof value === 'object' && value ? [value.name, value.firstName, value.lastName, value.email, value.role, value.title].filter(Boolean).join(' ') : String(value || '');
+const includesQuery = (fields, query) => {
+  const text = fields.map(searchEntity).join(' ').toLowerCase();
+  return query.trim().toLowerCase().split(/\s+/).every(word => text.includes(word));
+};
+const customerSearchFields = group => [group.name, group.customer?.domain, ...searchArray(group.customer?.contacts), ...searchArray(group.customer?.contact), ...searchArray(group.customer?.dealers), ...searchArray(group.customer?.dealer)];
+export const matchesCustomerQuery = (group, query) => includesQuery(customerSearchFields(group), query);
+export const matchesWorkspaceQuery = (project, group, query) => includesQuery([...customerSearchFields(group), project.name, project.company, project.endUser, ...searchArray(project.contact), ...searchArray(project.contacts), ...searchArray(project.dealers), ...searchArray(project.dealer)], query);

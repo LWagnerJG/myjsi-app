@@ -23,7 +23,7 @@ const CATEGORIES = {
 const NAV = {
     orders:       'View Your Orders',
     products:     'Browse Products',
-    projects:     'View Projects',
+    projects:     'Open MyWorkspace',
     samples:      'Request Samples',
     community:    'Visit Community',
     marketplace:  'Explore Marketplace',

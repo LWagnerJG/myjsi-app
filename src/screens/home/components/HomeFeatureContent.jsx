@@ -198,7 +198,7 @@ export const HomeFeatureContent = memo(({
                     >
                         <div>
                             <div className="text-sm font-semibold" style={{ color: colors.textPrimary }}>No active projects yet</div>
-                            <div className="text-xs mt-0.5" style={{ color: colors.textSecondary }}>Tap to open Projects and create one</div>
+                            <div className="text-xs mt-0.5" style={{ color: colors.textSecondary }}>Tap to open MyWorkspace and create one</div>
                         </div>
                     </button>
                 )}

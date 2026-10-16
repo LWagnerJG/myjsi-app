@@ -390,7 +390,7 @@ export const HomeScreen = React.memo(({
         { id: 'lead-times', label: 'Lead Times' },
         { id: 'announcements', label: 'Announcements' },
         { id: 'products', label: 'Products' },
-        { id: 'projects', label: 'Projects' },
+        { id: 'projects', label: 'MyWorkspace' },
         { id: 'marketplace', label: 'LWYD Marketplace' },
     ]), []);
 

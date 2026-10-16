@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { ProjectsWorkspace } from './ProjectsWorkspace.jsx';
 import { lightTheme } from '../../../../data/theme/themeData.js';
-import { groupCustomerProjects, isOpenProject, matchesCompany, projectListValue } from './workspaceData.js';
+import { groupCustomerProjects, isOpenProject, matchesCompany, projectListValue, matchesCustomerQuery, matchesWorkspaceQuery } from './workspaceData.js';
 
 const customers = [{ id: 'a', name: 'Acme', location: { city: 'Jasper', state: 'IN' }, standardsPrograms: [{ status: 'Active' }], orders: { current: [{}] } }, { id: 'b', name: 'Empty customer' }];
 const projects = [
@@ -31,6 +31,12 @@ describe('customer project grouping', () => {
     expect(projectListValue({ value: 'TBD' })).toBe(0);
     expect(projectListValue({ value: -100 })).toBe(0);
   });
+  it('matches spotlight filters across contacts, dealer objects and multiple words', () => {
+    const group = { name: 'Acme', customer: { contacts: [{ name: 'Jordan Lee', email: 'jordan@example.com' }] } };
+    expect(matchesCustomerQuery(group, 'jordan acme')).toBe(true);
+    expect(matchesWorkspaceQuery({ name: 'Office', dealers: [{ name: 'Business Furniture' }] }, group, 'furniture office')).toBe(true);
+    expect(matchesWorkspaceQuery({ name: 'Office' }, group, 'unknown')).toBe(false);
+  });
   it('does not match an empty dealer against a company filter', () => {
     expect(matchesCompany({ dealers: [''], company: '' }, 'Business Furniture')).toBe(false);
     expect(matchesCompany({ dealers: ['Business Furniture LLC'] }, 'Business Furniture')).toBe(true);
@@ -51,37 +57,56 @@ describe('ProjectsWorkspace', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Filter by customer' }), { target: { value: 'a' } });
     expect(screen.queryByRole('button', { name: /Unlinked work/ })).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole('combobox', { name: 'Filter by customer' }), { target: { value: '' } });
-    fireEvent.change(screen.getByRole('textbox', { name: 'Search customers and projects' }), { target: { value: 'Empty customer' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by customer' }), { target: { value: 'b' } });
     expect(screen.getByRole('region', { name: 'Empty customer projects' })).toBeInTheDocument();
   });
   it('changes stages from an accessible select and can undo', () => {
     render(<Harness view="pipeline" />);
     fireEvent.change(screen.getByRole('combobox', { name: 'Stage for Office refresh' }), { target: { value: 'PO Expected' } });
-    expect(within(screen.getByRole('region', { name: 'PO Expected pipeline' })).getByRole('button', { name: /Office refresh/ })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'PO Expected Active Projects' })).getByRole('button', { name: /^Office refresh/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Undo stage change' }));
-    expect(within(screen.getByRole('region', { name: 'Discovery pipeline' })).getByRole('button', { name: /Office refresh/ })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Discovery Active Projects' })).getByRole('button', { name: /^Office refresh/ })).toBeInTheDocument();
   });
   it('moving a project to Won updates active totals without losing it', () => {
     render(<Harness view="pipeline" />);
     fireEvent.change(screen.getByRole('combobox', { name: 'Stage for Office refresh' }), { target: { value: 'Won' } });
     expect(screen.queryByText('$12,000')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('checkbox', { name: 'Show closed' }));
-    expect(within(screen.getByRole('region', { name: 'Won pipeline' })).getByRole('button', { name: /Office refresh/ })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Won Active Projects' })).getByRole('button', { name: /^Office refresh/ })).toBeInTheDocument();
   });
   it('keeps unknown stages visible in pipeline', () => {
     render(<Harness view="pipeline" initial={[{ id: 99, name: 'Legacy work', company: 'Acme', stage: 'Custom stage', value: 500 }]} />);
-    expect(within(screen.getByRole('region', { name: 'Custom stage pipeline' })).getByRole('button', { name: /Legacy work/ })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Custom stage Active Projects' })).getByRole('button', { name: /^Legacy work/ })).toBeInTheDocument();
   });
   it('honors an explicit closed stage in customer view', () => {
     render(<Harness initialStage="Won" />);
     expect(screen.getByRole('button', { name: /Closed project/ })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Show closed' })).toBeChecked();
-    expect(screen.queryByRole('button', { name: /Office refresh/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Office refresh/ })).not.toBeInTheDocument();
+  });
+  it('keeps inactive customers in a compact, accessible directory', () => {
+    const onOpenCustomer = vi.fn();
+    render(<Harness onOpenCustomer={onOpenCustomer} />);
+    expect(screen.queryByRole('region', { name: 'Empty customer projects' })).not.toBeInTheDocument();
+    const directory = screen.getByRole('button', { name: /Other customers/ });
+    expect(directory).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(directory);
+    fireEvent.click(screen.getByRole('button', { name: 'Empty customer' }));
+    expect(onOpenCustomer).toHaveBeenCalledWith(customers[1]);
+    fireEvent.click(directory);
+    expect(screen.queryByRole('button', { name: 'Empty customer' })).not.toBeInTheDocument();
+  });
+  it('always offers closed-stage drop targets and drag handles', () => {
+    render(<Harness view="pipeline" />);
+    expect(screen.getByRole('region', { name: 'Won Active Projects' })).toHaveTextContent('Drop to close');
+    expect(screen.getByRole('region', { name: 'Lost Active Projects' })).toHaveTextContent('Drop to close');
+    expect(screen.getByRole('button', { name: 'Move Office refresh' })).toHaveAttribute('aria-roledescription', 'draggable');
+    expect(screen.queryByText(/pipeline/i)).not.toBeInTheDocument();
   });
   it('keeps customer and project navigation separate', () => {
     const onOpenProject = vi.fn(); const onOpenCustomer = vi.fn();
     render(<Harness onOpenProject={onOpenProject} onOpenCustomer={onOpenCustomer} />);
-    fireEvent.click(screen.getByRole('button', { name: /Office refresh/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Office refresh/ }));
     expect(onOpenProject).toHaveBeenCalledWith(1);
     fireEvent.click(within(screen.getByRole('region', { name: 'Acme projects' })).getByRole('button', { name: 'Customer workspace' }));
     expect(onOpenCustomer).toHaveBeenCalledWith(customers[0]);

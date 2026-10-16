@@ -10,12 +10,11 @@ import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
 import { PageHeader } from '../../components/common/PageHeader.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
-import { usePersistentState } from '../../hooks/usePersistentState.js';
 import { ProjectsWorkspace } from './components/projects/ProjectsWorkspace.jsx';
 
 const VIEW_OPTIONS = [
   { value: 'customers', label: 'Customers' },
-  { value: 'pipeline', label: 'Pipeline' },
+  { value: 'pipeline', label: 'Active Projects' },
   { value: 'my-projects', label: 'Installations' },
 ];
 
@@ -189,25 +188,25 @@ const AddCustomerModal = ({ theme, onClose, onAdd }) => {
 
 export const ProjectsScreen = forwardRef(({
   onNavigate, theme, opportunities, setOpportunities,
-  projectsInitialTab, clearProjectsInitialTab,
-  projectsInitialStage, clearProjectsInitialStage,
   deepLinkOppId, members, currentUserId,
   setBackHandler, sampleOrders, myProjects = [],
-  screenParams,
+  workspaceRoute,
 }, ref) => {
   const isDark = isDarkTheme(theme);
-  const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'customers');
-  const [selectedPipelineStage, setSelectedPipelineStage] = usePersistentState('pref.projects.pipelineStage', '');
+  const projectsTab = workspaceRoute?.tab || 'customers';
+  const selectedPipelineStage = workspaceRoute?.stage || '';
+  const companyFilter = workspaceRoute?.company || null;
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [deepLinkResolved, setDeepLinkResolved] = useState(!deepLinkOppId);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
-  const [companyFilter, setCompanyFilter] = useState(screenParams?.company || null);
-  const screenParamsCompany = screenParams?.company || null;
-  useEffect(() => {
-    setCompanyFilter(screenParamsCompany);
-  }, [screenParamsCompany]);
+  const navigateWorkspace = (changes = {}) => onNavigate('projects', {
+    tab: projectsTab,
+    company: companyFilter,
+    stage: selectedPipelineStage,
+    ...changes,
+  });
 
   const hasRouteOpportunityDetail = Boolean(deepLinkOppId);
   const selectedOpportunityRef = useRef(selectedOpportunity);
@@ -221,19 +220,10 @@ export const ProjectsScreen = forwardRef(({
     selectedCustomerRef.current = selectedCustomer;
   }, [selectedCustomer]);
 
+  // Browser history changes the route without invoking the local header back handler.
   useEffect(() => {
-    if (projectsInitialTab) {
-      setProjectsTab(projectsInitialTab);
-      clearProjectsInitialTab?.();
-    }
-  }, [projectsInitialTab, clearProjectsInitialTab, setProjectsTab]);
-
-  useEffect(() => {
-    if (projectsInitialStage) {
-      setSelectedPipelineStage(projectsInitialStage);
-      clearProjectsInitialStage?.();
-    }
-  }, [projectsInitialStage, clearProjectsInitialStage, setSelectedPipelineStage]);
+    setSelectedCustomer(null);
+  }, [workspaceRoute, deepLinkOppId]);
 
   useEffect(() => {
     if (!deepLinkOppId) {
@@ -352,9 +342,9 @@ export const ProjectsScreen = forwardRef(({
       onNavigate={onNavigate}
       onOpenCustomer={setSelectedCustomer}
       onUpdate={updated => { updateOpportunity(updated); setSelectedOpportunity(updated); }}
-      onMarkLost={updated => { updateOpportunity(updated); setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('projects'); }}
-      onDelete={id => { deleteOpportunity(id); setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('projects'); }}
-      onDone={() => { setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('projects'); }}
+      onMarkLost={updated => { updateOpportunity(updated); setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('active-projects'); }}
+      onDelete={id => { deleteOpportunity(id); setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('active-projects'); }}
+      onDone={() => { setDeepLinkResolved(false); setSelectedOpportunity(null); onNavigate('active-projects'); }}
     />
   );
 
@@ -367,7 +357,7 @@ export const ProjectsScreen = forwardRef(({
             theme={theme}
             title="Project not found"
             description="This project link is invalid or the project was removed."
-            action={{ label: 'Back to Projects', onClick: () => onNavigate('projects') }}
+            action={{ label: 'Back to MyWorkspace', onClick: () => onNavigate('projects') }}
           />
         </div>
       </div>
@@ -377,9 +367,9 @@ export const ProjectsScreen = forwardRef(({
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <div className="px-4 sm:px-6 lg:px-8 max-w-content mx-auto w-full pb-10" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)' }}>
-        <PageHeader theme={theme} title="My Projects" subtitle="Customer context. Clear next steps." />
+        <PageHeader theme={theme} title="MyWorkspace" />
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <SegmentedToggle value={projectsTab} onChange={setProjectsTab} options={VIEW_OPTIONS} size="sm" theme={theme} ariaLabel="Project views" />
+          <SegmentedToggle value={projectsTab} onChange={tab => navigateWorkspace({ tab })} options={VIEW_OPTIONS} size="sm" theme={theme} ariaLabel="Workspace views" />
           <button type="button" onClick={() => onNavigate(projectsTab === 'my-projects' ? 'add-new-install' : 'new-lead')}
             className="inline-flex items-center gap-2 rounded-full px-4 min-h-[44px] text-sm font-semibold focus-ring"
             style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
@@ -388,8 +378,9 @@ export const ProjectsScreen = forwardRef(({
         </div>
         {projectsTab !== 'my-projects' ? (
           <ProjectsWorkspace theme={theme} view={projectsTab} customers={customers} opportunities={opportunities || []}
-            companyFilter={companyFilter} onClearCompany={() => setCompanyFilter(null)}
-            initialStage={selectedPipelineStage} onClearInitialStage={() => setSelectedPipelineStage('')}
+            companyFilter={companyFilter} onClearCompany={() => navigateWorkspace({ company: null })}
+            initialStage={selectedPipelineStage} onClearInitialStage={() => navigateWorkspace({ stage: '' })}
+            onClearFilters={() => navigateWorkspace({ company: null, stage: '' })}
             onOpenProject={id => onNavigate(`projects/${id}`)} onOpenCustomer={setSelectedCustomer}
             onUpdateProject={updateOpportunity} onAddCustomer={() => setShowAddCustomer(true)} />
         ) : allProjects.length > 0 ? (

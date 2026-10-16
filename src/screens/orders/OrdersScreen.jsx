@@ -639,7 +639,7 @@ export const OrdersScreen = ({ theme, onNavigate, screenParams, sampleOrders }) 
                                     className="inline-flex items-center gap-1 text-xs font-medium ml-auto transition-opacity hover:opacity-70 min-h-[36px]"
                                     style={{ color: theme.colors.textSecondary }}
                                 >
-                                    See pipeline
+                                    See Active Projects
                                     <ChevronRight className="w-3.5 h-3.5 opacity-50" />
                                 </button>
                             )}

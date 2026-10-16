@@ -15,7 +15,7 @@ export const allApps = [
     { name: 'Products', route: 'products', icon: Armchair, desc: 'Browse the full JSI catalog' },
     { name: 'Orders', route: 'orders', icon: MousePointer, desc: 'Track and manage your orders' },
     { name: 'Sales', route: 'sales', icon: PieChart, desc: 'View sales data and project momentum' },
-    { name: 'Projects', route: 'projects', icon: Briefcase, desc: 'Manage active project specs' },
+    { name: 'MyWorkspace', route: 'projects', icon: Briefcase, desc: 'Manage customers, active projects, and installations' },
     { name: 'Add Project', route: 'new-lead', icon: FilePlus, desc: 'Start a new project or lead' },
     { name: 'Resources', route: 'resources', icon: Database, desc: 'Tools, docs, and references' },
     { name: 'Dealers', route: 'resources/dealer-directory', icon: Users, desc: 'Find dealers and Choice partners' },

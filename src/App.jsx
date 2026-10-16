@@ -23,6 +23,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary.jsx';
 import { ScreenSkeleton } from './components/common/ScreenSkeleton.jsx';
 import { submitLeadToExcel } from './utils/submitLeadToExcel.js';
 import { INITIAL_SAMPLE_ORDERS, buildSubmittedSampleOrder, syncSampleOrdersWithSeeds } from './screens/samples/sampleOrders.js';
+import { readWorkspaceRoute, workspaceNavigationPath } from './screens/projects/workspaceRoutes.js';
 
 // Lazy load less-frequently visited resource feature screens for bundle splitting
 const CommissionRatesScreen = React.lazy(() => import('./screens/resources/commission-rates/index.js'));
@@ -120,7 +121,7 @@ const ScreenRouter = React.memo(({ screenKey, projectsScreenRef, SuspenseFallbac
             </Suspense>
         );
     }
-    if (base === 'projects') {
+    if (base === 'projects' || base === 'active-projects') {
         return (
             <Suspense fallback={SuspenseFallback}>
                 <ProjectsScreen ref={projectsScreenRef} {...rest} />
@@ -297,6 +298,9 @@ function App() {
     const internalNavRef = useRef(false);
 
     const currentScreen = useMemo(() => pathToScreen(location.pathname), [location.pathname]);
+    const workspaceRoute = useMemo(() => readWorkspaceRoute(location.pathname, location.search), [location.pathname, location.search]);
+    // Changing workspace tabs keeps local customer/search state and avoids a full-screen transition.
+    const transitionScreen = workspaceRoute ? 'projects' : currentScreen;
     const isHomeScreen = !currentScreen || currentScreen === 'home';
 
     const releaseBackInteractionLock = useCallback(() => {
@@ -341,10 +345,11 @@ function App() {
             setLastNavigationDirection('none');
             setNavDepth(1);
         }
-    }, [currentScreen, isHomeScreen, releaseBackInteractionLock]);
+    }, [currentScreen, location.key, isHomeScreen, releaseBackInteractionLock]);
 
     const screenLabel = useMemo(() => {
         if (!currentScreen || currentScreen === 'home') return 'Home';
+        if (currentScreen === 'active-projects' || currentScreen.split('/')[0] === 'projects') return 'MyWorkspace';
         const app = allApps.find(a => a.route === currentScreen.split('/')[0]);
         return app?.name || currentScreen.split('/')[0].replace(/-/g, ' ');
     }, [currentScreen]);
@@ -352,8 +357,6 @@ function App() {
     const [userSettings, setUserSettings] = useState({ id: 1, firstName: 'Luke', lastName: 'Wagner', homeAddress: '5445 N Deerwood Lake Rd, Jasper, IN 47546', shirtSize: 'L' });
     const [opportunities, setOpportunities] = usePersistentState('projects.opportunities', INITIAL_OPPORTUNITIES);
     const [myProjects, setMyProjects] = useState(MY_PROJECTS_DATA);
-    const [projectsTabOverride, setProjectsTabOverride] = useState(null);
-    const [projectsStageOverride, setProjectsStageOverride] = useState(null);
     const [members, setMembers] = useState(INITIAL_MEMBERS);
     const [currentUserId] = useState(1);
 
@@ -432,12 +435,8 @@ function App() {
         internalNavRef.current = true;
         setLastNavigationDirection('forward');
         setScreenParams(params || {});
-        if (screen === 'projects') {
-            if (params?.tab) setProjectsTabOverride(params.tab);
-            if (params?.stage) setProjectsStageOverride(params.stage);
-        }
         setNavDepth(d => d + 1);
-        routerNavigate(screenToPath(screen));
+        routerNavigate(workspaceNavigationPath(screen, params) || screenToPath(screen));
     }, [navigateHome, routerNavigate]);
 
     const handleBack = useCallback(() => {
@@ -612,8 +611,6 @@ function App() {
     const openCreateContentModal = useCallback(() => setShowCreateContentModal(true), []);
     const openLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(true), []);
     const closeLibraryUploadModal = useCallback(() => setShowLibraryUploadModal(false), []);
-    const clearProjectsInitialTab = useCallback(() => setProjectsTabOverride(null), []);
-    const clearProjectsInitialStage = useCallback(() => setProjectsStageOverride(null), []);
     const toggleProfileMenu = useCallback(() => setShowProfileMenu(p => !p), []);
     const closeProfileMenu = useCallback(() => setShowProfileMenu(false), []);
     const closeCreateContentModal = useCallback(() => setShowCreateContentModal(false), []);
@@ -632,6 +629,7 @@ function App() {
         showAlert: handleShowAlert,
         currentScreen,
         screenParams,
+        workspaceRoute,
         opportunities,
         setOpportunities,
         myProjects,
@@ -670,23 +668,19 @@ function App() {
         onToggleTheme: handleToggleTheme,
         onSuccess: handleLeadSuccess,
         onAddInstall: handleAddInstall,
-        projectsInitialTab: projectsTabOverride,
-        clearProjectsInitialTab,
-        projectsInitialStage: projectsStageOverride,
-        clearProjectsInitialStage,
         homeApps,
         onUpdateHomeApps: handleUpdateHomeApps,
         homeResetKey
     }), [
         currentTheme, handleNavigate, handleAskAI, handleVoiceActivate,
-        handleBack, setBackHandler, userSettings, handleShowAlert, currentScreen, screenParams,
+        handleBack, setBackHandler, userSettings, handleShowAlert, currentScreen, screenParams, workspaceRoute,
         opportunities, myProjects, members, currentUserId,
         posts, polls, likedPosts, pollChoices, handleToggleLike,
         handleAddComment, handlePollVote, openCreateContentModal, openLibraryUploadModal, libraryAssets, savedImageIds,
         handleToggleSaveImage, postUpvotes, handleUpvote, cart, setCart,
         handleUpdateCart, sampleOrders, handleSubmitSampleOrder, dealerDirectory, setDealerDirectory, designFirms, dealers, newLeadData,
         handleNewLeadChange, isDarkMode, handleToggleTheme, handleLeadSuccess,
-        handleAddInstall, projectsTabOverride, clearProjectsInitialTab, projectsStageOverride, clearProjectsInitialStage,
+        handleAddInstall,
         homeApps, handleUpdateHomeApps, homeResetKey, setOpportunities
     ]);
 
@@ -696,7 +690,7 @@ function App() {
         if (base === 'orders' || base === 'products' || base === 'dealer-directory' || base === 'dealers') {
             return <ScreenSkeleton theme={currentTheme} variant="list" />;
         }
-        if (base === 'projects') return <ScreenSkeleton theme={currentTheme} variant="toolbar" />;
+        if (base === 'projects' || base === 'active-projects') return <ScreenSkeleton theme={currentTheme} variant="toolbar" />;
         return <ScreenSkeleton theme={currentTheme} />;
     }, [currentTheme]);
 
@@ -717,7 +711,7 @@ function App() {
                     profileBtnRef={profileBtnRef}
                 />
                 <main className="flex-1 overflow-hidden max-w-content mx-auto w-full" style={{ backgroundColor: currentTheme.colors.background }}>
-                    <AnimatedScreenWrapper screenKey={currentScreen} direction={lastNavigationDirection}>
+                    <AnimatedScreenWrapper screenKey={transitionScreen} direction={lastNavigationDirection}>
                         <ErrorBoundary screenKey={currentScreen} theme={currentTheme}>
                             <ScreenRouter screenKey={currentScreen} projectsScreenRef={projectsScreenRef} SuspenseFallback={suspenseFallbackFor(currentScreen)} {...screenProps} />
                         </ErrorBoundary>

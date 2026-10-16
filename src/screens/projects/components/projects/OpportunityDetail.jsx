@@ -2263,7 +2263,7 @@ export const OpportunityDetail = ({ opp, theme, onUpdate, onDelete, onMarkLost, 
       >
         <div className="space-y-3">
           <p className="text-[0.8125rem] leading-relaxed" style={{ color: c.textSecondary }}>
-            Choose how to remove <span className="font-semibold" style={{ color: c.textPrimary }}>{draft.name || 'this project'}</span> from your pipeline.
+            Choose how to remove <span className="font-semibold" style={{ color: c.textPrimary }}>{draft.name || 'this project'}</span> from Active Projects.
           </p>
 
           {onMarkLost ? (
