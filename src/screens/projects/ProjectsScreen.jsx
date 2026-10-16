@@ -1,143 +1,27 @@
-import React, { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import { createPortal } from 'react-dom';
-import { Briefcase, MapPin, Plus, X, Building2, ChevronDown, Check, Store, Pencil } from 'lucide-react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import { Briefcase, Plus } from 'lucide-react';
 import { EmptyState as SharedEmptyState } from '../../components/common/EmptyState.jsx';
 import { Modal } from '../../components/common/Modal.jsx';
 import { CITY_OPTIONS } from '../../constants/locations.js';
 import { AutoCompleteCombobox } from '../../components/forms/AutoCompleteCombobox.jsx';
-import { STAGES } from './data.js';
 import { SegmentedToggle } from '../../components/common/GroupedToggle.jsx';
-import { TabContent } from '../../components/common/TabContent.jsx';
-import { isDarkTheme, JSI_COLORS, fieldTileSurface, modalCardSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
-import { usePersistentState } from '../../hooks/usePersistentState.js';
-import { PROJECTS_TAB_OPTIONS, fmtCurrency } from './components/projects/utils.js';
-import { formatCompanyName } from '../../utils/format.js';
+import { isDarkTheme, JSI_COLORS, fieldTileSurface, FIELD_LABEL_CLASSNAME } from '../../design-system/tokens.js';
 import { OpportunityDetail } from './components/projects/OpportunityDetail.jsx';
-import { ProjectCard } from './components/projects/ProjectCard.jsx';
-import { ProjectSpotlight } from './components/projects/ProjectSpotlight.jsx';
 import { PageHeader } from '../../components/common/PageHeader.jsx';
 import { MOCK_CUSTOMERS, VERTICAL_COLORS, VERTICAL_OPTIONS, getAllProjectsWithMeta } from './customers/customerData.js';
 import { CustomerMicrositeScreen } from './customers/CustomerMicrositeScreen.jsx';
-import { resolveOpportunityCustomerLink } from '../../utils/projectLinks.js';
+import { usePersistentState } from '../../hooks/usePersistentState.js';
+import { ProjectsWorkspace } from './components/projects/ProjectsWorkspace.jsx';
 
-const CUSTOMER_TYPES = [
-  { id: 'end-users',    label: 'End Users',    singular: 'End User',    icon: Building2 },
-  { id: 'dealers',      label: 'Dealers',      singular: 'Dealer',      icon: Store     },
-  { id: 'design-firms', label: 'Design Firms', singular: 'Design Firm', icon: Pencil    },
-];
-
-const COMPACT_PROJECTS_TAB_OPTIONS = [
-  { value: 'pipeline', label: 'Projects' },
+const VIEW_OPTIONS = [
   { value: 'customers', label: 'Customers' },
+  { value: 'pipeline', label: 'Pipeline' },
   { value: 'my-projects', label: 'Installations' },
 ];
 
-/** Fills an empty grid cell on desktop so a lonely last card doesn't strand empty canvas. */
-const NewProjectGhostCard = ({ theme, onClick, className = '' }) => {
-  const dark = isDarkTheme(theme);
-  const c = theme.colors;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Create project"
-      className={`w-full text-left focus-ring rounded-2xl h-full min-h-[148px] ${className}`.trim()}
-      style={{ WebkitTapHighlightColor: 'transparent' }}
-    >
-      <div
-        className="rounded-2xl h-full min-h-[148px] flex flex-col items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
-        style={{
-          backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'rgba(53,53,53,0.02)',
-          border: `1.5px dashed ${dark ? 'rgba(255,255,255,0.16)' : 'rgba(53,53,53,0.14)'}`,
-        }}
-      >
-        <span
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full"
-          style={{ backgroundColor: dark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.06)', color: c.textPrimary }}
-        >
-          <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
-        </span>
-        <span className="text-[0.8125rem] font-semibold" style={{ color: c.textPrimary }}>New project</span>
-        <span className="text-[0.6875rem] font-medium" style={{ color: c.textSecondary, opacity: 0.7 }}>
-          Fill this stage
-        </span>
-      </div>
-    </button>
-  );
-};
-
-const TypeDropdown = React.memo(({ value, onChange, theme }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const isDark = isDarkTheme(theme);
-  const c = theme.colors;
-  const current = CUSTOMER_TYPES.find(t => t.id === value) || CUSTOMER_TYPES[0];
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', close);
-    document.addEventListener('touchstart', close, { passive: true });
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('touchstart', close); };
-  }, [open]);
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 active:opacity-60 transition-opacity select-none"
-        style={{ WebkitTapHighlightColor: 'transparent' }}
-      >
-        <span className="text-[1.375rem] font-bold tracking-tight leading-none" style={{ color: c.textPrimary }}>
-          {current.label}
-        </span>
-        <ChevronDown
-          className={`w-[18px] h-[18px] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          style={{ color: c.textSecondary, opacity: 0.55, marginTop: 2 }}
-        />
-      </button>
-
-      {open && (
-        <div
-          className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
-          style={{
-            backgroundColor: isDark ? 'rgba(35,35,35,0.96)' : c.surface,
-            border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(0,0,0,0.08)',
-            boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.55)' : '0 8px 28px rgba(0,0,0,0.13)',
-            minWidth: 170,
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-          }}
-        >
-          {CUSTOMER_TYPES.map((type, idx) => {
-            const Icon = type.icon;
-            const active = type.id === value;
-            return (
-              <button
-                key={type.id}
-                onClick={() => { onChange(type.id); setOpen(false); }}
-                className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors"
-                style={{
-                  color: active ? c.accent : c.textPrimary,
-                  borderTop: idx > 0 ? `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}` : 'none',
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.03)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? c.accent : c.textSecondary, opacity: active ? 1 : 0.5 }} />
-                <span className="text-sm font-semibold flex-1">{type.label}</span>
-                {active && <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.accent }} />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-});
-TypeDropdown.displayName = 'TypeDropdown';
-
-const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', typeSingular = 'Customer' }) => {
+const AddCustomerModal = ({ theme, onClose, onAdd }) => {
+  const [customerType, setCustomerType] = useState('end-users');
+  const typeSingular = { 'end-users': 'End User', dealers: 'Dealer', 'design-firms': 'Design Firm' }[customerType];
   const isDark = isDarkTheme(theme);
   const c = theme.colors;
   const border = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)';
@@ -183,6 +67,14 @@ const AddCustomerModal = ({ theme, onClose, onAdd, customerType = 'end-users', t
   return (
     <Modal show onClose={onClose} title={`Add ${typeSingular}`} theme={theme}>
       <div className="space-y-4">
+        <label className="block text-xs font-medium" style={{ color: c.textSecondary }}>
+          Customer type
+          <select value={customerType} onChange={event => setCustomerType(event.target.value)} className="block w-full rounded-xl px-4 min-h-[44px] mt-1.5 text-sm focus-ring" style={{ ...fieldTile, color: c.textPrimary }}>
+            <option value="end-users">End User</option>
+            <option value="dealers">Dealer</option>
+            <option value="design-firms">Design Firm</option>
+          </select>
+        </label>
         {/* Account Name */}
         <div>
           <label className={`${FIELD_LABEL_CLASSNAME} block mb-1.5`} style={{ color: c.textSecondary }}>
@@ -304,13 +196,12 @@ export const ProjectsScreen = forwardRef(({
   screenParams,
 }, ref) => {
   const isDark = isDarkTheme(theme);
-  const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'pipeline');
-  const [selectedPipelineStage, setSelectedPipelineStage] = usePersistentState('pref.projects.pipelineStage', 'Discovery');
+  const [projectsTab, setProjectsTab] = usePersistentState('pref.projects.activeTab', 'customers');
+  const [selectedPipelineStage, setSelectedPipelineStage] = usePersistentState('pref.projects.pipelineStage', '');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [deepLinkResolved, setDeepLinkResolved] = useState(!deepLinkOppId);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
-  const [customerType, setCustomerType] = usePersistentState('pref.projects.customerType', 'end-users');
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [companyFilter, setCompanyFilter] = useState(screenParams?.company || null);
   const screenParamsCompany = screenParams?.company || null;
@@ -318,14 +209,6 @@ export const ProjectsScreen = forwardRef(({
     setCompanyFilter(screenParamsCompany);
   }, [screenParamsCompany]);
 
-  const stagesScrollRef = useRef(null);
-  const [showStageFadeLeft, setShowStageFadeLeft] = useState(false);
-  const [showStageFadeRight, setShowStageFadeRight] = useState(false);
-  const headerControlsRef = useRef(null);
-  const projectsToggleRef = useRef(null);
-  const projectsStandardMeasureRef = useRef(null);
-  const projectsCompactMeasureRef = useRef(null);
-  const [projectsToggleMode, setProjectsToggleMode] = useState('default');
   const hasRouteOpportunityDetail = Boolean(deepLinkOppId);
   const selectedOpportunityRef = useRef(selectedOpportunity);
   const selectedCustomerRef = useRef(selectedCustomer);
@@ -346,7 +229,7 @@ export const ProjectsScreen = forwardRef(({
   }, [projectsInitialTab, clearProjectsInitialTab, setProjectsTab]);
 
   useEffect(() => {
-    if (projectsInitialStage && STAGES.includes(projectsInitialStage)) {
+    if (projectsInitialStage) {
       setSelectedPipelineStage(projectsInitialStage);
       clearProjectsInitialStage?.();
     }
@@ -403,60 +286,6 @@ export const ProjectsScreen = forwardRef(({
     });
   }, [selectedCustomer, selectedOpportunity, hasRouteOpportunityDetail, setBackHandler]);
 
-  const updateStageFade = useCallback(() => {
-    const el = stagesScrollRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setShowStageFadeLeft(scrollLeft > 4);
-    setShowStageFadeRight(scrollLeft + clientWidth < scrollWidth - 4);
-  }, []);
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => updateStageFade());
-    window.addEventListener('resize', updateStageFade);
-    const ro = typeof ResizeObserver !== 'undefined' && stagesScrollRef.current
-      ? new ResizeObserver(updateStageFade)
-      : null;
-    if (ro && stagesScrollRef.current) ro.observe(stagesScrollRef.current);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener('resize', updateStageFade);
-      ro?.disconnect();
-    };
-  }, [projectsTab, updateStageFade]);
-
-  const filteredOpportunities = useMemo(() => {
-    const normalize = s => (s || '').replace(/[^a-z]/gi, '').toLowerCase();
-    return (opportunities || []).filter(o => {
-      if (o.stage !== selectedPipelineStage) return false;
-      if (!companyFilter) return true;
-      const cf = normalize(companyFilter);
-      const dealerMatch = (o.dealers || []).some(d => normalize(d).includes(cf.slice(0, 10)) || cf.includes(normalize(d).slice(0, 10)));
-      const companyMatch = normalize(o.company).includes(cf.slice(0, 10));
-      return dealerMatch || companyMatch;
-    });
-  }, [selectedPipelineStage, opportunities, companyFilter]);
-
-  const presentedOpportunities = useMemo(
-    () => filteredOpportunities.map((opportunity) => {
-      const { customer, source } = resolveOpportunityCustomerLink(opportunity, customers);
-      return {
-        opportunity,
-        linkedCustomer: customer,
-        customerLinkSource: source,
-      };
-    }),
-    [customers, filteredOpportunities],
-  );
-
-  const stageTotalValue = useMemo(() =>
-    filteredOpportunities.reduce((sum, o) => {
-      const raw = typeof o.value === 'string' ? o.value.replace(/[^0-9.]/g, '') : o.value;
-      return sum + (parseFloat(raw) || 0);
-    }, 0),
-    [filteredOpportunities],
-  );
-
   const updateOpportunity = useCallback(updated => {
     const stamped = { ...updated, updatedAt: new Date().toISOString() };
     setOpportunities(prev => prev.map(o => o.id === stamped.id ? stamped : o));
@@ -474,91 +303,6 @@ export const ProjectsScreen = forwardRef(({
     setCustomers(prev => prev.map(customer => customer.id === updatedCustomer.id ? updatedCustomer : customer));
     setSelectedCustomer(prev => prev?.id === updatedCustomer.id ? updatedCustomer : prev);
   }, []);
-
-  const filteredCustomers = useMemo(() => {
-    if (customerType === 'dealers')       return customers.filter(c => c.type === 'dealer');
-    if (customerType === 'design-firms')  return customers.filter(c => c.type === 'design-firm');
-    return customers.filter(c => !c.type || c.type === 'end-user');
-  }, [customers, customerType]);
-
-  const ctaSingular = useMemo(
-    () => CUSTOMER_TYPES.find(t => t.id === customerType)?.singular || 'Customer',
-    [customerType],
-  );
-  const noopToggleChange = useCallback(() => {}, []);
-  const projectsTabOptions = useMemo(
-    () => projectsToggleMode === 'compact' ? COMPACT_PROJECTS_TAB_OPTIONS : PROJECTS_TAB_OPTIONS,
-    [projectsToggleMode],
-  );
-  const projectsToggleSize = projectsToggleMode === 'compact' ? 'smDense' : 'sm';
-
-  const cta = useMemo(() => ({
-    pipeline:      { label: 'New', ariaLabel: 'Create project', action: () => onNavigate('new-lead') },
-    customers:     { label: 'New', ariaLabel: `Add ${ctaSingular.toLowerCase()}`, action: () => setShowAddCustomer(true) },
-    'my-projects': { label: 'New', ariaLabel: 'Add installation', action: () => onNavigate('add-new-install') },
-  })[projectsTab], [projectsTab, ctaSingular, onNavigate]);
-
-  const updateProjectsToggleMode = useCallback(() => {
-    const toggleViewport = projectsToggleRef.current;
-    if (!toggleViewport) return;
-
-    const availableToggleWidth = toggleViewport.clientWidth;
-    const standardWidth = projectsStandardMeasureRef.current?.scrollWidth || 0;
-    const compactWidth = projectsCompactMeasureRef.current?.scrollWidth || 0;
-    if (!availableToggleWidth || !standardWidth) return;
-
-    const nextMode = standardWidth > availableToggleWidth - 4 && compactWidth > 0 ? 'compact' : 'default';
-    setProjectsToggleMode((prev) => prev === nextMode ? prev : nextMode);
-  }, []);
-
-  useLayoutEffect(() => {
-    updateProjectsToggleMode();
-    const row = headerControlsRef.current;
-    if (!row) return undefined;
-
-    const resizeObserver = typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(() => updateProjectsToggleMode())
-      : null;
-
-    resizeObserver?.observe(row);
-    if (projectsToggleRef.current) resizeObserver?.observe(projectsToggleRef.current);
-    if (projectsStandardMeasureRef.current) resizeObserver?.observe(projectsStandardMeasureRef.current);
-    if (projectsCompactMeasureRef.current) resizeObserver?.observe(projectsCompactMeasureRef.current);
-
-    window.addEventListener('resize', updateProjectsToggleMode);
-    return () => {
-      resizeObserver?.disconnect();
-      window.removeEventListener('resize', updateProjectsToggleMode);
-    };
-  }, [updateProjectsToggleMode, projectsTabOptions, projectsToggleSize]);
-
-  useLayoutEffect(() => {
-    const toggleViewport = projectsToggleRef.current;
-    if (!toggleViewport) return undefined;
-
-    const selectedIndex = projectsTabOptions.findIndex((option) => option.value === projectsTab);
-    const selectedButton = toggleViewport.querySelectorAll('[data-toggle-btn]')[selectedIndex];
-    if (!selectedButton) return undefined;
-
-    const frame = window.requestAnimationFrame(() => {
-      const gutter = projectsToggleMode === 'compact' ? 16 : 14;
-      const nextLeft = Math.max(0, selectedButton.offsetLeft - gutter);
-      const nextRight = selectedButton.offsetLeft + selectedButton.offsetWidth + gutter;
-      const viewportLeft = toggleViewport.scrollLeft;
-      const viewportRight = viewportLeft + toggleViewport.clientWidth;
-
-      if (nextLeft < viewportLeft) {
-        toggleViewport.scrollLeft = nextLeft;
-        return;
-      }
-
-      if (nextRight > viewportRight) {
-        toggleViewport.scrollLeft = Math.max(0, nextRight - toggleViewport.clientWidth);
-      }
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [projectsTab, projectsTabOptions, projectsToggleMode]);
 
   const catalogInstalls = useMemo(() => getAllProjectsWithMeta(customers), [customers]);
   const userInstalls = useMemo(() => (myProjects || []).map((project) => {
@@ -632,297 +376,34 @@ export const ProjectsScreen = forwardRef(({
 
   return (
     <div className="min-h-full relative" style={{ backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
-
-      <div className="flex-shrink-0" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)', backgroundColor: theme.colors.background }}>
-        <div className="px-4 sm:px-6 lg:px-8 max-w-content mx-auto w-full">
-          <PageHeader
-            theme={theme}
-            title="Projects"
-            subtitle={projectsTab === 'pipeline' ? 'Pipeline by stage' : projectsTab === 'customers' ? 'Accounts and firms' : 'Installations'}
-          />
+      <div className="px-4 sm:px-6 lg:px-8 max-w-content mx-auto w-full pb-10" style={{ paddingTop: 'calc(var(--app-header-offset, 72px) + env(safe-area-inset-top, 0px) + 20px)' }}>
+        <PageHeader theme={theme} title="My Projects" subtitle="Customer context. Clear next steps." />
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <SegmentedToggle value={projectsTab} onChange={setProjectsTab} options={VIEW_OPTIONS} size="sm" theme={theme} ariaLabel="Project views" />
+          <button type="button" onClick={() => onNavigate(projectsTab === 'my-projects' ? 'add-new-install' : 'new-lead')}
+            className="inline-flex items-center gap-2 rounded-full px-4 min-h-[44px] text-sm font-semibold focus-ring"
+            style={{ backgroundColor: theme.colors.accent, color: theme.colors.accentText }}>
+            <Plus size={16} />{projectsTab === 'my-projects' ? 'Add installation' : 'New project'}
+          </button>
         </div>
-        <div ref={headerControlsRef} className="px-4 sm:px-6 lg:px-8 pb-4 max-w-content mx-auto w-full flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2">
-          <div ref={projectsToggleRef} className="order-1 w-full min-w-0 sm:flex-1 overflow-x-auto scrollbar-hide scroll-smooth" style={{ scrollPaddingLeft: 14, scrollPaddingRight: 16 }}>
-            <div className="inline-block min-w-full sm:min-w-0 sm:pr-4">
-              <SegmentedToggle
-                value={projectsTab}
-                onChange={setProjectsTab}
-                options={projectsTabOptions}
-                size={projectsToggleSize}
-                theme={theme}
-                fullWidth
-                className="w-full"
-              />
-            </div>
+        {projectsTab !== 'my-projects' ? (
+          <ProjectsWorkspace theme={theme} view={projectsTab} customers={customers} opportunities={opportunities || []}
+            companyFilter={companyFilter} onClearCompany={() => setCompanyFilter(null)}
+            initialStage={selectedPipelineStage} onClearInitialStage={() => setSelectedPipelineStage('')}
+            onOpenProject={id => onNavigate(`projects/${id}`)} onOpenCustomer={setSelectedCustomer}
+            onUpdateProject={updateOpportunity} onAddCustomer={() => setShowAddCustomer(true)} />
+        ) : allProjects.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {allProjects.map(project => <InstallCard key={project.id} project={project} isDark={isDark}
+              onClick={() => { const customer = customers.find(c => c.id === project.customerId); if (customer) setSelectedCustomer(customer); }} />)}
           </div>
-          <div className="order-2 flex w-full min-w-0 flex-shrink-0 items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:justify-end sm:flex-1">
-            {projectsTab === 'pipeline' && (
-              <ProjectSpotlight
-                opportunities={opportunities}
-                theme={theme}
-                onOpenProject={(id) => onNavigate(`projects/${id}`)}
-              />
-            )}
-            {cta && (
-              <button
-                type="button"
-                aria-label={cta.ariaLabel}
-                onClick={cta.action}
-                className="flex-shrink-0 inline-flex items-center justify-center rounded-full font-semibold transition-all whitespace-nowrap active:scale-[0.97] min-h-[44px] min-w-[44px] gap-1.5 text-sm leading-none px-4"
-                style={{ height: 44, backgroundColor: theme.colors.accent, color: theme.colors.accentText }}
-              >
-                <Plus size={16} strokeWidth={2.5} />
-                {cta.label}
-              </button>
-            )}
-          </div>
-
-          <div aria-hidden="true" className="absolute invisible pointer-events-none h-0 overflow-hidden whitespace-nowrap">
-            <div ref={projectsStandardMeasureRef} className="inline-block">
-              <SegmentedToggle
-                value={projectsTab}
-                onChange={noopToggleChange}
-                options={PROJECTS_TAB_OPTIONS}
-                size="sm"
-                theme={theme}
-              />
-            </div>
-            <div ref={projectsCompactMeasureRef} className="inline-block ml-4">
-              <SegmentedToggle
-                value={projectsTab}
-                onChange={noopToggleChange}
-                options={COMPACT_PROJECTS_TAB_OPTIONS}
-                size="smDense"
-                theme={theme}
-              />
-            </div>
-          </div>
-        </div>
-
-        {projectsTab === 'customers' && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-1 max-w-content mx-auto w-full">
-            <TypeDropdown value={customerType} onChange={setCustomerType} theme={theme} />
-          </div>
-        )}
-
-        {projectsTab === 'pipeline' && companyFilter && (
-          <div className="px-4 sm:px-6 lg:px-8 pb-2 max-w-content mx-auto w-full">
-            <button
-              onClick={() => setCompanyFilter(null)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
-              style={{
-                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.07)',
-                color: theme.colors.textPrimary,
-              }}
-            >
-              <Building2 className="w-3 h-3" style={{ opacity: 0.6 }} />
-              {formatCompanyName(companyFilter)}
-              <X className="w-3 h-3" style={{ opacity: 0.5 }} />
-            </button>
-          </div>
-        )}
-
-        {projectsTab === 'pipeline' && (
-          <div className="relative max-w-content mx-auto w-full">
-            <div
-              ref={stagesScrollRef}
-              onScroll={updateStageFade}
-              className="overflow-x-auto scrollbar-hide overscroll-x-contain px-4 sm:px-6 lg:px-8"
-              style={{ WebkitOverflowScrolling: 'touch' }}
-            >
-              <div className="inline-flex min-w-max items-center gap-1 py-0.5 pb-3 whitespace-nowrap rounded-[999px] p-[3px]" role="tablist" aria-label="Pipeline stages" style={{ backgroundColor: theme.colors.subtle || '#E3E0D8' }}>
-                {STAGES.map((stage, i) => {
-                  const active = selectedPipelineStage === stage;
-                  return (
-                    <button
-                      key={stage}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      onClick={() => setSelectedPipelineStage(stage)}
-                      className="relative rounded-full text-[0.8125rem] font-semibold transition-all px-3 focus-ring whitespace-nowrap"
-                      style={{
-                        minHeight: 'calc(var(--jsi-ctrl-h) - 6px)',
-                        color: active ? theme.colors.textPrimary : (isDark ? 'rgba(240,240,240,0.78)' : '#6A6762'),
-                        backgroundColor: active
-                          ? (isDark ? 'rgba(255,255,255,0.14)' : '#FFFFFF')
-                          : 'transparent',
-                        border: active && !isDark ? '1px solid rgba(255,255,255,0.96)' : 'none',
-                        boxShadow: active && !isDark ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                      }}
-                    >
-                      {stage !== 'Won' && stage !== 'Lost' && (
-                        <span style={{ opacity: active ? 0.5 : 0.35 }} className="mr-0.5">{i + 1}</span>
-                      )}
-                      {' '}{stage}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {showStageFadeLeft && (
-              <div
-                className="pointer-events-none absolute inset-y-0 left-0 z-10 w-14 sm:w-16"
-                style={{
-                  background: `linear-gradient(to right, ${theme.colors.background} 0%, ${theme.colors.background} 35%, ${theme.colors.background}00 100%)`,
-                }}
-                aria-hidden="true"
-              />
-            )}
-            {showStageFadeRight && (
-              <div
-                className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-20"
-                style={{
-                  background: `linear-gradient(to left, ${theme.colors.background} 0%, ${theme.colors.background} 40%, ${theme.colors.background}00 100%)`,
-                }}
-                aria-hidden="true"
-              />
-            )}
-          </div>
-        )}
+        ) : <SharedEmptyState icon={Briefcase} theme={theme} title="No installations recorded yet" description="Add an installation to get started." />}
       </div>
-
-      <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-10 max-w-content mx-auto w-full">
-        <TabContent activeKey={projectsTab} tabIndex={PROJECTS_TAB_OPTIONS.findIndex(o => o.value === projectsTab)}>
-          {projectsTab === 'pipeline' && (
-            presentedOpportunities.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 lg:gap-4">
-                  {presentedOpportunities.map(({ opportunity, linkedCustomer, customerLinkSource }) => (
-                    <ProjectCard key={opportunity.id} opp={opportunity} theme={theme}
-                      linkedCustomer={linkedCustomer}
-                      customerLinkSource={customerLinkSource}
-                      onClick={() => onNavigate(`projects/${opportunity.id}`)} />
-                  ))}
-                  {/* Complete the last row on 2-col / 3-col so the fold isn't empty canvas */}
-                  {presentedOpportunities.length % 2 === 1 ? (
-                    <NewProjectGhostCard
-                      theme={theme}
-                      onClick={() => onNavigate('new-lead')}
-                      className="hidden sm:block xl:hidden"
-                    />
-                  ) : null}
-                  {Array.from({ length: (3 - (presentedOpportunities.length % 3)) % 3 }).map((_, i) => (
-                    <NewProjectGhostCard
-                      key={`ghost-new-${i}`}
-                      theme={theme}
-                      onClick={() => onNavigate('new-lead')}
-                      className="hidden xl:block"
-                    />
-                  ))}
-                </div>
-                <div className="mt-6 flex justify-center">
-                  <div
-                    className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[0.8125rem] font-semibold"
-                    style={{
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(53,53,53,0.06)',
-                      color: theme.colors.textSecondary,
-                    }}
-                  >
-                    <Briefcase size={15} style={{ opacity: 0.5 }} />
-                    {selectedPipelineStage} · {presentedOpportunities.length} {presentedOpportunities.length === 1 ? 'project' : 'projects'} · {fmtCurrency(stageTotalValue)}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <SharedEmptyState icon={Briefcase} theme={theme}
-                title={`No projects in ${selectedPipelineStage}`}
-                description='Tap "New" above to create one.' />
-            )
-          )}
-
-          {projectsTab === 'customers' && (
-            filteredCustomers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 lg:gap-4">
-                {filteredCustomers.map(cust => (
-                  <CustomerCard key={cust.id} customer={cust} isDark={isDark}
-                    onClick={() => setSelectedCustomer(cust)} />
-                ))}
-              </div>
-            ) : (
-              <SharedEmptyState icon={Building2} theme={theme}
-                title={`No ${ctaSingular.toLowerCase()}s yet`}
-                description='Tap "New" above to add one.' />
-            )
-          )}
-
-          {projectsTab === 'my-projects' && (
-            allProjects.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5 lg:gap-4">
-                {allProjects.map(p => {
-                  const ownerCustomer = customers.find(c => c.id === p.customerId);
-                  return (
-                    <InstallCard key={p.id} project={p} isDark={isDark}
-                      onClick={() => ownerCustomer && setSelectedCustomer(ownerCustomer)} />
-                  );
-                })}
-              </div>
-            ) : (
-              <SharedEmptyState icon={Briefcase} theme={theme}
-                title="No installations recorded yet"
-                description='Tap "New" above to add one.' />
-            )
-          )}
-        </TabContent>
-      </div>
-
-      {showAddCustomer && (
-        <AddCustomerModal
-          theme={theme}
-          onClose={() => setShowAddCustomer(false)}
-          onAdd={handleAddCustomer}
-          customerType={customerType}
-          typeSingular={ctaSingular}
-        />
-      )}
+      {showAddCustomer && <AddCustomerModal theme={theme} onClose={() => setShowAddCustomer(false)} onAdd={handleAddCustomer} />}
     </div>
   );
 });
-
 ProjectsScreen.displayName = 'ProjectsScreen';
-
-const CustomerCard = React.memo(({ customer, isDark, onClick }) => {
-  const border = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
-  const activeStds = (customer.standardsPrograms || []).filter(p => p.status === 'Active' || p.status === 'Expiring').length;
-  const currentOrd = (customer.orders?.current || []).length;
-  return (
-    <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor: 'transparent' }}>
-      <div className="rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
-        style={{ border: `1px solid ${border}` }}>
-        <div className="relative aspect-video w-full">
-          <img src={customer.image} alt={customer.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-3.5">
-            <h3 className="text-[0.9375rem] font-bold text-white tracking-tight leading-snug">{customer.name}</h3>
-            <div className="flex items-center gap-1 mt-0.5">
-              <MapPin className="w-2.5 h-2.5 text-white/80" />
-              <span className="text-xs text-white/80">{customer.location?.city || '—'}{customer.location?.state ? `, ${customer.location.state}` : ''}</span>
-            </div>
-            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-              {activeStds > 0 && (
-                <span className="text-[0.625rem] font-bold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: `${JSI_COLORS.success}40`, color: JSI_COLORS.success }}>
-                  {activeStds} standard{activeStds !== 1 ? 's' : ''}
-                </span>
-              )}
-              {currentOrd > 0 && (
-                <span className="text-[0.625rem] font-bold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: `${JSI_COLORS.info}40`, color: JSI_COLORS.info }}>
-                  {currentOrd} order{currentOrd !== 1 ? 's' : ''}
-                </span>
-              )}
-              <span className="text-[0.625rem] font-semibold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}>
-                {customer.vertical}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-});
-CustomerCard.displayName = 'CustomerCard';
 
 const InstallCard = React.memo(({ project, isDark, onClick }) => (
   <button onClick={onClick} className="w-full text-left group" style={{ WebkitTapHighlightColor: 'transparent' }}>
