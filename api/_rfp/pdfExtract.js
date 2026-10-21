@@ -82,7 +82,8 @@ export function heuristicExtractRequirements(pages) {
   const codeRe = /\b([A-Z]{2,5}-?\d{1,4}[A-Z]?)\b/g;
   const qtyNearCodeRe = /\b(?:qty|quantity|quan\.?|ea\.?|each|units?)\s*[:=]?\s*(\d{1,5})\b/gi;
   const dateRe = /\b(?:due|deadline|submit(?:tal)?(?:\s+due)?|closes?|closing)\b[^\n.]{0,40}?\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{2,4})\b/gi;
-  const solicitationRe = /\b(?:solicitation(?:\s*(?:no\.?|number|#))?|RFQ|RFP)\s*[:#]?\s*([A-Z0-9][A-Z0-9-]{4,})\b/gi;
+  // Require an identifier that includes a digit so titles like "RFP … Solicitation" are skipped.
+  const solicitationRe = /\b(?:solicitation(?:\s*(?:no\.?|number|#))?|RFQ|RFP)\s*[:#]\s*([A-Z0-9][A-Z0-9-]*\d[A-Z0-9-]*)\b/gi;
 
   let projectName = '';
   let solicitation = '';
