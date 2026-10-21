@@ -12,11 +12,14 @@ const MIN_CHARS_PER_PAGE = 12;
  * @param {{ fileName?: string }} [opts]
  */
 export async function extractPdfPages(bytes, opts = {}) {
-  const data = bytes instanceof Uint8Array
-    ? bytes
-    : bytes instanceof ArrayBuffer
-      ? new Uint8Array(bytes)
+  // unpdf rejects Node Buffer even though Buffer subclasses Uint8Array — copy to a plain view.
+  const src = bytes instanceof ArrayBuffer
+    ? new Uint8Array(bytes)
+    : bytes instanceof Uint8Array
+      ? bytes
       : new Uint8Array(bytes);
+  const data = new Uint8Array(src.byteLength);
+  data.set(src);
 
   const result = await extractText(data, { mergePages: false });
   const pageTexts = Array.isArray(result.text) ? result.text : [String(result.text || '')];
