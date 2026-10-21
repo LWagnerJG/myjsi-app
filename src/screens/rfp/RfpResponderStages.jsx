@@ -39,17 +39,29 @@ const formatFileSize = (bytes) => {
 /* ═══════════════════════════════════════════════════════════════════
    STAGE 0 — Upload Drop-zone
    ═══════════════════════════════════════════════════════════════════ */
-export const UploadStage = ({ file, onFileSelect, onFileRemove, onAnalyze, theme }) => {
+export const UploadStage = ({
+  file,
+  files,
+  onFileSelect,
+  onFileRemove,
+  onAnalyze,
+  theme,
+  aiStatus,
+  error,
+  onLoadSample,
+}) => {
   const isDark = isDarkTheme(theme);
   const c = theme?.colors || {};
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
+  const selected = files?.length ? files : (file ? [file] : []);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
-    const dropped = e.dataTransfer?.files?.[0];
-    if (dropped) onFileSelect(dropped);
+    const dropped = Array.from(e.dataTransfer?.files || []);
+    dropped.filter((f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf')
+      .forEach((f) => onFileSelect(f));
   }, [onFileSelect]);
 
   const handleDragOver = useCallback((e) => {
@@ -68,9 +80,21 @@ export const UploadStage = ({ file, onFileSelect, onFileRemove, onAnalyze, theme
           RFP Responder
         </h2>
         <p className="text-sm leading-relaxed max-w-sm mx-auto" style={{ color: c.textSecondary }}>
-          Drop your RFP below and I&rsquo;ll analyze the requirements, match JSI products, and draft a response you can edit before exporting.
+          Drop an RFP PDF (and attachments). I&rsquo;ll extract requirements with page sources, draft from the JSI answer library, and let you approve before exporting searchable text.
         </p>
       </div>
+
+      {aiStatus && !aiStatus.aiConfigured && (
+        <p className="text-xs text-center px-3" style={{ color: theme?.colors?.warning || '#C4956A' }}>
+          AI drafting is not configured yet — extraction still works with heuristic matching. {aiStatus.aiMessage}
+        </p>
+      )}
+
+      {error ? (
+        <p className="text-xs text-center px-3" style={{ color: theme?.colors?.error || '#B85C5C' }}>
+          {error}
+        </p>
+      ) : null}
 
       <GlassCard
         theme={theme}
@@ -94,52 +118,63 @@ export const UploadStage = ({ file, onFileSelect, onFileRemove, onAnalyze, theme
         <div className="flex flex-col items-center gap-3 py-12 px-6">
           <Upload className="w-8 h-8" style={{ color: c.textSecondary, opacity: 0.5 }} />
           <p className="text-sm font-medium" style={{ color: c.textSecondary }}>
-            {dragOver ? 'Drop your file here' : 'Drag & drop a PDF, or click to browse'}
+            {dragOver ? 'Drop your PDF here' : 'Drag & drop PDFs, or click to browse'}
           </p>
           <p className="text-xs" style={{ color: c.textSecondary, opacity: 0.5 }}>
-            PDF up to 20 MB
+            Up to 5 PDFs · 4 MB each · processed in memory only
           </p>
         </div>
         <input
           ref={inputRef}
           type="file"
           accept=".pdf,application/pdf"
+          multiple
           className="hidden"
           onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onFileSelect(f);
+            Array.from(e.target.files || []).forEach((f) => onFileSelect(f));
             e.target.value = '';
           }}
         />
       </GlassCard>
 
-      {file && (
-        <GlassCard theme={theme} className="w-full px-4 py-3 flex items-center gap-3">
+      {selected.map((f) => (
+        <GlassCard key={`${f.name}-${f.size}`} theme={theme} className="w-full px-4 py-3 flex items-center gap-3">
           <FileText className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.error }} />
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate" style={{ color: c.textPrimary }}>{file.name}</div>
-            <div className="text-xs" style={{ color: c.textSecondary }}>{formatFileSize(file.size)}</div>
+            <div className="text-sm font-medium truncate" style={{ color: c.textPrimary }}>{f.name}</div>
+            <div className="text-xs" style={{ color: c.textSecondary }}>{formatFileSize(f.size)}</div>
           </div>
           <button
-            onClick={(e) => { e.stopPropagation(); onFileRemove(); }}
-            className="w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+            onClick={(e) => { e.stopPropagation(); onFileRemove(f.name); }}
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-colors"
             style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}
             aria-label="Remove file"
           >
             <X className="w-3.5 h-3.5" style={{ color: c.textSecondary }} />
           </button>
         </GlassCard>
-      )}
+      ))}
 
       <PrimaryButton
         theme={theme}
-        disabled={!file}
+        disabled={!selected.length}
         fullWidth
         onClick={onAnalyze}
         icon={<ArrowUp className="w-4 h-4" />}
       >
         Analyze RFP
       </PrimaryButton>
+
+      {onLoadSample && (
+        <button
+          type="button"
+          onClick={onLoadSample}
+          className="text-xs font-medium underline-offset-2 hover:underline h-11"
+          style={{ color: c.textSecondary }}
+        >
+          Load sample GSA BPA response (demo only)
+        </button>
+      )}
     </div>
   );
 };
@@ -147,7 +182,7 @@ export const UploadStage = ({ file, onFileSelect, onFileRemove, onAnalyze, theme
 /* ═══════════════════════════════════════════════════════════════════
    STAGE 1 — Processing animation
    ═══════════════════════════════════════════════════════════════════ */
-export const ProcessingStage = ({ steps, completedCount, theme }) => {
+export const ProcessingStage = ({ steps, completedCount, theme, statusOverride }) => {
   const c = theme?.colors || {};
 
   return (
@@ -158,9 +193,10 @@ export const ProcessingStage = ({ steps, completedCount, theme }) => {
           Analyzing your RFP…
         </h2>
         <p className="text-sm" style={{ color: c.textSecondary }}>
-          {completedCount < steps.length
-            ? steps[completedCount]?.statusText
-            : 'Almost done - preparing your response package.'}
+          {statusOverride
+            || (completedCount < steps.length
+              ? steps[completedCount]?.statusText
+              : 'Almost done — preparing your response package.')}
         </p>
       </div>
 

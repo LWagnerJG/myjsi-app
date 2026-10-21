@@ -223,7 +223,7 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
     try {
       ({ default: html2pdf } = await import('html2pdf.js'));
     } catch {
-      onExport?.();
+      onExport?.(false);
       setExporting(false);
       return;
     }
@@ -270,9 +270,9 @@ export const ResponseBuilder = ({ data, onChange, partnerItems, onPartnerItemCha
         })
         .from(clone)
         .save();
-      onExport?.();
+      onExport?.(true);
     } catch {
-      onExport?.();
+      onExport?.(false);
     } finally {
       document.body.removeChild(clone);
       setExporting(false);
