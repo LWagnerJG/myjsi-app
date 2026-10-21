@@ -29,11 +29,11 @@ function fileToBase64(file) {
   });
 }
 
-/** Client-side size check before upload (server also enforces 4 MB / file). */
+/** Client upload limit (Vercel serverless body ~4.5MB). Use Try sample bid for the large TAPS PDF. */
 export const CLIENT_MAX_FILE_BYTES = 4 * 1024 * 1024;
 export const CLIENT_MAX_FILES = 5;
 
-export async function extractRfpPdfs(files) {
+export async function extractRfpPdfs(files, { onProgress } = {}) {
   const list = Array.from(files || []);
   if (!list.length) throw new Error('Select at least one PDF');
   if (list.length > CLIENT_MAX_FILES) throw new Error(`Maximum ${CLIENT_MAX_FILES} PDFs`);
@@ -41,11 +41,12 @@ export async function extractRfpPdfs(files) {
   const payloadFiles = [];
   for (const file of list) {
     if (file.size > CLIENT_MAX_FILE_BYTES) {
-      throw new Error(`${file.name} exceeds 4 MB. Compress the PDF or split attachments.`);
+      throw new Error(`${file.name} exceeds 4 MB. Use “Try sample bid” for the large TAPS IFB, or split/compress the file.`);
     }
     if (file.type && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
       throw new Error(`${file.name} is not a PDF`);
     }
+    onProgress?.(`Reading ${file.name}…`);
     const dataBase64 = await fileToBase64(file);
     payloadFiles.push({
       name: file.name,
@@ -54,6 +55,7 @@ export async function extractRfpPdfs(files) {
     });
   }
 
+  onProgress?.('Extracting text on the server…');
   const res = await fetch('/api/rfp/extract', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -62,7 +64,8 @@ export async function extractRfpPdfs(files) {
   return readJson(res);
 }
 
-export async function analyzeRfpPages({ pages, emptyPages, fileName }) {
+export async function analyzeRfpPages({ pages, emptyPages, fileName }, { onProgress } = {}) {
+  onProgress?.('Building checklist and drafting from the JSI library…');
   const slimPages = (pages || []).map((p) => ({
     pageNumber: p.pageNumber,
     text: p.text || '',
@@ -74,6 +77,17 @@ export async function analyzeRfpPages({ pages, emptyPages, fileName }) {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ pages: slimPages, emptyPages, fileName }),
+  });
+  return readJson(res);
+}
+
+/** Server-side TAPS IFB sample (72pp) — does not upload through the client body limit. */
+export async function runSampleBid({ onProgress } = {}) {
+  onProgress?.('Loading TAPS IFB sample and extracting…');
+  const res = await fetch('/api/rfp/sample', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({}),
   });
   return readJson(res);
 }

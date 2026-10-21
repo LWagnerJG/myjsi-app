@@ -60,7 +60,7 @@ export const MOCK_RESPONSE = {
         question: 'Structural & Testing Compliance',
         rfpQuestion: 'All products offered must comply with applicable ANSI/BIFMA testing standards for the product category offered. Provide documentation of third-party testing and certification for each product line submitted under this solicitation.',
         answer:
-          'All JSI seating complies with ANSI/BIFMA X5.1. Desk and table products comply with ANSI/BIFMA X5.5. Panel systems comply with ANSI/BIFMA X5.6. Storage units comply with ANSI/BIFMA X5.9. JSI seating carries BIFMA LEVEL® 2 certification. Products are tested by independent third-party laboratories.',
+          'All JSI seating complies with ANSI/BIFMA X5.1. Desk and table products comply with ANSI/BIFMA X5.5. Panel systems comply with ANSI/BIFMA X5.6. Storage units comply with ANSI/BIFMA X5.9. JSI states ANSI/BIFMA e3 self-certified Silver (not a third-party LEVEL certificate). Confirm third-party test reports required by the solicitation before attaching certificates.',
       },
       {
         question: 'Warranty',
@@ -72,7 +72,7 @@ export const MOCK_RESPONSE = {
         question: 'Sustainability & Environmental',
         rfpQuestion: 'Describe environmental sustainability practices, including materials sourcing, VOC emissions, environmental certifications, and packaging disposal and recycling practices per Section 13.0.',
         answer:
-          'Products manufactured using no-added-formaldehyde composite panels. Low-VOC finishes. BIFMA LEVEL® program participant. Packaging uses recycled content and recyclable materials. JSI participates in responsible disposal and recycling of packing materials per Section 13.0.',
+          'Products manufactured using no-added-formaldehyde composite panels. Low-VOC finishes. JSI states UL 2818 GREENGUARD certification and BIFMA e3 self-certified Silver — flag if the bid requires a third-party LEVEL certificate. Packaging uses recycled content and recyclable materials. JSI participates in responsible disposal and recycling of packing materials per Section 13.0.',
       },
       {
         question: 'Compliance & Trade Agreements',
