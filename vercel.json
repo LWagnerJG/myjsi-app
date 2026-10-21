@@ -1,7 +1,13 @@
 {
+  "functions": {
+    "api/rfp/*.js": {
+      "maxDuration": 120,
+      "memory": 1024
+    }
+  },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/"
     }
   ],

@@ -1,11 +1,11 @@
 /* ── RFP Responder Mock Data ─────────────────────────────────────── */
 
 export const PROCESSING_STEPS = [
-  { id: 'requirements', label: 'BPA Scope & Structure', statusText: 'Parsing solicitation number, zones, period of performance, and estimated value…' },
-  { id: 'furniture-codes', label: 'Furniture Code Extraction', statusText: 'Mapping item codes to categories — workstations, benching, seating, tables, storage…' },
-  { id: 'specs', label: 'Specification Compliance', statusText: 'Cross-referencing ANSI/BIFMA structural requirements and Section 8.0 furniture specs…' },
-  { id: 'product-fit', label: 'JSI Product Matching', statusText: 'Scoring JSI series against SOW item codes and sample project typicals…' },
-  { id: 'dealer', label: 'Response Assembly', statusText: 'Preparing editable sections for your review…' },
+  { id: 'upload', label: 'File intake', statusText: 'Reading PDF bytes in memory…' },
+  { id: 'extract', label: 'Text extraction', statusText: 'Extracting page text and flagging scanned pages…' },
+  { id: 'requirements', label: 'Requirements checklist', statusText: 'Pulling questions, deadlines, and submission rules with page sources…' },
+  { id: 'item-codes', label: 'Item codes & quantities', statusText: 'Capturing furniture codes and quantities for product matching…' },
+  { id: 'draft', label: 'Library drafting', statusText: 'Drafting from the JSI answer library — flagging gaps as needs-info…' },
 ];
 
 export const CLARIFICATION_QUESTIONS = [
