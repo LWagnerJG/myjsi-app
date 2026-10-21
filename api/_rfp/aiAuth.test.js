@@ -15,12 +15,16 @@ describe('getAiConfigStatus', () => {
     delete process.env.AI_GATEWAY_MODEL;
   });
 
-  it('is configured when API key is present', async () => {
+  it('is configured when API key is present but does not claim operational inference', async () => {
     process.env.AI_GATEWAY_API_KEY = 'test-key';
     const status = await getAiConfigStatus({});
     expect(status.configured).toBe(true);
+    expect(status.authConfigured).toBe(true);
+    expect(status.aiOperational).toBeNull();
+    expect(status.operationalState).toBe('auth_ready_inference_unverified');
     expect(status.authMethod).toBe('api-key');
     expect(status.model).toContain('claude-opus');
+    expect(status.operationalHint).toMatch(/unverified|auth/i);
   });
 
   it('resolves OIDC via getVercelOidcToken at request time', async () => {

@@ -11,6 +11,7 @@ import { verifySourcedItems, attachAnswerSources } from './quoteVerify.js';
 import { ChunkExtractSchema, DraftAnswersSchema } from './schemas.js';
 import { getAiConfigStatus } from './aiAuth.js';
 import { LLM_TIMEOUT_MS, LLM_MAX_RETRIES, resolveModels } from './models.js';
+import { summarizeLlmFailures } from './gatewayErrors.js';
 
 export { getAiConfigStatus } from './aiAuth.js';
 
@@ -158,7 +159,10 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
   if (!pages?.length || !pages.some((p) => p.hasExtractableText)) {
     return {
       ok: true,
+      authConfigured: ai.authConfigured,
       aiConfigured: ai.configured,
+      aiOperational: false,
+      aiFailureKind: 'empty_pdf',
       aiMessage: pages?.length
         ? 'No extractable text in this PDF (possible scan or image-only). OCR is not enabled.'
         : 'No pages to analyze.',
@@ -182,12 +186,15 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
   }
 
   if (!ai.configured) {
-    steps.push({ step: 'ai', status: 'skipped', detail: 'AI not configured — heuristic path' });
+    steps.push({ step: 'ai', status: 'skipped', detail: 'AI auth not configured — heuristic path' });
     const verified = verifyAll(heuristic);
     const answers = attachAnswerSources(draftFromLibrary(verified.requirements), verified.requirements);
     return {
       ok: true,
+      authConfigured: false,
       aiConfigured: false,
+      aiOperational: false,
+      aiFailureKind: 'auth_missing',
       aiMessage: ai.missingHint,
       model: null,
       fallbackModel: ai.fallbackModel,
@@ -226,6 +233,7 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
   ].join('\n');
 
   const chunkResults = [];
+  const extractFailures = [];
   for (const chunk of chunks) {
     const docBlock = pagesToPromptBlock(chunk.pages);
     const gen = await generateValidatedObject({
@@ -252,6 +260,7 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
         detail: `${gen.object.requirements?.length || 0} requirements`,
       });
     } else {
+      extractFailures.push(...(gen.errors || [{ detail: 'extract failed' }]));
       steps.push({
         step: `extract_chunk_${chunk.index + 1}`,
         status: 'failed',
@@ -271,6 +280,8 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
   // Draft answers (library-bound). Prefer LLM when we have requirements; else library matcher.
   let answers = [];
   let clarifyingQuestions = [];
+  let draftUsedLlm = false;
+  let draftFailure = null;
   if (verified.requirements.length) {
     const library = librarySummaryForPrompt();
     const draftGen = await generateValidatedObject({
@@ -305,8 +316,10 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
     if (draftGen.ok) {
       answers = attachAnswerSources(draftGen.object.answers, verified.requirements);
       clarifyingQuestions = draftGen.object.clarifyingQuestions || [];
+      draftUsedLlm = true;
       steps.push({ step: 'draft', status: 'ok', model: draftGen.model });
     } else {
+      draftFailure = summarizeLlmFailures(draftGen.errors || []);
       answers = attachAnswerSources(draftFromLibrary(verified.requirements), verified.requirements);
       steps.push({ step: 'draft', status: 'fallback_library', detail: 'LLM draft failed — library matcher used' });
     }
@@ -320,17 +333,34 @@ export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = ''
     }
   }
 
-  const usedLlm = chunkResults.length > 0;
+  const usedLlmExtract = chunkResults.length > 0;
+  const extractFailure = usedLlmExtract ? null : summarizeLlmFailures(extractFailures);
+  const aiOperational = usedLlmExtract || draftUsedLlm;
+  const aiFailureKind = aiOperational
+    ? (draftUsedLlm ? null : draftFailure?.kind || null)
+    : (extractFailure?.kind || draftFailure?.kind || 'provider');
+
+  let aiMessage = null;
+  if (!usedLlmExtract && extractFailure) {
+    aiMessage = extractFailure.userMessage;
+  } else if (usedLlmExtract && !draftUsedLlm && draftFailure) {
+    aiMessage = `Extract used LLM, but drafting fell back to library matcher. ${draftFailure.userMessage}`;
+  }
+
   return {
     ok: true,
+    authConfigured: true,
     aiConfigured: true,
-    aiMessage: usedLlm
-      ? null
-      : 'AI extraction failed for all chunks; used heuristic extraction with quote verification.',
-    model: usedLlm ? (steps.find((s) => s.model)?.model || models.primary) : models.primary,
+    aiOperational,
+    aiFailureKind,
+    aiMessage,
+    model: usedLlmExtract || draftUsedLlm
+      ? (steps.find((s) => s.model)?.model || models.primary)
+      : models.primary,
     fallbackModel: models.fallback,
     authMethod: ai.authMethod,
-    extractionMode: usedLlm ? 'llm_chunked' : 'heuristic_fallback',
+    extractionMode: usedLlmExtract ? 'llm_chunked' : 'heuristic_fallback',
+    draftMode: draftUsedLlm ? 'llm' : 'library_fallback',
     ...verified,
     answers,
     clarifyingQuestions,
