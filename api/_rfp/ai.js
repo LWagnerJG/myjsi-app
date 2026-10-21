@@ -1,222 +1,93 @@
 /**
- * Vercel AI Gateway helper for RFP analysis.
- * Auth: AI_GATEWAY_API_KEY (preferred for explicit key) or VERCEL_OIDC_TOKEN on Vercel.
- * Never log document contents.
+ * Robust RFP analysis: chunked LLM extraction, schema validate + retry + fallback model,
+ * quote verification, timeouts. Never logs document contents.
  */
 
 import { generateText, Output } from 'ai';
-import { z } from 'zod';
 import { librarySummaryForPrompt, matchLibraryEntries, JSI_ANSWER_LIBRARY } from './answerLibrary.js';
 import { heuristicExtractRequirements } from './pdfExtract.js';
+import { chunkPages, pagesToPromptBlock, mergeExtractions } from './chunking.js';
+import { verifySourcedItems, attachAnswerSources } from './quoteVerify.js';
+import { ChunkExtractSchema, DraftAnswersSchema } from './schemas.js';
+import { getAiConfigStatus } from './aiAuth.js';
+import { LLM_TIMEOUT_MS, LLM_MAX_RETRIES, resolveModels } from './models.js';
 
-const REQUIRED_ENV_HINT =
-  'AI is not configured. Set AI_GATEWAY_API_KEY on the Vercel project (Production + Preview), or enable Vercel OIDC so VERCEL_OIDC_TOKEN is available. Optionally set AI_GATEWAY_MODEL (e.g. openai/gpt-4o-mini).';
+export { getAiConfigStatus } from './aiAuth.js';
 
-export function getAiConfigStatus() {
-  const hasKey = Boolean(process.env.AI_GATEWAY_API_KEY);
-  const hasOidc = Boolean(process.env.VERCEL_OIDC_TOKEN);
-  const model = process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini';
-  return {
-    configured: hasKey || hasOidc,
-    hasKey,
-    hasOidc,
-    model,
-    missingHint: REQUIRED_ENV_HINT,
-  };
-}
-
-const AnalyzeSchema = z.object({
-  meta: z.object({
-    projectName: z.string(),
-    solicitation: z.string().optional().default(''),
-    dueDate: z.string().optional().default(''),
-    summary: z.string().optional().default(''),
-  }),
-  requirements: z.array(z.object({
-    id: z.string(),
-    category: z.string(),
-    text: z.string(),
-    sourcePage: z.number().int().positive(),
-    itemCode: z.string().nullable().optional(),
-    quantity: z.number().nullable().optional(),
-  })),
-  itemCodes: z.array(z.object({
-    id: z.string(),
-    itemCode: z.string(),
-    quantity: z.number().nullable().optional(),
-    description: z.string().optional().default(''),
-    sourcePage: z.number().int().positive(),
-    context: z.string().optional().default(''),
-  })),
-  deadlines: z.array(z.object({
-    id: z.string(),
-    text: z.string(),
-    dateText: z.string().optional().default(''),
-    sourcePage: z.number().int().positive(),
-  })),
-  submissionRules: z.array(z.object({
-    id: z.string(),
-    text: z.string(),
-    sourcePage: z.number().int().positive(),
-  })),
-  answers: z.array(z.object({
-    requirementId: z.string(),
-    status: z.enum(['drafted', 'needs_info', 'library_match']),
-    libraryIds: z.array(z.string()).optional().default([]),
-    draftText: z.string().optional().default(''),
-    needsInfoQuestion: z.string().nullable().optional(),
-    notes: z.string().optional().default(''),
-  })),
-  clarifyingQuestions: z.array(z.object({
-    id: z.string(),
-    question: z.string(),
-    why: z.string().optional().default(''),
-    relatedRequirementIds: z.array(z.string()).optional().default([]),
-  })).optional().default([]),
-});
-
-function pagesToPromptBlock(pages, maxChars = 48_000) {
-  let used = 0;
-  const parts = [];
-  for (const page of pages) {
-    if (!page.hasExtractableText) {
-      parts.push(`--- PAGE ${page.pageNumber} [NO EXTRACTABLE TEXT] ---`);
-      continue;
-    }
-    const chunk = page.text.slice(0, 6000);
-    if (used + chunk.length > maxChars) break;
-    parts.push(`--- PAGE ${page.pageNumber} ---\n${chunk}`);
-    used += chunk.length;
-  }
-  return parts.join('\n\n');
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const err = new Error(`${label} timed out after ${Math.round(ms / 1000)}s`);
+      err.code = 'TIMEOUT';
+      reject(err);
+    }, ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 /**
- * Analyze extracted pages: LLM when configured, heuristic + library match otherwise.
+ * Call LLM for structured output with schema validation, retry, and fallback model.
  */
-export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = '' }) {
-  const ai = getAiConfigStatus();
-  const heuristic = heuristicExtractRequirements(pages);
+export async function generateValidatedObject({
+  schema,
+  system,
+  prompt,
+  primaryModel,
+  fallbackModel,
+  label = 'LLM',
+  timeoutMs = LLM_TIMEOUT_MS,
+  maxRetries = LLM_MAX_RETRIES,
+}) {
+  const models = [primaryModel, fallbackModel].filter(Boolean)
+    .filter((m, i, arr) => arr.indexOf(m) === i);
+  const errors = [];
 
-  if (!ai.configured) {
-    const answers = draftFromLibrary(heuristic.requirements);
-    return {
-      ok: true,
-      aiConfigured: false,
-      aiMessage: ai.missingHint,
-      model: null,
-      extractionMode: 'heuristic',
-      meta: heuristic.meta,
-      requirements: heuristic.requirements,
-      itemCodes: heuristic.itemCodes,
-      deadlines: heuristic.deadlines,
-      submissionRules: heuristic.submissionRules,
-      answers,
-      clarifyingQuestions: answers
-        .filter((a) => a.status === 'needs_info')
-        .slice(0, 6)
-        .map((a, i) => ({
-          id: `cq-${i}`,
-          question: a.needsInfoQuestion,
-          why: 'Not covered by the approved JSI answer library.',
-          relatedRequirementIds: [a.requirementId],
-        })),
-      emptyPages,
-      fileName,
-      library: JSI_ANSWER_LIBRARY.map(({ id, title, category, owner, lastReviewed, needsApproval }) => ({
-        id, title, category, owner, lastReviewed, needsApproval,
-      })),
-    };
-  }
-
-  const library = librarySummaryForPrompt();
-  const docBlock = pagesToPromptBlock(pages);
-
-  try {
-    const { output } = await generateText({
-      model: ai.model,
-      output: Output.object({ schema: AnalyzeSchema }),
-      system: [
-        'You extract structured RFP / solicitation requirements for JSI Furniture dealers.',
-        'Rules:',
-        '1. Every requirement, deadline, item code, and submission rule MUST include sourcePage from the document markers.',
-        '2. Capture furniture item codes and quantities whenever present (for later product matching).',
-        '3. Draft answers ONLY using the provided JSI answer library entries and facts stated in the RFP itself.',
-        '4. Do NOT invent JSI capabilities, certifications, pricing, lead times, or compliance claims.',
-        '5. If the library does not support an answer, set status to needs_info and write a concrete needsInfoQuestion.',
-        '6. When using library text, set status to library_match or drafted and list libraryIds used.',
-        '7. Prefer concise, submission-ready wording. Mark library entries that say [needs approval] in notes.',
-        '8. clarifyingQuestions should only ask for information a dealer/JSI SME must provide — not rhetorical.',
-      ].join('\n'),
-      prompt: [
-        `File name: ${fileName || 'rfp.pdf'}`,
-        '',
-        'JSI ANSWER LIBRARY (JSON):',
-        JSON.stringify(library),
-        '',
-        'DOCUMENT PAGES:',
-        docBlock || '(no extractable text)',
-      ].join('\n'),
-    });
-
-    const parsed = output || {};
-    // Merge heuristic item codes if LLM missed some
-    const mergedItems = mergeItemCodes(parsed.itemCodes || [], heuristic.itemCodes);
-    const requirements = (parsed.requirements?.length ? parsed.requirements : heuristic.requirements)
-      .map((r, i) => ({ ...r, id: r.id || `req-${i}` }));
-
-    let answers = Array.isArray(parsed.answers) ? parsed.answers : [];
-    if (!answers.length) {
-      answers = draftFromLibrary(requirements);
+  for (const model of models) {
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+      try {
+        const result = await withTimeout(
+          generateText({
+            model,
+            output: Output.object({ schema }),
+            system,
+            prompt,
+          }),
+          timeoutMs,
+          `${label} (${model})`,
+        );
+        const parsed = schema.safeParse(result.output);
+        if (!parsed.success) {
+          errors.push({ model, attempt, error: 'schema_invalid', detail: parsed.error.issues?.[0]?.message });
+          continue;
+        }
+        return { ok: true, object: parsed.data, model, attempts: attempt + 1 };
+      } catch (error) {
+        errors.push({
+          model,
+          attempt,
+          error: error.code || error.name || 'Error',
+          detail: error.message?.slice(0, 180),
+        });
+      }
     }
-
-    return {
-      ok: true,
-      aiConfigured: true,
-      aiMessage: null,
-      model: ai.model,
-      extractionMode: 'llm',
-      meta: {
-        projectName: parsed.meta?.projectName || heuristic.meta.projectName,
-        solicitation: parsed.meta?.solicitation || heuristic.meta.solicitation,
-        dueDate: parsed.meta?.dueDate || heuristic.meta.dueDate,
-        summary: parsed.meta?.summary || '',
-      },
-      requirements,
-      itemCodes: mergedItems,
-      deadlines: parsed.deadlines?.length ? parsed.deadlines : heuristic.deadlines,
-      submissionRules: parsed.submissionRules?.length ? parsed.submissionRules : heuristic.submissionRules,
-      answers,
-      clarifyingQuestions: parsed.clarifyingQuestions || [],
-      emptyPages,
-      fileName,
-      library: JSI_ANSWER_LIBRARY.map(({ id, title, category, owner, lastReviewed, needsApproval }) => ({
-        id, title, category, owner, lastReviewed, needsApproval,
-      })),
-    };
-  } catch (error) {
-    // Fall back to heuristic — never leak document text in error messages returned upstream
-    const answers = draftFromLibrary(heuristic.requirements);
-    return {
-      ok: true,
-      aiConfigured: true,
-      aiMessage: `AI analysis failed (${error.name || 'Error'}); used heuristic extraction instead. ${ai.missingHint}`,
-      model: ai.model,
-      extractionMode: 'heuristic_fallback',
-      meta: heuristic.meta,
-      requirements: heuristic.requirements,
-      itemCodes: heuristic.itemCodes,
-      deadlines: heuristic.deadlines,
-      submissionRules: heuristic.submissionRules,
-      answers,
-      clarifyingQuestions: [],
-      emptyPages,
-      fileName,
-      library: JSI_ANSWER_LIBRARY.map(({ id, title, category, owner, lastReviewed, needsApproval }) => ({
-        id, title, category, owner, lastReviewed, needsApproval,
-      })),
-    };
   }
+
+  return { ok: false, errors };
+}
+
+function enrichHeuristicWithQuotes(heuristic) {
+  const mapItem = (item) => ({
+    ...item,
+    sourceQuote: item.sourceQuote || item.context || item.text || item.dateText || '',
+  });
+  return {
+    ...heuristic,
+    requirements: (heuristic.requirements || []).map(mapItem),
+    itemCodes: (heuristic.itemCodes || []).map(mapItem),
+    deadlines: (heuristic.deadlines || []).map(mapItem),
+    submissionRules: (heuristic.submissionRules || []).map(mapItem),
+  };
 }
 
 function draftFromLibrary(requirements) {
@@ -230,6 +101,8 @@ function draftFromLibrary(requirements) {
         draftText: '',
         needsInfoQuestion: `What approved JSI response should we use for: "${req.text.slice(0, 160)}"?`,
         notes: 'No library match.',
+        sourcePage: req.sourcePage,
+        sourceQuote: req.sourceQuote || req.text?.slice(0, 240) || '',
       };
     }
     const primary = matches[0];
@@ -242,23 +115,230 @@ function draftFromLibrary(requirements) {
         ? `Library entry "${primary.title}" is marked needs approval — confirm before submitting.`
         : null,
       notes: primary.needsApproval ? 'needs approval' : '',
+      sourcePage: req.sourcePage,
+      sourceQuote: req.sourceQuote || req.text?.slice(0, 240) || '',
     };
   });
 }
 
-function mergeItemCodes(primary, secondary) {
-  const map = new Map();
-  for (const item of [...primary, ...secondary]) {
-    const key = String(item.itemCode || '').toUpperCase();
-    if (!key) continue;
-    if (!map.has(key)) {
-      map.set(key, { ...item, itemCode: key, id: item.id || `item-${key}` });
+function librarySummary() {
+  return JSI_ANSWER_LIBRARY.map(({
+    id, title, category, owner, lastReviewed, needsApproval, body, sourceUrls, riskFlags, staleAfterMonths,
+  }) => ({
+    id, title, category, owner, lastReviewed, needsApproval, body, sourceUrls, riskFlags: riskFlags || [], staleAfterMonths,
+  }));
+}
+
+/**
+ * Analyze extracted pages with chunking + verification.
+ */
+export async function analyzeRfpDocument({ pages, emptyPages = [], fileName = '', req } = {}) {
+  const ai = await getAiConfigStatus(req);
+  const models = resolveModels();
+  const heuristic = enrichHeuristicWithQuotes(heuristicExtractRequirements(pages));
+  const steps = [];
+  const dropped = [];
+
+  const verifyAll = (merged) => {
+    const reqV = verifySourcedItems(merged.requirements, pages, { soft: false, kind: 'requirement' });
+    const itemV = verifySourcedItems(merged.itemCodes, pages, { soft: true, kind: 'itemCode' });
+    const deadV = verifySourcedItems(merged.deadlines, pages, { soft: true, kind: 'deadline' });
+    const ruleV = verifySourcedItems(merged.submissionRules, pages, { soft: true, kind: 'submissionRule' });
+    dropped.push(...reqV.dropped, ...itemV.dropped, ...deadV.dropped, ...ruleV.dropped);
+    return {
+      meta: merged.meta,
+      requirements: reqV.kept,
+      itemCodes: itemV.kept,
+      deadlines: deadV.kept,
+      submissionRules: ruleV.kept,
+      flagged: [...reqV.flagged, ...itemV.flagged, ...deadV.flagged, ...ruleV.flagged],
+    };
+  };
+
+  if (!pages?.length || !pages.some((p) => p.hasExtractableText)) {
+    return {
+      ok: true,
+      aiConfigured: ai.configured,
+      aiMessage: pages?.length
+        ? 'No extractable text in this PDF (possible scan or image-only). OCR is not enabled.'
+        : 'No pages to analyze.',
+      model: ai.configured ? ai.model : null,
+      fallbackModel: ai.fallbackModel,
+      authMethod: ai.authMethod,
+      extractionMode: 'empty',
+      meta: heuristic.meta,
+      requirements: [],
+      itemCodes: [],
+      deadlines: [],
+      submissionRules: [],
+      answers: [],
+      clarifyingQuestions: [],
+      emptyPages,
+      dropped,
+      steps: [{ step: 'extract', status: 'empty', detail: 'No extractable text' }],
+      fileName,
+      library: librarySummary(),
+    };
+  }
+
+  if (!ai.configured) {
+    steps.push({ step: 'ai', status: 'skipped', detail: 'AI not configured — heuristic path' });
+    const verified = verifyAll(heuristic);
+    const answers = attachAnswerSources(draftFromLibrary(verified.requirements), verified.requirements);
+    return {
+      ok: true,
+      aiConfigured: false,
+      aiMessage: ai.missingHint,
+      model: null,
+      fallbackModel: ai.fallbackModel,
+      authMethod: null,
+      extractionMode: 'heuristic',
+      ...verified,
+      answers,
+      clarifyingQuestions: answers
+        .filter((a) => a.status === 'needs_info')
+        .slice(0, 6)
+        .map((a, i) => ({
+          id: `cq-${i}`,
+          question: a.needsInfoQuestion,
+          why: 'Not covered by the approved JSI answer library.',
+          relatedRequirementIds: [a.requirementId],
+        })),
+      emptyPages,
+      dropped,
+      steps,
+      fileName,
+      library: librarySummary(),
+    };
+  }
+
+  const chunks = chunkPages(pages);
+  steps.push({ step: 'chunk', status: 'ok', detail: `${chunks.length} chunk(s) from ${pages.length} page(s)` });
+
+  const extractSystem = [
+    'You extract structured RFP / solicitation requirements for JSI Furniture dealers.',
+    'Rules:',
+    '1. Every requirement, deadline, item code, and submission rule MUST include sourcePage AND a verbatim sourceQuote copied from that page.',
+    '2. sourceQuote must be a contiguous substring of the page text (at least ~12 characters).',
+    '3. Capture furniture item codes and quantities whenever present.',
+    '4. Do not invent content that is not on the provided pages.',
+    '5. Prefer concise requirement wording; keep the quote faithful to the source.',
+  ].join('\n');
+
+  const chunkResults = [];
+  for (const chunk of chunks) {
+    const docBlock = pagesToPromptBlock(chunk.pages);
+    const gen = await generateValidatedObject({
+      schema: ChunkExtractSchema,
+      system: extractSystem,
+      prompt: [
+        `File: ${fileName || 'rfp.pdf'}`,
+        `Pages ${chunk.startPage}–${chunk.endPage} of document`,
+        '',
+        'DOCUMENT PAGES:',
+        docBlock || '(no extractable text in this chunk)',
+      ].join('\n'),
+      primaryModel: models.primary,
+      fallbackModel: models.fallback,
+      label: `Extract chunk ${chunk.index + 1}/${chunks.length}`,
+    });
+
+    if (gen.ok) {
+      chunkResults.push(gen.object);
+      steps.push({
+        step: `extract_chunk_${chunk.index + 1}`,
+        status: 'ok',
+        model: gen.model,
+        detail: `${gen.object.requirements?.length || 0} requirements`,
+      });
     } else {
-      const existing = map.get(key);
-      if (existing.quantity == null && item.quantity != null) existing.quantity = item.quantity;
-      if (!existing.context && item.context) existing.context = item.context;
-      if (!existing.description && item.description) existing.description = item.description;
+      steps.push({
+        step: `extract_chunk_${chunk.index + 1}`,
+        status: 'failed',
+        detail: gen.errors?.[gen.errors.length - 1]?.detail || 'extract failed',
+      });
     }
   }
-  return Array.from(map.values());
+
+  const merged = mergeExtractions(chunkResults, heuristic);
+  const verified = verifyAll(merged);
+  steps.push({
+    step: 'verify_quotes',
+    status: 'ok',
+    detail: `kept ${verified.requirements.length} requirements; dropped ${dropped.filter((d) => d.kind === 'requirement').length}`,
+  });
+
+  // Draft answers (library-bound). Prefer LLM when we have requirements; else library matcher.
+  let answers = [];
+  let clarifyingQuestions = [];
+  if (verified.requirements.length) {
+    const library = librarySummaryForPrompt();
+    const draftGen = await generateValidatedObject({
+      schema: DraftAnswersSchema,
+      system: [
+        'Draft RFP answers for JSI Furniture using ONLY the provided answer library and RFP requirement text.',
+        'Rules:',
+        '1. Do NOT invent JSI capabilities, certifications, pricing, or compliance claims.',
+        '2. If unsupported, status=needs_info with a concrete needsInfoQuestion.',
+        '3. Every answer MUST include sourcePage + sourceQuote copied from its requirement.',
+        '4. List libraryIds used when drafting from the library.',
+      ].join('\n'),
+      prompt: [
+        'JSI ANSWER LIBRARY:',
+        JSON.stringify(library),
+        '',
+        'REQUIREMENTS:',
+        JSON.stringify(verified.requirements.slice(0, 40).map((r) => ({
+          id: r.id,
+          text: r.text,
+          category: r.category,
+          sourcePage: r.sourcePage,
+          sourceQuote: r.sourceQuote,
+        }))),
+      ].join('\n'),
+      primaryModel: models.primary,
+      fallbackModel: models.fallback,
+      label: 'Draft answers',
+      timeoutMs: LLM_TIMEOUT_MS,
+    });
+
+    if (draftGen.ok) {
+      answers = attachAnswerSources(draftGen.object.answers, verified.requirements);
+      clarifyingQuestions = draftGen.object.clarifyingQuestions || [];
+      steps.push({ step: 'draft', status: 'ok', model: draftGen.model });
+    } else {
+      answers = attachAnswerSources(draftFromLibrary(verified.requirements), verified.requirements);
+      steps.push({ step: 'draft', status: 'fallback_library', detail: 'LLM draft failed — library matcher used' });
+    }
+  }
+
+  // Ensure every requirement has an answer row
+  const answered = new Set(answers.map((a) => a.requirementId));
+  for (const req of verified.requirements) {
+    if (!answered.has(req.id)) {
+      answers.push(...attachAnswerSources(draftFromLibrary([req]), [req]));
+    }
+  }
+
+  const usedLlm = chunkResults.length > 0;
+  return {
+    ok: true,
+    aiConfigured: true,
+    aiMessage: usedLlm
+      ? null
+      : 'AI extraction failed for all chunks; used heuristic extraction with quote verification.',
+    model: usedLlm ? (steps.find((s) => s.model)?.model || models.primary) : models.primary,
+    fallbackModel: models.fallback,
+    authMethod: ai.authMethod,
+    extractionMode: usedLlm ? 'llm_chunked' : 'heuristic_fallback',
+    ...verified,
+    answers,
+    clarifyingQuestions,
+    emptyPages,
+    dropped,
+    steps,
+    chunks: chunks.length,
+    fileName,
+    library: librarySummary(),
+  };
 }

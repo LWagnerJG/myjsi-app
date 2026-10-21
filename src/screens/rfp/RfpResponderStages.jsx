@@ -1,12 +1,9 @@
-/* ── RFP Responder — Stage 0/1/2 Components ───────────────────── */
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+/* ── RFP Responder — Upload + single progress indicator ─────────── */
+import React, { useRef, useState, useCallback } from 'react';
 import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
-import {
-  FileText, Upload, CheckCircle2, Loader2, X,
-  ArrowUp,
-} from 'lucide-react';
+import { FileText, Upload, X, ArrowUp } from 'lucide-react';
 
 const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
 
@@ -19,14 +16,7 @@ const ElliottAvatar = ({ size = 36 }) => (
       background: 'linear-gradient(135deg, #E8D1C2 0%, #D3A891 100%)',
     }}
   >
-    <img
-      src={ELLIOTT_AVATAR_URL}
-      alt="Elliott"
-      width={size}
-      height={size}
-      className="w-full h-full object-cover"
-      loading="eager"
-    />
+    <img src={ELLIOTT_AVATAR_URL} alt="Elliott" width={size} height={size} className="w-full h-full object-cover" loading="eager" />
   </div>
 );
 
@@ -36,64 +26,53 @@ const formatFileSize = (bytes) => {
   return `${(bytes / 1048576).toFixed(1)} MB`;
 };
 
-/* ═══════════════════════════════════════════════════════════════════
-   STAGE 0 — Upload Drop-zone
-   ═══════════════════════════════════════════════════════════════════ */
 export const UploadStage = ({
-  file,
   files,
   onFileSelect,
   onFileRemove,
   onAnalyze,
+  onSample,
+  onLoadLegacySample,
   theme,
   aiStatus,
   error,
-  onLoadSample,
 }) => {
   const isDark = isDarkTheme(theme);
   const c = theme?.colors || {};
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
-  const selected = files?.length ? files : (file ? [file] : []);
+  const selected = files || [];
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
-    const dropped = Array.from(e.dataTransfer?.files || []);
-    dropped.filter((f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf')
+    Array.from(e.dataTransfer?.files || [])
+      .filter((f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf')
       .forEach((f) => onFileSelect(f));
   }, [onFileSelect]);
-
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-    setDragOver(true);
-  }, []);
 
   return (
     <div className="flex flex-col items-center gap-5 w-full max-w-xl mx-auto py-4">
       <ElliottAvatar size={40} />
       <div className="text-center space-y-1.5">
-        <h2
-          className="text-xl font-bold tracking-tight"
-          style={{ color: c.textPrimary }}
-        >
+        <h2 className="text-xl font-bold tracking-tight" style={{ color: c.textPrimary }}>
           RFP Responder
         </h2>
         <p className="text-sm leading-relaxed max-w-sm mx-auto" style={{ color: c.textSecondary }}>
-          Drop an RFP PDF (and attachments). I&rsquo;ll extract requirements with page sources, draft from the JSI answer library, and let you approve before exporting searchable text.
+          Upload a bid PDF. I&rsquo;ll extract requirements with page citations, draft from the JSI answer library, and build a go/no-go workspace you can export.
         </p>
       </div>
 
-      {aiStatus && !aiStatus.aiConfigured && (
-        <p className="text-xs text-center px-3" style={{ color: theme?.colors?.warning || '#C4956A' }}>
-          AI drafting is not configured yet — extraction still works with heuristic matching. {aiStatus.aiMessage}
+      {aiStatus && (
+        <p className="text-xs text-center px-3" style={{ color: aiStatus.aiConfigured ? (c.textSecondary) : (theme?.colors?.warning || '#C4956A') }}>
+          {aiStatus.aiConfigured
+            ? `AI ready · ${aiStatus.authMethod || 'gateway'} · ${aiStatus.model || 'default model'}`
+            : `AI not configured yet — extraction still works. ${aiStatus.aiMessage || ''}`}
         </p>
       )}
 
       {error ? (
-        <p className="text-xs text-center px-3" style={{ color: theme?.colors?.error || '#B85C5C' }}>
-          {error}
-        </p>
+        <p className="text-xs text-center px-3" style={{ color: theme?.colors?.error || '#B85C5C' }}>{error}</p>
       ) : null}
 
       <GlassCard
@@ -102,26 +81,21 @@ export const UploadStage = ({
         className="w-full cursor-pointer"
         style={{
           borderRadius: DESIGN_TOKENS.borderRadius.xl,
-          border: dragOver
-            ? `2px dashed ${c.accent || '#353535'}`
-            : `2px dashed ${c.border || '#E3E0D8'}`,
-          backgroundColor: dragOver
-            ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)')
-            : 'transparent',
-          transition: 'border-color 200ms ease, background-color 200ms ease',
+          border: dragOver ? `2px dashed ${c.accent || '#353535'}` : `2px dashed ${c.border || '#E3E0D8'}`,
+          backgroundColor: dragOver ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)') : 'transparent',
         }}
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
-        onDragOver={handleDragOver}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
       >
         <div className="flex flex-col items-center gap-3 py-12 px-6">
           <Upload className="w-8 h-8" style={{ color: c.textSecondary, opacity: 0.5 }} />
           <p className="text-sm font-medium" style={{ color: c.textSecondary }}>
-            {dragOver ? 'Drop your PDF here' : 'Drag & drop PDFs, or click to browse'}
+            {dragOver ? 'Drop PDF here' : 'Drag & drop PDFs, or click to browse'}
           </p>
           <p className="text-xs" style={{ color: c.textSecondary, opacity: 0.5 }}>
-            Up to 5 PDFs · 4 MB each · processed in memory only
+            Up to 5 PDFs · 4 MB each · text extract per page · OCR for scans not enabled yet
           </p>
         </div>
         <input
@@ -142,11 +116,11 @@ export const UploadStage = ({
           <FileText className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.error }} />
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium truncate" style={{ color: c.textPrimary }}>{f.name}</div>
-            <div className="text-xs" style={{ color: c.textSecondary }}>{formatFileSize(f.size)}</div>
+            <div className="text-xs" style={{ color: c.textSecondary }}>{formatFileSize(f.size)} · PDF</div>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onFileRemove(f.name); }}
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-colors"
+            className="w-11 h-11 rounded-full flex items-center justify-center"
             style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}
             aria-label="Remove file"
           >
@@ -165,247 +139,63 @@ export const UploadStage = ({
         Analyze RFP
       </PrimaryButton>
 
-      {onLoadSample && (
+      {onSample && (
         <button
           type="button"
-          onClick={onLoadSample}
-          className="text-xs font-medium underline-offset-2 hover:underline h-11"
+          onClick={onSample}
+          className="h-11 px-4 rounded-full text-xs font-semibold w-full"
+          style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', color: c.textPrimary }}
+        >
+          Try sample bid — TAPS IFB 2025-10 (72 pp)
+        </button>
+      )}
+
+      {onLoadLegacySample && (
+        <button
+          type="button"
+          onClick={onLoadLegacySample}
+          className="text-xs font-medium h-11 underline-offset-2 hover:underline"
           style={{ color: c.textSecondary }}
         >
-          Load sample GSA BPA response (demo only)
+          Load legacy GSA mock editor (demo only)
         </button>
       )}
     </div>
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════════
-   STAGE 1 — Processing animation
-   ═══════════════════════════════════════════════════════════════════ */
-export const ProcessingStage = ({ steps, completedCount, theme, statusOverride }) => {
-  const c = theme?.colors || {};
-
-  return (
-    <div className="flex flex-col items-center gap-5 w-full max-w-xl mx-auto py-4">
-      <ElliottAvatar size={40} />
-      <div className="text-center space-y-1">
-        <h2 className="text-xl font-bold tracking-tight" style={{ color: c.textPrimary }}>
-          Analyzing your RFP…
-        </h2>
-        <p className="text-sm" style={{ color: c.textSecondary }}>
-          {statusOverride
-            || (completedCount < steps.length
-              ? steps[completedCount]?.statusText
-              : 'Almost done — preparing your response package.')}
-        </p>
-      </div>
-
-      <GlassCard theme={theme} className="w-full divide-y" style={{ borderRadius: DESIGN_TOKENS.borderRadius.xl }}>
-        {steps.map((step, idx) => {
-          const done = idx < completedCount;
-          const active = idx === completedCount;
-          return (
-            <div key={step.id} className="flex items-center gap-3 px-5 py-4" style={{ borderColor: c.border }}>
-              {done ? (
-                <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: theme.colors.success }} />
-              ) : active ? (
-                <Loader2
-                  className="w-5 h-5 flex-shrink-0 animate-spin"
-                  style={{ color: c.accent }}
-                />
-              ) : (
-                <div
-                  className="w-5 h-5 rounded-full flex-shrink-0"
-                  style={{ border: `2px solid ${c.border}` }}
-                />
-              )}
-              <span
-                className="text-sm font-medium"
-                style={{
-                  color: done ? c.textPrimary : active ? c.textPrimary : c.textSecondary,
-                  opacity: done || active ? 1 : 0.5,
-                }}
-              >
-                {step.label}
-              </span>
-            </div>
-          );
-        })}
-      </GlassCard>
-    </div>
-  );
-};
-
-const ThinkingDots = ({ color }) => (
-  <div className="flex items-center justify-center gap-1.5 py-8">
-    {[0, 1, 2].map((i) => (
-      <span
-        key={i}
-        className="w-2 h-2 rounded-full"
-        style={{
-          backgroundColor: color || '#D3A891',
-          animation: `rfp-think-pulse 1.4s ease-in-out ${i * 0.2}s infinite`,
-        }}
-      />
-    ))}
-    <style>{`
-      @keyframes rfp-think-pulse {
-        0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
-        40% { transform: scale(1); opacity: 1; }
-      }
-    `}</style>
-  </div>
-);
-
-/* ═══════════════════════════════════════════════════════════════════
-   STAGE 2 — Swipeable Multiple-Choice Cards with thinking state
-   ═══════════════════════════════════════════════════════════════════ */
-export const ClarificationStage = ({
-  questions,
-  currentIndex,
-  onAnswer,
-  theme,
-}) => {
+/** One calm progress indicator — no fake multi-step checklist. */
+export const ProcessingStage = ({ theme, progressPct = 0, statusText }) => {
   const c = theme?.colors || {};
   const isDark = isDarkTheme(theme);
-  const total = questions.length;
-  const q = questions[currentIndex];
-  const [selected, setSelected] = useState(null);
-  const [phase, setPhase] = useState('enter'); // 'enter' | 'visible' | 'exit' | 'thinking'
-  const thinkTimerRef = useRef(null);
-
-  useEffect(() => {
-    setSelected(null);
-    setPhase('enter');
-    const t = setTimeout(() => setPhase('visible'), 60);
-    return () => { clearTimeout(t); clearTimeout(thinkTimerRef.current); };
-  }, [currentIndex]);
-
-  const handleSelect = (choiceIdx) => {
-    if (selected !== null) return;
-    setSelected(choiceIdx);
-
-    setTimeout(() => setPhase('exit'), 300);
-    setTimeout(() => setPhase('thinking'), 600);
-
-    const thinkMs = 800 + Math.random() * 800;
-    thinkTimerRef.current = setTimeout(() => {
-      onAnswer(choiceIdx);
-    }, 600 + thinkMs);
-  };
-
-  if (!q) return null;
-
-  const isThinking = phase === 'thinking';
-  const isVisible = phase === 'visible';
-  const isExit = phase === 'exit';
+  const pct = Math.max(0, Math.min(100, progressPct));
 
   return (
-    <div className="flex flex-col items-center w-full max-w-lg mx-auto flex-1" style={{ minHeight: 0 }}>
-      <div className="w-full max-w-[200px] mt-6 mb-6 flex-shrink-0">
+    <div className="flex flex-col items-center gap-5 w-full max-w-xl mx-auto py-10">
+      <ElliottAvatar size={40} />
+      <div className="text-center space-y-1 w-full">
+        <h2 className="text-xl font-bold tracking-tight" style={{ color: c.textPrimary }}>
+          Analyzing…
+        </h2>
+        <p className="text-sm" style={{ color: c.textSecondary }}>
+          {statusText || 'Working on your bid package.'}
+        </p>
+      </div>
+      <div className="w-full max-w-xs">
         <div
-          className="w-full h-[3px] rounded-full overflow-hidden"
+          className="h-2 rounded-full overflow-hidden"
           style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}
         >
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
-            style={{
-              width: `${((currentIndex + (isThinking ? 1 : 0)) / total) * 100}%`,
-              backgroundColor: c.accent || '#353535',
-            }}
+            style={{ width: `${pct}%`, backgroundColor: c.accent || '#353535' }}
           />
         </div>
-      </div>
-
-      <div className="flex-1 w-full flex items-start justify-center" style={{ minHeight: 0 }}>
-        {isThinking && (
-          <div className="flex flex-col items-center gap-3 pt-12" style={{ animation: 'rfp-fade-in 300ms ease' }}>
-            <ElliottAvatar size={36} />
-            <p className="text-sm font-medium" style={{ color: c.textSecondary }}>
-              Thinking…
-            </p>
-            <ThinkingDots color={c.accent || '#353535'} />
-            <style>{`
-              @keyframes rfp-fade-in {
-                from { opacity: 0; transform: translateY(6px); }
-                to { opacity: 1; transform: translateY(0); }
-              }
-            `}</style>
-          </div>
-        )}
-
-        {!isThinking && (
-          <div
-            className="w-full"
-            style={{
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible
-                ? 'translateY(0)'
-                : isExit
-                  ? 'translateY(-20px)'
-                  : 'translateY(16px)',
-              transition: 'opacity 350ms ease, transform 350ms ease',
-            }}
-          >
-            {q.rfpExcerpt && (
-              <div
-                className="rounded-xl mb-5 px-5 py-4"
-                style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(53,53,53,0.03)',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)'}`,
-                }}
-              >
-                <div
-                  className="text-[0.625rem] font-semibold tracking-[0.1em] uppercase mb-2"
-                  style={{ color: c.textSecondary, opacity: 0.45 }}
-                >
-                  From the RFP
-                </div>
-                <p
-                  className="text-[0.9375rem] leading-relaxed"
-                  style={{ color: c.textPrimary, opacity: 0.85 }}
-                >
-                  &ldquo;{q.rfpExcerpt}&rdquo;
-                </p>
-              </div>
-            )}
-
-            <h2
-              className="text-xl font-bold tracking-tight leading-snug mb-5"
-              style={{ color: c.textPrimary }}
-            >
-              {q.question}
-            </h2>
-
-            <div className="flex flex-col gap-2.5">
-              {q.choices.map((choice, idx) => {
-                const isSelected = selected === idx;
-                const isNotSure = choice.toLowerCase().includes('not sure');
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelect(idx)}
-                    className="w-full text-left px-5 py-4 rounded-2xl transition-all duration-200 active:scale-[0.98]"
-                    style={{
-                      backgroundColor: isSelected
-                        ? (c.accent || '#353535')
-                        : (isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.03)'),
-                      border: `1.5px solid ${isSelected ? (c.accent || '#353535') : (c.border || '#E3E0D8')}`,
-                      color: isSelected
-                        ? (c.accentText || '#fff')
-                        : isNotSure ? c.textSecondary : c.textPrimary,
-                      cursor: selected !== null ? 'default' : 'pointer',
-                      opacity: selected !== null && !isSelected ? 0.35 : 1,
-                    }}
-                  >
-                    <span className={`text-sm ${isNotSure ? 'font-normal' : 'font-medium'}`}>{choice}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <p className="text-xs mt-2 text-center tabular-nums" style={{ color: c.textSecondary }}>{pct}%</p>
       </div>
     </div>
   );
 };
+
+// Keep ClarificationStage export as no-op stub so old imports don't break if any remain
+export const ClarificationStage = () => null;

@@ -1,119 +1,155 @@
 /**
- * Seeded JSI answer library for RFP drafting.
- * Only includes claims already present in the repo's RFP mock / product content.
- * Entries marked needsApproval: true must not be treated as final approved copy.
+ * Seeded JSI answer library from public cited sources (research spec §3).
+ * Every entry has source URL(s), owner, lastReviewed. Flag risks honestly.
  */
 
 export const JSI_ANSWER_LIBRARY = [
   {
     id: 'company-overview',
     category: 'company',
-    title: 'Company overview & capacity',
-    owner: 'JSI Marketing (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['company', 'capacity', 'qualification', 'offeror', 'experience'],
+    title: 'Company overview',
+    owner: 'JSI Marketing',
+    lastReviewed: '2026-03-01',
+    needsApproval: false,
+    staleAfterMonths: 12,
+    tags: ['company', 'jasper', 'heritage', 'capacity', 'offeror', 'experience'],
+    sourceUrls: [
+      'https://www.jaspergroup.us.com/about-us/our-story/',
+      'https://jsifurniture.com/our-story',
+      'https://webresources.jsifurniture.com/production/uploads/documents/jg_80historybook-2.pdf',
+    ],
     body:
-      'JSI is a privately held furniture manufacturer based in Jasper, Indiana, with over 100 years of woodworking heritage. We operate a 1.2 million sq. ft. manufacturing campus and serve commercial, education, government, and healthcare markets through a national dealer network.',
-  },
-  {
-    id: 'ansi-bifma',
-    category: 'compliance',
-    title: 'ANSI/BIFMA structural & testing',
-    owner: 'JSI Product (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['bifma', 'ansi', 'testing', 'structural', 'certification'],
-    body:
-      'All JSI seating complies with ANSI/BIFMA X5.1. Desk and table products comply with ANSI/BIFMA X5.5. Panel systems comply with ANSI/BIFMA X5.6. Storage units comply with ANSI/BIFMA X5.9. JSI seating carries BIFMA LEVEL® 2 certification. Products are tested by independent third-party laboratories.',
+      'JSI is a Jasper Group brand. Jasper Seating was founded in 1929; the JSI contract office division started in 1996. Woodworking heritage dates to 1876 (first patent 1890). The organization employs about 1,000 people across roughly 2.3 million sq. ft. in Dubois and Orange counties, Indiana. Headquarters: 225 Clay St, Jasper, IN 47546 · 800.457.4511.',
   },
   {
     id: 'warranty',
     category: 'warranty',
-    title: 'Warranty',
-    owner: 'JSI Customer Care (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['warranty', 'lifetime', 'seating', 'casegoods'],
+    title: 'Warranty (public terms)',
+    owner: 'JSI Customer Care',
+    lastReviewed: '2026-03-01',
+    needsApproval: false,
+    staleAfterMonths: 6,
+    tags: ['warranty', 'lifetime', 'seating', 'casegoods', 'multi-shift'],
+    sourceUrls: [
+      'https://jasperwebsites.blob.core.windows.net/production/uploads/jsi_warrantyinformation_IvcWQpZ.pdf',
+      'https://webresources.jsifurniture.com/production/uploads/jsi_lok_pricelist.pdf',
+    ],
     body:
-      'JSI provides a Limited Lifetime Warranty on all casegoods and desking. Seating carries a 12-year warranty covering defects in materials and workmanship under normal commercial use.',
+      'Limited Lifetime Warranty to the original purchaser, based on single-shift 40-hr/week use; JSI repairs or replaces at its option. 12 years: wood seating, seating controls, pneumatic cylinders, laminate, veneer, solid surface, and Somna/Kindera/Satisse/Forge in multi-shift use. 10 years: recliner mechanisms. 5 years: casters, glides, electric height-adjustable bases, task lights, mesh/knit, electrical, foam. Replacement parts: 2 years or remaining warranty, whichever is longer. Textiles carry the supplier’s warranty; COM/COL is excluded.',
+    riskFlags: ['If the RFP requires warranty beyond these published terms, flag as Gap / needs Spec.'],
   },
   {
-    id: 'sustainability',
+    id: 'ansi-bifma-testing',
+    category: 'compliance',
+    title: 'ANSI/BIFMA testing',
+    owner: 'JSI Product',
+    lastReviewed: '2026-03-01',
+    needsApproval: false,
+    staleAfterMonths: 12,
+    tags: ['bifma', 'ansi', 'testing', 'structural', 'x5.1'],
+    sourceUrls: [
+      'https://www.bifma.org/members/?id=16386942',
+      'https://webresources.jsifurniture.com/production/uploads/documents/Sustainability_0624.pdf',
+    ],
+    body:
+      'JSI has been a BIFMA member since 2009 and tests products to applicable ANSI/BIFMA standards for the category offered. Confirm the exact X5.x standard and third-party test reports required by the solicitation before attaching certificates.',
+  },
+  {
+    id: 'level-self-certified',
     category: 'sustainability',
-    title: 'Sustainability & environmental',
-    owner: 'JSI Product (seed)',
-    lastReviewed: '2025-11-01',
+    title: 'BIFMA e3 / LEVEL (self-certified — risk)',
+    owner: 'JSI Product',
+    lastReviewed: '2026-03-01',
     needsApproval: true,
-    tags: ['sustainability', 'voc', 'formaldehyde', 'packaging', 'environment'],
+    staleAfterMonths: 6,
+    tags: ['level', 'bifma e3', 'sustainability', 'silver', 'third-party'],
+    sourceUrls: [
+      'https://webresources.jsifurniture.com/production/uploads/documents/Sustainability_0624.pdf',
+      'https://www.bifma.org/page/level-designersandbuyers',
+    ],
     body:
-      'Products manufactured using no-added-formaldehyde composite panels. Low-VOC finishes. BIFMA LEVEL® program participant. Packaging uses recycled content and recyclable materials.',
+      'JSI states ANSI/BIFMA e3 self-certified Silver and participates on the e3 committee. [RISK] This is self-certified — if the solicitation requires a third-party LEVEL certificate, do NOT claim third-party LEVEL; mark Gap and escalate to Spec.',
+    riskFlags: ['LEVEL self-certified vs third-party certificate required'],
   },
   {
-    id: 'buy-american-taa',
+    id: 'greenguard',
+    category: 'sustainability',
+    title: 'GREENGUARD / VOC',
+    owner: 'JSI Product',
+    lastReviewed: '2026-03-01',
+    needsApproval: true,
+    staleAfterMonths: 6,
+    tags: ['greenguard', 'ul 2818', 'voc', 'leed', 'fsc'],
+    sourceUrls: [
+      'https://webresources.jsifurniture.com/production/uploads/documents/Sustainability_0624.pdf',
+    ],
+    body:
+      'JSI states its products are UL 2818 GREENGUARD certified and can contribute to LEED credits; FSC and USGBC partnerships noted in sustainability materials. Water-based glues and recycled finish waste practices are described publicly. [needs approval] Attach current certificates for the specific SKUs offered.',
+    riskFlags: ['Confirm current GREENGUARD certificates per SKU before submission'],
+  },
+  {
+    id: 'gsa-contract',
     category: 'compliance',
-    title: 'Buy American / TAA / trade',
-    owner: 'JSI Contracts (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['buy american', 'taa', 'trade', 'compliance', 'jasper'],
+    title: 'GSA MAS contract GS-28F-0030U',
+    owner: 'JSI Contracts',
+    lastReviewed: '2026-03-01',
+    needsApproval: false,
+    staleAfterMonths: 3,
+    tags: ['gsa', 'mas', 'gs-28f-0030u', 'taa', 'sin 33721', 'cage'],
+    sourceUrls: [
+      'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/Contract%20GS-28F-0030U',
+      'https://www.gsaelibrary.gsa.gov/ElibMain/home.do/sinDetails.do?executeQuery=YES&scheduleNumber=MAS&specialItemNumber=33721',
+    ],
     body:
-      'JSI products are manufactured in Jasper, IN — fully compliant with the Buy American Act and TAA requirements.',
+      'GSA contract GS-28F-0030U, valid through June 24, 2028. SINs 33721, OLM, and 339113H. FOB destination, 48 contiguous states. Lead time typically 30–75 days ARO; Quickship 15–20 days. Terms 1% 15 / net 30. Min order $100, max $250k. Install capped at 30% of net product. Open to all JSI dealers. CAGE 31881. Series on contract include Wellington, Vision, Walden, Brogan, Finale, Flux, BeSpace, Arwyn, Lok, Draft, and others.',
+    riskFlags: ['TAA / Buy American: confirm product origin for the specific offer before claiming compliance'],
   },
   {
-    id: 'ada-accessibility',
-    category: 'compliance',
-    title: 'ADA / ABA accessibility',
-    owner: 'JSI Product (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['ada', 'aba', 'accessibility'],
-    body:
-      'Products comply with applicable ADA/ABA accessibility standards. [needs approval — confirm applicability per product line for the specific solicitation.]',
-  },
-  {
-    id: 'weight-rating-seating',
+    id: 'lead-time',
     category: 'manufacturing',
-    title: 'Seating weight ratings',
-    owner: 'JSI Product (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['weight', 'rating', 'seating', '275'],
+    title: 'Lead time / Quickship',
+    owner: 'JSI Operations',
+    lastReviewed: '2026-03-01',
+    needsApproval: false,
+    staleAfterMonths: 6,
+    tags: ['lead time', 'quickship', 'aro', 'delivery'],
+    sourceUrls: [
+      'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/Contract%20GS-28F-0030U',
+    ],
     body:
-      'Applicable JSI seating series are rated to 275 lbs for ANSI/BIFMA commercial seating standards. Internal validation continues beyond 450 lbs to confirm structural reserve above the published rating.',
+      'Under GSA GS-28F-0030U published terms: standard lead time 30–75 days ARO; Quickship 15–20 days where applicable. Confirm current lead times with Customer Care for the specific series and options on this bid.',
   },
   {
-    id: 'manufacturing-location',
-    category: 'manufacturing',
-    title: 'Manufacturing location',
-    owner: 'JSI Operations (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['manufacturing', 'jasper', 'facility', 'made in usa'],
+    id: 'install-cap-gsa',
+    category: 'pricing',
+    title: 'Installation fee cap (GSA)',
+    owner: 'JSI Contracts',
+    lastReviewed: '2026-03-01',
+    needsApproval: false,
+    staleAfterMonths: 6,
+    tags: ['install', 'gsa', '30%', 'pricing'],
+    sourceUrls: [
+      'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/Contract%20GS-28F-0030U',
+    ],
     body:
-      'JSI manufactures at its campus in Jasper, Indiana (headquarters address used in app materials: 5445 N Deerwood Lake Rd / 225 Clay Street references appear in brand materials — confirm the address required by the solicitation before submitting).',
+      'On GSA GS-28F-0030U, installation is capped at 30% of net product. Use this as a hard ceiling on any GSA-priced worksheet.',
   },
   {
-    id: 'ul-electrical',
+    id: 'taa-buy-american',
     category: 'compliance',
-    title: 'UL-listed electrical components',
-    owner: 'JSI Product (seed)',
-    lastReviewed: '2025-11-01',
+    title: 'TAA / Buy American (needs confirmation)',
+    owner: 'JSI Contracts',
+    lastReviewed: '2026-03-01',
     needsApproval: true,
-    tags: ['ul', 'electrical', 'power', 'usb'],
+    staleAfterMonths: 3,
+    tags: ['taa', 'buy american', 'trade', 'compliance'],
+    sourceUrls: [
+      'https://info.winvale.com/blog/how-do-sell-furniture-gsa-mas-program',
+      'https://res.cloudinary.com/jasper-jsi-furniture/image/upload/Contract%20GS-28F-0030U',
+    ],
     body:
-      '[needs approval] Confirm UL listing and wiring configuration (e.g. 8-wire / 4-2-2) for the specific power products offered under this solicitation before submitting a compliance claim.',
-  },
-  {
-    id: 'hspd12',
-    category: 'compliance',
-    title: 'HSPD-12 facility access',
-    owner: 'JSI Contracts (seed)',
-    lastReviewed: '2025-11-01',
-    needsApproval: true,
-    tags: ['hspd-12', 'security', 'clearance'],
-    body:
-      '[needs approval] HSPD-12 security adjudication for personnel entering Government facilities must be confirmed with the responding dealer / installer team for each call order — do not assert blanket clearance.',
+      '[needs approval] GSA MAS furniture offers generally require TAA compliance. Do not assert Buy American or TAA for a specific line without confirming country of origin for that SKU. Escalate country-of-origin questions to Contracts.',
+    riskFlags: ['TAA / Buy American — verify per SKU'],
   },
 ];
 
@@ -127,7 +163,19 @@ export function librarySummaryForPrompt() {
     body: entry.body,
     owner: entry.owner,
     lastReviewed: entry.lastReviewed,
+    sourceUrls: entry.sourceUrls,
+    riskFlags: entry.riskFlags || [],
   }));
+}
+
+export function isStale(entry, asOf = new Date()) {
+  if (!entry?.lastReviewed) return true;
+  const reviewed = new Date(entry.lastReviewed);
+  if (Number.isNaN(reviewed.getTime())) return true;
+  const months = entry.staleAfterMonths ?? 12;
+  const cutoff = new Date(asOf);
+  cutoff.setMonth(cutoff.getMonth() - months);
+  return reviewed < cutoff;
 }
 
 /** Simple tag overlap scorer for offline drafting fallback. */
@@ -139,6 +187,9 @@ export function matchLibraryEntries(requirementText, limit = 3) {
       if (hay.includes(tag.toLowerCase())) score += 2;
     }
     if (hay.includes(entry.category)) score += 1;
+    if (/level|third.?party/i.test(hay) && entry.id === 'level-self-certified') score += 4;
+    if (/warrant/i.test(hay) && entry.id === 'warranty') score += 3;
+    if (/gsa|mas|gs-28/i.test(hay) && entry.id === 'gsa-contract') score += 3;
     return { entry, score };
   })
     .filter((s) => s.score > 0)

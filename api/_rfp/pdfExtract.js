@@ -21,7 +21,22 @@ export async function extractPdfPages(bytes, opts = {}) {
   const data = new Uint8Array(src.byteLength);
   data.set(src);
 
-  const result = await extractText(data, { mergePages: false });
+  let result;
+  try {
+    result = await extractText(data, { mergePages: false });
+  } catch (error) {
+    const msg = String(error?.message || error || '');
+    if (/password|encrypt|encrypted/i.test(msg)) {
+      throw Object.assign(new Error('This PDF is password-protected or encrypted. Remove the password and try again.'), {
+        statusCode: 422,
+        code: 'PDF_ENCRYPTED',
+      });
+    }
+    throw Object.assign(new Error('Could not read this PDF. It may be corrupt or an unsupported format.'), {
+      statusCode: 422,
+      code: 'PDF_CORRUPT',
+    });
+  }
   const pageTexts = Array.isArray(result.text) ? result.text : [String(result.text || '')];
   const totalPages = result.totalPages || pageTexts.length;
 
@@ -81,12 +96,20 @@ export function heuristicExtractRequirements(pages) {
 
   const codeRe = /\b([A-Z]{2,5}-?\d{1,4}[A-Z]?)\b/g;
   const qtyNearCodeRe = /\b(?:qty|quantity|quan\.?|ea\.?|each|units?)\s*[:=]?\s*(\d{1,5})\b/gi;
-  const dateRe = /\b(?:due|deadline|submit(?:tal)?(?:\s+due)?|closes?|closing)\b[^\n.]{0,40}?\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{2,4})\b/gi;
+  const dateRe = /\b(?:due|deadline|submit(?:tal)?(?:\s+due)?|closes?|closing|bid\s+opening)\b[^\n.]{0,60}?\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{2,4})\b/gi;
+  const qaRe = /\b(?:questions?|Q\s*&\s*A|inquir(?:y|ies))\b[^\n.]{0,50}?\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{2,4})\b/gi;
+  const walkRe = /\b(mandatory\s+)?(pre-?bid|site\s+visit|walk-?through)\b[^\n]{0,80}/gi;
+  const submitRe = /\b(electronic(?:ally)?|email|portal|sealed\s+bid|USB|paper)\b[^\n]{0,100}/gi;
+  const vehicleRe = /\b(GSA|MAS|Sourcewell|OMNIA|E&I|cooperative|IFB|RFP|RFQ)\b/g;
   // Require an identifier that includes a digit so titles like "RFP … Solicitation" are skipped.
   const solicitationRe = /\b(?:solicitation(?:\s*(?:no\.?|number|#))?|RFQ|RFP)\s*[:#]\s*([A-Z0-9][A-Z0-9-]*\d[A-Z0-9-]*)\b/gi;
 
   let projectName = '';
   let solicitation = '';
+  let qaDeadline = '';
+  let walkThrough = '';
+  let submissionMethod = '';
+  let contractVehicle = '';
 
   for (const { pageNumber, text } of joined) {
     const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
@@ -107,9 +130,33 @@ export function heuristicExtractRequirements(pages) {
         text: m[0].trim(),
         dateText: m[1],
         sourcePage: pageNumber,
+        sourceQuote: m[0].trim().slice(0, 240),
       });
     }
     dateRe.lastIndex = 0;
+
+    while ((m = qaRe.exec(text)) !== null) {
+      if (!qaDeadline) qaDeadline = m[1];
+    }
+    qaRe.lastIndex = 0;
+
+    while ((m = walkRe.exec(text)) !== null) {
+      if (!walkThrough) walkThrough = m[0].trim().slice(0, 160);
+    }
+    walkRe.lastIndex = 0;
+
+    while ((m = submitRe.exec(text)) !== null) {
+      if (!submissionMethod) submissionMethod = m[0].trim().slice(0, 120);
+    }
+    submitRe.lastIndex = 0;
+
+    while ((m = vehicleRe.exec(text)) !== null) {
+      const v = m[1].toUpperCase();
+      if (!contractVehicle && /GSA|MAS|SOURCEWELL|OMNIA|E&I|IFB|RFP|RFQ|COOPERATIVE/.test(v)) {
+        contractVehicle = v === 'COOPERATIVE' ? 'Co-op' : v;
+      }
+    }
+    vehicleRe.lastIndex = 0;
 
     // Capture codes with nearby quantity when present on same line
     for (const line of lines) {
@@ -140,6 +187,7 @@ export function heuristicExtractRequirements(pages) {
           quantity,
           sourcePage: pageNumber,
           context: line.slice(0, 220),
+          sourceQuote: line.slice(0, 240),
         });
       }
     }
@@ -158,6 +206,7 @@ export function heuristicExtractRequirements(pages) {
         category: guessCategory(line),
         text: line,
         sourcePage: pageNumber,
+        sourceQuote: line.slice(0, 240),
         itemCode: null,
         quantity: null,
       });
@@ -169,6 +218,10 @@ export function heuristicExtractRequirements(pages) {
       projectName: projectName || 'Untitled RFP',
       solicitation: solicitation || '',
       dueDate: deadlines[0]?.dateText || '',
+      qaDeadline,
+      walkThrough,
+      submissionMethod,
+      contractVehicle,
     },
     requirements,
     itemCodes,
