@@ -113,8 +113,19 @@ export function buildGoNoGo(session) {
   if (dropped.length) risks.push(`${dropped.length} item(s) dropped — quote not found in text.`);
   if (gap > 0) risks.push(`${gap} mandatory/coverage gap(s) need Spec input.`);
   if (partner > 0) risks.push(`${partner} out-of-portfolio / partner item(s).`);
-  if (!session?.aiConfigured) risks.push('AI not configured — heuristic path only.');
+  if (session?.extractionMode === 'heuristic_fallback') {
+    risks.push('Heuristic fallback — LLM extract failed; not a source-backed AI draft.');
+  } else if (session?.extractionMode === 'heuristic' || session?.aiConfigured === false) {
+    risks.push('AI auth not configured — heuristic path only.');
+  } else if (session?.aiOperational === false) {
+    risks.push('AI auth present but inference not operational for this run.');
+  }
+  const undrafted = (session?.answers || []).filter((a) => !a.draftText || !String(a.draftText).trim()).length;
+  if (undrafted > 0) risks.push(`${undrafted} undrafted answer(s) — needs Spec / library coverage.`);
   if (partial > 0) risks.push(`${partial} partial answer(s) need SME approval.`);
+  if (session?.pricing?.demo || session?.productMatch) {
+    risks.push('SKU match + pricing are demo-only rules — not a formal quote.');
+  }
 
   const dueDays = daysUntil(meta.dueDate);
   if (dueDays != null && dueDays < 0) risks.push('Due date appears to be in the past.');

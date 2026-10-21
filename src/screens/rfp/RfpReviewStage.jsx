@@ -14,6 +14,7 @@ import {
   exportMarkdown,
 } from './rfpExport.js';
 import { isStale } from './rfpLibraryClient.js';
+import { buildHonestyNotes } from './rfpReadiness.js';
 
 const SECTIONS = [
   { id: 'summary', label: 'Summary' },
@@ -60,11 +61,13 @@ export const RfpReviewStage = ({
   const [matrixFilter, setMatrixFilter] = useState('all');
   const [exporting, setExporting] = useState(false);
   const go = session?.goNoGo;
+  const honestyNotes = useMemo(() => buildHonestyNotes(session), [session]);
 
   const approvals = session?.approvals || {};
   const approvedCount = Object.values(approvals).filter((v) => v === 'approved').length;
   const answerTotal = (session?.requirements || []).length;
   const progressPct = answerTotal ? Math.round((approvedCount / answerTotal) * 100) : 0;
+  const undraftedCount = (session?.answers || []).filter((a) => !a.draftText || !String(a.draftText).trim()).length;
 
   const matrixRows = useMemo(() => {
     const rows = go?.matrix || [];
@@ -106,12 +109,6 @@ export const RfpReviewStage = ({
               .filter(Boolean)
               .join(' · ')}
           </p>
-          {session?.aiMessage && (
-            <p className="text-xs mt-2 flex gap-1.5 items-start" style={{ color: c.warning || '#C4956A' }}>
-              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-              <span>{session.aiMessage}</span>
-            </p>
-          )}
         </div>
         <button
           type="button"
@@ -123,11 +120,28 @@ export const RfpReviewStage = ({
         </button>
       </div>
 
+      {honestyNotes.length > 0 && (
+        <GlassCard theme={theme} className="px-4 py-3 flex flex-col gap-2">
+          <div className="text-[0.625rem] font-semibold uppercase tracking-wider" style={{ color: c.textSecondary, opacity: 0.55 }}>
+            Provenance — what this run actually did
+          </div>
+          {honestyNotes.map((n) => (
+            <p key={n.id} className="text-xs leading-relaxed flex gap-1.5 items-start" style={{ color: n.tone === 'positive' ? c.textSecondary : (c.warning || '#C4956A') }}>
+              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              <span>{n.text}</span>
+            </p>
+          ))}
+        </GlassCard>
+      )}
+
       {/* Review progress */}
       <div>
         <div className="flex justify-between text-xs mb-1.5" style={{ color: c.textSecondary }}>
           <span>Review progress</span>
-          <span>{approvedCount}/{answerTotal} approved · {progressPct}%</span>
+          <span>
+            {approvedCount}/{answerTotal} approved · {progressPct}%
+            {undraftedCount > 0 ? ` · ${undraftedCount} undrafted` : ''}
+          </span>
         </div>
         <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>
           <div className="h-full rounded-full transition-all" style={{ width: `${progressPct}%`, backgroundColor: c.accent || '#353535' }} />
@@ -276,6 +290,17 @@ export const RfpReviewStage = ({
                     RFP: “{req.sourceQuote}”
                   </p>
                 )}
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {(!ans.draftText || !String(ans.draftText).trim()) && (
+                    <TonePill tone="negative" theme={theme}>undrafted</TonePill>
+                  )}
+                  {(ans.status === 'needs_info' || ans.needsInfoQuestion) && (
+                    <TonePill tone="caution" theme={theme}>needs Spec</TonePill>
+                  )}
+                  {ans.status === 'library_match' && (
+                    <TonePill tone="positive" theme={theme}>library match</TonePill>
+                  )}
+                </div>
                 {ans.needsInfoQuestion && (
                   <p className="text-xs mb-2" style={{ color: c.warning || '#C4956A' }}>Insufficient evidence → {ans.needsInfoQuestion}</p>
                 )}
@@ -286,7 +311,7 @@ export const RfpReviewStage = ({
                   value={ans.draftText || ''}
                   onChange={(e) => onUpdateAnswer(req.id, { draftText: e.target.value, status: 'drafted' })}
                   rows={3}
-                  placeholder="Draft answer…"
+                  placeholder="No grounded draft yet — enter Spec answer or leave as needs info…"
                   className="w-full text-sm leading-relaxed rounded-xl px-3 py-2.5 outline-none resize-y min-h-[88px]"
                   style={{
                     color: c.textPrimary,
@@ -350,6 +375,9 @@ export const RfpReviewStage = ({
 
       {section === 'products' && (
         <div className="flex flex-col gap-3">
+          <p className="text-xs font-semibold" style={{ color: c.warning || '#C4956A' }}>
+            DEMO-ONLY SKU suggestions — verify every series before any bid language.
+          </p>
           <p className="text-xs" style={{ color: c.textSecondary }}>{session?.productMatch?.disclaimer}</p>
           {(session?.productMatch?.matches || []).map((m) => (
             <GlassCard key={m.itemCode} theme={theme} className="px-4 py-3 flex gap-3">
@@ -385,6 +413,9 @@ export const RfpReviewStage = ({
 
       {section === 'pricing' && session?.pricing && (
         <GlassCard theme={theme} className="px-4 py-4">
+          <p className="text-xs font-semibold mb-2" style={{ color: c.warning || '#C4956A' }}>
+            DEMO PRICING ONLY — not a quote; rules-based catalog math.
+          </p>
           <p className="text-xs mb-3" style={{ color: c.warning || '#C4956A' }}>{session.pricing.disclaimer}</p>
           <div className="text-xs mb-3" style={{ color: c.textSecondary }}>
             Discount {session.pricing.discountOption}

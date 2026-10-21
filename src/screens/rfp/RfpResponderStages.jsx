@@ -4,6 +4,7 @@ import { GlassCard } from '../../components/common/GlassCard.jsx';
 import { PrimaryButton } from '../../components/common/JSIButtons.jsx';
 import { isDarkTheme, DESIGN_TOKENS } from '../../design-system/tokens.js';
 import { FileText, Upload, X, ArrowUp } from 'lucide-react';
+import { describeAiStatus } from './rfpReadiness.js';
 
 const ELLIOTT_AVATAR_URL = '/elliott-avatar.png';
 
@@ -63,13 +64,18 @@ export const UploadStage = ({
         </p>
       </div>
 
-      {aiStatus && (
-        <p className="text-xs text-center px-3" style={{ color: aiStatus.aiConfigured ? (c.textSecondary) : (theme?.colors?.warning || '#C4956A') }}>
-          {aiStatus.aiConfigured
-            ? `AI ready · ${aiStatus.authMethod || 'gateway'} · ${aiStatus.model || 'default model'}`
-            : `AI not configured yet — extraction still works. ${aiStatus.aiMessage || ''}`}
-        </p>
-      )}
+      {aiStatus && (() => {
+        const desc = describeAiStatus(aiStatus);
+        const color = desc.tone === 'positive'
+          ? c.textSecondary
+          : (theme?.colors?.warning || '#C4956A');
+        return (
+          <p className="text-xs text-center px-3 leading-relaxed" style={{ color }}>
+            <span className="font-semibold">{desc.headline}</span>
+            {desc.detail ? ` — ${desc.detail}` : ''}
+          </p>
+        );
+      })()}
 
       {error ? (
         <p className="text-xs text-center px-3" style={{ color: theme?.colors?.error || '#B85C5C' }}>{error}</p>

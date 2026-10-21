@@ -40,10 +40,24 @@ export async function getAiConfigStatus(req) {
   }
 
   const hasOidc = Boolean(oidcToken) || Boolean(headerToken) || envToken;
+  // "configured" means auth material is present — NOT that inference will succeed.
   const configured = hasKey || Boolean(oidcToken) || Boolean(headerToken);
+
+  const operationalHint = configured
+    ? [
+      'Auth is present (OIDC or API key). Inference is unverified until a successful Gateway call.',
+      'AI Gateway still requires team billing verification / credits for paid models.',
+      'Do not treat “AI configured” as “ready to draft.”',
+    ].join(' ')
+    : MISSING_HINT;
 
   return {
     configured,
+    authConfigured: configured,
+    // Status never claims operational without a successful inference in this request.
+    aiOperational: null,
+    operationalState: configured ? 'auth_ready_inference_unverified' : 'auth_missing',
+    operationalHint,
     hasKey,
     hasOidc,
     oidcFromHeader: Boolean(headerToken),

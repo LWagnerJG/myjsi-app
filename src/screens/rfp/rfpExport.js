@@ -104,9 +104,15 @@ export function buildMarkdown(session) {
 
   lines.push('## Exclusions');
   lines.push('');
+  if (session?.extractionMode === 'heuristic_fallback' || session?.extractionMode === 'heuristic') {
+    lines.push(`- Extraction mode: ${session.extractionMode} (not a verified LLM source-backed draft).`);
+  }
+  if (session?.aiOperational === false) {
+    lines.push('- AI inference was not operational for this run; drafts may be undrafted or library-only.');
+  }
   lines.push('- Scanned pages without extractable text were not OCR’d.');
   lines.push('- Library entries marked needs approval require SME sign-off.');
-  lines.push('- Product SKUs and demo pricing are not a formal quote.');
+  lines.push('- Product SKUs and demo pricing are DEMO-ONLY — not a formal quote.');
   lines.push('');
   lines.push('---');
   lines.push('_Assembled with MyJSI RFP Responder. Demo / proof — verify before external submission._');

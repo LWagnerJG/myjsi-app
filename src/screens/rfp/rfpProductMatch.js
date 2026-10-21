@@ -136,7 +136,7 @@ export function matchProducts({ itemCodes = [], requirements = [] } = {}) {
     matches,
     exceptions,
     knownSeries: JSI_SERIES,
-    disclaimer: 'Product matches are rule-based suggestions from the in-app JSI catalog. Always verify SKU and finish against the current price list.',
+    disclaimer: 'DEMO-ONLY product matches — rule-based suggestions from the in-app JSI catalog. Always verify SKU and finish against the current price list. Not a formal offer.',
   };
 }
 
@@ -186,7 +186,7 @@ export function buildPricingWorksheet(matches, {
 
   return {
     demo: true,
-    disclaimer: 'DEMO PRICE DATA — list prices from the in-app catalog (Jan 2026 price list references). Rules-based only (no AI pricing). Not a quote.',
+    disclaimer: 'DEMO PRICE DATA ONLY — list prices from the in-app catalog (Jan 2026 price list references). Rules-based only (no AI pricing). Not a formal quote or commitment.',
     discountOption: discount.label,
     netOffPct: discount.netPct,
     installFeePct: cappedInstallPct,
